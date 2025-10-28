@@ -51,16 +51,24 @@ Preferred communication style: Simple, everyday language.
 
 ## Data Storage
 
-**Database**: MySQL or PostgreSQL (not yet finalized)
-- **Rationale**: Relational database suitable for financial data with ACID compliance
-- **Pros**: Strong data integrity, transaction support, mature tooling
+**Database**: PostgreSQL (Implemented as of 2025-10-28)
+- **Rationale**: Relational database suitable for financial data with ACID compliance, chosen for superior features over MySQL
+- **Pros**: Strong data integrity, transaction support, mature tooling, advanced features (JSON support, full-text search), better performance
 - **Cons**: Schema migrations required for changes
-- **Note**: The specific database will be selected based on deployment needs and scalability requirements
+- **Current State**: Deployed on Replit with native PostgreSQL database integration
 
 **ORM**: Laravel Eloquent
 - **Rationale**: Built-in Laravel ORM with Active Record pattern
 - **Pros**: Intuitive syntax, relationship management, query builder
 - **Cons**: Can generate inefficient queries if not used carefully
+
+**Database Schema** (Core tables implemented):
+- **users**: User account information with name, email, password
+- **roles**: Role definitions (owner, editor, viewer)
+- **user_roles**: Many-to-many pivot table linking users to roles
+- **accounts**: Financial accounts with currency support
+- **categories**: Transaction categories with hierarchical support
+- **transactions**: Financial transactions with account and category references
 
 ## Development & Deployment
 
@@ -124,3 +132,133 @@ Preferred communication style: Simple, everyday language.
 - doctrine/lexer: String parsing
 
 **No Third-Party Integrations Currently**: The application does not yet integrate with external banking APIs, payment processors, or cloud storage services. These are planned for future releases as noted in the README (cloud synchronization planned for future).
+
+# Authentication & Authorization System
+
+**Implementation Date**: October 28, 2025  
+**Status**: Fully Implemented and Tested
+
+## Overview
+
+The application uses JWT (JSON Web Token) authentication with role-based access control (RBAC) to secure API endpoints and manage user permissions.
+
+## Authentication Flow
+
+1. **Registration** (`POST /api/auth/register`)
+   - Users register with name, email, and password
+   - Passwords are hashed using bcrypt
+   - New users are automatically assigned the "viewer" role
+   - Returns JWT token and user information
+
+2. **Login** (`POST /api/auth/login`)
+   - Users authenticate with email and password
+   - Returns JWT token (valid for 1 hour) and user information with roles
+
+3. **Logout** (`POST /api/auth/logout`)
+   - Invalidates the current JWT token
+   - Requires valid authentication
+
+4. **Token Refresh** (`POST /api/auth/refresh`)
+   - Allows users to refresh their JWT token without re-logging in
+   - Extends session without requiring password
+
+5. **Get Current User** (`GET /api/auth/me`)
+   - Returns authenticated user information with roles
+   - Requires valid JWT token
+
+## Authorization (Role-Based Access Control)
+
+### Available Roles
+
+1. **Owner** (`owner`)
+   - Full access to all resources
+   - Can manage users and assign roles
+   - Can perform all CRUD operations
+   - Assigned to primary account holders
+
+2. **Editor** (`editor`)
+   - Can create, edit, and delete own resources
+   - Can view all resources
+   - Limited administrative capabilities
+   - Suitable for family members or collaborators
+
+3. **Viewer** (`viewer`)
+   - Read-only access to resources
+   - Cannot modify any data
+   - Default role for new users
+   - Suitable for accountants, advisors
+
+### Role Enforcement
+
+**Middleware**: `EnsureUserHasRole`
+- Applied to routes requiring specific role permissions
+- Supports multiple roles (OR logic): user needs at least one of the specified roles
+- Returns 403 Forbidden if user lacks required role
+- Returns 401 Unauthorized if user is not authenticated
+
+**Usage Example**:
+```php
+// Accessible by owners and editors
+Route::middleware(['auth:api', 'role:owner,editor'])->group(function () {
+    Route::get('/transactions', [TransactionController::class, 'index']);
+});
+
+// Accessible only by owners
+Route::middleware(['auth:api', 'role:owner'])->group(function () {
+    Route::delete('/account/{id}', [AccountController::class, 'destroy']);
+});
+```
+
+## Security Features
+
+- **Password Hashing**: All passwords are hashed using bcrypt with configurable rounds (default: 12)
+- **JWT Secret**: Securely stored in environment variables, never exposed in code
+- **Token Expiration**: JWT tokens expire after 1 hour for security
+- **Input Validation**: All endpoints validate input data before processing
+- **Protected Routes**: All sensitive endpoints require valid JWT authentication
+- **CORS Protection**: Configured to prevent unauthorized cross-origin requests
+- **SQL Injection Prevention**: Eloquent ORM prevents SQL injection attacks
+
+## Database Models
+
+### User Model
+- Implements `JWTSubject` interface for JWT authentication
+- Has many-to-many relationship with roles
+- Helper methods: `hasRole()`, `hasAnyRole()`, `assignRole()`, `removeRole()`
+- Automatically hashes passwords on creation/update
+
+### Role Model
+- Defines available roles in the system
+- Has many-to-many relationship with users
+- Seeded with default roles: owner, editor, viewer
+
+## API Endpoints
+
+### Public Endpoints (No Authentication Required)
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login and receive JWT token
+
+### Protected Endpoints (Require Authentication)
+- `POST /api/auth/logout` - Logout current user
+- `POST /api/auth/refresh` - Refresh JWT token
+- `GET /api/auth/me` - Get current authenticated user
+
+### Test Users (Seeded)
+- **Owner**: owner@example.com / password
+- **Viewer**: viewer@example.com / password
+
+## Configuration Files
+
+- **Auth Guard**: `config/auth.php` - Defines JWT guard for API
+- **JWT Config**: `config/jwt.php` - JWT package configuration
+- **Middleware**: `bootstrap/app.php` - Registers role middleware
+- **Routes**: `routes/api.php` - API route definitions
+
+## Future Enhancements
+
+- Password reset functionality via email
+- Two-factor authentication (2FA)
+- Refresh token rotation for enhanced security
+- Role permissions for granular access control
+- API rate limiting per role
+- Audit logging for security-sensitive actions
