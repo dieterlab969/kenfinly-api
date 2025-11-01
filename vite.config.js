@@ -3,6 +3,11 @@ import laravel from 'laravel-vite-plugin';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
+const replitDomain = process.env.REPLIT_DEV_DOMAIN || 
+    (process.env.REPL_SLUG && process.env.REPL_OWNER 
+        ? `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` 
+        : 'localhost');
+
 export default defineConfig({
     plugins: [
         laravel({
@@ -15,10 +20,13 @@ export default defineConfig({
     server: {
         host: '0.0.0.0',
         port: 5173,
+        cors: true,
+        strictPort: true,
         hmr: {
-            host: process.env.REPLIT_DEV_DOMAIN || 'localhost',
+            host: replitDomain,
             clientPort: 443,
-            protocol: 'wss',
+            protocol: replitDomain === 'localhost' ? 'ws' : 'wss',
         },
+        origin: replitDomain === 'localhost' ? `http://localhost:5173` : `https://${replitDomain}`,
     },
 });

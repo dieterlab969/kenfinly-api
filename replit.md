@@ -39,10 +39,12 @@ Preferred communication style: Simple, everyday language.
 - **Pros**: Highly customizable, small production bundle sizes, consistent design system
 - **Cons**: Initial learning curve, markup can become verbose
 
-**JavaScript**: Vanilla JavaScript with Axios for HTTP requests
-- **Rationale**: Lightweight approach suitable for current requirements
-- **Pros**: No framework overhead, simple to maintain
-- **Cons**: May need migration to React/Vue for complex UI requirements (as noted in README)
+**JavaScript Framework**: React 19.2 with React Router
+- **Rationale**: Modern component-based framework for building interactive UIs with client-side routing
+- **Pros**: Component reusability, strong ecosystem, excellent developer experience, virtual DOM performance
+- **Cons**: Learning curve for team members new to React
+- **Implementation**: Separate Login (/login) and Registration (/register) pages with JWT authentication flow
+- **State Management**: React Context API for authentication state and user session management
 
 **Asset Pipeline**: Laravel Vite Plugin
 - **Rationale**: Seamless integration between Laravel backend and Vite frontend tooling
@@ -71,6 +73,12 @@ Preferred communication style: Simple, everyday language.
 - **transactions**: Financial transactions with account and category references
 
 ## Development & Deployment
+
+**Development Server**: Concurrent Laravel (port 5000) and Vite (port 5173)
+- Laravel serves the backend API and routes all frontend requests to React
+- Vite provides hot module replacement for React development
+- Access the application through the Replit webview for proper HTTPS URL handling
+- Note: The app must be accessed via the Replit webview URL (not localhost) for proper CORS handling between Laravel and Vite dev servers
 
 **Containerization**: Docker via Laravel Sail
 - **Rationale**: Consistent development environment across team members
