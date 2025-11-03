@@ -3,7 +3,7 @@ import laravel from 'laravel-vite-plugin';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-const replitDomain = process.env.REPLIT_DEV_DOMAIN || 
+const replitDomain = process.env.REPLIT_DOMAINS || 
     (process.env.REPL_SLUG && process.env.REPL_OWNER 
         ? `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` 
         : 'localhost');
