@@ -112,12 +112,27 @@ This guide will help you deploy and use Kenfinly, whether you're setting it up l
 
 For production deployment, we recommend using a service like Replit, Heroku, or a VPS with the following configuration:
 
-1. **Environment Variables**
+1. **Install dependencies**
+   ```bash
+   composer install --optimize-autoloader --no-dev
+   npm install
+   ```
+
+2. **Generate application keys**
+   ```bash
+   php artisan key:generate
+   php artisan jwt:secret
+   ```
+   
+   **Important:** Save the generated `APP_KEY` and `JWT_SECRET` values to your environment variables.
+
+3. **Environment Variables**
    
    Set these environment variables in your hosting platform:
    ```env
    APP_ENV=production
    APP_DEBUG=false
+   APP_KEY=base64:your-generated-app-key
    APP_URL=https://your-domain.com
    DB_CONNECTION=mysql  # or pgsql
    DB_HOST=your-database-host
@@ -128,27 +143,28 @@ For production deployment, we recommend using a service like Replit, Heroku, or 
    JWT_SECRET=your-generated-jwt-secret
    ```
 
-2. **Build assets**
+4. **Build frontend assets**
    ```bash
    npm run build
    ```
 
-3. **Optimize application**
+5. **Run migrations**
    ```bash
-   composer install --optimize-autoloader --no-dev
+   php artisan migrate --force --seed
+   ```
+
+6. **Optimize application**
+   ```bash
    php artisan config:cache
    php artisan route:cache
    php artisan view:cache
    ```
 
-4. **Run migrations**
-   ```bash
-   php artisan migrate --force --seed
-   ```
-
-5. **Configure web server**
+7. **Configure web server**
    
    Point your web server (Nginx/Apache) to the `public` directory and ensure all requests are routed through `public/index.php`.
+   
+   **Note:** The `npm run serve` command starts both the Laravel backend (port 5000) and Vite development server (port 5173) concurrently for local development only. In production, you should serve the built assets from the `public` directory.
 
 ### Registering an Account
 
