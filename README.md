@@ -37,19 +37,166 @@ Our mission is to turn complex financial data into clear, actionable insights â€
 
 ## ðŸ“¦ Getting Started
 
-```bash
-# Clone the repository
-git clone https://github.com/<your-org>/kenfinly.git
+This guide will help you deploy and use Kenfinly, whether you're setting it up locally for development or deploying to production.
 
-# Navigate to the project folder
-cd kenfinly
+### Deploying the Application
 
-# Install dependencies (example for Node.js)
-npm install
+#### Local Development Setup
 
-# Run the app
-npm start
-```
+**Prerequisites:**
+- PHP 8.1+
+- Composer
+- Node.js 16+ and npm
+- SQLite (for local development) or MySQL/PostgreSQL
+
+**Step-by-step instructions:**
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/<your-org>/kenfinly.git
+   cd kenfinly
+   ```
+
+2. **Install PHP dependencies**
+   ```bash
+   composer install
+   ```
+
+3. **Install Node.js dependencies**
+   ```bash
+   npm install
+   ```
+
+4. **Set up environment configuration**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit the `.env` file and update the following:
+   ```env
+   APP_NAME=Kenfinly
+   APP_URL=http://localhost:5000
+   DB_CONNECTION=sqlite
+   ```
+
+5. **Generate application key**
+   ```bash
+   php artisan key:generate
+   ```
+
+6. **Generate JWT secret**
+   ```bash
+   php artisan jwt:secret
+   ```
+
+7. **Create and set up the database**
+   ```bash
+   touch database/database.sqlite
+   php artisan migrate --seed
+   ```
+   
+   This will create all necessary tables and seed default roles (owner, editor, viewer).
+
+8. **Start the development servers**
+   ```bash
+   npm run serve
+   ```
+   
+   This starts both the Laravel backend (port 5000) and Vite dev server (port 5173).
+
+9. **Access the application**
+   
+   Open your browser and navigate to `http://localhost:5000`
+
+#### Production Deployment
+
+For production deployment, we recommend using a service like Replit, Heroku, or a VPS with the following configuration:
+
+1. **Environment Variables**
+   
+   Set these environment variables in your hosting platform:
+   ```env
+   APP_ENV=production
+   APP_DEBUG=false
+   APP_URL=https://your-domain.com
+   DB_CONNECTION=mysql  # or pgsql
+   DB_HOST=your-database-host
+   DB_PORT=3306
+   DB_DATABASE=kenfinly_production
+   DB_USERNAME=your-db-username
+   DB_PASSWORD=your-db-password
+   JWT_SECRET=your-generated-jwt-secret
+   ```
+
+2. **Build assets**
+   ```bash
+   npm run build
+   ```
+
+3. **Optimize application**
+   ```bash
+   composer install --optimize-autoloader --no-dev
+   php artisan config:cache
+   php artisan route:cache
+   php artisan view:cache
+   ```
+
+4. **Run migrations**
+   ```bash
+   php artisan migrate --force --seed
+   ```
+
+5. **Configure web server**
+   
+   Point your web server (Nginx/Apache) to the `public` directory and ensure all requests are routed through `public/index.php`.
+
+### Registering an Account
+
+Once the application is running, you can create a new account:
+
+1. Click on the **"Sign up"** link or navigate to `/register`
+
+2. Fill in the registration form with your details:
+   - **Name:** Your full name
+   - **Email:** A valid email address
+   - **Password:** At least 8 characters
+   - **Confirm Password:** Must match your password
+
+3. Click the **"Sign up"** button
+
+![Registration Page](docs/screenshots/registration.png)
+
+4. Upon successful registration, you'll be automatically logged in and redirected to the dashboard.
+
+### Logging In
+
+If you already have an account, you can log in:
+
+1. Navigate to the login page at `/login`
+
+2. Enter your credentials:
+   - **Email:** The email you registered with
+   - **Password:** Your account password
+
+3. Click the **"Sign in"** button
+
+![Login Page](docs/screenshots/login.png)
+
+4. After successful login, you'll be redirected to your dashboard where you can:
+   - View your user information (name, email, role)
+   - Access financial tracking features (coming soon)
+   - Manage your account settings
+   - Log out securely
+
+![Dashboard View](docs/screenshots/dashboard.png)
+
+**Security Notes:**
+- Authentication tokens are stored securely in browser localStorage
+- Unauthorized users attempting to access protected pages are automatically redirected to login
+- All passwords are hashed using bcrypt before storage
+- JWT tokens expire after 60 minutes and can be refreshed
+
+---
 
 ## Prerequisites
 Before proceeding, ensure your environment meets the following requirements:
