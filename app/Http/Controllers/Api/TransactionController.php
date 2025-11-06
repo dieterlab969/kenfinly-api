@@ -156,13 +156,21 @@ class TransactionController extends Controller
             ->where('user_id', $user->id)
             ->firstOrFail();
 
+        if ($request->has('account_id')) {
+            $newAccount = Account::where('id', $request->account_id)
+                ->where('user_id', $user->id)
+                ->firstOrFail();
+        }
+
         DB::beginTransaction();
         try {
             $oldAmount = $transaction->amount;
             $oldType = $transaction->type;
             $oldAccountId = $transaction->account_id;
 
-            $oldAccount = Account::findOrFail($oldAccountId);
+            $oldAccount = Account::where('id', $oldAccountId)
+                ->where('user_id', $user->id)
+                ->firstOrFail();
             $oldBalanceChange = $oldType === 'income' ? -$oldAmount : $oldAmount;
             $oldAccount->increment('balance', $oldBalanceChange);
 
@@ -176,7 +184,9 @@ class TransactionController extends Controller
             $transaction->fill($request->except('receipt'));
             $transaction->save();
 
-            $newAccount = Account::findOrFail($transaction->account_id);
+            $newAccount = Account::where('id', $transaction->account_id)
+                ->where('user_id', $user->id)
+                ->firstOrFail();
             $newBalanceChange = $transaction->type === 'income' 
                 ? $transaction->amount 
                 : -$transaction->amount;

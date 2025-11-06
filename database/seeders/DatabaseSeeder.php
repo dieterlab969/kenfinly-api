@@ -35,6 +35,9 @@ class DatabaseSeeder extends Seeder
         ]);
         $viewerUser->assignRole('viewer');
 
+        // Seed accounts for test users
+        $this->call(AccountSeeder::class);
+
         $this->command->info('Database seeded successfully!');
     }
 }
