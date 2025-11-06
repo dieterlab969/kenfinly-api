@@ -18,6 +18,9 @@ class DatabaseSeeder extends Seeder
         // Seed roles first
         $this->call(RoleSeeder::class);
 
+        // Seed categories
+        $this->call(CategorySeeder::class);
+
         // Create a test user with owner role
         $testUser = User::factory()->create([
             'name' => 'Test Owner',
