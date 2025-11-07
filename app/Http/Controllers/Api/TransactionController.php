@@ -46,6 +46,15 @@ class TransactionController extends Controller
 
     public function store(Request $request)
     {
+        $user = auth('api')->user();
+
+        if ($user->accounts()->count() === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You must have at least one account to create transactions. Please create an account first.'
+            ], 400);
+        }
+
         $validator = Validator::make($request->all(), [
             'account_id' => 'required|exists:accounts,id',
             'category_id' => 'required|exists:categories,id',
@@ -62,8 +71,6 @@ class TransactionController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-
-        $user = auth('api')->user();
         
         $account = Account::where('id', $request->account_id)
             ->where('user_id', $user->id)
