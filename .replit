@@ -1,4 +1,4 @@
-modules = ["php-8.2", "web", "nodejs-20", "php-8.3"]
+modules = ["php-8.2", "nodejs-20", "web"]
 [agent]
 expertMode = true
 
@@ -21,21 +21,17 @@ args = "dev-server"
 name = "dev-server"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run serve"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php artisan serve --host=0.0.0.0 --port=5000"
+waitForPort = 5000
 
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-localPort = 5173
-externalPort = 5173
 
 [[ports]]
 localPort = 37517
@@ -44,3 +40,7 @@ externalPort = 3001
 [[ports]]
 localPort = 39743
 externalPort = 3000
+
+[[ports]]
+localPort = 42591
+externalPort = 3002

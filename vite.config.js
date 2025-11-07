@@ -20,13 +20,17 @@ export default defineConfig({
     server: {
         host: '0.0.0.0',
         port: 5173,
-        cors: true,
+        cors: {
+            origin: '*',
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+            credentials: true,
+        },
         strictPort: true,
         hmr: {
             host: replitDomain,
             clientPort: 443,
             protocol: replitDomain === 'localhost' ? 'ws' : 'wss',
         },
-        origin: replitDomain === 'localhost' ? `http://localhost:5173` : `https://${replitDomain}`,
     },
 });
