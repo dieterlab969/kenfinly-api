@@ -199,6 +199,10 @@
     "en": "Add transaction",
     "vi": "Thêm giao dịch"
   },
+  "transaction.notes_placeholder": {
+    "en": "Add notes about this transaction...",
+    "vi": "Thêm ghi chú về giao dịch này..."
+  },
   "common.cancel": {
     "en": "Cancel",
     "vi": "Hủy"
@@ -234,5 +238,37 @@
   "settings.select_language": {
     "en": "Select your preferred language",
     "vi": "Chọn ngôn ngữ ưa thích của bạn"
+  },
+  "balanceChart.title": {
+    "en": "Balance",
+    "vi": "Số dư"
+  },
+  "balanceChart.totalAmountOwned": {
+    "en": "Total amount owned:",
+    "vi": "Tổng số tiền sở hữu:"
+  },
+  "monthlySummary": {
+    "title": {
+      "en": "Monthly Summary",
+      "vi": "Tổng kết tháng"
+    },
+    "income": {
+      "label": {
+        "en": "Income:",
+        "vi": "Thu nhập:"
+      }
+    },
+    "expense": {
+      "label": {
+        "en": "Expense:",
+        "vi": "Chi tiêu:"
+      }
+    },
+    "total": {
+      "label": {
+        "en": "Total:",
+        "vi": "Tổng:"
+      }
+    }
   }
 }
