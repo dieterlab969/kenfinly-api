@@ -30,4 +30,29 @@ class Account extends Model
     {
         return $this->hasMany(Transaction::class);
     }
+
+    public function participants(): HasMany
+    {
+        return $this->hasMany(AccountParticipant::class);
+    }
+
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(Invitation::class);
+    }
+
+    public function hasParticipant(int $userId): bool
+    {
+        return $this->participants()->where('user_id', $userId)->exists();
+    }
+
+    public function getParticipantRole(int $userId): ?string
+    {
+        $participant = $this->participants()
+            ->where('user_id', $userId)
+            ->with('role')
+            ->first();
+        
+        return $participant?->role?->name;
+    }
 }
