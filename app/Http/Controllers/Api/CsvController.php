@@ -78,12 +78,12 @@ class CsvController extends Controller
 
         foreach ($transactions as $transaction) {
             $row = [
-                $transaction->transaction_date,
-                $transaction->account->name ?? '',
-                $transaction->category->name ?? '',
-                $transaction->type,
-                $transaction->amount,
-                $transaction->currency,
+                $this->escapeCsvField($transaction->transaction_date),
+                $this->escapeCsvField($transaction->account->name ?? ''),
+                $this->escapeCsvField($transaction->category->name ?? ''),
+                $this->escapeCsvField($transaction->type),
+                $this->escapeCsvField($transaction->amount),
+                $this->escapeCsvField($transaction->currency),
                 $this->escapeCsvField($transaction->description ?? ''),
                 $this->escapeCsvField($transaction->notes ?? ''),
             ];
@@ -96,6 +96,8 @@ class CsvController extends Controller
 
     private function escapeCsvField($field)
     {
+        $field = (string) $field;
+        
         if (strpos($field, ',') !== false || strpos($field, '"') !== false || strpos($field, "\n") !== false) {
             return '"' . str_replace('"', '""', $field) . '"';
         }
