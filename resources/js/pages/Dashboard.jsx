@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Plus, TrendingUp, TrendingDown, Wallet } from 'lucide-react';
+import { Plus, Wallet } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import api from '../utils/api';
 import AddTransactionModal from '../components/AddTransactionModal';
+import MonthlySummaryCard from '../components/dashboard/MonthlySummaryCard';
+import BalanceTrendChart from '../components/dashboard/BalanceTrendChart';
 import { getCategoryIcon, formatCurrency } from '../constants/categories';
 
 const Dashboard = () => {
@@ -111,42 +113,10 @@ const Dashboard = () => {
             </nav>
 
             <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                <div className="mb-6">
-                    <div className="bg-white rounded-2xl shadow-lg p-6">
-                        <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm text-gray-600">Total Balance</span>
-                            <Wallet className="w-5 h-5 text-gray-400" />
-                        </div>
-                        <div className="text-4xl font-bold text-gray-900 mb-4">
-                            {formatCurrency(totalBalance)}
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-green-50 rounded-xl p-4">
-                                <div className="flex items-center mb-1">
-                                    <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
-                                    <span className="text-xs text-green-700 font-medium">Income</span>
-                                </div>
-                                <div className="text-xl font-bold text-green-600">
-                                    {formatCurrency(dashboardData?.monthly_summary?.income || 0)}
-                                </div>
-                                <div className="text-xs text-green-600 mt-1">This month</div>
-                            </div>
-                            <div className="bg-red-50 rounded-xl p-4">
-                                <div className="flex items-center mb-1">
-                                    <TrendingDown className="w-4 h-4 text-red-600 mr-1" />
-                                    <span className="text-xs text-red-700 font-medium">Expenses</span>
-                                </div>
-                                <div className="text-xl font-bold text-red-600">
-                                    {formatCurrency(dashboardData?.monthly_summary?.expense || 0)}
-                                </div>
-                                <div className="text-xs text-red-600 mt-1">This month</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <MonthlySummaryCard monthlySummary={dashboardData?.monthly_summary} />
 
                 <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">Expenses (Last 7 Days)</h3>
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">Expenses - Last 7 Days</h3>
                     <ResponsiveContainer width="100%" height={200}>
                         <BarChart data={prepareChartData()}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -169,12 +139,17 @@ const Dashboard = () => {
                             />
                             <Bar 
                                 dataKey="amount" 
-                                fill="#3b82f6"
+                                fill="#ef4444"
                                 radius={[8, 8, 0, 0]}
                             />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
+
+                <BalanceTrendChart 
+                    balanceHistory={dashboardData?.balance_history} 
+                    totalBalance={totalBalance}
+                />
 
                 <div className="bg-white rounded-2xl shadow-lg p-6">
                     <div className="flex items-center justify-between mb-4">
