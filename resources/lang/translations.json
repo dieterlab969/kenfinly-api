@@ -1,0 +1,238 @@
+{
+  "app.name": {
+    "en": "Kenfinly",
+    "vi": "Kenfinly"
+  },
+  "app.tagline": {
+    "en": "Understand your finances better",
+    "vi": "Hiểu rõ hơn về tài chính của bạn"
+  },
+  "auth.login": {
+    "en": "Sign in to Kenfinly",
+    "vi": "Đăng nhập vào Kenfinly"
+  },
+  "auth.register": {
+    "en": "Create your Kenfinly account",
+    "vi": "Tạo tài khoản Kenfinly của bạn"
+  },
+  "auth.register_subtitle": {
+    "en": "Start managing your finances today",
+    "vi": "Bắt đầu quản lý tài chính ngay hôm nay"
+  },
+  "auth.email": {
+    "en": "Email address",
+    "vi": "Địa chỉ email"
+  },
+  "auth.password": {
+    "en": "Password",
+    "vi": "Mật khẩu"
+  },
+  "auth.name": {
+    "en": "Full name",
+    "vi": "Họ và tên"
+  },
+  "auth.confirm_password": {
+    "en": "Confirm password",
+    "vi": "Xác nhận mật khẩu"
+  },
+  "auth.sign_in": {
+    "en": "Sign in",
+    "vi": "Đăng nhập"
+  },
+  "auth.sign_up": {
+    "en": "Sign up",
+    "vi": "Đăng ký"
+  },
+  "auth.logout": {
+    "en": "Logout",
+    "vi": "Đăng xuất"
+  },
+  "auth.no_account": {
+    "en": "Don't have an account?",
+    "vi": "Chưa có tài khoản?"
+  },
+  "auth.have_account": {
+    "en": "Already have an account?",
+    "vi": "Đã có tài khoản?"
+  },
+  "auth.register_here": {
+    "en": "Register here",
+    "vi": "Đăng ký tại đây"
+  },
+  "auth.login_here": {
+    "en": "Sign in here",
+    "vi": "Đăng nhập tại đây"
+  },
+  "auth.login_failed": {
+    "en": "Login failed. Please check your credentials.",
+    "vi": "Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập."
+  },
+  "auth.login_error": {
+    "en": "An error occurred during login. Please try again.",
+    "vi": "Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại."
+  },
+  "auth.register_error": {
+    "en": "An error occurred during registration. Please try again.",
+    "vi": "Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại."
+  },
+  "auth.register_success": {
+    "en": "Registration successful! Redirecting to dashboard...",
+    "vi": "Đăng ký thành công! Đang chuyển đến bảng điều khiển..."
+  },
+  "nav.welcome": {
+    "en": "Welcome",
+    "vi": "Chào mừng"
+  },
+  "nav.settings": {
+    "en": "Settings",
+    "vi": "Cài đặt"
+  },
+  "dashboard.monthly_summary": {
+    "en": "Monthly Summary",
+    "vi": "Tổng kết tháng"
+  },
+  "dashboard.expenses_7days": {
+    "en": "Expenses - Last 7 Days",
+    "vi": "Chi tiêu - 7 ngày qua"
+  },
+  "dashboard.balance": {
+    "en": "Balance",
+    "vi": "Số dư"
+  },
+  "dashboard.total_balance": {
+    "en": "Total Balance",
+    "vi": "Tổng số dư"
+  },
+  "dashboard.total_amount_owned": {
+    "en": "Total amount owned:",
+    "vi": "Tổng số tiền hiện có:"
+  },
+  "dashboard.income": {
+    "en": "Income",
+    "vi": "Thu nhập"
+  },
+  "dashboard.expense": {
+    "en": "Expense",
+    "vi": "Chi tiêu"
+  },
+  "dashboard.total": {
+    "en": "Total",
+    "vi": "Tổng"
+  },
+  "dashboard.recent_transactions": {
+    "en": "Recent Transactions",
+    "vi": "Giao dịch gần đây"
+  },
+  "dashboard.view_all": {
+    "en": "View All",
+    "vi": "Xem tất cả"
+  },
+  "dashboard.no_transactions": {
+    "en": "No transactions yet",
+    "vi": "Chưa có giao dịch nào"
+  },
+  "dashboard.add_first_transaction": {
+    "en": "Add your first transaction",
+    "vi": "Thêm giao dịch đầu tiên"
+  },
+  "dashboard.loading": {
+    "en": "Loading dashboard...",
+    "vi": "Đang tải bảng điều khiển..."
+  },
+  "transaction.add": {
+    "en": "Add Transaction",
+    "vi": "Thêm giao dịch"
+  },
+  "transaction.type": {
+    "en": "Type",
+    "vi": "Loại"
+  },
+  "transaction.amount": {
+    "en": "Amount",
+    "vi": "Số tiền"
+  },
+  "transaction.category": {
+    "en": "Category",
+    "vi": "Danh mục"
+  },
+  "transaction.account": {
+    "en": "Account",
+    "vi": "Tài khoản"
+  },
+  "transaction.date": {
+    "en": "Date",
+    "vi": "Ngày"
+  },
+  "transaction.notes": {
+    "en": "Notes",
+    "vi": "Ghi chú"
+  },
+  "transaction.notes_optional": {
+    "en": "Notes (Optional)",
+    "vi": "Ghi chú (Tùy chọn)"
+  },
+  "transaction.receipt": {
+    "en": "Receipt",
+    "vi": "Hóa đơn"
+  },
+  "transaction.receipt_optional": {
+    "en": "Receipt (Optional)",
+    "vi": "Hóa đơn (Tùy chọn)"
+  },
+  "transaction.select_category": {
+    "en": "Select a category",
+    "vi": "Chọn danh mục"
+  },
+  "transaction.upload_receipt": {
+    "en": "Upload receipt",
+    "vi": "Tải lên hóa đơn"
+  },
+  "transaction.change_receipt": {
+    "en": "Change receipt",
+    "vi": "Thay đổi hóa đơn"
+  },
+  "transaction.adding": {
+    "en": "Adding...",
+    "vi": "Đang thêm..."
+  },
+  "transaction.add_button_label": {
+    "en": "Add transaction",
+    "vi": "Thêm giao dịch"
+  },
+  "common.cancel": {
+    "en": "Cancel",
+    "vi": "Hủy"
+  },
+  "common.save": {
+    "en": "Save",
+    "vi": "Lưu"
+  },
+  "common.loading": {
+    "en": "Loading...",
+    "vi": "Đang tải..."
+  },
+  "common.error_title": {
+    "en": "Translation Error",
+    "vi": "Lỗi dịch thuật"
+  },
+  "common.error_message": {
+    "en": "Failed to load translations. Please refresh the page.",
+    "vi": "Không thể tải bản dịch. Vui lòng làm mới trang."
+  },
+  "common.reload_page": {
+    "en": "Reload Page",
+    "vi": "Tải lại trang"
+  },
+  "settings.title": {
+    "en": "Settings",
+    "vi": "Cài đặt"
+  },
+  "settings.language": {
+    "en": "Language",
+    "vi": "Ngôn ngữ"
+  },
+  "settings.select_language": {
+    "en": "Select your preferred language",
+    "vi": "Chọn ngôn ngữ ưa thích của bạn"
+  }
+}

@@ -4,11 +4,16 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\LanguageController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+
+// Language routes (public)
+Route::get('/languages', [LanguageController::class, 'index']);
+Route::get('/languages/{code}/translations', [LanguageController::class, 'getTranslations']);
 
 // Protected routes (require authentication)
 Route::middleware('auth:api')->group(function () {
@@ -27,4 +32,7 @@ Route::middleware('auth:api')->group(function () {
     
     // Transactions
     Route::apiResource('transactions', TransactionController::class);
+    
+    // Language preference
+    Route::post('/user/language', [LanguageController::class, 'updateUserLanguage']);
 });

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../contexts/TranslationContext';
+import { Wallet } from 'lucide-react';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -13,6 +15,7 @@ const Register = () => {
     const [successMessage, setSuccessMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const { register, user } = useAuth();
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -50,17 +53,13 @@ const Register = () => {
             );
 
             if (result.success) {
-                setSuccessMessage('Registration successful! Redirecting to dashboard...');
+                setSuccessMessage(t('auth.register_success'));
                 setTimeout(() => navigate('/dashboard'), 1500);
-            } else if (result.errors) {
-                setErrors(result.errors);
+            } else {
+                setErrors({ general: [t('auth.register_error')] });
             }
         } catch (err) {
-            if (err.response?.data?.errors) {
-                setErrors(err.response.data.errors);
-            } else {
-                setErrors({ general: ['An error occurred during registration. Please try again.'] });
-            }
+            setErrors({ general: [t('auth.register_error')] });
         } finally {
             setLoading(false);
         }
@@ -69,12 +68,17 @@ const Register = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
-                <div>
+                <div className="text-center">
+                    <div className="flex justify-center mb-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center">
+                            <Wallet className="w-10 h-10 text-white" />
+                        </div>
+                    </div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        Create your Kenfinly account
+                        {t('auth.register')}
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600">
-                        Start managing your finances today
+                        {t('auth.register_subtitle')}
                     </p>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -91,7 +95,7 @@ const Register = () => {
                     <div className="rounded-md shadow-sm space-y-4">
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                                Full Name
+                                {t('auth.name')}
                             </label>
                             <input
                                 id="name"
@@ -102,7 +106,6 @@ const Register = () => {
                                 value={formData.name}
                                 onChange={handleChange}
                                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Enter your full name"
                             />
                             {errors.name && (
                                 <p className="mt-1 text-sm text-red-600">{errors.name[0]}</p>
@@ -110,7 +113,7 @@ const Register = () => {
                         </div>
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                Email address
+                                {t('auth.email')}
                             </label>
                             <input
                                 id="email"
@@ -121,7 +124,6 @@ const Register = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Enter your email"
                             />
                             {errors.email && (
                                 <p className="mt-1 text-sm text-red-600">{errors.email[0]}</p>
@@ -129,7 +131,7 @@ const Register = () => {
                         </div>
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                                Password
+                                {t('auth.password')}
                             </label>
                             <input
                                 id="password"
@@ -140,7 +142,6 @@ const Register = () => {
                                 value={formData.password}
                                 onChange={handleChange}
                                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Create a password (min. 8 characters)"
                             />
                             {errors.password && (
                                 <p className="mt-1 text-sm text-red-600">{errors.password[0]}</p>
@@ -148,7 +149,7 @@ const Register = () => {
                         </div>
                         <div>
                             <label htmlFor="passwordConfirmation" className="block text-sm font-medium text-gray-700 mb-1">
-                                Confirm Password
+                                {t('auth.confirm_password')}
                             </label>
                             <input
                                 id="passwordConfirmation"
@@ -159,7 +160,6 @@ const Register = () => {
                                 value={formData.passwordConfirmation}
                                 onChange={handleChange}
                                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Confirm your password"
                             />
                         </div>
                     </div>
@@ -170,15 +170,15 @@ const Register = () => {
                             disabled={loading}
                             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {loading ? 'Creating account...' : 'Create account'}
+                            {loading ? `${t('auth.sign_up')}...` : t('auth.sign_up')}
                         </button>
                     </div>
 
                     <div className="text-center">
                         <p className="text-sm text-gray-600">
-                            Already have an account?{' '}
+                            {t('auth.have_account')}{' '}
                             <Link to="/login" className="font-medium text-indigo-600 hover:text-indigo-500">
-                                Sign in here
+                                {t('auth.login_here')}
                             </Link>
                         </p>
                     </div>

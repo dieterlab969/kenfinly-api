@@ -18,6 +18,9 @@ class DatabaseSeeder extends Seeder
         // Seed roles first
         $this->call(RoleSeeder::class);
 
+        // Seed languages and translations
+        $this->call(LanguageSeeder::class);
+
         // Seed categories
         $this->call(CategorySeeder::class);
 

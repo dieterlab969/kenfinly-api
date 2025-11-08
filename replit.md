@@ -26,6 +26,27 @@ The frontend is a Single Page Application (SPA) built using React 19.2, Vite 7.x
 - **Framework**: React with React Router for component-based UIs and client-side routing.
 - **State Management**: React Context API for authentication and user session.
 - **UI/UX**: Responsive design with a blue gradient theme, interactive dashboards (Recharts), and modals for transaction entry with real-time updates.
+- **Multilanguage**: Complete English and Vietnamese support with shared translation manifest architecture.
+
+## Multilanguage System
+
+Kenfinly implements a production-ready multilanguage system supporting English and Vietnamese:
+
+**Architecture:**
+- **Shared Manifest**: `resources/lang/translations.json` serves as single source of truth for all translations (68+ keys)
+- **Backend**: LanguageSeeder reads from shared manifest to populate database
+- **Frontend**: TranslationContext imports manifest for comprehensive fallback translations
+- **Graceful Degradation**: App continues working offline using manifest data when translation API is unavailable
+
+**Testing Offline Mode:**
+To verify the multilanguage system works correctly when the backend is unavailable:
+1. Open browser developer tools (F12)
+2. Go to Network tab and enable "Offline" mode
+3. Refresh the application
+4. Verify: App loads successfully with English/Vietnamese UI (no raw translation keys visible)
+5. Verify: Yellow "Offline Mode" banner appears in top-right corner
+6. Verify: All UI text displays properly in the selected language
+7. Re-enable network and click "Retry" button to restore API connectivity
 
 ## Development & Deployment
 
