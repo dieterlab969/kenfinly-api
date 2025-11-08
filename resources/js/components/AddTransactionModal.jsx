@@ -165,18 +165,23 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Amount
+                            Amount (VND)
                         </label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            min="0.01"
-                            required
-                            value={formData.amount}
-                            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="0.00"
-                        />
+                        <div className="relative">
+                            <input
+                                type="number"
+                                step="1"
+                                min="1"
+                                required
+                                value={formData.amount}
+                                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                                className="w-full px-4 py-2 pr-16 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="0"
+                            />
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                <span className="text-gray-500 font-medium">VND</span>
+                            </div>
+                        </div>
                     </div>
 
                     <div>
