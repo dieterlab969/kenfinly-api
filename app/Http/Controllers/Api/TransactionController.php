@@ -264,18 +264,44 @@ class TransactionController extends Controller
         $startOfMonth = $now->copy()->startOfMonth();
         $endOfMonth = $now->copy()->endOfMonth();
         $sevenDaysAgo = $now->copy()->subDays(6);
+        
+        $startOfPreviousMonth = $now->copy()->subMonth()->startOfMonth();
+        $endOfPreviousMonth = $now->copy()->subMonth()->endOfMonth();
+
+        $currentIncome = Transaction::where('user_id', $user->id)
+            ->where('type', 'income')
+            ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
+            ->sum('amount');
+        
+        $currentExpense = Transaction::where('user_id', $user->id)
+            ->where('type', 'expense')
+            ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
+            ->sum('amount');
+
+        $previousIncome = Transaction::where('user_id', $user->id)
+            ->where('type', 'income')
+            ->whereBetween('transaction_date', [$startOfPreviousMonth, $endOfPreviousMonth])
+            ->sum('amount');
+        
+        $previousExpense = Transaction::where('user_id', $user->id)
+            ->where('type', 'expense')
+            ->whereBetween('transaction_date', [$startOfPreviousMonth, $endOfPreviousMonth])
+            ->sum('amount');
 
         $monthlySummary = [
-            'income' => Transaction::where('user_id', $user->id)
-                ->where('type', 'income')
-                ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
-                ->sum('amount'),
-            'expense' => Transaction::where('user_id', $user->id)
-                ->where('type', 'expense')
-                ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
-                ->sum('amount'),
+            'current' => [
+                'month' => $now->format('F Y'),
+                'income' => $currentIncome,
+                'expense' => $currentExpense,
+                'net' => $currentIncome - $currentExpense,
+            ],
+            'previous' => [
+                'month' => $now->copy()->subMonth()->format('F Y'),
+                'income' => $previousIncome,
+                'expense' => $previousExpense,
+                'net' => $previousIncome - $previousExpense,
+            ],
         ];
-        $monthlySummary['total'] = $monthlySummary['income'] - $monthlySummary['expense'];
 
         $sevenDayExpenses = Transaction::where('user_id', $user->id)
             ->where('type', 'expense')
@@ -288,6 +314,30 @@ class TransactionController extends Controller
             ->orderBy('date')
             ->get();
 
+        $thirtyDaysAgo = $now->copy()->subDays(29);
+        $balanceHistory = [];
+        $accounts = Account::where('user_id', $user->id)->get();
+        $totalBalance = $accounts->sum('balance');
+        
+        for ($i = 29; $i >= 0; $i--) {
+            $date = $now->copy()->subDays($i);
+            $dateStr = $date->format('Y-m-d');
+            
+            $dayTransactions = Transaction::where('user_id', $user->id)
+                ->whereDate('transaction_date', '>', $dateStr)
+                ->select(
+                    DB::raw('SUM(CASE WHEN type = "income" THEN amount ELSE -amount END) as net_change')
+                )
+                ->first();
+            
+            $dayBalance = $totalBalance - ($dayTransactions->net_change ?? 0);
+            
+            $balanceHistory[] = [
+                'date' => $dateStr,
+                'balance' => $dayBalance,
+            ];
+        }
+
         $recentTransactions = Transaction::where('user_id', $user->id)
             ->with(['category', 'account'])
             ->orderBy('transaction_date', 'desc')
@@ -295,14 +345,12 @@ class TransactionController extends Controller
             ->limit(6)
             ->get();
 
-        $accounts = Account::where('user_id', $user->id)
-            ->get();
-
         return response()->json([
             'success' => true,
             'data' => [
                 'monthly_summary' => $monthlySummary,
                 'seven_day_expenses' => $sevenDayExpenses,
+                'balance_history' => $balanceHistory,
                 'recent_transactions' => $recentTransactions,
                 'accounts' => $accounts,
             ]
