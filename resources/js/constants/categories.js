@@ -21,8 +21,22 @@ export const getCategoryIcon = (slug) => {
 };
 
 export const formatCurrency = (amount, currency = 'USD') => {
+  if (currency === 'VND') {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  }
+  
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency,
   }).format(amount);
 };
+
+export const SUPPORTED_CURRENCIES = [
+  { code: 'USD', name: 'US Dollar', symbol: '$' },
+  { code: 'VND', name: 'Vietnamese Dong', symbol: '₫' },
+];
