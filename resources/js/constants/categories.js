@@ -20,7 +20,7 @@ export const getCategoryIcon = (slug) => {
   return categoryIcons[slug] || '📄';
 };
 
-export const formatCurrency = (amount, currency = 'USD') => {
+export const formatCurrency = (amount, currency = 'VND') => {
   if (currency === 'VND') {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
