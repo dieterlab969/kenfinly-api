@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../contexts/TranslationContext';
+import { Wallet } from 'lucide-react';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -8,6 +10,7 @@ const Login = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const { login, user } = useAuth();
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -26,14 +29,10 @@ const Login = () => {
             if (result.success) {
                 navigate('/dashboard');
             } else {
-                setError(result.message || 'Login failed. Please check your credentials.');
+                setError(t('auth.login_failed'));
             }
         } catch (err) {
-            if (err.response?.data?.message) {
-                setError(err.response.data.message);
-            } else {
-                setError('An error occurred during login. Please try again.');
-            }
+            setError(t('auth.login_error'));
         } finally {
             setLoading(false);
         }
@@ -42,12 +41,17 @@ const Login = () => {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
-                <div>
+                <div className="text-center">
+                    <div className="flex justify-center mb-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center">
+                            <Wallet className="w-10 h-10 text-white" />
+                        </div>
+                    </div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        Sign in to Kenfinly
+                        {t('auth.login')}
                     </h2>
                     <p className="mt-2 text-center text-sm text-gray-600">
-                        Understand your finances better
+                        {t('app.tagline')}
                     </p>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -59,7 +63,7 @@ const Login = () => {
                     <div className="rounded-md shadow-sm space-y-4">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                Email address
+                                {t('auth.email')}
                             </label>
                             <input
                                 id="email"
@@ -70,12 +74,11 @@ const Login = () => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Enter your email"
                             />
                         </div>
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                                Password
+                                {t('auth.password')}
                             </label>
                             <input
                                 id="password"
@@ -86,7 +89,6 @@ const Login = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                placeholder="Enter your password"
                             />
                         </div>
                     </div>
@@ -97,15 +99,15 @@ const Login = () => {
                             disabled={loading}
                             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {loading ? 'Signing in...' : 'Sign in'}
+                            {loading ? `${t('auth.sign_in')}...` : t('auth.sign_in')}
                         </button>
                     </div>
 
                     <div className="text-center">
                         <p className="text-sm text-gray-600">
-                            Don't have an account?{' '}
+                            {t('auth.no_account')}{' '}
                             <Link to="/register" className="font-medium text-indigo-600 hover:text-indigo-500">
-                                Register here
+                                {t('auth.register_here')}
                             </Link>
                         </p>
                     </div>

@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../contexts/TranslationContext';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Wallet } from 'lucide-react';
+import { Plus, Wallet, Settings } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import api from '../utils/api';
 import AddTransactionModal from '../components/AddTransactionModal';
+import SettingsModal from '../components/SettingsModal';
 import MonthlySummaryCard from '../components/dashboard/MonthlySummaryCard';
 import BalanceTrendChart from '../components/dashboard/BalanceTrendChart';
 import { getCategoryIcon, formatCurrency } from '../constants/categories';
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [dashboardData, setDashboardData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showSettingsModal, setShowSettingsModal] = useState(false);
 
     useEffect(() => {
         fetchDashboardData();
@@ -76,7 +80,7 @@ const Dashboard = () => {
             <div className="min-h-screen bg-blue-50 flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading dashboard...</p>
+                    <p className="text-gray-600">{t('dashboard.loading')}</p>
                 </div>
             </div>
         );
@@ -93,19 +97,26 @@ const Dashboard = () => {
                                     <Wallet className="w-5 h-5 text-white" />
                                 </div>
                                 <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                                    Kenfinly
+                                    {t('app.name')}
                                 </h1>
                             </div>
                         </div>
                         <div className="flex items-center space-x-4">
                             <span className="text-sm text-gray-700">
-                                Welcome, <span className="font-medium">{user?.name}</span>
+                                {t('nav.welcome')}, <span className="font-medium">{user?.name}</span>
                             </span>
+                            <button
+                                onClick={() => setShowSettingsModal(true)}
+                                className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                                title={t('nav.settings')}
+                            >
+                                <Settings className="w-5 h-5" />
+                            </button>
                             <button
                                 onClick={handleLogout}
                                 className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-lg shadow-sm transition-all duration-200"
                             >
-                                Logout
+                                {t('auth.logout')}
                             </button>
                         </div>
                     </div>
@@ -116,7 +127,7 @@ const Dashboard = () => {
                 <MonthlySummaryCard monthlySummary={dashboardData?.monthly_summary} />
 
                 <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">Expenses - Last 7 Days</h3>
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">{t('dashboard.expenses_7days')}</h3>
                     <ResponsiveContainer width="100%" height={200}>
                         <BarChart data={prepareChartData()}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -153,12 +164,12 @@ const Dashboard = () => {
 
                 <div className="bg-white rounded-2xl shadow-lg p-6">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-bold text-gray-900">Recent Transactions</h3>
+                        <h3 className="text-lg font-bold text-gray-900">{t('dashboard.recent_transactions')}</h3>
                         <button
                             onClick={() => setShowAddModal(true)}
                             className="text-sm text-blue-600 hover:text-blue-700 font-medium"
                         >
-                            View All
+                            {t('dashboard.view_all')}
                         </button>
                     </div>
                     
@@ -205,13 +216,13 @@ const Dashboard = () => {
                     ) : (
                         <div className="text-center py-12">
                             <div className="text-6xl mb-4">📊</div>
-                            <p className="text-gray-600 mb-4">No transactions yet</p>
+                            <p className="text-gray-600 mb-4">{t('dashboard.no_transactions')}</p>
                             <button
                                 onClick={() => setShowAddModal(true)}
                                 className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                             >
                                 <Plus className="w-4 h-4 mr-2" />
-                                Add your first transaction
+                                {t('dashboard.add_first_transaction')}
                             </button>
                         </div>
                     )}
@@ -221,7 +232,7 @@ const Dashboard = () => {
             <button
                 onClick={() => setShowAddModal(true)}
                 className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 flex items-center justify-center z-40"
-                aria-label="Add transaction"
+                aria-label={t('transaction.add_button_label')}
             >
                 <Plus className="w-6 h-6" />
             </button>
@@ -230,6 +241,11 @@ const Dashboard = () => {
                 isOpen={showAddModal}
                 onClose={() => setShowAddModal(false)}
                 onSuccess={handleTransactionAdded}
+            />
+
+            <SettingsModal
+                isOpen={showSettingsModal}
+                onClose={() => setShowSettingsModal(false)}
             />
         </div>
     );
