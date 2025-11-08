@@ -67,18 +67,41 @@ All notable changes to the Personal Finance Application (Kenfinly) are documente
 - Role-based permission enforcement at model and controller levels
 - Owner can manage all aspects, editors can modify data, viewers have read-only access
 
-### Added - CSV Import (Web API)
+### Added - CSV Import & Export (Web API)
 
 #### API Endpoints
-- `POST /api/transactions/import-csv` - Upload and import CSV files with transaction data
+- `POST /api/csv/import` - Upload and import CSV files with transaction data
+- `GET /api/csv/export` - Export transactions to CSV with optional date range filtering
 
-#### Features
-- Web-based CSV upload (complementing existing console command)
-- Supports multiple date formats (MM/YYYY and standard dates)
-- Automatic category assignment for imported transactions
-- Transaction-wrapped imports with rollback on errors
-- Validation of account ownership before import
-- Returns count of successfully imported transactions
+#### CSV Export Features
+- Export all transaction records (not just summary data)
+- Date range filtering with `start_date` and `end_date` parameters
+- Optional `account_id` parameter to filter by specific account
+- Exports transactions from owned accounts and shared accounts (participant access)
+- CSV format includes: Date, Account, Category, Type, Amount, Currency, Description, Notes
+- Automatic filename generation with timestamp (`transactions_export_YYYY-MM-DD_HHMMSS.csv`)
+- Proper CSV escaping for fields containing commas, quotes, or newlines
+- Downloadable file with appropriate headers for browser download
+
+#### CSV Import Features
+- Web-based CSV upload (separate from console command, optimized for web usage)
+- File validation: Max 10MB, CSV/TXT MIME types only
+- CSV header validation (enforces correct column structure)
+- Support for multiple date formats (Y-m-d, m/d/Y, d/m/Y, Y/m/d, d-m-Y, m-d-Y)
+- Automatic category creation if category doesn't exist
+- Comprehensive validation for each row:
+  - Valid transaction type (income/expense)
+  - Positive amount validation
+  - Date format validation
+  - Required field validation
+- Detailed import summary with:
+  - Total rows processed
+  - Success count
+  - Failed count
+  - Specific error messages for each failed row (with row numbers)
+- Database transaction support with automatic rollback on critical errors
+- Role-based access: Account owners and invited participants with owner/editor roles can import
+- Returns JSON response with import summary and detailed error information
 
 ### Added - Financial Analytics
 
