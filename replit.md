@@ -16,7 +16,7 @@ The backend is built with Laravel 12 (PHP 8.2+) and provides a REST API. Key arc
 - **Database**: PostgreSQL for robust data integrity and advanced features. Eloquent ORM is used for database interaction.
 - **Authorization**: Role-Based Access Control (RBAC) with 'owner', 'editor', and 'viewer' roles enforced via custom middleware.
 - **Core Models**: `users`, `roles`, `user_roles`, `accounts`, `categories`, and `transactions` tables are implemented.
-- **Features**: Multi-currency support (USD, VND) with conversion services, CSV import for bulk transactions, and comprehensive API endpoints for dashboard data, transactions, accounts, and categories.
+- **Features**: Multi-currency support (USD, VND) with conversion services, web-based CSV import/export with date filtering and detailed validation, payment module with licenses and subscriptions, role-based access control with multi-user collaboration, participant management with secure invitations, and comprehensive API endpoints for dashboard data, transactions, accounts, categories, and analytics.
 
 ## Frontend
 
@@ -47,6 +47,33 @@ To verify the multilanguage system works correctly when the backend is unavailab
 5. Verify: Yellow "Offline Mode" banner appears in top-right corner
 6. Verify: All UI text displays properly in the selected language
 7. Re-enable network and click "Retry" button to restore API connectivity
+
+## CSV Import/Export System
+
+Kenfinly provides production-ready web-based CSV import and export functionality:
+
+**CSV Export:**
+- Date range filtering (start_date, end_date) for targeted exports
+- Account-specific or all-account export options
+- Role-based access (owners and participants can export)
+- Proper CSV formatting with field escaping for commas, quotes, and newlines
+- Downloadable files with timestamp-based naming
+
+**CSV Import:**
+- File validation (10MB limit, CSV/TXT MIME types)
+- CSV header validation enforcing correct column structure
+- Multiple date format support (Y-m-d, m/d/Y, d/m/Y, etc.)
+- Row-by-row validation with detailed error reporting
+- Import summary with success/failed counts and specific error messages
+- Database transaction support with automatic rollback on errors
+- Role-based access (owners and editor participants can import)
+- Automatic category creation for new categories
+
+**API Endpoints:**
+- `GET /api/csv/export` - Export transactions with optional filtering
+- `POST /api/csv/import` - Import transactions from CSV file
+
+**Sample Files:** `storage/app/sample_transactions_valid.csv` and `storage/app/sample_transactions_invalid.csv` for testing
 
 ## Development & Deployment
 

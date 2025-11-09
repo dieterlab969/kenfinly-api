@@ -2,8 +2,10 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { formatCurrency } from '../../constants/categories';
+import {useTranslation} from "@assets/js/contexts/TranslationContext.jsx";
 
 const BalanceTrendChart = ({ balanceHistory, totalBalance }) => {
+
     if (!balanceHistory || balanceHistory.length === 0) {
         return null;
     }
@@ -17,13 +19,14 @@ const BalanceTrendChart = ({ balanceHistory, totalBalance }) => {
     const minBalance = Math.min(...chartData.map(d => d.balance));
     const maxBalance = Math.max(...chartData.map(d => d.balance));
     const padding = (maxBalance - minBalance) * 0.1;
+    const { t } = useTranslation();
 
     return (
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-gray-900">Balance</h3>
+                <h3 className="text-lg font-bold text-gray-900">{t('balanceChart.title')}</h3>
                 <div className="text-right">
-                    <div className="text-xs text-gray-500">Total amount owned:</div>
+                    <div className="text-xs text-gray-500">{t('balanceChart.totalAmountOwned')}</div>
                     <div className={`text-xl font-bold ${totalBalance < 0 ? 'text-red-600' : 'text-gray-900'}`}>
                         {formatCurrency(totalBalance)}
                     </div>
@@ -38,13 +41,13 @@ const BalanceTrendChart = ({ balanceHistory, totalBalance }) => {
                         </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis 
-                        dataKey="date" 
+                    <XAxis
+                        dataKey="date"
                         tick={{ fill: '#6b7280', fontSize: 12 }}
                         axisLine={{ stroke: '#e5e7eb' }}
                         interval="preserveStartEnd"
                     />
-                    <YAxis 
+                    <YAxis
                         tick={{ fill: '#6b7280', fontSize: 12 }}
                         axisLine={{ stroke: '#e5e7eb' }}
                         domain={[minBalance - padding, maxBalance + padding]}
@@ -58,7 +61,7 @@ const BalanceTrendChart = ({ balanceHistory, totalBalance }) => {
                             return value.toFixed(0);
                         }}
                     />
-                    <Tooltip 
+                    <Tooltip
                         formatter={(value) => formatCurrency(value)}
                         labelFormatter={(label, payload) => {
                             if (payload && payload.length > 0) {
@@ -66,16 +69,16 @@ const BalanceTrendChart = ({ balanceHistory, totalBalance }) => {
                             }
                             return label;
                         }}
-                        contentStyle={{ 
-                            backgroundColor: '#ffffff', 
+                        contentStyle={{
+                            backgroundColor: '#ffffff',
                             border: '1px solid #e5e7eb',
                             borderRadius: '8px'
                         }}
                     />
-                    <Area 
-                        type="monotone" 
-                        dataKey="balance" 
-                        stroke="#3b82f6" 
+                    <Area
+                        type="monotone"
+                        dataKey="balance"
+                        stroke="#3b82f6"
                         strokeWidth={2}
                         fill="url(#balanceGradient)"
                     />

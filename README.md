@@ -442,12 +442,181 @@ The app uses JWT for security via Laravel Sanctum or tymon/jwt-auth package.
 
 ---
 
-## CSV Import Guidelines
+## CSV Import & Export API Documentation
 
-- Ensure CSV files follow the required format (date, amount, category, account, currency, notes).
-- Use UTF-8 encoding.
-- The backend validates each entry, returning detailed errors on import failures.
-- Large CSV files may be imported asynchronously in batches (future enhancement).
+Kenfinly provides comprehensive web-based CSV import and export functionality for transaction data management.
+
+### CSV Export API
+
+**Endpoint:** `GET /api/csv/export`
+
+**Authentication:** Required (JWT Bearer token)
+
+**Description:** Export transactions to CSV format with optional filtering by date range and account.
+
+**Query Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `account_id` | integer | No | Filter transactions by specific account ID. If omitted, exports all accessible accounts |
+| `start_date` | date (Y-m-d) | No | Filter transactions from this date onwards |
+| `end_date` | date (Y-m-d) | No | Filter transactions up to this date |
+
+**Access Control:**
+- Account owners can export their account transactions
+- Invited participants (owner, editor, viewer roles) can export shared account transactions
+- Without `account_id`, exports all transactions from owned and shared accounts
+
+**Response:** CSV file download with headers:
+- `Date,Account,Category,Type,Amount,Currency,Description,Notes`
+
+**Filename Format:** `transactions_export_YYYY-MM-DD_HHMMSS.csv`
+
+**Example Request:**
+```bash
+# Export all transactions
+curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  "http://localhost:5000/api/csv/export"
+
+# Export transactions for specific account with date range
+curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  "http://localhost:5000/api/csv/export?account_id=1&start_date=2024-01-01&end_date=2024-12-31"
+```
+
+**Example CSV Output:**
+```csv
+Date,Account,Category,Type,Amount,Currency,Description,Notes
+2024-11-01,My Checking,Groceries,expense,125.50,USD,Weekly grocery shopping,Bought fruits and vegetables
+2024-11-02,My Checking,Salary,income,3500.00,USD,Monthly salary payment,November salary
+2024-11-03,My Savings,Investment,income,500.00,USD,Stock dividends,AAPL dividend payment
+```
+
+---
+
+### CSV Import API
+
+**Endpoint:** `POST /api/csv/import`
+
+**Authentication:** Required (JWT Bearer token)
+
+**Description:** Import transactions from a CSV file with comprehensive validation and error reporting.
+
+**Request Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `file` | file | Yes | CSV file (max 10MB, .csv or .txt extension) |
+| `account_id` | integer | Yes | Target account ID for imported transactions |
+
+**Access Control:**
+- Account owners can import to their accounts
+- Invited participants with owner or editor roles can import
+
+**CSV File Format:**
+
+The CSV file must include the following headers in exact order:
+```
+Date,Account,Category,Type,Amount,Currency,Description,Notes
+```
+
+**Field Requirements:**
+
+| Field | Type | Required | Validation |
+|-------|------|----------|------------|
+| Date | date | Yes | Supports formats: Y-m-d, m/d/Y, d/m/Y, Y/m/d, d-m-Y, m-d-Y |
+| Account | string | No | Informational only (import uses `account_id` parameter) |
+| Category | string | Yes | Auto-created if doesn't exist |
+| Type | string | Yes | Must be either `income` or `expense` |
+| Amount | decimal | Yes | Must be greater than 0 |
+| Currency | string | No | Defaults to `USD` if empty |
+| Description | string | No | Transaction description |
+| Notes | string | No | Additional notes |
+
+**Response Format:**
+```json
+{
+  "message": "CSV import completed",
+  "summary": {
+    "total": 8,
+    "success": 6,
+    "failed": 2,
+    "errors": [
+      "Row 3: Invalid type 'invalid-type'. Must be 'income' or 'expense'",
+      "Row 5: Amount must be greater than 0"
+    ]
+  }
+}
+```
+
+**Example Request (cURL):**
+```bash
+curl -X POST \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -F "file=@transactions.csv" \
+  -F "account_id=1" \
+  "http://localhost:5000/api/csv/import"
+```
+
+**Example Request (JavaScript/Fetch):**
+```javascript
+const formData = new FormData();
+formData.append('file', fileInput.files[0]);
+formData.append('account_id', '1');
+
+fetch('http://localhost:5000/api/csv/import', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${token}`
+  },
+  body: formData
+})
+.then(response => response.json())
+.then(data => {
+  console.log(`Imported ${data.summary.success} of ${data.summary.total} transactions`);
+  if (data.summary.errors.length > 0) {
+    console.log('Errors:', data.summary.errors);
+  }
+});
+```
+
+**Sample Valid CSV File:**
+```csv
+Date,Account,Category,Type,Amount,Currency,Description,Notes
+2024-11-01,My Checking,Groceries,expense,125.50,USD,Weekly grocery shopping,Bought fruits and vegetables
+2024-11-02,My Checking,Salary,income,3500.00,USD,Monthly salary payment,November salary
+2024-11-03,My Savings,Investment,income,500.00,USD,Stock dividends,AAPL dividend payment
+```
+
+**Error Handling:**
+
+The import process validates each row individually and provides detailed error messages:
+
+| Error Type | Example Message |
+|------------|-----------------|
+| Invalid date format | `Row 2: Invalid date format: invalid-date` |
+| Invalid transaction type | `Row 3: Invalid type 'spending'. Must be 'income' or 'expense'` |
+| Invalid amount | `Row 4: Amount must be greater than 0` |
+| Missing columns | `Row 5: Insufficient columns` |
+| Invalid CSV headers | `Invalid CSV format. Expected headers: Date, Account, Category, Type, Amount, Currency, Description, Notes` |
+
+**Transaction Safety:**
+- All imports are wrapped in database transactions
+- If a critical error occurs, all changes are rolled back
+- Individual row failures are reported but don't stop the entire import
+- Successfully imported rows remain in the database even if some rows fail
+
+**Security Features:**
+- File size limited to 10MB
+- Only CSV and TXT MIME types accepted
+- Role-based access control enforced
+- SQL injection protection through Eloquent ORM
+- File validation before processing
+
+**Sample Files:**
+
+Valid sample CSV files are available in the repository:
+- `storage/app/sample_transactions_valid.csv` - Valid transaction data
+- `storage/app/sample_transactions_invalid.csv` - Examples of invalid data for testing error handling
 
 ---
 

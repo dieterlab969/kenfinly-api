@@ -144,4 +144,45 @@ class User extends Authenticatable implements JWTSubject
             $this->roles()->detach($role);
         }
     }
+
+    public function licenses(): HasMany
+    {
+        return $this->hasMany(License::class);
+    }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function accountParticipations(): HasMany
+    {
+        return $this->hasMany(AccountParticipant::class);
+    }
+
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(Invitation::class, 'invited_by');
+    }
+
+    public function activeLicense()
+    {
+        return $this->licenses()
+            ->where('status', 'active')
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                      ->orWhere('expires_at', '>', now());
+            })
+            ->first();
+    }
+
+    public function hasActiveLicense(): bool
+    {
+        return $this->activeLicense() !== null;
+    }
 }

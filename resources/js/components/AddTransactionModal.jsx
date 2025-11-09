@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Upload } from 'lucide-react';
 import api from '../utils/api';
 import { getCategoryIcon } from '../constants/categories';
+import {useTranslation} from "@assets/js/contexts/TranslationContext.jsx";
 
 const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
     const [type, setType] = useState('expense');
@@ -18,6 +19,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [receiptPreview, setReceiptPreview] = useState(null);
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (isOpen) {
@@ -111,7 +113,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
                 <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-gray-900">Add Transaction</h2>
+                    <h2 className="text-xl font-bold text-gray-900">{t('transaction.add')}</h2>
                     <button
                         onClick={onClose}
                         className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -129,7 +131,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Type
+                            {t('transaction.type')}
                         </label>
                         <div className="flex gap-3">
                             <button
@@ -144,7 +146,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                 }`}
                             >
-                                Expense
+                                {t('dashboard.expense')}
                             </button>
                             <button
                                 type="button"
@@ -158,14 +160,14 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                 }`}
                             >
-                                Income
+                                {t('dashboard.income')}
                             </button>
                         </div>
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Amount (VND)
+                            {t('transaction.amount')} (VND)
                         </label>
                         <div className="relative">
                             <input
@@ -186,7 +188,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Category
+                            {t('transaction.category')}
                         </label>
                         <select
                             required
@@ -194,7 +196,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
                             onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
-                            <option value="">Select a category</option>
+                            <option value="">{t('transaction.select_category')}</option>
                             {categories.map((category) => (
                                 <React.Fragment key={category.id}>
                                     <option value={category.id}>
@@ -212,7 +214,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Account
+                            {t('transaction.account')}
                         </label>
                         <select
                             required
@@ -230,7 +232,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Date
+                            {t('transaction.date')}
                         </label>
                         <input
                             type="date"
@@ -243,20 +245,20 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Notes (Optional)
+                            {t('transaction.notes_optional')}
                         </label>
                         <textarea
                             value={formData.notes}
                             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                             rows="3"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Add notes about this transaction..."
+                            placeholder={t('transaction.notes_placeholder')}
                         />
                     </div>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Receipt (Optional)
+                            {t('transaction.receipt_optional')}
                         </label>
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 transition-colors">
                             <input
@@ -280,7 +282,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
                                     <Upload className="w-8 h-8 text-gray-400 mb-2" />
                                 )}
                                 <span className="text-sm text-gray-600">
-                                    {receiptPreview ? 'Change receipt' : 'Upload receipt'}
+                                    {receiptPreview ? t('transaction.change_receipt') : t('transaction.upload_receipt')}
                                 </span>
                             </label>
                         </div>
@@ -292,7 +294,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
                             onClick={onClose}
                             className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                         >
-                            Cancel
+                            {t('common.cancel')}
                         </button>
                         <button
                             type="submit"
@@ -303,7 +305,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
                                     : 'bg-blue-600 hover:bg-blue-700'
                             }`}
                         >
-                            {loading ? 'Adding...' : 'Add Transaction'}
+                            {loading ? t('transaction.adding') : t('transaction.add_button_label')}
                         </button>
                     </div>
                 </form>

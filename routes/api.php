@@ -5,6 +5,10 @@ use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\LanguageController;
+use App\Http\Controllers\Api\CsvController;
+use App\Http\Controllers\Api\PaymentController;
+use App\Http\Controllers\Api\ParticipantController;
+use App\Http\Controllers\Api\AnalyticsController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -35,4 +39,26 @@ Route::middleware('auth:api')->group(function () {
     
     // Language preference
     Route::post('/user/language', [LanguageController::class, 'updateUserLanguage']);
+    
+    // CSV Import & Export
+    Route::post('/csv/import', [CsvController::class, 'import']);
+    Route::get('/csv/export', [CsvController::class, 'export']);
+    
+    // Payments & Licenses
+    Route::post('/payments/create-intent', [PaymentController::class, 'createPaymentIntent']);
+    Route::get('/licenses/my-licenses', [PaymentController::class, 'myLicenses']);
+    
+    // Participants & Invitations
+    Route::post('/participants/invite', [ParticipantController::class, 'invite']);
+    Route::post('/invitations/{token}/accept', [ParticipantController::class, 'acceptInvitation']);
+    Route::get('/accounts/{accountId}/participants', [ParticipantController::class, 'listParticipants']);
+    Route::delete('/accounts/{accountId}/participants/{userId}', [ParticipantController::class, 'removeParticipant']);
+    
+    // Analytics
+    Route::get('/analytics/summary', [AnalyticsController::class, 'getSummary']);
+    Route::get('/analytics/category-breakdown', [AnalyticsController::class, 'getCategoryBreakdown']);
+    Route::get('/analytics/trends', [AnalyticsController::class, 'getTrends']);
 });
+
+// Public webhook endpoint (no auth required)
+Route::post('/webhooks/payment', [PaymentController::class, 'webhook']);
