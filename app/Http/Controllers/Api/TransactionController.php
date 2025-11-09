@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use App\Models\Account;
+use App\Services\TransactionPhotoService;
+use App\Services\TransactionChangeLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -12,6 +14,17 @@ use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
+    protected $photoService;
+    protected $changeLogService;
+
+    public function __construct(
+        TransactionPhotoService $photoService,
+        TransactionChangeLogService $changeLogService
+    ) {
+        $this->photoService = $photoService;
+        $this->changeLogService = $changeLogService;
+        $this->authorizeResource(Transaction::class, 'transaction');
+    }
     public function index(Request $request)
     {
         $user = auth('api')->user();
@@ -62,7 +75,7 @@ class TransactionController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'notes' => 'nullable|string|max:1000',
             'transaction_date' => 'required|date',
-            'receipt' => 'nullable|image|max:5120',
+            'receipt' => 'nullable|image|max:20480',
         ]);
 
         if ($validator->fails()) {
@@ -100,6 +113,8 @@ class TransactionController extends Controller
             
             $account->increment('balance', $balanceChange);
 
+            $this->changeLogService->logCreate($transaction, $user);
+
             DB::commit();
 
             $transaction->load(['category', 'account']);
@@ -123,22 +138,29 @@ class TransactionController extends Controller
         }
     }
 
-    public function show($id)
+    public function show(Transaction $transaction)
     {
+        $transaction->load([
+            'category',
+            'account',
+            'photos.uploader:id,name,email',
+            'changeLogs.user:id,name,email'
+        ]);
+
         $user = auth('api')->user();
-        
-        $transaction = Transaction::where('id', $id)
-            ->where('user_id', $user->id)
-            ->with(['category', 'account'])
-            ->firstOrFail();
+        $canEdit = $user->hasAnyRole(['owner', 'editor']);
 
         return response()->json([
             'success' => true,
-            'transaction' => $transaction
+            'transaction' => $transaction,
+            'permissions' => [
+                'can_edit' => $canEdit,
+                'can_manage_photos' => $canEdit,
+            ]
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Transaction $transaction)
     {
         $validator = Validator::make($request->all(), [
             'account_id' => 'sometimes|required|exists:accounts,id',
@@ -147,7 +169,7 @@ class TransactionController extends Controller
             'amount' => 'sometimes|required|numeric|min:0.01',
             'notes' => 'nullable|string|max:1000',
             'transaction_date' => 'sometimes|required|date',
-            'receipt' => 'nullable|image|max:5120',
+            'receipt' => 'nullable|image|max:20480',
         ]);
 
         if ($validator->fails()) {
@@ -158,16 +180,21 @@ class TransactionController extends Controller
         }
 
         $user = auth('api')->user();
-        
-        $transaction = Transaction::where('id', $id)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
 
         if ($request->has('account_id')) {
             $newAccount = Account::where('id', $request->account_id)
                 ->where('user_id', $user->id)
                 ->firstOrFail();
         }
+
+        $oldData = [
+            'type' => $transaction->type,
+            'amount' => (string)$transaction->amount,
+            'category_id' => $transaction->category_id,
+            'account_id' => $transaction->account_id,
+            'notes' => $transaction->notes,
+            'transaction_date' => $transaction->transaction_date->format('Y-m-d'),
+        ];
 
         DB::beginTransaction();
         try {
@@ -199,9 +226,11 @@ class TransactionController extends Controller
                 : -$transaction->amount;
             $newAccount->increment('balance', $newBalanceChange);
 
+            $this->changeLogService->logUpdate($transaction, $user, $oldData);
+
             DB::commit();
 
-            $transaction->load(['category', 'account']);
+            $transaction->load(['category', 'account', 'photos', 'changeLogs']);
 
             return response()->json([
                 'success' => true,
@@ -218,13 +247,9 @@ class TransactionController extends Controller
         }
     }
 
-    public function destroy($id)
+    public function destroy(Transaction $transaction)
     {
         $user = auth('api')->user();
-        
-        $transaction = Transaction::where('id', $id)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
 
         DB::beginTransaction();
         try {
@@ -234,8 +259,14 @@ class TransactionController extends Controller
                 : $transaction->amount;
             $account->increment('balance', $balanceChange);
 
+            $this->changeLogService->logDelete($transaction, $user);
+
             if ($transaction->receipt_path) {
                 Storage::disk('public')->delete($transaction->receipt_path);
+            }
+
+            foreach ($transaction->photos as $photo) {
+                $this->photoService->deletePhoto($photo);
             }
 
             $transaction->delete();
@@ -252,6 +283,81 @@ class TransactionController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to delete transaction'
+            ], 500);
+        }
+    }
+
+    public function addPhoto(Request $request, Transaction $transaction)
+    {
+        $this->authorize('managePhotos', $transaction);
+
+        $validator = Validator::make($request->all(), [
+            'photo' => 'required|image|max:20480',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $user = auth('api')->user();
+            $photo = $this->photoService->uploadPhoto(
+                $transaction,
+                $request->file('photo'),
+                $user
+            );
+
+            $this->changeLogService->logPhotoAdded(
+                $transaction,
+                $user,
+                $photo->original_filename
+            );
+
+            $photo->load('uploader:id,name,email');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Photo uploaded successfully',
+                'photo' => $photo
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function deletePhoto(Request $request, $photoId)
+    {
+        $user = auth('api')->user();
+        
+        $photo = \App\Models\TransactionPhoto::findOrFail($photoId);
+        $transaction = $photo->transaction;
+
+        $this->authorize('managePhotos', $transaction);
+
+        try {
+            $filename = $photo->original_filename;
+            $this->photoService->deletePhoto($photo);
+
+            $this->changeLogService->logPhotoRemoved(
+                $transaction,
+                $user,
+                $filename
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Photo deleted successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete photo'
             ], 500);
         }
     }

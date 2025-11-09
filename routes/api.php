@@ -36,6 +36,8 @@ Route::middleware('auth:api')->group(function () {
     
     // Transactions
     Route::apiResource('transactions', TransactionController::class);
+    Route::post('/transactions/{transaction}/photos', [TransactionController::class, 'addPhoto']);
+    Route::delete('/photos/{photoId}', [TransactionController::class, 'deletePhoto']);
     
     // Language preference
     Route::post('/user/language', [LanguageController::class, 'updateUserLanguage']);

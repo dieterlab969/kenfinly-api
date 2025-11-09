@@ -75,6 +75,69 @@ Kenfinly provides production-ready web-based CSV import and export functionality
 
 **Sample Files:** `storage/app/sample_transactions_valid.csv` and `storage/app/sample_transactions_invalid.csv` for testing
 
+## Transaction Detail and Photo Management
+
+Kenfinly provides comprehensive transaction detail viewing and photo management capabilities:
+
+**Transaction Detail View:**
+- Click any transaction to open a detailed modal view
+- Three tabs: Details, Photos, and History
+- Full transaction information including date, amount, category, account, and notes
+- Role-based editing permissions (Owner/Editor can edit, Viewer read-only)
+- Permission indicators shown in the UI based on user role
+
+**Photo Management:**
+- Upload multiple receipt photos per transaction (up to 10 photos)
+- Support for large files up to 20MB per photo
+- Accepted formats: JPEG, PNG, GIF, WebP
+- **Server-side image optimization**: Automatically resizes images larger than 2048x2048 pixels while preserving aspect ratio and compresses to 85% quality to save storage space
+- Client-side and server-side validation for file size and type
+- Photo carousel with delete functionality for authorized users
+- Metadata tracking: original filename, file size, MIME type, uploader
+
+**Change History Tracking:**
+- Complete audit trail of all transaction changes
+- Logs creation, updates, deletions, and photo additions/removals
+- Tracks who made changes and when
+- Shows detailed diff of what changed (old value → new value)
+- JSON-based change storage for flexible querying
+
+**Role-Based Permissions:**
+- **Owner**: Full permissions - can view, edit, delete transactions and manage photos
+- **Editor**: Can view, edit, and manage photos, but limited admin rights
+- **Viewer**: Read-only access - can view transaction details and photos but cannot edit
+
+**Technical Implementation:**
+- **Backend**: Laravel Policies for authorization, Service classes for business logic
+- **Database**: Separate tables for transaction_photos and transaction_change_logs with proper foreign keys and indices
+- **API Endpoints**: 
+  - `GET /api/transactions/{id}` - Get transaction with photos and change logs
+  - `PUT /api/transactions/{id}` - Update transaction (with change logging)
+  - `POST /api/transactions/{id}/photos` - Upload photo (max 20MB)
+  - `DELETE /api/photos/{photoId}` - Delete photo
+- **Frontend**: React modal component with tabs, drag-and-drop photo upload, and real-time updates
+
+## Test User Accounts
+
+For testing and development purposes, three test user accounts are available with different permission levels:
+
+**Owner User:**
+- Email: `owner@example.com`
+- Password: `password123`
+- Permissions: Full access - can view, create, edit, delete transactions and manage photos
+
+**Editor User:**
+- Email: `editor@example.com`
+- Password: `password123`
+- Permissions: Can view, create, edit transactions and manage photos (limited admin rights)
+
+**Viewer User:**
+- Email: `viewer@example.com`
+- Password: `password123`
+- Permissions: Read-only access - can only view transaction details and photos, cannot edit or upload
+
+These accounts are automatically created when running `php artisan db:seed` or specifically with `php artisan db:seed --class=TestUsersSeeder`.
+
 ## Development & Deployment
 
 - **Development Environment**: Dockerized using Laravel Sail for consistency.
@@ -91,4 +154,5 @@ Kenfinly provides production-ready web-based CSV import and export functionality
 - **Utilities**: Carbon (date/time), Monolog (logging), Ramsey UUID (UUID generation), Symfony Components.
 - **Cron Expression Parsing**: `dragonmantank/cron-expression`.
 - **String Manipulation**: `doctrine/inflector`, `doctrine/lexer`.
+- **Image Processing**: Intervention Image (for photo optimization and manipulation).
 - **Note**: No third-party financial integrations (e.g., banking APIs, payment processors) are currently implemented.

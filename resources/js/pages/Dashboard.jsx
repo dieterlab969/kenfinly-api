@@ -8,6 +8,7 @@ import { format, parseISO } from 'date-fns';
 import api from '../utils/api';
 import AddTransactionModal from '../components/AddTransactionModal';
 import SettingsModal from '../components/SettingsModal';
+import TransactionDetailModal from '../components/TransactionDetailModal';
 import MonthlySummaryCard from '../components/dashboard/MonthlySummaryCard';
 import BalanceTrendChart from '../components/dashboard/BalanceTrendChart';
 import { getCategoryIcon, formatCurrency } from '../constants/categories';
@@ -20,6 +21,8 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showSettingsModal, setShowSettingsModal] = useState(false);
+    const [selectedTransactionId, setSelectedTransactionId] = useState(null);
+    const [showDetailModal, setShowDetailModal] = useState(false);
 
     useEffect(() => {
         fetchDashboardData();
@@ -178,7 +181,11 @@ const Dashboard = () => {
                             {dashboardData.recent_transactions.map((transaction) => (
                                 <div
                                     key={transaction.id}
-                                    className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors"
+                                    onClick={() => {
+                                        setSelectedTransactionId(transaction.id);
+                                        setShowDetailModal(true);
+                                    }}
+                                    className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
                                 >
                                     <div className="flex items-center space-x-3">
                                         <div className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl ${
@@ -246,6 +253,16 @@ const Dashboard = () => {
             <SettingsModal
                 isOpen={showSettingsModal}
                 onClose={() => setShowSettingsModal(false)}
+            />
+
+            <TransactionDetailModal
+                isOpen={showDetailModal}
+                onClose={() => {
+                    setShowDetailModal(false);
+                    setSelectedTransactionId(null);
+                }}
+                transactionId={selectedTransactionId}
+                onUpdate={handleTransactionAdded}
             />
         </div>
     );
