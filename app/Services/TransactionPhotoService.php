@@ -26,7 +26,12 @@ class TransactionPhotoService
         $image = Image::read($file);
         
         if ($image->width() > 2048 || $image->height() > 2048) {
-            $image->scale(width: 2048, height: 2048);
+            $maxDimension = max($image->width(), $image->height());
+            $scaleFactor = 2048 / $maxDimension;
+            $image->scale(
+                width: (int)($image->width() * $scaleFactor),
+                height: (int)($image->height() * $scaleFactor)
+            );
         }
         
         $image->encodeByMediaType(quality: 85);
