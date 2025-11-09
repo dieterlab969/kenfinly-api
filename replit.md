@@ -75,6 +75,47 @@ Kenfinly provides production-ready web-based CSV import and export functionality
 
 **Sample Files:** `storage/app/sample_transactions_valid.csv` and `storage/app/sample_transactions_invalid.csv` for testing
 
+## Transaction Detail and Photo Management
+
+Kenfinly provides comprehensive transaction detail viewing and photo management capabilities:
+
+**Transaction Detail View:**
+- Click any transaction to open a detailed modal view
+- Three tabs: Details, Photos, and History
+- Full transaction information including date, amount, category, account, and notes
+- Role-based editing permissions (Owner/Editor can edit, Viewer read-only)
+- Permission indicators shown in the UI based on user role
+
+**Photo Management:**
+- Upload multiple receipt photos per transaction (up to 10 photos)
+- Support for large files up to 20MB per photo
+- Accepted formats: JPEG, PNG, GIF, WebP
+- Client-side and server-side validation for file size and type
+- Photo carousel with delete functionality for authorized users
+- Metadata tracking: original filename, file size, MIME type, uploader
+
+**Change History Tracking:**
+- Complete audit trail of all transaction changes
+- Logs creation, updates, deletions, and photo additions/removals
+- Tracks who made changes and when
+- Shows detailed diff of what changed (old value → new value)
+- JSON-based change storage for flexible querying
+
+**Role-Based Permissions:**
+- **Owner**: Full permissions - can view, edit, delete transactions and manage photos
+- **Editor**: Can view, edit, and manage photos, but limited admin rights
+- **Viewer**: Read-only access - can view transaction details and photos but cannot edit
+
+**Technical Implementation:**
+- **Backend**: Laravel Policies for authorization, Service classes for business logic
+- **Database**: Separate tables for transaction_photos and transaction_change_logs with proper foreign keys and indices
+- **API Endpoints**: 
+  - `GET /api/transactions/{id}` - Get transaction with photos and change logs
+  - `PUT /api/transactions/{id}` - Update transaction (with change logging)
+  - `POST /api/transactions/{id}/photos` - Upload photo (max 20MB)
+  - `DELETE /api/photos/{photoId}` - Delete photo
+- **Frontend**: React modal component with tabs, drag-and-drop photo upload, and real-time updates
+
 ## Development & Deployment
 
 - **Development Environment**: Dockerized using Laravel Sail for consistency.
