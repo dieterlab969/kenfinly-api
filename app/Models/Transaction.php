@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Transaction extends Model
 {
@@ -36,5 +37,15 @@ class Transaction extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function photos(): HasMany
+    {
+        return $this->hasMany(TransactionPhoto::class);
+    }
+
+    public function changeLogs(): HasMany
+    {
+        return $this->hasMany(TransactionChangeLog::class)->orderBy('created_at', 'desc');
     }
 }
