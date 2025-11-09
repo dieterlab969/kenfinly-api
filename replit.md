@@ -90,6 +90,7 @@ Kenfinly provides comprehensive transaction detail viewing and photo management 
 - Upload multiple receipt photos per transaction (up to 10 photos)
 - Support for large files up to 20MB per photo
 - Accepted formats: JPEG, PNG, GIF, WebP
+- **Server-side image optimization**: Automatically resizes images larger than 2048x2048 pixels while preserving aspect ratio and compresses to 85% quality to save storage space
 - Client-side and server-side validation for file size and type
 - Photo carousel with delete functionality for authorized users
 - Metadata tracking: original filename, file size, MIME type, uploader
@@ -116,6 +117,27 @@ Kenfinly provides comprehensive transaction detail viewing and photo management 
   - `DELETE /api/photos/{photoId}` - Delete photo
 - **Frontend**: React modal component with tabs, drag-and-drop photo upload, and real-time updates
 
+## Test User Accounts
+
+For testing and development purposes, three test user accounts are available with different permission levels:
+
+**Owner User:**
+- Email: `owner@example.com`
+- Password: `password123`
+- Permissions: Full access - can view, create, edit, delete transactions and manage photos
+
+**Editor User:**
+- Email: `editor@example.com`
+- Password: `password123`
+- Permissions: Can view, create, edit transactions and manage photos (limited admin rights)
+
+**Viewer User:**
+- Email: `viewer@example.com`
+- Password: `password123`
+- Permissions: Read-only access - can only view transaction details and photos, cannot edit or upload
+
+These accounts are automatically created when running `php artisan db:seed` or specifically with `php artisan db:seed --class=TestUsersSeeder`.
+
 ## Development & Deployment
 
 - **Development Environment**: Dockerized using Laravel Sail for consistency.
@@ -132,4 +154,5 @@ Kenfinly provides comprehensive transaction detail viewing and photo management 
 - **Utilities**: Carbon (date/time), Monolog (logging), Ramsey UUID (UUID generation), Symfony Components.
 - **Cron Expression Parsing**: `dragonmantank/cron-expression`.
 - **String Manipulation**: `doctrine/inflector`, `doctrine/lexer`.
+- **Image Processing**: Intervention Image (for photo optimization and manipulation).
 - **Note**: No third-party financial integrations (e.g., banking APIs, payment processors) are currently implemented.
