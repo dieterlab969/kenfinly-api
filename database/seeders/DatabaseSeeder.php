@@ -31,6 +31,13 @@ class DatabaseSeeder extends Seeder
         ]);
         $testUser->assignRole('owner');
 
+        // Create an editor user
+        $editorUser = User::factory()->create([
+            'name' => 'Test Editor',
+            'email' => 'editor@example.com',
+        ]);
+        $editorUser->assignRole('editor');
+
         // Create a viewer user
         $viewerUser = User::factory()->create([
             'name' => 'Test Viewer',

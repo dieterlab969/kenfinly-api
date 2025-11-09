@@ -7,6 +7,7 @@ use App\Models\TransactionPhoto;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Laravel\Facades\Image;
 
 class TransactionPhotoService
 {
@@ -19,7 +20,20 @@ class TransactionPhotoService
         $this->validatePhoto($file);
         $this->validatePhotoCount($transaction);
 
-        $filePath = $file->store('receipts', 'public');
+        $filename = uniqid() . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $filePath = 'receipts/' . $filename;
+
+        $image = Image::read($file);
+        
+        if ($image->width() > 2048 || $image->height() > 2048) {
+            $image->scale(width: 2048, height: 2048);
+        }
+        
+        $image->encodeByMediaType(quality: 85);
+        
+        Storage::disk('public')->put($filePath, (string) $image);
+        
+        $optimizedSize = Storage::disk('public')->size($filePath);
 
         return TransactionPhoto::create([
             'transaction_id' => $transaction->id,
@@ -27,7 +41,7 @@ class TransactionPhotoService
             'file_path' => $filePath,
             'original_filename' => $file->getClientOriginalName(),
             'mime_type' => $file->getMimeType(),
-            'file_size' => $file->getSize(),
+            'file_size' => $optimizedSize,
         ]);
     }
 

@@ -35,8 +35,10 @@ class LanguageSeeder extends Seeder
         }
 
         foreach ($translations as $key => $values) {
-            Translation::create(['language_id' => $english->id, 'key' => $key, 'value' => $values['en']]);
-            Translation::create(['language_id' => $vietnamese->id, 'key' => $key, 'value' => $values['vi']]);
+            if (isset($values['en']) && isset($values['vi'])) {
+                Translation::create(['language_id' => $english->id, 'key' => $key, 'value' => $values['en']]);
+                Translation::create(['language_id' => $vietnamese->id, 'key' => $key, 'value' => $values['vi']]);
+            }
         }
 
         $this->command->info('Languages and translations seeded successfully!');
