@@ -39,8 +39,8 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        // Assign default viewer role to new users
-        $user->assignRole('viewer');
+        // Assign default owner role to new users (they own their financial data)
+        $user->assignRole('owner');
 
         $token = JWTAuth::fromUser($user);
 
