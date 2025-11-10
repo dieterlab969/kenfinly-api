@@ -247,28 +247,20 @@
     "en": "Total amount owned:",
     "vi": "Tổng số tiền sở hữu:"
   },
-  "monthlySummary": {
-    "title": {
-      "en": "Monthly Summary",
-      "vi": "Tổng kết tháng"
-    },
-    "income": {
-      "label": {
-        "en": "Income:",
-        "vi": "Thu nhập:"
-      }
-    },
-    "expense": {
-      "label": {
-        "en": "Expense:",
-        "vi": "Chi tiêu:"
-      }
-    },
-    "total": {
-      "label": {
-        "en": "Total:",
-        "vi": "Tổng:"
-      }
-    }
+  "monthlySummary.title": {
+    "en": "Monthly Summary",
+    "vi": "Tổng kết tháng"
+  },
+  "monthlySummary.income": {
+    "en": "Income:",
+    "vi": "Thu nhập:"
+  },
+  "monthlySummary.expense": {
+    "en": "Expense:",
+    "vi": "Chi tiêu:"
+  },
+  "monthlySummary.total": {
+    "en": "Total:",
+    "vi": "Tổng:"
   }
 }
