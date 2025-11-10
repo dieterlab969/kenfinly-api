@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Rules\Recaptcha;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -24,6 +25,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:100',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'g-recaptcha-response' => ['required', 'string', new Recaptcha],
         ], [
             'name.required' => 'Please enter your name',
             'name.max' => 'Name must not exceed 100 characters',
@@ -33,6 +35,7 @@ class AuthController extends Controller
             'password.required' => 'Please enter a password',
             'password.min' => 'Password must be at least 8 characters long',
             'password.confirmed' => 'Password confirmation does not match. Please make sure both passwords are the same.',
+            'g-recaptcha-response.required' => 'Security verification is required.',
         ]);
 
         if ($validator->fails()) {
@@ -80,10 +83,12 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string',
+            'g-recaptcha-response' => ['required', 'string', new Recaptcha],
         ], [
             'email.required' => 'Please enter your email address',
             'email.email' => 'Please enter a valid email address',
             'password.required' => 'Please enter your password',
+            'g-recaptcha-response.required' => 'Security verification is required.',
         ]);
 
         if ($validator->fails()) {

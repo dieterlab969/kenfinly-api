@@ -31,8 +31,12 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const login = async (email, password) => {
-        const response = await axios.post('/api/auth/login', { email, password });
+    const login = async (email, password, recaptchaToken = null) => {
+        const response = await axios.post('/api/auth/login', { 
+            email, 
+            password,
+            'g-recaptcha-response': recaptchaToken
+        });
         if (response.data.success) {
             const newToken = response.data.access_token;
             localStorage.setItem('token', newToken);
@@ -44,12 +48,13 @@ export const AuthProvider = ({ children }) => {
         return { success: false, message: response.data.message };
     };
 
-    const register = async (name, email, password, passwordConfirmation) => {
+    const register = async (name, email, password, passwordConfirmation, recaptchaToken = null) => {
         const response = await axios.post('/api/auth/register', {
             name,
             email,
             password,
             password_confirmation: passwordConfirmation,
+            'g-recaptcha-response': recaptchaToken
         });
         
         if (response.data.success) {
