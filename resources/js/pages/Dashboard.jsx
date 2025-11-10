@@ -28,15 +28,19 @@ const Dashboard = () => {
         fetchDashboardData();
     }, []);
 
-    const fetchDashboardData = async () => {
+    const fetchDashboardData = async (showLoading = true) => {
         try {
-            setLoading(true);
+            if (showLoading) {
+                setLoading(true);
+            }
             const response = await api.get('/dashboard');
             setDashboardData(response.data.data);
         } catch (error) {
             console.error('Failed to fetch dashboard data:', error);
         } finally {
-            setLoading(false);
+            if (showLoading) {
+                setLoading(false);
+            }
         }
     };
 
@@ -45,8 +49,20 @@ const Dashboard = () => {
         navigate('/login');
     };
 
-    const handleTransactionAdded = () => {
-        fetchDashboardData();
+    const handleTransactionAdded = (newTransaction) => {
+        if (newTransaction && dashboardData) {
+            setDashboardData(prev => ({
+                ...prev,
+                recent_transactions: [
+                    newTransaction,
+                    ...(prev.recent_transactions || [])
+                ].slice(0, 6)
+            }));
+        }
+        
+        fetchDashboardData(false).catch(error => {
+            console.error('Failed to refresh dashboard data:', error);
+        });
     };
 
     const prepareChartData = () => {
