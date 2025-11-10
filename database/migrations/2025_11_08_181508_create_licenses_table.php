@@ -14,7 +14,10 @@ return new class extends Migration
         Schema::create('licenses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('subscription_id')->nullable()->constrained()->onDelete('set null');
+
+            // Remove the foreign key constraint here, just create the column
+            $table->unsignedBigInteger('subscription_id')->nullable();
+
             $table->string('license_key')->unique();
             $table->enum('status', ['active', 'expired', 'revoked', 'trial'])->default('trial');
             $table->timestamp('expires_at')->nullable();
@@ -22,9 +25,19 @@ return new class extends Migration
             $table->integer('max_users')->default(1);
             $table->json('metadata')->nullable();
             $table->timestamps();
-            
             $table->index(['user_id', 'status']);
             $table->index('expires_at');
+        });
+
+        // Add a separate step to add the foreign key constraint after all tables exist
+        Schema::table('licenses', function (Blueprint $table) {
+            // Only add the constraint if the subscriptions table exists
+            if (Schema::hasTable('subscriptions')) {
+                $table->foreign('subscription_id')
+                    ->references('id')
+                    ->on('subscriptions')
+                    ->onDelete('set null');
+            }
         });
     }
 
