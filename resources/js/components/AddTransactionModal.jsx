@@ -5,6 +5,7 @@ import { getCategoryIcon } from '../constants/categories';
 import {useTranslation} from "@assets/js/contexts/TranslationContext.jsx";
 
 const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
+    const { t } = useTranslation();
     const [type, setType] = useState('expense');
     const [formData, setFormData] = useState({
         amount: '',
@@ -19,7 +20,6 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [receiptPreview, setReceiptPreview] = useState(null);
-    const { t } = useTranslation();
 
     useEffect(() => {
         if (isOpen) {

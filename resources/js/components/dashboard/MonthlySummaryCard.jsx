@@ -5,13 +5,12 @@ import {useTranslation} from "@assets/js/contexts/TranslationContext.jsx";
 
 const MonthlySummaryCard = ({ monthlySummary }) => {
     if (!monthlySummary) return null;
+    const { t } = useTranslation();
 
     const { current, previous } = monthlySummary;
 
     const MonthColumn = ({ data, label }) => {
         const isNegative = data.net < 0;
-        const { t } = useTranslation();
-
         return (
             <div className="flex-1">
                 <h4 className="text-sm font-semibold text-gray-700 mb-3">{label}</h4>

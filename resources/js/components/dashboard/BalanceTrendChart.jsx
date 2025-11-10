@@ -6,6 +6,8 @@ import {useTranslation} from "@assets/js/contexts/TranslationContext.jsx";
 
 const BalanceTrendChart = ({ balanceHistory, totalBalance }) => {
 
+    const { t } = useTranslation();
+
     if (!balanceHistory || balanceHistory.length === 0) {
         return null;
     }
@@ -19,7 +21,6 @@ const BalanceTrendChart = ({ balanceHistory, totalBalance }) => {
     const minBalance = Math.min(...chartData.map(d => d.balance));
     const maxBalance = Math.max(...chartData.map(d => d.balance));
     const padding = (maxBalance - minBalance) * 0.1;
-    const { t } = useTranslation();
 
     return (
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
