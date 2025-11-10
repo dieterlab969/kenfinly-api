@@ -60,6 +60,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/analytics/summary', [AnalyticsController::class, 'getSummary']);
     Route::get('/analytics/category-breakdown', [AnalyticsController::class, 'getCategoryBreakdown']);
     Route::get('/analytics/trends', [AnalyticsController::class, 'getTrends']);
+
+    Route::post('/auth/register', [AuthController::class, 'register']);
+    Route::post('/auth/login', [AuthController::class, 'login']);
 });
 
 // Public webhook endpoint (no auth required)
