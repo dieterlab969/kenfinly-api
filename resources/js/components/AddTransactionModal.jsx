@@ -83,7 +83,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
                 submitData.append('receipt', formData.receipt);
             }
 
-            await api.post('/transactions', submitData, {
+            const response = await api.post('/transactions', submitData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -98,7 +98,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
                 receipt: null,
             });
             setReceiptPreview(null);
-            onSuccess();
+            onSuccess(response.data.transaction);
             onClose();
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to add transaction');
