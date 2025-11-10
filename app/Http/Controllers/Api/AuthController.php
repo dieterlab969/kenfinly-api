@@ -24,11 +24,21 @@ class AuthController extends Controller
             'name' => 'required|string|max:100',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+        ], [
+            'name.required' => 'Please enter your name',
+            'name.max' => 'Name must not exceed 100 characters',
+            'email.required' => 'Please enter your email address',
+            'email.email' => 'Please enter a valid email address',
+            'email.unique' => 'This email is already registered. Please login or use a different email.',
+            'password.required' => 'Please enter a password',
+            'password.min' => 'Password must be at least 8 characters long',
+            'password.confirmed' => 'Password confirmation does not match. Please make sure both passwords are the same.',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
+                'message' => 'Registration failed. Please check the errors below.',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -46,8 +56,13 @@ class AuthController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'User successfully registered',
-            'user' => $user,
+            'message' => 'Welcome to Kenfinly! Your account has been created successfully.',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'roles' => $user->roles->pluck('name')
+            ],
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60
@@ -65,11 +80,16 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string',
+        ], [
+            'email.required' => 'Please enter your email address',
+            'email.email' => 'Please enter a valid email address',
+            'password.required' => 'Please enter your password',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
+                'message' => 'Login failed. Please check the errors below.',
                 'errors' => $validator->errors()
             ], 422);
         }
@@ -79,7 +99,7 @@ class AuthController extends Controller
         if (!$token = auth('api')->attempt($credentials)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid credentials'
+                'message' => 'Invalid email or password. Please check your credentials and try again.'
             ], 401);
         }
 
