@@ -18,7 +18,7 @@ const MonthlySummaryCard = ({ monthlySummary }) => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
                             <TrendingUp className="w-4 h-4 text-green-600 mr-2" />
-                            <span className="text-sm text-gray-600">{t('monthlySummary.income.label')}</span>
+                            <span className="text-sm text-gray-600">{t('monthlySummary.income')}</span>
                         </div>
                         <span className="text-sm font-bold text-green-600">
                             {formatCurrency(data.income)}
@@ -27,7 +27,7 @@ const MonthlySummaryCard = ({ monthlySummary }) => {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
                             <TrendingDown className="w-4 h-4 text-red-600 mr-2" />
-                            <span className="text-sm text-gray-600">{t('monthlySummary.expense.label')}</span>
+                            <span className="text-sm text-gray-600">{t('monthlySummary.expense')}</span>
                         </div>
                         <span className="text-sm font-bold text-red-600">
                             {formatCurrency(data.expense)}
@@ -35,7 +35,7 @@ const MonthlySummaryCard = ({ monthlySummary }) => {
                     </div>
                     <div className="pt-2 border-t border-gray-200">
                         <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-700">{t('monthlySummary.total.label')}</span>
+                            <span className="text-sm font-medium text-gray-700">{t('monthlySummary.total')}</span>
                             <span className={`text-base font-bold ${isNegative ? 'text-red-600' : 'text-green-600'}`}>
                                 {formatCurrency(data.net)}
                             </span>
