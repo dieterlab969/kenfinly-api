@@ -7,6 +7,8 @@ export default function VerificationPending() {
   const navigate = useNavigate();
   const location = useLocation();
   const [userEmail, setUserEmail] = useState(location.state?.user?.email || '');
+  const [source, setSource] = useState(location.state?.source || 'register');
+  const [customMessage, setCustomMessage] = useState(location.state?.message || '');
 
   const [isResending, setIsResending] = useState(false);
   const [resendStatus, setResendStatus] = useState(null);
@@ -14,9 +16,9 @@ export default function VerificationPending() {
 
   useEffect(() => {
     if (!userEmail) {
-      navigate('/register');
+      navigate(source === 'login' ? '/login' : '/register');
     }
-  }, [userEmail, navigate]);
+  }, [userEmail, navigate, source]);
 
   const handleResendEmail = async () => {
     setIsResending(true);
@@ -64,10 +66,18 @@ export default function VerificationPending() {
             Verify Your Email
           </h2>
           
+          {customMessage ? (
+            <p className="text-gray-600 mb-4">{customMessage}</p>
+          ) : null}
+          
           <p className="text-gray-600 mb-6">
+            {source === 'login' 
+              ? 'To complete your login, please verify your email address. ' 
+              : ''
+            }
             We've sent a verification email to{' '}
             <span className="font-medium text-gray-900">{userEmail}</span>.
-            Please check your inbox and click the verification link to activate your account.
+            Please check your inbox and click the verification link to {source === 'login' ? 'continue' : 'activate your account'}.
           </p>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">

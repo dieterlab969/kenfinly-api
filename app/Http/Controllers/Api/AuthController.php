@@ -155,11 +155,54 @@ class AuthController extends Controller
         if (!$user->isEmailVerified()) {
             auth('api')->logout();
             
+            $verificationSent = false;
+            $verificationExpiresAt = null;
+            
+            try {
+                $recentVerification = $user->emailVerifications()
+                    ->whereNull('verified_at')
+                    ->latest()
+                    ->first();
+                
+                $shouldSendEmail = !$recentVerification || 
+                    $recentVerification->created_at->diffInMinutes(now()) >= 5;
+                
+                if ($shouldSendEmail) {
+                    $verification = $this->emailVerificationService->sendVerificationEmail($user);
+                    $verificationSent = true;
+                    $verificationExpiresAt = $verification->expires_at;
+                    
+                    Log::info('Verification email sent during login', [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                    ]);
+                } else {
+                    $verificationExpiresAt = $recentVerification->expires_at;
+                    
+                    Log::info('Skipped sending verification email (too recent)', [
+                        'user_id' => $user->id,
+                        'minutes_since_last' => $recentVerification->created_at->diffInMinutes(now()),
+                    ]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send verification email during login', [
+                    'user_id' => $user->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Please verify your email address before logging in. Check your inbox for the verification link.',
+                'action' => 'verify_email',
+                'message' => 'Please verify your email address before logging in. We\'ve sent you a verification link.',
                 'email_verified' => false,
-                'status' => $user->status,
+                'user' => [
+                    'id' => $user->id,
+                    'email' => $user->email,
+                    'status' => $user->status,
+                ],
+                'verification_sent' => $verificationSent,
+                'verification_expires_at' => $verificationExpiresAt,
             ], 403);
         }
 

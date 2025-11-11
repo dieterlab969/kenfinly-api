@@ -43,8 +43,17 @@ const Login = () => {
             const result = await login(email, password, recaptchaToken);
             if (result.success) {
                 navigate('/dashboard');
+            } else if (result.action === 'verify_email') {
+                navigate('/verification-pending', {
+                    state: {
+                        user: result.user,
+                        source: 'login',
+                        verificationSent: result.verification_sent,
+                        message: result.message
+                    }
+                });
             } else {
-                setError(t('auth.login_failed'));
+                setError(result.message || t('auth.login_failed'));
             }
         } catch (err) {
             setError(t('auth.login_error'));

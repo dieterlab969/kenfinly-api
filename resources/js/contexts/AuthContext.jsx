@@ -32,20 +32,39 @@ export const AuthProvider = ({ children }) => {
     };
 
     const login = async (email, password, recaptchaToken = null) => {
-        const response = await axios.post('/api/auth/login', { 
-            email, 
-            password,
-            'g-recaptcha-response': recaptchaToken
-        });
-        if (response.data.success) {
-            const newToken = response.data.access_token;
-            localStorage.setItem('token', newToken);
-            setToken(newToken);
-            axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-            setUser(response.data.user);
-            return { success: true };
+        try {
+            const response = await axios.post('/api/auth/login', { 
+                email, 
+                password,
+                'g-recaptcha-response': recaptchaToken
+            });
+            if (response.data.success) {
+                const newToken = response.data.access_token;
+                localStorage.setItem('token', newToken);
+                setToken(newToken);
+                axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+                setUser(response.data.user);
+                return { success: true };
+            }
+            return { success: false, message: response.data.message };
+        } catch (error) {
+            if (error.response?.data?.action === 'verify_email') {
+                return {
+                    success: false,
+                    action: 'verify_email',
+                    message: error.response.data.message,
+                    user: error.response.data.user,
+                    verification_sent: error.response.data.verification_sent,
+                    verification_expires_at: error.response.data.verification_expires_at
+                };
+            }
+            
+            if (error.response?.data?.message) {
+                return { success: false, message: error.response.data.message };
+            }
+            
+            throw error;
         }
-        return { success: false, message: response.data.message };
     };
 
     const register = async (name, email, password, passwordConfirmation, recaptchaToken = null) => {
