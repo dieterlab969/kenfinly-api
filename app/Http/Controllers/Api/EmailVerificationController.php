@@ -83,7 +83,7 @@ class EmailVerificationController extends Controller
             ], 429);
         }
 
-        RateLimiter::hit($rateLimitKey, 600);
+        RateLimiter::hit($rateLimitKey, 3600);
 
         $user = \App\Models\User::where('email', $email)->first();
 

@@ -138,13 +138,13 @@ class SendGridService
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
     <div style="background-color: #5856d6; padding: 20px; text-align: center; border-radius: 5px 5px 0 0;">
-        <h1 style="color: white; margin: 0;">Welcome to {$appName}!</h1>
+        <h1 style="color: white; margin: 0;">Verify Your Email Address</h1>
     </div>
     
     <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 5px 5px;">
         <h2 style="color: #333;">Hello {$name},</h2>
         
-        <p>Thank you for registering with {$appName}! To complete your registration and start using our platform, please verify your email address.</p>
+        <p>To access your {$appName} account, please verify your email address. Email verification is now required for all users to ensure account security.</p>
         
         <div style="text-align: center; margin: 30px 0;">
             <a href="{$verificationUrl}" 
@@ -161,6 +161,13 @@ class SendGridService
         <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
             <p style="margin: 0;"><strong>⚠️ Important:</strong> This verification link will expire on <strong>{$expirationTime}</strong>.</p>
         </div>
+        
+        <div style="background-color: #e7f3ff; border-left: 4px solid #2196F3; padding: 15px; margin: 20px 0;">
+            <p style="margin: 0;"><strong>ℹ️ Why am I receiving this?</strong></p>
+            <p style="margin: 5px 0 0 0; font-size: 14px;">We've implemented email verification to enhance account security and protect your financial data. All users must verify their email to continue accessing {$appName}.</p>
+        </div>
+        
+        <p><strong>Need help?</strong> If you're having trouble verifying your email, please contact our support team for assistance.</p>
         
         <p>If you didn't create an account with {$appName}, please ignore this email.</p>
         
