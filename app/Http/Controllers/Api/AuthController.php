@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\AppSetting;
 use App\Models\User;
 use App\Rules\Recaptcha;
 use Illuminate\Http\Request;
@@ -21,12 +22,13 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $rules = [
             'name' => 'required|string|max:100',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'g-recaptcha-response' => ['required', 'string', new Recaptcha],
-        ], [
+        ];
+
+        $messages = [
             'name.required' => 'Please enter your name',
             'name.max' => 'Name must not exceed 100 characters',
             'email.required' => 'Please enter your email address',
@@ -35,8 +37,14 @@ class AuthController extends Controller
             'password.required' => 'Please enter a password',
             'password.min' => 'Password must be at least 8 characters long',
             'password.confirmed' => 'Password confirmation does not match. Please make sure both passwords are the same.',
-            'g-recaptcha-response.required' => 'Security verification is required.',
-        ]);
+        ];
+
+        if (AppSetting::isRecaptchaEnabled()) {
+            $rules['g-recaptcha-response'] = ['required', 'string', new Recaptcha];
+            $messages['g-recaptcha-response.required'] = 'Security verification is required.';
+        }
+
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
             return response()->json([
@@ -80,16 +88,23 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $rules = [
             'email' => 'required|email',
             'password' => 'required|string',
-            'g-recaptcha-response' => ['required', 'string', new Recaptcha],
-        ], [
+        ];
+
+        $messages = [
             'email.required' => 'Please enter your email address',
             'email.email' => 'Please enter a valid email address',
             'password.required' => 'Please enter your password',
-            'g-recaptcha-response.required' => 'Security verification is required.',
-        ]);
+        ];
+
+        if (AppSetting::isRecaptchaEnabled()) {
+            $rules['g-recaptcha-response'] = ['required', 'string', new Recaptcha];
+            $messages['g-recaptcha-response.required'] = 'Security verification is required.';
+        }
+
+        $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
             return response()->json([
@@ -124,6 +139,22 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'user' => $user
+        ]);
+    }
+
+    /**
+     * Get app configuration including reCAPTCHA status.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function config()
+    {
+        return response()->json([
+            'success' => true,
+            'config' => [
+                'recaptcha_enabled' => AppSetting::isRecaptchaEnabled(),
+                'recaptcha_site_key' => config('services.recaptcha.site_key'),
+            ]
         ]);
     }
 

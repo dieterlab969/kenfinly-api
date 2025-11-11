@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/TranslationContext';
+import { useRecaptchaConfig } from '../components/App';
 import { Wallet } from 'lucide-react';
 
 const Login = () => {
@@ -13,6 +14,7 @@ const Login = () => {
     const { executeRecaptcha } = useGoogleReCaptcha();
     const { login, user } = useAuth();
     const { t } = useTranslation();
+    const { enabled: recaptchaEnabled } = useRecaptchaConfig();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -27,13 +29,17 @@ const Login = () => {
         setLoading(true);
 
         try {
-            if (!executeRecaptcha) {
-                setError('reCAPTCHA not loaded. Please refresh the page.');
-                setLoading(false);
-                return;
+            let recaptchaToken = null;
+            
+            if (recaptchaEnabled) {
+                if (!executeRecaptcha) {
+                    setError('reCAPTCHA not loaded. Please refresh the page.');
+                    setLoading(false);
+                    return;
+                }
+                recaptchaToken = await executeRecaptcha('login');
             }
 
-            const recaptchaToken = await executeRecaptcha('login');
             const result = await login(email, password, recaptchaToken);
             if (result.success) {
                 navigate('/dashboard');
