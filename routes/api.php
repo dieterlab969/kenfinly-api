@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 // Public routes
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+Route::get('/auth/config', [AuthController::class, 'config']);
 
 // Language routes (public)
 Route::get('/languages', [LanguageController::class, 'index']);

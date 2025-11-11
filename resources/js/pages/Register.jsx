@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/TranslationContext';
+import { useRecaptchaConfig } from '../components/App';
 import { Wallet } from 'lucide-react';
 
 const Register = () => {
@@ -18,6 +19,7 @@ const Register = () => {
     const { executeRecaptcha } = useGoogleReCaptcha();
     const { register, user } = useAuth();
     const { t } = useTranslation();
+    const { enabled: recaptchaEnabled } = useRecaptchaConfig();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -47,13 +49,17 @@ const Register = () => {
         setLoading(true);
 
         try {
-            if (!executeRecaptcha) {
-                setErrors({ general: ['reCAPTCHA not loaded. Please refresh the page.'] });
-                setLoading(false);
-                return;
+            let recaptchaToken = null;
+            
+            if (recaptchaEnabled) {
+                if (!executeRecaptcha) {
+                    setErrors({ general: ['reCAPTCHA not loaded. Please refresh the page.'] });
+                    setLoading(false);
+                    return;
+                }
+                recaptchaToken = await executeRecaptcha('register');
             }
 
-            const recaptchaToken = await executeRecaptcha('register');
             const result = await register(
                 formData.name,
                 formData.email,

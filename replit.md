@@ -138,6 +138,46 @@ For testing and development purposes, three test user accounts are available wit
 
 These accounts are automatically created when running `php artisan db:seed` or specifically with `php artisan db:seed --class=TestUsersSeeder`.
 
+## Google reCAPTCHA v3 Protection
+
+Kenfinly implements Google reCAPTCHA v3 for bot protection on login and registration forms with command-line toggle capability:
+
+**Features:**
+- **Invisible Protection**: reCAPTCHA v3 runs in the background without user interaction
+- **Score-Based Validation**: Backend validates reCAPTCHA tokens with a threshold of ≥0.5
+- **Command-Line Toggle**: Enable or disable reCAPTCHA without modifying code or admin UI
+- **Database-Driven Configuration**: Uses `app_settings` table for persistent configuration
+- **Conditional Integration**: Frontend and backend both respect the enabled/disabled state
+
+**Management Commands:**
+```bash
+# Check current status
+php artisan recaptcha status
+
+# Enable reCAPTCHA protection
+php artisan recaptcha enable
+
+# Disable reCAPTCHA protection
+php artisan recaptcha disable
+```
+
+**Configuration:**
+- **Site Key**: Set `GOOGLE_RECAPTCHA_SITE_KEY` in environment variables
+- **Secret Key**: Set `GOOGLE_RECAPTCHA_SECRET_KEY` in environment variables
+- Both keys are stored securely in Replit Secrets
+
+**Technical Implementation:**
+- **Backend**: `AppSetting` model with typed value retrieval, `Recaptcha` validation rule, conditional validation in `AuthController`
+- **Database**: `app_settings` table with `recaptcha_enabled` flag (default: false)
+- **API**: `GET /api/auth/config` endpoint exposes reCAPTCHA status and site key to frontend
+- **Frontend**: React app fetches config at startup, conditionally wraps app in `GoogleReCaptchaProvider`, and Login/Register forms only generate tokens when enabled
+- **Artisan Command**: `php artisan recaptcha {status|enable|disable}` for runtime configuration
+
+**Security:**
+- Server-side token verification using Google's API
+- Tokens are single-use and expire quickly
+- Score threshold prevents automated abuse while allowing legitimate users
+
 ## Development & Deployment
 
 - **Development Environment**: Dockerized using Laravel Sail for consistency.
