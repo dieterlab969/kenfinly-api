@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/TranslationContext';
 import { Wallet } from 'lucide-react';
@@ -9,6 +10,7 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const { executeRecaptcha } = useGoogleReCaptcha();
     const { login, user } = useAuth();
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -25,7 +27,14 @@ const Login = () => {
         setLoading(true);
 
         try {
-            const result = await login(email, password);
+            if (!executeRecaptcha) {
+                setError('reCAPTCHA not loaded. Please refresh the page.');
+                setLoading(false);
+                return;
+            }
+
+            const recaptchaToken = await executeRecaptcha('login');
+            const result = await login(email, password, recaptchaToken);
             if (result.success) {
                 navigate('/dashboard');
             } else {
