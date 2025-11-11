@@ -5,6 +5,8 @@ import { TranslationProvider } from '../contexts/TranslationContext';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Dashboard from '../pages/Dashboard';
+import VerifyEmail from '../pages/VerifyEmail';
+import VerificationPending from '../pages/VerificationPending';
 import ProtectedRoute from './ProtectedRoute';
 
 const RecaptchaConfigContext = createContext({ enabled: false });
@@ -19,6 +21,8 @@ function App({ recaptchaEnabled = false }) {
                     <Routes>
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
+                        <Route path="/verify-email" element={<VerifyEmail />} />
+                        <Route path="/verification-pending" element={<VerificationPending />} />
                         <Route 
                             path="/dashboard" 
                             element={

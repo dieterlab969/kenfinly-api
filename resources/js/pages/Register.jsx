@@ -69,10 +69,18 @@ const Register = () => {
             );
 
             if (result.success) {
-                setSuccessMessage(t('auth.register_success'));
-                setTimeout(() => navigate('/dashboard'), 1500);
+                setSuccessMessage(result.message || t('auth.register_success'));
+                setTimeout(() => {
+                    navigate('/verification-pending', { 
+                        state: { user: result.user } 
+                    });
+                }, 1500);
             } else {
-                setErrors({ general: [t('auth.register_error')] });
+                if (result.errors) {
+                    setErrors(result.errors);
+                } else {
+                    setErrors({ general: [t('auth.register_error')] });
+                }
             }
         } catch (err) {
             setErrors({ general: [t('auth.register_error')] });
