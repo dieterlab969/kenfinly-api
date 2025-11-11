@@ -18,6 +18,13 @@ class SendGridService
     private function initializeCredentials(): void
     {
         try {
+            $this->apiKey = env('SENDGRID_API_KEY');
+            $this->fromEmail = env('SENDGRID_FROM_EMAIL');
+
+            if ($this->apiKey && $this->fromEmail) {
+                return;
+            }
+
             $hostname = env('REPLIT_CONNECTORS_HOSTNAME');
             $xReplitToken = env('REPL_IDENTITY') 
                 ? 'repl ' . env('REPL_IDENTITY')
@@ -25,26 +32,27 @@ class SendGridService
                     ? 'depl ' . env('WEB_REPL_RENEWAL')
                     : null);
 
-            if (!$xReplitToken || !$hostname) {
-                throw new \Exception('Replit authentication not found');
+            if ($xReplitToken && $hostname) {
+                $response = Http::withHeaders([
+                    'Accept' => 'application/json',
+                    'X_REPLIT_TOKEN' => $xReplitToken
+                ])->get('https://' . $hostname . '/api/v2/connection?include_secrets=true&connector_names=sendgrid');
+
+                $data = $response->json();
+                $connectionSettings = $data['items'][0] ?? null;
+
+                if ($connectionSettings && 
+                    isset($connectionSettings['settings']['api_key']) && 
+                    isset($connectionSettings['settings']['from_email'])) {
+                    $this->apiKey = $connectionSettings['settings']['api_key'];
+                    $this->fromEmail = $connectionSettings['settings']['from_email'];
+                    return;
+                }
             }
 
-            $response = Http::withHeaders([
-                'Accept' => 'application/json',
-                'X_REPLIT_TOKEN' => $xReplitToken
-            ])->get('https://' . $hostname . '/api/v2/connection?include_secrets=true&connector_names=sendgrid');
-
-            $data = $response->json();
-            $connectionSettings = $data['items'][0] ?? null;
-
-            if (!$connectionSettings || 
-                !isset($connectionSettings['settings']['api_key']) || 
-                !isset($connectionSettings['settings']['from_email'])) {
-                throw new \Exception('SendGrid not connected');
+            if (!$this->apiKey || !$this->fromEmail) {
+                throw new \Exception('SendGrid credentials not configured. Please set SENDGRID_API_KEY and SENDGRID_FROM_EMAIL in your environment variables.');
             }
-
-            $this->apiKey = $connectionSettings['settings']['api_key'];
-            $this->fromEmail = $connectionSettings['settings']['from_email'];
 
         } catch (\Exception $e) {
             Log::error('Failed to initialize SendGrid credentials', [
