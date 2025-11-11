@@ -25,6 +25,8 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'password',
         'language_id',
+        'status',
+        'email_verified_at',
     ];
 
     /**
@@ -47,6 +49,7 @@ class User extends Authenticatable implements JWTSubject
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'status' => 'string',
         ];
     }
 
@@ -184,5 +187,43 @@ class User extends Authenticatable implements JWTSubject
     public function hasActiveLicense(): bool
     {
         return $this->activeLicense() !== null;
+    }
+
+    public function emailVerifications(): HasMany
+    {
+        return $this->hasMany(EmailVerification::class);
+    }
+
+    public function isEmailVerified(): bool
+    {
+        return $this->email_verified_at !== null;
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->status === 'suspended';
+    }
+
+    public function markEmailAsVerified(): void
+    {
+        $this->update([
+            'email_verified_at' => now(),
+            'status' => 'active',
+        ]);
+    }
+
+    public function hasVerifiedEmail(): bool
+    {
+        return !is_null($this->email_verified_at);
     }
 }

@@ -6,14 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Models\AppSetting;
 use App\Models\User;
 use App\Rules\Recaptcha;
+use App\Services\EmailVerificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+    public function __construct(
+        private EmailVerificationService $emailVerificationService
+    ) {}
+
     /**
      * Register a new user.
      *
@@ -58,26 +64,47 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'status' => 'pending',
         ]);
 
-        // Assign default owner role to new users (they own their financial data)
         $user->assignRole('owner');
 
-        $token = JWTAuth::fromUser($user);
+        try {
+            $verification = $this->emailVerificationService->sendVerificationEmail($user);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Registration successful! Please check your email to verify your account.',
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'status' => $user->status,
+                    'email_verified' => false,
+                ],
+                'verification_sent' => true,
+                'verification_expires_at' => $verification->expires_at,
+            ], 201);
+            
+        } catch (\Exception $e) {
+            Log::error('Failed to send verification email during registration', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Welcome to Kenfinly! Your account has been created successfully.',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'roles' => $user->roles->pluck('name')
-            ],
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60
-        ], 201);
+            return response()->json([
+                'success' => true,
+                'message' => 'Registration successful, but we could not send a verification email. Please contact support.',
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'status' => $user->status,
+                    'email_verified' => false,
+                ],
+                'verification_sent' => false,
+            ], 201);
+        }
     }
 
     /**
@@ -121,6 +148,29 @@ class AuthController extends Controller
                 'success' => false,
                 'message' => 'Invalid email or password. Please check your credentials and try again.'
             ], 401);
+        }
+
+        $user = auth('api')->user();
+
+        if (!$user->isEmailVerified()) {
+            auth('api')->logout();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Please verify your email address before logging in. Check your inbox for the verification link.',
+                'email_verified' => false,
+                'status' => $user->status,
+            ], 403);
+        }
+
+        if ($user->isSuspended()) {
+            auth('api')->logout();
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Your account has been suspended. Please contact support.',
+                'status' => $user->status,
+            ], 403);
         }
 
         return $this->respondWithToken($token);

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\CategoryController;
@@ -15,6 +16,11 @@ use Illuminate\Support\Facades\Route;
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::get('/auth/config', [AuthController::class, 'config']);
+
+// Email verification routes (public)
+Route::post('/email/verify', [EmailVerificationController::class, 'verify']);
+Route::post('/email/resend', [EmailVerificationController::class, 'resend']);
+Route::get('/email/verification-status', [EmailVerificationController::class, 'status'])->middleware('auth:api');
 
 // Language routes (public)
 Route::get('/languages', [LanguageController::class, 'index']);

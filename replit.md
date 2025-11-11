@@ -138,6 +138,53 @@ For testing and development purposes, three test user accounts are available wit
 
 These accounts are automatically created when running `php artisan db:seed` or specifically with `php artisan db:seed --class=TestUsersSeeder`.
 
+## Email Verification System
+
+Kenfinly implements a two-step email verification process for new user registrations to ensure email validity and enhance security:
+
+**Registration Flow:**
+1. User submits registration form with valid email address
+2. System creates user account with "pending" status (cannot log in yet)
+3. System generates a secure, time-limited verification token (SHA-256 hash)
+4. First verification email is sent via SendGrid with verification link
+5. User clicks verification link in email
+6. System validates token and updates user status to "active"
+7. System sends second confirmation email notifying successful verification
+8. User can now log in to the platform
+
+**Security Features:**
+- **Time-Limited Tokens**: Verification links expire after 24 hours
+- **Secure Token Generation**: SHA-256 hashing of random strings with timestamp
+- **Rate Limiting**: Maximum 5 verification attempts per token, with 5-minute cooldown between resend requests
+- **Attempt Tracking**: Logs all verification attempts with IP addresses for security auditing
+- **HTTPS Links**: All verification URLs use secure HTTPS protocol
+- **Protected Routes**: Middleware ensures only verified users can access protected endpoints
+
+**Technical Implementation:**
+- **Backend**:
+  - `EmailVerification` model for token management
+  - `SendGridService` for email delivery with HTML templates
+  - `EmailVerificationService` for verification business logic
+  - `EmailVerificationController` with verify, resend, and status endpoints
+  - `EnsureEmailIsVerified` middleware for route protection
+  - Database tables: `email_verifications` (tokens), `users.status` field (pending/active/suspended)
+- **API Endpoints**:
+  - `POST /api/email/verify` - Verify email with token (public)
+  - `POST /api/email/resend` - Resend verification email (authenticated)
+  - `GET /api/email/verification-status` - Check verification status (authenticated)
+- **Frontend**:
+  - `/verify-email` - Email verification page (handles token validation)
+  - `/verification-pending` - Pending verification instructions page
+  - Updated registration flow redirects to pending page after signup
+  - Updated login prevents unverified users from accessing the app
+- **Email Integration**: SendGrid connector via Replit integrations for reliable delivery
+
+**User Experience:**
+- Clear email templates with professional design
+- User-friendly error messages for expired/invalid links
+- Automatic redirect to login after successful verification
+- Graceful handling of edge cases (already verified, token expired, etc.)
+
 ## Google reCAPTCHA v3 Protection
 
 Kenfinly implements Google reCAPTCHA v3 for bot protection on login and registration forms with command-line toggle capability:

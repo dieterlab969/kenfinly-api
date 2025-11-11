@@ -58,12 +58,12 @@ export const AuthProvider = ({ children }) => {
         });
         
         if (response.data.success) {
-            const newToken = response.data.access_token;
-            localStorage.setItem('token', newToken);
-            setToken(newToken);
-            axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-            setUser(response.data.user);
-            return { success: true };
+            return { 
+                success: true, 
+                user: response.data.user,
+                verification_sent: response.data.verification_sent,
+                message: response.data.message
+            };
         }
         return { success: false, errors: response.data.errors };
     };
