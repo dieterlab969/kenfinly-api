@@ -13,8 +13,8 @@ use App\Http\Controllers\Api\AnalyticsController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
-Route::post('/auth/register', [AuthController::class, 'register']);
-Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/auth/register', [AuthController::class, 'register'])->middleware('check.blocked.ip');
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('check.blocked.ip');
 Route::get('/auth/config', [AuthController::class, 'config']);
 
 // Email verification routes (public)
