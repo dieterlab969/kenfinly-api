@@ -7,6 +7,8 @@ use App\Models\AppSetting;
 use App\Models\User;
 use App\Rules\Recaptcha;
 use App\Services\EmailVerificationService;
+use App\Services\EmailValidationService;
+use App\Services\BotDetectionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +19,8 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class AuthController extends Controller
 {
     public function __construct(
-        private EmailVerificationService $emailVerificationService
+        private EmailVerificationService $emailVerificationService,
+        private EmailValidationService $emailValidationService
     ) {}
 
     /**
@@ -58,6 +61,61 @@ class AuthController extends Controller
                 'message' => 'Registration failed. Please check the errors below.',
                 'errors' => $validator->errors()
             ], 422);
+        }
+
+        $emailValidation = $this->emailValidationService->validate($request->email);
+        if (!$emailValidation['valid']) {
+            Log::info('Email validation failed during registration', [
+                'email' => $request->email,
+                'errors' => $emailValidation['errors'],
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Email validation failed.',
+                'errors' => ['email' => $emailValidation['errors']],
+            ], 422);
+        }
+
+        if (!empty($emailValidation['warnings'])) {
+            Log::info('Email validation warnings during registration', [
+                'email' => $request->email,
+                'warnings' => $emailValidation['warnings'],
+            ]);
+        }
+
+        $suggestion = $this->emailValidationService->getTypoSuggestion($request->email);
+        if ($suggestion) {
+            Log::info('Email typo suggestion available', [
+                'original' => $request->email,
+                'suggestion' => $suggestion,
+            ]);
+        }
+
+        $botDetection = new BotDetectionService($request);
+        $botAnalysis = $botDetection->analyzeRegistrationAttempt($request->name, $request->email);
+
+        if ($botAnalysis['should_block']) {
+            Log::warning('Bot registration attempt blocked', [
+                'name' => $request->name,
+                'email' => $request->email,
+                'reasons' => $botAnalysis['reasons'],
+                'risk_score' => $botAnalysis['risk_score'],
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Registration blocked due to suspicious activity. If you believe this is an error, please contact support.',
+            ], 403);
+        }
+
+        if ($botAnalysis['is_suspicious']) {
+            Log::info('Suspicious registration pattern detected but allowed', [
+                'name' => $request->name,
+                'email' => $request->email,
+                'reasons' => $botAnalysis['reasons'],
+                'risk_score' => $botAnalysis['risk_score'],
+            ]);
         }
 
         $user = User::create([
