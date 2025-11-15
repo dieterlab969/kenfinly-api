@@ -1,4 +1,4 @@
-modules = ["php-8.2", "nodejs-20", "bash", "web", "python-3.11"]
+modules = ["php-8.2", "nodejs-20", "bash", "web"]
 [agent]
 expertMode = true
 integrations = ["sendgrid:1.0.0"]
@@ -81,6 +81,10 @@ externalPort = 8080
 [[ports]]
 localPort = 40745
 externalPort = 6800
+
+[[ports]]
+localPort = 42579
+externalPort = 8099
 
 [[ports]]
 localPort = 43385
