@@ -10,11 +10,14 @@ use App\Http\Controllers\Api\CsvController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\BotAnalyticsController;
 use Illuminate\Support\Facades\Route;
 
-// Public routes
-Route::post('/auth/register', [AuthController::class, 'register'])->middleware('check.blocked.ip');
-Route::post('/auth/login', [AuthController::class, 'login'])->middleware('check.blocked.ip');
+// Public routes with rate limiting
+Route::post('/auth/register', [AuthController::class, 'register'])
+    ->middleware(['check.blocked.ip', 'api.rate.limiter:5,1']);
+Route::post('/auth/login', [AuthController::class, 'login'])
+    ->middleware(['check.blocked.ip', 'api.rate.limiter:10,1']);
 Route::get('/auth/config', [AuthController::class, 'config']);
 
 // Email verification routes (public)
@@ -67,6 +70,13 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/analytics/summary', [AnalyticsController::class, 'getSummary']);
     Route::get('/analytics/category-breakdown', [AnalyticsController::class, 'getCategoryBreakdown']);
     Route::get('/analytics/trends', [AnalyticsController::class, 'getTrends']);
+    
+    // Bot Detection Analytics (admin only - add middleware as needed)
+    Route::prefix('bot-analytics')->group(function () {
+        Route::get('/registrations', [BotAnalyticsController::class, 'getRegistrationAnalytics']);
+        Route::get('/bot-summary', [BotAnalyticsController::class, 'getBotDetectionSummary']);
+        Route::get('/hourly-trends', [BotAnalyticsController::class, 'getHourlyTrends']);
+    });
 });
 
 // Public webhook endpoint (no auth required)
