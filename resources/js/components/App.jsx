@@ -8,6 +8,19 @@ import Dashboard from '../pages/Dashboard';
 import VerifyEmail from '../pages/VerifyEmail';
 import VerificationPending from '../pages/VerificationPending';
 import ProtectedRoute from './ProtectedRoute';
+import SuperAdminRoute from './SuperAdminRoute';
+import AdminLogin from '../pages/admin/AdminLogin';
+import AdminDashboard from '../pages/admin/AdminDashboard';
+import AccountManagement from '../pages/admin/AccountManagement';
+import UserManagement from '../pages/admin/UserManagement';
+import RoleManagement from '../pages/admin/RoleManagement';
+import CategoryManagement from '../pages/admin/CategoryManagement';
+import LanguageManagement from '../pages/admin/LanguageManagement';
+import LicenseManagement from '../pages/admin/LicenseManagement';
+import SettingsManagement from '../pages/admin/SettingsManagement';
+import CacheManagement from '../pages/admin/CacheManagement';
+import TranslationManagement from '../pages/admin/TranslationManagement';
+import TransactionManagement from '../pages/admin/TransactionManagement';
 
 const RecaptchaConfigContext = createContext({ enabled: false });
 
@@ -31,6 +44,97 @@ function App({ recaptchaEnabled = false }) {
                                 </ProtectedRoute>
                             } 
                         />
+                        
+                        <Route path="/admin/login" element={<AdminLogin />} />
+                        <Route 
+                            path="/admin/dashboard" 
+                            element={
+                                <SuperAdminRoute>
+                                    <AdminDashboard />
+                                </SuperAdminRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/admin/accounts" 
+                            element={
+                                <SuperAdminRoute>
+                                    <AccountManagement />
+                                </SuperAdminRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/admin/users" 
+                            element={
+                                <SuperAdminRoute>
+                                    <UserManagement />
+                                </SuperAdminRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/admin/roles" 
+                            element={
+                                <SuperAdminRoute>
+                                    <RoleManagement />
+                                </SuperAdminRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/admin/categories" 
+                            element={
+                                <SuperAdminRoute>
+                                    <CategoryManagement />
+                                </SuperAdminRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/admin/languages" 
+                            element={
+                                <SuperAdminRoute>
+                                    <LanguageManagement />
+                                </SuperAdminRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/admin/licenses" 
+                            element={
+                                <SuperAdminRoute>
+                                    <LicenseManagement />
+                                </SuperAdminRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/admin/settings" 
+                            element={
+                                <SuperAdminRoute>
+                                    <SettingsManagement />
+                                </SuperAdminRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/admin/cache" 
+                            element={
+                                <SuperAdminRoute>
+                                    <CacheManagement />
+                                </SuperAdminRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/admin/translations" 
+                            element={
+                                <SuperAdminRoute>
+                                    <TranslationManagement />
+                                </SuperAdminRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/admin/transactions" 
+                            element={
+                                <SuperAdminRoute>
+                                    <TransactionManagement />
+                                </SuperAdminRoute>
+                            } 
+                        />
+                        
                         <Route path="/" element={<Navigate to="/login" replace />} />
                     </Routes>
                 </AuthProvider>
