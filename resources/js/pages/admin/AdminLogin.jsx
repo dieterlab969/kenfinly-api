@@ -29,17 +29,26 @@ const AdminLogin = () => {
         try {
             const result = await login(email, password);
             if (result.success) {
-                if (user?.role === 'super_admin') {
+                const response = await fetch('/api/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Accept': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.user.role === 'super_admin') {
                     navigate('/admin/dashboard');
                 } else {
                     setError('Access denied. Super Administrator privileges required.');
+                    setLoading(false);
                 }
             } else {
                 setError(result.message || 'Login failed');
+                setLoading(false);
             }
         } catch (err) {
             setError('Login error. Please try again.');
-        } finally {
             setLoading(false);
         }
     };
