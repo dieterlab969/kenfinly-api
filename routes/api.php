@@ -10,6 +10,17 @@ use App\Http\Controllers\Api\CsvController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AccountManagementController;
+use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\RoleManagementController;
+use App\Http\Controllers\Admin\CategoryManagementController;
+use App\Http\Controllers\Admin\LanguageManagementController;
+use App\Http\Controllers\Admin\LicenseManagementController;
+use App\Http\Controllers\Admin\SettingsManagementController;
+use App\Http\Controllers\Admin\CacheManagementController;
+use App\Http\Controllers\Admin\TranslationManagementController;
+use App\Http\Controllers\Admin\TransactionManagementController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -71,3 +82,34 @@ Route::middleware('auth:api')->group(function () {
 
 // Public webhook endpoint (no auth required)
 Route::post('/webhooks/payment', [PaymentController::class, 'webhook']);
+
+// Admin routes (Super Admin only)
+Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index']);
+    
+    Route::apiResource('accounts', AccountManagementController::class);
+    Route::apiResource('users', UserManagementController::class);
+    Route::apiResource('roles', RoleManagementController::class);
+    Route::apiResource('categories', CategoryManagementController::class);
+    Route::apiResource('languages', LanguageManagementController::class);
+    Route::apiResource('licenses', LicenseManagementController::class);
+    
+    Route::get('/settings', [SettingsManagementController::class, 'index']);
+    Route::post('/settings', [SettingsManagementController::class, 'store']);
+    Route::put('/settings/{id}', [SettingsManagementController::class, 'update']);
+    Route::delete('/settings/{id}', [SettingsManagementController::class, 'destroy']);
+    
+    Route::post('/cache/clear', [CacheManagementController::class, 'clearAllCaches']);
+    Route::post('/cache/clear-app', [CacheManagementController::class, 'clearApplicationCache']);
+    Route::post('/cache/clear-config', [CacheManagementController::class, 'clearConfigCache']);
+    Route::post('/cache/clear-route', [CacheManagementController::class, 'clearRouteCache']);
+    Route::post('/cache/clear-view', [CacheManagementController::class, 'clearViewCache']);
+    
+    Route::get('/translations', [TranslationManagementController::class, 'index']);
+    Route::post('/translations', [TranslationManagementController::class, 'store']);
+    Route::put('/translations/{id}', [TranslationManagementController::class, 'update']);
+    Route::delete('/translations/{id}', [TranslationManagementController::class, 'destroy']);
+    
+    Route::get('/transactions', [TransactionManagementController::class, 'index']);
+    Route::get('/transactions/{id}', [TransactionManagementController::class, 'show']);
+});
