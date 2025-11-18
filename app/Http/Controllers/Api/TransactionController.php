@@ -23,7 +23,7 @@ class TransactionController extends Controller
     ) {
         $this->photoService = $photoService;
         $this->changeLogService = $changeLogService;
-        //$this->authorizeResource(Transaction::class, 'transaction');
+        $this->authorizeResource(Transaction::class, 'transaction');
     }
     public function index(Request $request)
     {
