@@ -17,7 +17,11 @@ const SuperAdminRoute = ({ children }) => {
         return <Navigate to="/admin/login" replace />;
     }
 
-    if (user.role !== 'super_admin') {
+    if (
+        !user.roles ||
+        !Array.isArray(user.roles) ||
+        !user.roles.some(role => role.name === 'super_admin')
+    ) {
         return <Navigate to="/dashboard" replace />;
     }
 
