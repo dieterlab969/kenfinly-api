@@ -13,7 +13,9 @@ const AdminLogin = () => {
 
     useEffect(() => {
         if (user) {
-            if (user.role === 'super_admin') {
+            // Check if user.roles exists and is an array
+            // Use Array.some() to verify if any role's name is 'super_admin'
+            if (user.roles && Array.isArray(user.roles) && user.roles.some(r => r.name === 'super_admin')) {
                 navigate('/admin/dashboard');
             } else {
                 navigate('/dashboard');
@@ -36,8 +38,11 @@ const AdminLogin = () => {
                     }
                 });
                 const data = await response.json();
-                
-                if (data.success && data.user.role === 'super_admin') {
+
+                if (data.success &&
+                    data.user &&
+                    Array.isArray(data.user.roles) &&
+                    data.user.roles.some(role => role.name === 'super_admin')) {
                     navigate('/admin/dashboard');
                 } else {
                     setError('Access denied. Super Administrator privileges required.');
