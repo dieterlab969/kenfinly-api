@@ -2,6 +2,56 @@
 
 All notable changes to the Personal Finance Application (Kenfinly) are documented in this file.
 
+## [1.4.0] - 2025-11-28
+
+### Added - WordPress-Powered Landing Page and Blog
+
+This release transforms the homepage from a login-only page to a WordPress-powered landing page with integrated blog functionality.
+
+#### New Public Pages
+- **Landing Page** (`/`) - Marketing homepage with:
+  - Navigation menu (Home, Features, Blog, About)
+  - Hero section with "Take Control of Your Financial Future" messaging
+  - Features grid showcasing platform capabilities
+  - Latest blog posts section (fetched from WordPress)
+  - Financial tips section (from WordPress custom post type)
+  - Call-to-action sections with Sign In and Get Started buttons
+  
+- **Blog Page** (`/blog`) - Blog listing with:
+  - Search functionality
+  - Category filtering
+  - Pagination
+  - Responsive grid layout
+  - Error state handling for WordPress unavailability
+
+- **Blog Post Page** (`/blog/:slug`) - Individual article view with:
+  - Full content display
+  - Reading time estimation
+  - Share functionality
+  - Related posts section
+
+- **About Page** (`/about`) - Company information with:
+  - Mission statement
+  - Company story (can be managed via WordPress)
+  - Core values section
+  - Statistics showcase
+
+#### New Components
+- `Navbar.jsx` - Responsive navigation with mobile menu
+- `Footer.jsx` - Site-wide footer with links and contact info
+- `PublicLayout.jsx` - Layout wrapper for public pages
+
+#### WordPress API Integration
+- `wordpressApi.js` - React service for WordPress REST API
+- Handles posts, pages, categories, custom post types
+- Graceful error handling with "Try Again" functionality
+- Loading states and empty state messages
+
+#### Route Changes
+- Homepage (`/`) now shows landing page instead of login redirect
+- Login page available at `/login`
+- Catch-all route redirects to homepage
+
 ## [1.3.0] - 2025-11-28
 
 ### Changed - WordPress Composer Integration

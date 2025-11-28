@@ -15,21 +15,27 @@ import wordpressApi from '../../services/wordpressApi';
 function AboutPage() {
     const [pageContent, setPageContent] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+
+    const fetchPage = async () => {
+        setLoading(true);
+        setError(false);
+        try {
+            const result = await wordpressApi.getPageBySlug('about');
+            if (result.success && result.page) {
+                setPageContent(result.page);
+            } else {
+                setError(true);
+            }
+        } catch (err) {
+            console.error('Error fetching about page:', err);
+            setError(true);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchPage = async () => {
-            try {
-                const result = await wordpressApi.getPageBySlug('about');
-                if (result.success && result.page) {
-                    setPageContent(result.page);
-                }
-            } catch (error) {
-                console.error('Error fetching about page:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchPage();
     }, []);
 
@@ -91,6 +97,19 @@ function AboutPage() {
                                     <div className="h-4 bg-gray-200 rounded w-full"></div>
                                     <div className="h-4 bg-gray-200 rounded w-full"></div>
                                     <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                </div>
+                            ) : error ? (
+                                <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                                    <p className="text-gray-600 mb-4">
+                                        We're having trouble loading our story. The content will be available shortly.
+                                    </p>
+                                    <button
+                                        onClick={fetchPage}
+                                        className="text-blue-600 font-medium hover:text-blue-700 inline-flex items-center"
+                                    >
+                                        Try Again
+                                        <ArrowRight className="ml-1 w-4 h-4" />
+                                    </button>
                                 </div>
                             ) : pageContent?.content?.rendered ? (
                                 <div 

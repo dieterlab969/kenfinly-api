@@ -19,28 +19,37 @@ function LandingPage() {
     const [latestPosts, setLatestPosts] = useState([]);
     const [financialTips, setFinancialTips] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [postsError, setPostsError] = useState(false);
+
+    const fetchContent = async () => {
+        setLoading(true);
+        setPostsError(false);
+        try {
+            const [postsResult, tipsResult] = await Promise.all([
+                wordpressApi.getPosts({ per_page: 3 }),
+                wordpressApi.getFinancialTips({ per_page: 3 })
+            ]);
+
+            if (postsResult.success) {
+                setLatestPosts(postsResult.posts || []);
+                setPostsError(false);
+            } else {
+                setLatestPosts([]);
+                setPostsError(true);
+            }
+            if (tipsResult.success) {
+                setFinancialTips(tipsResult.financial_tip || []);
+            }
+        } catch (error) {
+            console.error('Error fetching WordPress content:', error);
+            setLatestPosts([]);
+            setPostsError(true);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchContent = async () => {
-            try {
-                const [postsResult, tipsResult] = await Promise.all([
-                    wordpressApi.getPosts({ per_page: 3 }),
-                    wordpressApi.getFinancialTips({ per_page: 3 })
-                ]);
-
-                if (postsResult.success) {
-                    setLatestPosts(postsResult.posts || []);
-                }
-                if (tipsResult.success) {
-                    setFinancialTips(tipsResult.financial_tip || []);
-                }
-            } catch (error) {
-                console.error('Error fetching WordPress content:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchContent();
     }, []);
 
@@ -214,6 +223,21 @@ function LandingPage() {
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    ) : postsError ? (
+                        <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+                            <TrendingUp className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                            <h3 className="text-xl font-semibold text-gray-700 mb-2">Content Temporarily Unavailable</h3>
+                            <p className="text-gray-500 mb-4">
+                                We're having trouble loading our latest articles. Please check back later.
+                            </p>
+                            <button
+                                onClick={fetchContent}
+                                className="text-blue-600 font-medium hover:text-blue-700 inline-flex items-center"
+                            >
+                                Try Again
+                                <ArrowRight className="ml-1 w-4 h-4" />
+                            </button>
                         </div>
                     ) : latestPosts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

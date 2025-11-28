@@ -18,52 +18,61 @@ function BlogPage() {
     const [posts, setPosts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
     const [pagination, setPagination] = useState({ total: 0, totalPages: 1 });
     const [searchQuery, setSearchQuery] = useState('');
 
     const currentPage = parseInt(searchParams.get('page') || '1', 10);
     const currentCategory = searchParams.get('category') || '';
 
+    const fetchPosts = async () => {
+        setLoading(true);
+        setError(false);
+        try {
+            const params = {
+                per_page: 9,
+                page: currentPage
+            };
+
+            if (currentCategory) {
+                params.categories = currentCategory;
+            }
+
+            const result = await wordpressApi.getPosts(params);
+            
+            if (result.success) {
+                setPosts(result.posts || []);
+                setPagination({
+                    total: result.pagination?.total || 0,
+                    totalPages: result.pagination?.total_pages || 1
+                });
+            } else {
+                setPosts([]);
+                setPagination({ total: 0, totalPages: 1 });
+                setError(true);
+            }
+        } catch (err) {
+            console.error('Error fetching posts:', err);
+            setPosts([]);
+            setPagination({ total: 0, totalPages: 1 });
+            setError(true);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchCategories = async () => {
+        try {
+            const result = await wordpressApi.getCategories();
+            if (result.success) {
+                setCategories(result.categories || []);
+            }
+        } catch (err) {
+            console.error('Error fetching categories:', err);
+        }
+    };
+
     useEffect(() => {
-        const fetchPosts = async () => {
-            setLoading(true);
-            try {
-                const params = {
-                    per_page: 9,
-                    page: currentPage
-                };
-
-                if (currentCategory) {
-                    params.categories = currentCategory;
-                }
-
-                const result = await wordpressApi.getPosts(params);
-                
-                if (result.success) {
-                    setPosts(result.posts || []);
-                    setPagination({
-                        total: result.pagination?.total || 0,
-                        totalPages: result.pagination?.total_pages || 1
-                    });
-                }
-            } catch (error) {
-                console.error('Error fetching posts:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        const fetchCategories = async () => {
-            try {
-                const result = await wordpressApi.getCategories();
-                if (result.success) {
-                    setCategories(result.categories || []);
-                }
-            } catch (error) {
-                console.error('Error fetching categories:', error);
-            }
-        };
-
         fetchPosts();
         fetchCategories();
     }, [currentPage, currentCategory]);
@@ -73,14 +82,20 @@ function BlogPage() {
         if (!searchQuery.trim()) return;
 
         setLoading(true);
+        setError(false);
         try {
             const result = await wordpressApi.search(searchQuery);
             if (result.success) {
                 setPosts(result.search_results || []);
                 setPagination({ total: result.search_results?.length || 0, totalPages: 1 });
+            } else {
+                setPosts([]);
+                setError(true);
             }
-        } catch (error) {
-            console.error('Error searching:', error);
+        } catch (err) {
+            console.error('Error searching:', err);
+            setPosts([]);
+            setError(true);
         } finally {
             setLoading(false);
         }
@@ -202,6 +217,23 @@ function BlogPage() {
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    ) : error ? (
+                        <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
+                            <TrendingUp className="w-20 h-20 text-gray-300 mx-auto mb-6" />
+                            <h3 className="text-2xl font-semibold text-gray-700 mb-3">
+                                Content Temporarily Unavailable
+                            </h3>
+                            <p className="text-gray-500 mb-6">
+                                We're having trouble loading our blog content. Please check back later.
+                            </p>
+                            <button
+                                onClick={fetchPosts}
+                                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                            >
+                                Try Again
+                                <ArrowRight className="ml-2 w-4 h-4" />
+                            </button>
                         </div>
                     ) : posts.length > 0 ? (
                         <>

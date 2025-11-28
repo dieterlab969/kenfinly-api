@@ -12,6 +12,24 @@ Preferred communication style: Simple, everyday language.
 
 The frontend is a Single Page Application (SPA) built with React 19.2, Vite 7.x, and Tailwind CSS 4.0. It features a responsive design with a blue gradient theme, interactive dashboards using Recharts, and modals for transaction entry with real-time updates. A dedicated admin UI with a dark sidebar navigation and consistent layout is implemented for super administrators. The application also supports multilanguage functionality, specifically English and Vietnamese, with a shared translation manifest architecture ensuring graceful degradation in offline mode.
 
+### Public Pages (WordPress-Powered)
+- **Landing Page** (`/`) - Marketing homepage with navigation, hero section, features, blog preview, and CTAs
+- **Blog Page** (`/blog`) - Blog listing with search, category filtering, and pagination
+- **Blog Post Page** (`/blog/:slug`) - Individual article view with related posts
+- **About Page** (`/about`) - Company information and values
+- **Login Page** (`/login`) - User authentication
+- **Register Page** (`/register`) - New user registration
+
+### Public Components
+- `Navbar.jsx` - Responsive navigation with mobile menu
+- `Footer.jsx` - Site-wide footer with links and contact
+- `PublicLayout.jsx` - Layout wrapper for public pages
+
+### WordPress API Service
+- `resources/js/services/wordpressApi.js` - React service for WordPress REST API integration
+- Handles posts, pages, categories, custom post types (financial_tip, news, faq)
+- Graceful error handling with "Try Again" functionality
+
 ## Technical Implementation
 
 The backend is built with Laravel 12 (PHP 8.2+) and provides a REST API. Key architectural decisions include:
