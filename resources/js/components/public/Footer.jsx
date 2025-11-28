@@ -73,18 +73,19 @@ function Footer() {
 
                     <div>
                         <h3 className="text-white font-semibold mb-4">Contact</h3>
+                        <p className="text-sm text-yellow-400 font-medium mb-3">Getkenka Ltd – Tax Code: 0318304909</p>
                         <ul className="space-y-3">
                             <li className="flex items-center space-x-3">
                                 <Mail className="w-5 h-5 text-blue-500" />
-                                <span>support@kenfinly.com</span>
+                                <span>purchasevn@getkenka.com</span>
                             </li>
                             <li className="flex items-center space-x-3">
                                 <Phone className="w-5 h-5 text-blue-500" />
-                                <span>+1 (555) 123-4567</span>
+                                <span>+84 0941069969</span>
                             </li>
                             <li className="flex items-start space-x-3">
                                 <MapPin className="w-5 h-5 text-blue-500 mt-0.5" />
-                                <span>123 Finance Street<br />New York, NY 10001</span>
+                                <span>2nd Floor, 81 CMT8 Street<br />Ben Thanh Ward, Dist 1, HCMC</span>
                             </li>
                         </ul>
                     </div>
