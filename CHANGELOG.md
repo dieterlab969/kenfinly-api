@@ -2,6 +2,237 @@
 
 All notable changes to the Personal Finance Application (Kenfinly) are documented in this file.
 
+## [1.4.0] - 2025-11-28
+
+### Added - WordPress-Powered Landing Page and Blog
+
+This release transforms the homepage from a login-only page to a WordPress-powered landing page with integrated blog functionality.
+
+#### New Public Pages
+- **Landing Page** (`/`) - Marketing homepage with:
+  - Navigation menu (Home, Features, Blog, About)
+  - Hero section with "Take Control of Your Financial Future" messaging
+  - Features grid showcasing platform capabilities
+  - Latest blog posts section (fetched from WordPress)
+  - Financial tips section (from WordPress custom post type)
+  - Call-to-action sections with Sign In and Get Started buttons
+  
+- **Blog Page** (`/blog`) - Blog listing with:
+  - Search functionality
+  - Category filtering
+  - Pagination
+  - Responsive grid layout
+  - Error state handling for WordPress unavailability
+
+- **Blog Post Page** (`/blog/:slug`) - Individual article view with:
+  - Full content display
+  - Reading time estimation
+  - Share functionality
+  - Related posts section
+
+- **About Page** (`/about`) - Company information with:
+  - Mission statement
+  - Company story (can be managed via WordPress)
+  - Core values section
+  - Statistics showcase
+
+#### New Components
+- `Navbar.jsx` - Responsive navigation with mobile menu
+- `Footer.jsx` - Site-wide footer with links and contact info
+- `PublicLayout.jsx` - Layout wrapper for public pages
+
+#### WordPress API Integration
+- `wordpressApi.js` - React service for WordPress REST API
+- Handles posts, pages, categories, custom post types
+- Graceful error handling with "Try Again" functionality
+- Loading states and empty state messages
+
+#### Route Changes
+- Homepage (`/`) now shows landing page instead of login redirect
+- Login page available at `/login`
+- Catch-all route redirects to homepage
+
+## [1.3.0] - 2025-11-28
+
+### Changed - WordPress Composer Integration
+
+This release restructures WordPress installation to use Composer for dependency management, improving deployment workflow and version control practices.
+
+#### Composer Integration
+- WordPress core is now installed via Composer using `johnpbloch/wordpress` package
+- WordPress plugins from WPackagist:
+  - `wpackagist-plugin/jwt-authentication-for-wp-rest-api` - JWT authentication
+  - `wpackagist-plugin/sqlite-database-integration` - SQLite database support
+- Configured `wordpress-install-dir` in composer.json for proper installation path
+- Added installer paths for WordPress plugins and themes
+
+#### Installation Script (`install-wp.sh`)
+- Created automated bash script for WordPress setup
+- Deploys custom wp-config.php with SQLite and JWT configuration
+- Installs custom must-use plugins (mu-plugins):
+  - `auto-activate-plugins.php` - Automatically activates required plugins
+  - `sample-data-seeder.php` - Seeds initial content for testing
+- Deploys custom plugins:
+  - `headless-cms-api` - Custom REST API endpoints for headless CMS
+- Sets proper file permissions
+- Configures SQLite database integration
+
+#### Custom WordPress Files (`wordpress-custom/`)
+- `configs/wp-config.php` - Custom WordPress configuration
+- `mu-plugins/` - Must-use plugins (auto-loaded by WordPress)
+- `plugins/` - Custom plugins (headless-cms-api)
+- `themes/` - Custom themes (if any)
+
+#### Git Workflow Improvements
+- WordPress source code excluded from version control
+- Only custom configurations, plugins, and themes are tracked
+- Added `.gitkeep` to preserve directory structure
+- Reduced repository size significantly
+
+#### New Files
+- `install-wp.sh` - WordPress installation script
+- `wordpress-custom/` - Directory for custom WordPress files
+- `docs/WORDPRESS_LARAVEL_API_TESTING.md` - API testing documentation
+
+#### Usage
+```bash
+# Install all dependencies including WordPress
+composer install
+
+# Run WordPress setup script
+./install-wp.sh
+
+# Start development server
+php -S 0.0.0.0:5000 server.php
+```
+
+## [1.2.0] - 2025-11-28
+
+### Added - WordPress Headless CMS Laravel Integration
+
+This release adds a comprehensive Laravel-based WordPress REST API integration layer that enables seamless content management from a headless WordPress CMS.
+
+#### WordPress Service Class (`app/Services/WordPressService.php`)
+- Full WordPress REST API v2 integration
+- Automatic authentication support (Basic Auth, Application Passwords)
+- Configurable timeout and retry mechanisms
+- Built-in caching with customizable TTL per content type
+- Error handling with detailed logging
+- Support for standard and custom post types
+
+#### New API Endpoints (`/api/wordpress/...`)
+
+**Content Endpoints:**
+- `GET /posts` - List posts with pagination and filtering
+- `GET /posts/{id}` - Get post by ID
+- `GET /posts/slug/{slug}` - Get post by slug
+- `GET /pages` - List pages
+- `GET /pages/{id}` - Get page by ID
+- `GET /pages/slug/{slug}` - Get page by slug
+- `GET /categories` - List WordPress categories
+- `GET /tags` - List WordPress tags
+- `GET /media/{id}` - Get media item details
+
+**Custom Post Types:**
+- `GET /custom/{postType}` - List custom post type items
+- `GET /custom/{postType}/{id}` - Get custom post type item by ID
+- `GET /custom/{postType}/slug/{slug}` - Get custom post type item by slug
+
+**Utility Endpoints:**
+- `GET /search?q={query}` - Search across content
+- `GET /menus` - Get WordPress menus
+- `GET /menus/{location}` - Get menu by location
+- `GET /site-info` - Get WordPress site information
+- `GET /status` - Check WordPress API configuration and connection
+- `GET /test-connection` - Test WordPress API connectivity
+- `POST /admin/wordpress/cache/clear` - Clear WordPress cache (Admin only)
+
+#### Configuration (`config/wordpress.php`)
+- `WORDPRESS_API_URL` - WordPress site URL
+- `WORDPRESS_USERNAME` - Authentication username
+- `WORDPRESS_APPLICATION_PASSWORD` - Application password (recommended)
+- `WORDPRESS_TIMEOUT` - Request timeout (default: 30s)
+- `WORDPRESS_RETRIES` - Retry attempts (default: 3)
+- Customizable cache TTL for each content type
+
+#### Caching Features
+- Automatic content caching with configurable TTL
+- Cache bypass option via `?cache=false` query parameter
+- Content-type specific cache durations:
+  - Posts: 5 minutes
+  - Pages: 10 minutes
+  - Categories/Tags: 1 hour
+  - Menus: 30 minutes
+- Admin cache clear functionality
+
+#### Error Handling
+- Graceful degradation when WordPress is not configured
+- Detailed error logging for debugging
+- User-friendly error messages
+- HTTP status code mapping
+- Connection retry with exponential backoff
+
+#### Security Features
+- Application Password authentication support
+- Configurable allowed custom post types
+- No credentials exposed in responses
+- Request rate limiting awareness
+
+## [1.1.0] - 2025-11-28
+
+### Added - WordPress Headless CMS Integration
+
+#### WordPress Installation
+- WordPress 6.x installed in `/public/wordpress/` subdirectory
+- SQLite database integration for lightweight, serverless operation
+- Database stored in `/storage/wordpress/` for data persistence
+
+#### Plugins Installed
+- **JWT Authentication for WP REST API**: Secure token-based API authentication
+- **SQLite Database Integration**: WordPress SQLite database support
+- **Headless CMS API** (Custom): Unified content delivery endpoints
+
+#### Custom Post Types
+- **Financial Tips** (`financial_tip`): Financial advice and tips for users
+- **News Articles** (`news`): News and updates related to personal finance
+- **FAQs** (`faq`): Frequently asked questions with answers
+
+#### Custom REST API Endpoints
+- `GET /wordpress/wp-json/headless/v1/all-content` - Retrieves all content types in a single request
+- `GET /wordpress/wp-json/headless/v1/content/{type}` - Get paginated content by type
+- `GET /wordpress/wp-json/headless/v1/content/{type}/{id}` - Get single content item with full details
+- `GET /wordpress/wp-json/headless/v1/menus` - Get navigation menus
+- `GET /wordpress/wp-json/headless/v1/site-info` - Get site configuration
+- `GET /wordpress/wp-json/headless/v1/search` - Search across all content types
+
+#### Sample Content Seeder
+- 5 Financial Tips covering budgeting, saving, and expense tracking
+- 3 News Articles about personal finance updates
+- 5 FAQs about Kenfinly features and usage
+- Auto-seeding via admin interface or activation
+
+#### Security Features
+- JWT token authentication for protected endpoints
+- CORS headers configured for cross-origin requests
+- Application Passwords support (WordPress 5.6+)
+- Secure database storage outside web root
+
+#### Documentation
+- Complete API documentation in `docs/WORDPRESS_HEADLESS_CMS_API.md`
+- Test requests and examples for all endpoints
+- Integration examples for React and Laravel
+
+### Added - PostgreSQL Database Migration
+
+#### Database Configuration
+- Migrated from SQLite to PostgreSQL for main application
+- Database seeder for importing existing data
+- All tables recreated with PostgreSQL-compatible schema
+
+#### New Files
+- `database/seeders/ImportMysqlDataSeeder.php` - Data import seeder
+- Sample data including users, accounts, categories, and transactions
+
 ## [1.0.0] - 2025-11-08
 
 ### Added - Payment Module

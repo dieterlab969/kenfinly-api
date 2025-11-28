@@ -108,14 +108,20 @@ class CategorySeeder extends Seeder
             $children = $categoryData['children'] ?? [];
             unset($categoryData['children']);
 
-            $category = Category::create($categoryData);
+            $category = Category::firstOrCreate(
+                ['slug' => $categoryData['slug']],
+                $categoryData
+            );
 
             foreach ($children as $child) {
-                Category::create([
-                    ...$child,
-                    'parent_id' => $category->id,
-                    'type' => $categoryData['type'],
-                ]);
+                Category::firstOrCreate(
+                    ['slug' => $child['slug']],
+                    [
+                        ...$child,
+                        'parent_id' => $category->id,
+                        'type' => $categoryData['type'],
+                    ]
+                );
             }
         }
 

@@ -12,6 +12,24 @@ Preferred communication style: Simple, everyday language.
 
 The frontend is a Single Page Application (SPA) built with React 19.2, Vite 7.x, and Tailwind CSS 4.0. It features a responsive design with a blue gradient theme, interactive dashboards using Recharts, and modals for transaction entry with real-time updates. A dedicated admin UI with a dark sidebar navigation and consistent layout is implemented for super administrators. The application also supports multilanguage functionality, specifically English and Vietnamese, with a shared translation manifest architecture ensuring graceful degradation in offline mode.
 
+### Public Pages (WordPress-Powered)
+- **Landing Page** (`/`) - Marketing homepage with navigation, hero section, features, blog preview, and CTAs
+- **Blog Page** (`/blog`) - Blog listing with search, category filtering, and pagination
+- **Blog Post Page** (`/blog/:slug`) - Individual article view with related posts
+- **About Page** (`/about`) - Company information and values
+- **Login Page** (`/login`) - User authentication
+- **Register Page** (`/register`) - New user registration
+
+### Public Components
+- `Navbar.jsx` - Responsive navigation with mobile menu
+- `Footer.jsx` - Site-wide footer with links and contact
+- `PublicLayout.jsx` - Layout wrapper for public pages
+
+### WordPress API Service
+- `resources/js/services/wordpressApi.js` - React service for WordPress REST API integration
+- Handles posts, pages, categories, custom post types (financial_tip, news, faq)
+- Graceful error handling with "Try Again" functionality
+
 ## Technical Implementation
 
 The backend is built with Laravel 12 (PHP 8.2+) and provides a REST API. Key architectural decisions include:
@@ -36,6 +54,79 @@ The backend is built with Laravel 12 (PHP 8.2+) and provides a REST API. Key arc
 - **Transaction Photo Management**: Upload multiple receipt photos (up to 10 photos, 20MB each) with server-side optimization (resize, compress).
 - **Audit Trail**: Tracks creation, updates, deletions, and photo changes on transactions, including who made changes and when.
 
+# WordPress Headless CMS Integration
+
+## Overview
+The application includes a comprehensive WordPress headless CMS integration for content management. This allows the React frontend to fetch blog posts, pages, and custom content from an external WordPress site.
+
+## Configuration
+Set the following environment variables to enable WordPress integration:
+- `WORDPRESS_API_URL`: WordPress site URL (e.g., https://your-wordpress-site.com)
+- `WORDPRESS_USERNAME`: API authentication username
+- `WORDPRESS_APPLICATION_PASSWORD`: WordPress Application Password (recommended)
+- `WORDPRESS_TIMEOUT`: Request timeout in seconds (default: 30)
+- `WORDPRESS_RETRIES`: Number of retry attempts (default: 3)
+
+## Available Endpoints
+- `GET /api/wordpress/posts` - List blog posts
+- `GET /api/wordpress/pages` - List pages
+- `GET /api/wordpress/categories` - List categories
+- `GET /api/wordpress/search?q={query}` - Search content
+- `GET /api/wordpress/status` - Check integration status
+
+## Caching
+Content is automatically cached with configurable TTL:
+- Posts: 5 minutes
+- Pages: 10 minutes
+- Categories/Tags: 1 hour
+- Clear cache via Admin: `POST /api/admin/wordpress/cache/clear`
+
+## Files
+- `app/Services/WordPressService.php` - WordPress API client with caching
+- `app/Http/Controllers/Api/WordPressController.php` - API endpoints
+- `config/wordpress.php` - Configuration settings
+
+# Quick Start (Development Setup)
+
+1. **Database Setup** (after PostgreSQL is available):
+   ```bash
+   php artisan migrate --seed
+   ```
+
+2. **Default Super Admin Credentials**:
+   - Email: admin@kenfinly.com
+   - Password: Admin@123
+
+3. **JWT Secret** (already generated in .env):
+   ```bash
+   php artisan jwt:secret
+   ```
+
+4. **Frontend Build**:
+   ```bash
+   npm run build
+   ```
+
+5. **Start Server**:
+   ```bash
+   php -S 0.0.0.0:5000 server.php
+   ```
+
+## Database Seeders
+All seeders are idempotent and can be run multiple times safely:
+- `RoleSeeder` - Creates owner, editor, viewer roles
+- `LanguageSeeder` - Creates English and Vietnamese languages with translations
+- `CategorySeeder` - Creates default expense and income categories
+- `SuperAdminSeeder` - Creates the super admin user
+
+# Company Information
+
+- **Company**: Getkenka Ltd
+- **Tax Code**: 0318304909
+- **Email**: purchasevn@getkenka.com
+- **Phone**: +84 0941069969
+- **Address**: 2nd Floor, 81 CMT8 Street, Ben Thanh Ward, Dist 1, HCMC
+
 # External Dependencies
 
 - **HTTP Client**: Guzzle 7.x
@@ -45,3 +136,4 @@ The backend is built with Laravel 12 (PHP 8.2+) and provides a REST API. Key arc
 - **UUID Generation**: Ramsey UUID
 - **Image Processing**: Intervention Image (for photo optimization)
 - **Email Service**: SendGrid (via Replit integrations for email verification)
+- **WordPress Integration**: Laravel HTTP Client for headless CMS content

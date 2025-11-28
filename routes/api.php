@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\SettingsManagementController;
 use App\Http\Controllers\Admin\CacheManagementController;
 use App\Http\Controllers\Admin\TranslationManagementController;
 use App\Http\Controllers\Admin\TransactionManagementController;
+use App\Http\Controllers\Api\WordPressController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -112,4 +113,44 @@ Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])
     
     Route::get('/transactions', [TransactionManagementController::class, 'index']);
     Route::get('/transactions/{id}', [TransactionManagementController::class, 'show']);
+    
+    // WordPress Cache Management (Admin only)
+    Route::post('/wordpress/cache/clear', [WordPressController::class, 'clearCache']);
+});
+
+// WordPress CMS Routes (public endpoints for frontend content)
+Route::prefix('wordpress')->group(function () {
+    // Status & Connection Testing
+    Route::get('/status', [WordPressController::class, 'status']);
+    Route::get('/test-connection', [WordPressController::class, 'testConnection']);
+    Route::get('/site-info', [WordPressController::class, 'siteInfo']);
+    
+    // Posts
+    Route::get('/posts', [WordPressController::class, 'posts']);
+    Route::get('/posts/{id}', [WordPressController::class, 'post'])->where('id', '[0-9]+');
+    Route::get('/posts/slug/{slug}', [WordPressController::class, 'postBySlug']);
+    
+    // Pages
+    Route::get('/pages', [WordPressController::class, 'pages']);
+    Route::get('/pages/{id}', [WordPressController::class, 'page'])->where('id', '[0-9]+');
+    Route::get('/pages/slug/{slug}', [WordPressController::class, 'pageBySlug']);
+    
+    // Taxonomies
+    Route::get('/categories', [WordPressController::class, 'categories']);
+    Route::get('/tags', [WordPressController::class, 'tags']);
+    
+    // Media
+    Route::get('/media/{id}', [WordPressController::class, 'media'])->where('id', '[0-9]+');
+    
+    // Custom Post Types
+    Route::get('/custom/{postType}', [WordPressController::class, 'customPostType']);
+    Route::get('/custom/{postType}/{id}', [WordPressController::class, 'customPostTypeItem'])->where('id', '[0-9]+');
+    Route::get('/custom/{postType}/slug/{slug}', [WordPressController::class, 'customPostTypeBySlug']);
+    
+    // Search
+    Route::get('/search', [WordPressController::class, 'search']);
+    
+    // Menus
+    Route::get('/menus', [WordPressController::class, 'menus']);
+    Route::get('/menus/{location}', [WordPressController::class, 'menu']);
 });
