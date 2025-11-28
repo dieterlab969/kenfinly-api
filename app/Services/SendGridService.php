@@ -51,14 +51,13 @@ class SendGridService
             }
 
             if (!$this->apiKey || !$this->fromEmail) {
-                throw new \Exception('SendGrid credentials not configured. Please set SENDGRID_API_KEY and SENDGRID_FROM_EMAIL in your environment variables.');
+                Log::warning('SendGrid credentials not configured. Email functionality will be disabled.');
             }
 
         } catch (\Exception $e) {
             Log::error('Failed to initialize SendGrid credentials', [
                 'error' => $e->getMessage()
             ]);
-            throw $e;
         }
     }
 
@@ -80,6 +79,14 @@ class SendGridService
 
     private function sendEmail(string $to, string $subject, string $htmlContent): void
     {
+        if (!$this->apiKey || !$this->fromEmail) {
+            Log::warning('Skipping email send - SendGrid credentials not configured', [
+                'to' => $to,
+                'subject' => $subject
+            ]);
+            return;
+        }
+
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
