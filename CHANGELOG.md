@@ -2,6 +2,60 @@
 
 All notable changes to the Personal Finance Application (Kenfinly) are documented in this file.
 
+## [1.3.0] - 2025-11-28
+
+### Changed - WordPress Composer Integration
+
+This release restructures WordPress installation to use Composer for dependency management, improving deployment workflow and version control practices.
+
+#### Composer Integration
+- WordPress core is now installed via Composer using `johnpbloch/wordpress` package
+- WordPress plugins from WPackagist:
+  - `wpackagist-plugin/jwt-authentication-for-wp-rest-api` - JWT authentication
+  - `wpackagist-plugin/sqlite-database-integration` - SQLite database support
+- Configured `wordpress-install-dir` in composer.json for proper installation path
+- Added installer paths for WordPress plugins and themes
+
+#### Installation Script (`install-wp.sh`)
+- Created automated bash script for WordPress setup
+- Deploys custom wp-config.php with SQLite and JWT configuration
+- Installs custom must-use plugins (mu-plugins):
+  - `auto-activate-plugins.php` - Automatically activates required plugins
+  - `sample-data-seeder.php` - Seeds initial content for testing
+- Deploys custom plugins:
+  - `headless-cms-api` - Custom REST API endpoints for headless CMS
+- Sets proper file permissions
+- Configures SQLite database integration
+
+#### Custom WordPress Files (`wordpress-custom/`)
+- `configs/wp-config.php` - Custom WordPress configuration
+- `mu-plugins/` - Must-use plugins (auto-loaded by WordPress)
+- `plugins/` - Custom plugins (headless-cms-api)
+- `themes/` - Custom themes (if any)
+
+#### Git Workflow Improvements
+- WordPress source code excluded from version control
+- Only custom configurations, plugins, and themes are tracked
+- Added `.gitkeep` to preserve directory structure
+- Reduced repository size significantly
+
+#### New Files
+- `install-wp.sh` - WordPress installation script
+- `wordpress-custom/` - Directory for custom WordPress files
+- `docs/WORDPRESS_LARAVEL_API_TESTING.md` - API testing documentation
+
+#### Usage
+```bash
+# Install all dependencies including WordPress
+composer install
+
+# Run WordPress setup script
+./install-wp.sh
+
+# Start development server
+php -S 0.0.0.0:5000 server.php
+```
+
 ## [1.2.0] - 2025-11-28
 
 ### Added - WordPress Headless CMS Laravel Integration
