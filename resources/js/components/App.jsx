@@ -21,6 +21,10 @@ import SettingsManagement from '../pages/admin/SettingsManagement';
 import CacheManagement from '../pages/admin/CacheManagement';
 import TranslationManagement from '../pages/admin/TranslationManagement';
 import TransactionManagement from '../pages/admin/TransactionManagement';
+import LandingPage from '../pages/public/LandingPage';
+import BlogPage from '../pages/public/BlogPage';
+import BlogPostPage from '../pages/public/BlogPostPage';
+import AboutPage from '../pages/public/AboutPage';
 
 const RecaptchaConfigContext = createContext({ enabled: false });
 
@@ -32,6 +36,11 @@ function App({ recaptchaEnabled = false }) {
             <TranslationProvider>
                 <AuthProvider>
                     <Routes>
+                        <Route path="/" element={<LandingPage />} />
+                        <Route path="/blog" element={<BlogPage />} />
+                        <Route path="/blog/:slug" element={<BlogPostPage />} />
+                        <Route path="/about" element={<AboutPage />} />
+                        
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/verify-email" element={<VerifyEmail />} />
@@ -135,7 +144,7 @@ function App({ recaptchaEnabled = false }) {
                             } 
                         />
                         
-                        <Route path="/" element={<Navigate to="/login" replace />} />
+                        <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </AuthProvider>
             </TranslationProvider>
