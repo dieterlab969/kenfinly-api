@@ -5,6 +5,7 @@ integrations = ["sendgrid:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
+packages = ["openssh"]
 
 [workflows]
 runButton = "Project"
@@ -94,6 +95,7 @@ externalPort = 3003
 localPort = 44597
 externalPort = 8008
 
-[[ports]]
-localPort = 44723
-externalPort = 8099
+[userenv]
+
+[userenv.development]
+DB_CONNECTION = "pgsql"
