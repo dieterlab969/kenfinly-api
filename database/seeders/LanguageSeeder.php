@@ -10,21 +10,25 @@ class LanguageSeeder extends Seeder
 {
     public function run(): void
     {
-        $english = Language::create([
-            'code' => 'en',
-            'name' => 'English',
-            'native_name' => 'English',
-            'is_default' => true,
-            'is_active' => true,
-        ]);
+        $english = Language::firstOrCreate(
+            ['code' => 'en'],
+            [
+                'name' => 'English',
+                'native_name' => 'English',
+                'is_default' => true,
+                'is_active' => true,
+            ]
+        );
 
-        $vietnamese = Language::create([
-            'code' => 'vi',
-            'name' => 'Vietnamese',
-            'native_name' => 'Tiếng Việt',
-            'is_default' => false,
-            'is_active' => true,
-        ]);
+        $vietnamese = Language::firstOrCreate(
+            ['code' => 'vi'],
+            [
+                'name' => 'Vietnamese',
+                'native_name' => 'Tiếng Việt',
+                'is_default' => false,
+                'is_active' => true,
+            ]
+        );
 
         $manifestPath = resource_path('lang/translations.json');
         $manifestData = json_decode(file_get_contents($manifestPath), true);
@@ -36,8 +40,14 @@ class LanguageSeeder extends Seeder
 
         foreach ($translations as $key => $values) {
             if (isset($values['en']) && isset($values['vi'])) {
-                Translation::create(['language_id' => $english->id, 'key' => $key, 'value' => $values['en']]);
-                Translation::create(['language_id' => $vietnamese->id, 'key' => $key, 'value' => $values['vi']]);
+                Translation::updateOrCreate(
+                    ['language_id' => $english->id, 'key' => $key],
+                    ['value' => $values['en']]
+                );
+                Translation::updateOrCreate(
+                    ['language_id' => $vietnamese->id, 'key' => $key],
+                    ['value' => $values['vi']]
+                );
             }
         }
 
