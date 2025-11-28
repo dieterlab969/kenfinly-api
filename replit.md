@@ -86,6 +86,47 @@ Content is automatically cached with configurable TTL:
 - `app/Http/Controllers/Api/WordPressController.php` - API endpoints
 - `config/wordpress.php` - Configuration settings
 
+# Quick Start (Development Setup)
+
+1. **Database Setup** (after PostgreSQL is available):
+   ```bash
+   php artisan migrate --seed
+   ```
+
+2. **Default Super Admin Credentials**:
+   - Email: admin@kenfinly.com
+   - Password: Admin@123
+
+3. **JWT Secret** (already generated in .env):
+   ```bash
+   php artisan jwt:secret
+   ```
+
+4. **Frontend Build**:
+   ```bash
+   npm run build
+   ```
+
+5. **Start Server**:
+   ```bash
+   php -S 0.0.0.0:5000 server.php
+   ```
+
+## Database Seeders
+All seeders are idempotent and can be run multiple times safely:
+- `RoleSeeder` - Creates owner, editor, viewer roles
+- `LanguageSeeder` - Creates English and Vietnamese languages with translations
+- `CategorySeeder` - Creates default expense and income categories
+- `SuperAdminSeeder` - Creates the super admin user
+
+# Company Information
+
+- **Company**: Getkenka Ltd
+- **Tax Code**: 0318304909
+- **Email**: purchasevn@getkenka.com
+- **Phone**: +84 0941069969
+- **Address**: 2nd Floor, 81 CMT8 Street, Ben Thanh Ward, Dist 1, HCMC
+
 # External Dependencies
 
 - **HTTP Client**: Guzzle 7.x
