@@ -2,6 +2,61 @@
 
 All notable changes to the Personal Finance Application (Kenfinly) are documented in this file.
 
+## [1.1.0] - 2025-11-28
+
+### Added - WordPress Headless CMS Integration
+
+#### WordPress Installation
+- WordPress 6.x installed in `/public/wordpress/` subdirectory
+- SQLite database integration for lightweight, serverless operation
+- Database stored in `/storage/wordpress/` for data persistence
+
+#### Plugins Installed
+- **JWT Authentication for WP REST API**: Secure token-based API authentication
+- **SQLite Database Integration**: WordPress SQLite database support
+- **Headless CMS API** (Custom): Unified content delivery endpoints
+
+#### Custom Post Types
+- **Financial Tips** (`financial_tip`): Financial advice and tips for users
+- **News Articles** (`news`): News and updates related to personal finance
+- **FAQs** (`faq`): Frequently asked questions with answers
+
+#### Custom REST API Endpoints
+- `GET /wordpress/wp-json/headless/v1/all-content` - Retrieves all content types in a single request
+- `GET /wordpress/wp-json/headless/v1/content/{type}` - Get paginated content by type
+- `GET /wordpress/wp-json/headless/v1/content/{type}/{id}` - Get single content item with full details
+- `GET /wordpress/wp-json/headless/v1/menus` - Get navigation menus
+- `GET /wordpress/wp-json/headless/v1/site-info` - Get site configuration
+- `GET /wordpress/wp-json/headless/v1/search` - Search across all content types
+
+#### Sample Content Seeder
+- 5 Financial Tips covering budgeting, saving, and expense tracking
+- 3 News Articles about personal finance updates
+- 5 FAQs about Kenfinly features and usage
+- Auto-seeding via admin interface or activation
+
+#### Security Features
+- JWT token authentication for protected endpoints
+- CORS headers configured for cross-origin requests
+- Application Passwords support (WordPress 5.6+)
+- Secure database storage outside web root
+
+#### Documentation
+- Complete API documentation in `docs/WORDPRESS_HEADLESS_CMS_API.md`
+- Test requests and examples for all endpoints
+- Integration examples for React and Laravel
+
+### Added - PostgreSQL Database Migration
+
+#### Database Configuration
+- Migrated from SQLite to PostgreSQL for main application
+- Database seeder for importing existing data
+- All tables recreated with PostgreSQL-compatible schema
+
+#### New Files
+- `database/seeders/ImportMysqlDataSeeder.php` - Data import seeder
+- Sample data including users, accounts, categories, and transactions
+
 ## [1.0.0] - 2025-11-08
 
 ### Added - Payment Module

@@ -27,7 +27,7 @@ class Headless_CMS_API {
         add_action('init', array($this, 'register_custom_post_types'));
         add_action('init', array($this, 'add_cors_headers'));
         add_filter('rest_pre_serve_request', array($this, 'rest_cors_headers'), 10, 4);
-        add_action('plugins_loaded', array($this, 'activate_required_plugins'));
+        add_action('admin_init', array($this, 'activate_required_plugins'));
     }
 
     public function add_cors_headers() {
@@ -45,6 +45,10 @@ class Headless_CMS_API {
     }
 
     public function activate_required_plugins() {
+        if (!function_exists('is_blog_installed') || !is_blog_installed()) {
+            return;
+        }
+        
         if (!function_exists('activate_plugin')) {
             require_once ABSPATH . 'wp-admin/includes/plugin.php';
         }

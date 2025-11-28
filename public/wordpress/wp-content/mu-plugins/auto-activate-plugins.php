@@ -4,7 +4,11 @@
  * Description: Automatically activates required plugins for headless CMS
  */
 
-add_action('plugins_loaded', function() {
+add_action('admin_init', function() {
+    if (!function_exists('is_blog_installed') || !is_blog_installed()) {
+        return;
+    }
+    
     if (!function_exists('activate_plugin')) {
         require_once ABSPATH . 'wp-admin/includes/plugin.php';
     }
