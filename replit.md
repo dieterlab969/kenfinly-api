@@ -36,6 +36,38 @@ The backend is built with Laravel 12 (PHP 8.2+) and provides a REST API. Key arc
 - **Transaction Photo Management**: Upload multiple receipt photos (up to 10 photos, 20MB each) with server-side optimization (resize, compress).
 - **Audit Trail**: Tracks creation, updates, deletions, and photo changes on transactions, including who made changes and when.
 
+# WordPress Headless CMS Integration
+
+## Overview
+The application includes a comprehensive WordPress headless CMS integration for content management. This allows the React frontend to fetch blog posts, pages, and custom content from an external WordPress site.
+
+## Configuration
+Set the following environment variables to enable WordPress integration:
+- `WORDPRESS_API_URL`: WordPress site URL (e.g., https://your-wordpress-site.com)
+- `WORDPRESS_USERNAME`: API authentication username
+- `WORDPRESS_APPLICATION_PASSWORD`: WordPress Application Password (recommended)
+- `WORDPRESS_TIMEOUT`: Request timeout in seconds (default: 30)
+- `WORDPRESS_RETRIES`: Number of retry attempts (default: 3)
+
+## Available Endpoints
+- `GET /api/wordpress/posts` - List blog posts
+- `GET /api/wordpress/pages` - List pages
+- `GET /api/wordpress/categories` - List categories
+- `GET /api/wordpress/search?q={query}` - Search content
+- `GET /api/wordpress/status` - Check integration status
+
+## Caching
+Content is automatically cached with configurable TTL:
+- Posts: 5 minutes
+- Pages: 10 minutes
+- Categories/Tags: 1 hour
+- Clear cache via Admin: `POST /api/admin/wordpress/cache/clear`
+
+## Files
+- `app/Services/WordPressService.php` - WordPress API client with caching
+- `app/Http/Controllers/Api/WordPressController.php` - API endpoints
+- `config/wordpress.php` - Configuration settings
+
 # External Dependencies
 
 - **HTTP Client**: Guzzle 7.x
@@ -45,3 +77,4 @@ The backend is built with Laravel 12 (PHP 8.2+) and provides a REST API. Key arc
 - **UUID Generation**: Ramsey UUID
 - **Image Processing**: Intervention Image (for photo optimization)
 - **Email Service**: SendGrid (via Replit integrations for email verification)
+- **WordPress Integration**: Laravel HTTP Client for headless CMS content

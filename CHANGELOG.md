@@ -2,6 +2,78 @@
 
 All notable changes to the Personal Finance Application (Kenfinly) are documented in this file.
 
+## [1.2.0] - 2025-11-28
+
+### Added - WordPress Headless CMS Laravel Integration
+
+This release adds a comprehensive Laravel-based WordPress REST API integration layer that enables seamless content management from a headless WordPress CMS.
+
+#### WordPress Service Class (`app/Services/WordPressService.php`)
+- Full WordPress REST API v2 integration
+- Automatic authentication support (Basic Auth, Application Passwords)
+- Configurable timeout and retry mechanisms
+- Built-in caching with customizable TTL per content type
+- Error handling with detailed logging
+- Support for standard and custom post types
+
+#### New API Endpoints (`/api/wordpress/...`)
+
+**Content Endpoints:**
+- `GET /posts` - List posts with pagination and filtering
+- `GET /posts/{id}` - Get post by ID
+- `GET /posts/slug/{slug}` - Get post by slug
+- `GET /pages` - List pages
+- `GET /pages/{id}` - Get page by ID
+- `GET /pages/slug/{slug}` - Get page by slug
+- `GET /categories` - List WordPress categories
+- `GET /tags` - List WordPress tags
+- `GET /media/{id}` - Get media item details
+
+**Custom Post Types:**
+- `GET /custom/{postType}` - List custom post type items
+- `GET /custom/{postType}/{id}` - Get custom post type item by ID
+- `GET /custom/{postType}/slug/{slug}` - Get custom post type item by slug
+
+**Utility Endpoints:**
+- `GET /search?q={query}` - Search across content
+- `GET /menus` - Get WordPress menus
+- `GET /menus/{location}` - Get menu by location
+- `GET /site-info` - Get WordPress site information
+- `GET /status` - Check WordPress API configuration and connection
+- `GET /test-connection` - Test WordPress API connectivity
+- `POST /admin/wordpress/cache/clear` - Clear WordPress cache (Admin only)
+
+#### Configuration (`config/wordpress.php`)
+- `WORDPRESS_API_URL` - WordPress site URL
+- `WORDPRESS_USERNAME` - Authentication username
+- `WORDPRESS_APPLICATION_PASSWORD` - Application password (recommended)
+- `WORDPRESS_TIMEOUT` - Request timeout (default: 30s)
+- `WORDPRESS_RETRIES` - Retry attempts (default: 3)
+- Customizable cache TTL for each content type
+
+#### Caching Features
+- Automatic content caching with configurable TTL
+- Cache bypass option via `?cache=false` query parameter
+- Content-type specific cache durations:
+  - Posts: 5 minutes
+  - Pages: 10 minutes
+  - Categories/Tags: 1 hour
+  - Menus: 30 minutes
+- Admin cache clear functionality
+
+#### Error Handling
+- Graceful degradation when WordPress is not configured
+- Detailed error logging for debugging
+- User-friendly error messages
+- HTTP status code mapping
+- Connection retry with exponential backoff
+
+#### Security Features
+- Application Password authentication support
+- Configurable allowed custom post types
+- No credentials exposed in responses
+- Request rate limiting awareness
+
 ## [1.1.0] - 2025-11-28
 
 ### Added - WordPress Headless CMS Integration
