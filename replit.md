@@ -86,31 +86,76 @@ Content is automatically cached with configurable TTL:
 - `app/Http/Controllers/Api/WordPressController.php` - API endpoints
 - `config/wordpress.php` - Configuration settings
 
+# Database Architecture (Two-Database System)
+
+## Overview
+
+Kenfinly uses a **two-database architecture** for separation of concerns:
+
+| Database | Type | Purpose |
+|----------|------|---------|
+| **Application Database** | PostgreSQL | Core business data (users, transactions, accounts, roles) |
+| **CMS Database** | SQLite (WordPress) | Content management (blog posts, pages, FAQs, tips) |
+
+## Data Flow
+
+```
+React Frontend
+      │
+      ▼
+Laravel API (Middleware)
+      │
+      ├──────────────────────┬─────────────────────────────┐
+      ▼                      ▼                             │
+ PostgreSQL           WordPress REST API                   │
+ (App Data)                  │                             │
+                             ▼                             │
+                         SQLite                            │
+                       (CMS Data)                          │
+```
+
+## Why Two Databases?
+
+1. **Security**: Financial data isolated from public content
+2. **Independence**: CMS can be updated without affecting core application
+3. **Performance**: Each database optimized for its specific use case
+4. **Flexibility**: Marketing team manages content via WordPress admin
+
+## No Direct Database Link
+
+The two databases do NOT share data directly. Laravel acts as the middleware:
+- Application data requests → Laravel queries PostgreSQL
+- Content requests → Laravel calls WordPress REST API → WordPress queries SQLite
+
 # Quick Start (Development Setup)
 
-1. **Database Setup** (after PostgreSQL is available):
-   ```bash
-   php artisan migrate --seed
-   ```
+**For comprehensive setup instructions, see: `docs/SETUP_MANUAL.md`**
 
-2. **Default Super Admin Credentials**:
-   - Email: admin@kenfinly.com
-   - Password: Admin@123
+## Quick Setup
 
-3. **JWT Secret** (already generated in .env):
-   ```bash
-   php artisan jwt:secret
-   ```
+```bash
+# 1. Install dependencies
+composer install && npm install
 
-4. **Frontend Build**:
-   ```bash
-   npm run build
-   ```
+# 2. Set up environment
+cp .env.example .env
+php artisan key:generate
+php artisan jwt:secret
 
-5. **Start Server**:
-   ```bash
-   php -S 0.0.0.0:5000 server.php
-   ```
+# 3. Database setup
+php artisan migrate --seed
+
+# 4. Start servers
+php artisan serve --host=0.0.0.0 --port=5000 & npm run dev
+```
+
+## Test Credentials
+
+| Email | Password | Role |
+|-------|----------|------|
+| owner@example.com | password | Owner |
+| viewer@example.com | password | Viewer |
+| admin@kenfinly.com | Admin@123 | Super Admin |
 
 ## Database Seeders
 All seeders are idempotent and can be run multiple times safely:
@@ -118,6 +163,14 @@ All seeders are idempotent and can be run multiple times safely:
 - `LanguageSeeder` - Creates English and Vietnamese languages with translations
 - `CategorySeeder` - Creates default expense and income categories
 - `SuperAdminSeeder` - Creates the super admin user
+
+# Documentation
+
+| Document | Location | Purpose |
+|----------|----------|---------|
+| Setup Manual | `docs/SETUP_MANUAL.md` | Complete installation guide |
+| WordPress API | `docs/WORDPRESS_HEADLESS_CMS_API.md` | CMS API reference |
+| API Testing | `docs/WORDPRESS_LARAVEL_API_TESTING.md` | API testing guide |
 
 # Company Information
 
