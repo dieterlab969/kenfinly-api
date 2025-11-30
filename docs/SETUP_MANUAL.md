@@ -51,7 +51,7 @@ Kenfinly uses a **headless architecture** with three main components working tog
               ▼                                        ▼
 ┌─────────────────────────────┐        ┌─────────────────────────────────────┐
 │   MySQL Database (Prod)      │        │       WordPress (Headless CMS)      │
-│   PostgreSQL (Dev/Replit)    │        │       with SQLite Database          │
+│                              │        │       with SQLite Database          │
 │      (Application Data)      │        │                                     │
 │                              │        │  • Blog Posts & Pages               │
 │  • Users & Roles             │        │  • Financial Tips                   │
@@ -70,7 +70,6 @@ Kenfinly uses a **headless architecture** with three main components working tog
 | **Laravel** | API Middleware | Provides security, data validation, business logic, and acts as a unified API gateway |
 | **React** | User Interface | Modern, fast, interactive frontend with real-time updates |
 | **MySQL** | Core Application Data (Production) | Our production database - reliable, ACID-compliant for financial transactions |
-| **PostgreSQL** | Core Application Data (Development) | Used in Replit development environment (built-in database) |
 | **SQLite** (WordPress) | CMS Content | Lightweight, no external database server needed for WordPress |
 
 ### Data Flow Examples
@@ -96,7 +95,6 @@ We use **TWO databases** that serve different purposes:
 | Database | Type | Environment | Purpose |
 |----------|------|-------------|---------|
 | **Application Database** | MySQL | Production | Core business data (users, transactions, accounts) |
-| **Application Database** | PostgreSQL | Development (Replit) | Same schema, built-in Replit database |
 | **CMS Database** | SQLite | All Environments | WordPress content (blog, pages, FAQs) |
 
 > **Note**: The application code is database-agnostic. Laravel's Eloquent ORM handles the differences between MySQL and PostgreSQL automatically. No code changes are needed when switching environments.
@@ -112,7 +110,7 @@ We use **TWO databases** that serve different purposes:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│        APPLICATION DATABASE (MySQL in Prod / PostgreSQL in Dev)  │
+│        APPLICATION DATABASE (MySQL in Prod)                     │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                   │
 │  ┌──────────┐    ┌─────────────┐    ┌─────────────────┐          │
@@ -190,13 +188,6 @@ php -m
 # - gd (image processing)
 ```
 
-### For Replit Environment
-
-If you're using Replit, most dependencies are pre-configured. Just ensure:
-- PHP 8.3 module is installed
-- Node.js 20 module is installed
-- PostgreSQL database is created
-
 ---
 
 ## 4. Step-by-Step Installation
@@ -255,13 +246,6 @@ DB_PORT=5432
 DB_DATABASE=your-database-name
 DB_USERNAME=your-username
 DB_PASSWORD=your-password
-
-# For Replit: Use these environment variable references
-# DB_HOST=${PGHOST}
-# DB_PORT=${PGPORT}
-# DB_DATABASE=${PGDATABASE}
-# DB_USERNAME=${PGUSER}
-# DB_PASSWORD=${PGPASSWORD}
 
 # WordPress Configuration (Optional - for content features)
 WORDPRESS_API_URL=http://localhost:5000/wordpress
@@ -348,8 +332,6 @@ npm run build
 # Option 2: Manual start
 php artisan serve --host=0.0.0.0 --port=5000 & npm run dev
 
-# Option 3: For Replit
-# The workflow is pre-configured to start automatically
 ```
 
 ---
@@ -380,21 +362,6 @@ APP_FALLBACK_LOCALE=en
 # DB_DATABASE=kenfinly
 # DB_USERNAME=your_username
 # DB_PASSWORD=your_password
-
-# DEVELOPMENT (PostgreSQL - Replit built-in):
-DB_CONNECTION=pgsql
-DB_HOST=127.0.0.1
-DB_PORT=5432
-DB_DATABASE=kenfinly
-DB_USERNAME=postgres
-DB_PASSWORD=
-
-# For Replit environment (uses system environment variables):
-# DB_HOST=${PGHOST}
-# DB_PORT=${PGPORT}
-# DB_DATABASE=${PGDATABASE}
-# DB_USERNAME=${PGUSER}
-# DB_PASSWORD=${PGPASSWORD}
 
 #===================================================================
 # JWT AUTHENTICATION
@@ -750,6 +717,6 @@ git push origin feature/my-feature
 
 ---
 
-**Document Maintainer**: Development Team  
+**Document Maintainer**: Dieter R.  
 **Last Review Date**: October 28, 2025  
 **Next Review**: When major architecture changes occur
