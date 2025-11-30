@@ -34,7 +34,7 @@ The frontend is a Single Page Application (SPA) built with React 19.2, Vite 7.x,
 
 The backend is built with Laravel 12 (PHP 8.2+) and provides a REST API. Key architectural decisions include:
 - **Authentication**: JWT via `tymon/jwt-auth` for stateless API authentication.
-- **Database**: PostgreSQL with Eloquent ORM.
+- **Database**: MySQL (Production) / PostgreSQL (Development on Replit) with Eloquent ORM.
 - **Authorization**: Role-Based Access Control (RBAC) with 'owner', 'editor', and 'viewer' roles, enforced via custom middleware. Super Admin roles have full system-wide management capabilities through a dedicated admin dashboard.
 - **Core Models**: `users`, `roles`, `user_roles`, `accounts`, `categories`, and `transactions`.
 - **Transaction Management**: Comprehensive detail viewing, photo management (with server-side image optimization), and detailed change history tracking (audit trail).
@@ -92,10 +92,13 @@ Content is automatically cached with configurable TTL:
 
 Kenfinly uses a **two-database architecture** for separation of concerns:
 
-| Database | Type | Purpose |
-|----------|------|---------|
-| **Application Database** | PostgreSQL | Core business data (users, transactions, accounts, roles) |
-| **CMS Database** | SQLite (WordPress) | Content management (blog posts, pages, FAQs, tips) |
+| Database | Type | Environment | Purpose |
+|----------|------|-------------|---------|
+| **Application Database** | MySQL | Production | Core business data (users, transactions, accounts, roles) |
+| **Application Database** | PostgreSQL | Development (Replit) | Same schema, built-in Replit database |
+| **CMS Database** | SQLite | All Environments | Content management (blog posts, pages, FAQs, tips) |
+
+> **Note**: The code is database-agnostic. Laravel's Eloquent ORM handles MySQL/PostgreSQL differences automatically.
 
 ## Data Flow
 

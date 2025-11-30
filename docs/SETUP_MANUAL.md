@@ -50,15 +50,15 @@ Kenfinly uses a **headless architecture** with three main components working tog
               │                                        │
               ▼                                        ▼
 ┌─────────────────────────────┐        ┌─────────────────────────────────────┐
-│      PostgreSQL Database     │        │       WordPress (Headless CMS)      │
-│      (Application Data)      │        │       with SQLite Database          │
-│                              │        │                                     │
-│  • Users & Roles             │        │  • Blog Posts & Pages               │
-│  • Accounts                  │        │  • Financial Tips                   │
-│  • Transactions              │        │  • News Articles                    │
-│  • Categories                │        │  • FAQs                             │
-│  • Budgets                   │        │  • Media Files                      │
-│  • Licenses                  │        │                                     │
+│   MySQL Database (Prod)      │        │       WordPress (Headless CMS)      │
+│   PostgreSQL (Dev/Replit)    │        │       with SQLite Database          │
+│      (Application Data)      │        │                                     │
+│                              │        │  • Blog Posts & Pages               │
+│  • Users & Roles             │        │  • Financial Tips                   │
+│  • Accounts                  │        │  • News Articles                    │
+│  • Transactions              │        │  • FAQs                             │
+│  • Categories                │        │  • Media Files                      │
+│  • Budgets & Licenses        │        │                                     │
 └─────────────────────────────┘        └─────────────────────────────────────┘
 ```
 
@@ -69,14 +69,15 @@ Kenfinly uses a **headless architecture** with three main components working tog
 | **WordPress** | Content Management | Marketing team can easily manage blog posts, landing pages, and FAQs without developer help |
 | **Laravel** | API Middleware | Provides security, data validation, business logic, and acts as a unified API gateway |
 | **React** | User Interface | Modern, fast, interactive frontend with real-time updates |
-| **PostgreSQL** | Core Application Data | Reliable, ACID-compliant database for financial transactions |
+| **MySQL** | Core Application Data (Production) | Our production database - reliable, ACID-compliant for financial transactions |
+| **PostgreSQL** | Core Application Data (Development) | Used in Replit development environment (built-in database) |
 | **SQLite** (WordPress) | CMS Content | Lightweight, no external database server needed for WordPress |
 
 ### Data Flow Examples
 
 **User logs in and views dashboard:**
 ```
-User → React UI → Laravel API → PostgreSQL → Returns account/transaction data
+User → React UI → Laravel API → MySQL/PostgreSQL → Returns account/transaction data
 ```
 
 **User reads a blog post:**
@@ -92,10 +93,13 @@ User → React UI → Laravel API → WordPress REST API → SQLite → Returns 
 
 We use **TWO databases** that serve different purposes:
 
-| Database | Type | Location | Purpose |
-|----------|------|----------|---------|
-| **Application Database** | PostgreSQL | Replit Managed / External Server | Core business data (users, transactions, accounts) |
-| **CMS Database** | SQLite | `/public/wordpress/wp-content/database/` | WordPress content (blog, pages, FAQs) |
+| Database | Type | Environment | Purpose |
+|----------|------|-------------|---------|
+| **Application Database** | MySQL | Production | Core business data (users, transactions, accounts) |
+| **Application Database** | PostgreSQL | Development (Replit) | Same schema, built-in Replit database |
+| **CMS Database** | SQLite | All Environments | WordPress content (blog, pages, FAQs) |
+
+> **Note**: The application code is database-agnostic. Laravel's Eloquent ORM handles the differences between MySQL and PostgreSQL automatically. No code changes are needed when switching environments.
 
 ### Why Two Databases?
 
@@ -108,7 +112,7 @@ We use **TWO databases** that serve different purposes:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    APPLICATION DATABASE (PostgreSQL)              │
+│        APPLICATION DATABASE (MySQL in Prod / PostgreSQL in Dev)  │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                   │
 │  ┌──────────┐    ┌─────────────┐    ┌─────────────────┐          │
@@ -367,8 +371,17 @@ APP_LOCALE=en
 APP_FALLBACK_LOCALE=en
 
 #===================================================================
-# DATABASE CONFIGURATION (PostgreSQL - Core Application)
+# DATABASE CONFIGURATION
 #===================================================================
+# PRODUCTION (MySQL):
+# DB_CONNECTION=mysql
+# DB_HOST=your-mysql-host.com
+# DB_PORT=3306
+# DB_DATABASE=kenfinly
+# DB_USERNAME=your_username
+# DB_PASSWORD=your_password
+
+# DEVELOPMENT (PostgreSQL - Replit built-in):
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
 DB_PORT=5432
