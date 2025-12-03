@@ -96,9 +96,9 @@ Kenfinly uses a **two-database architecture** for separation of concerns:
 |----------|------|-------------|---------|
 | **Application Database** | MySQL | Production | Core business data (users, transactions, accounts, roles) |
 | **Application Database** | PostgreSQL | Development (Replit) | Same schema, built-in Replit database |
-| **CMS Database** | SQLite | All Environments | Content management (blog posts, pages, FAQs, tips) |
+| **WordPress CMS Database** | MySQL | All Environments | Content management (blog posts, pages, FAQs, tips) |
 
-> **Note**: The code is database-agnostic. Laravel's Eloquent ORM handles MySQL/PostgreSQL differences automatically.
+> **Note**: The code is database-agnostic. Laravel's Eloquent ORM handles MySQL/PostgreSQL differences automatically. WordPress uses its own MySQL database (can share the same MySQL server with a different database name).
 
 ## Data Flow
 
@@ -110,11 +110,11 @@ Laravel API (Middleware)
       │
       ├──────────────────────┬─────────────────────────────┐
       ▼                      ▼                             │
- PostgreSQL           WordPress REST API                   │
+MySQL/PostgreSQL      WordPress REST API                   │
  (App Data)                  │                             │
                              ▼                             │
-                         SQLite                            │
-                       (CMS Data)                          │
+                         MySQL                             │
+                    (WordPress CMS Data)                   │
 ```
 
 ## Why Two Databases?
@@ -128,7 +128,7 @@ Laravel API (Middleware)
 
 The two databases do NOT share data directly. Laravel acts as the middleware:
 - Application data requests → Laravel queries PostgreSQL
-- Content requests → Laravel calls WordPress REST API → WordPress queries SQLite
+- Content requests → Laravel calls WordPress REST API → WordPress queries MySQL
 
 # Quick Start (Development Setup)
 

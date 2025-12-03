@@ -51,7 +51,7 @@ Kenfinly uses a **headless architecture** with three main components working tog
               ▼                                        ▼
 ┌─────────────────────────────┐        ┌─────────────────────────────────────┐
 │   MySQL Database (Prod)      │        │       WordPress (Headless CMS)      │
-│                              │        │       with SQLite Database          │
+│                              │        │       with MySQL Database           │
 │      (Application Data)      │        │                                     │
 │                              │        │  • Blog Posts & Pages               │
 │  • Users & Roles             │        │  • Financial Tips                   │
@@ -70,7 +70,8 @@ Kenfinly uses a **headless architecture** with three main components working tog
 | **Laravel** | API Middleware | Provides security, data validation, business logic, and acts as a unified API gateway |
 | **React** | User Interface | Modern, fast, interactive frontend with real-time updates |
 | **MySQL** | Core Application Data (Production) | Our production database - reliable, ACID-compliant for financial transactions |
-| **SQLite** (WordPress) | CMS Content | Lightweight, no external database server needed for WordPress |
+| **PostgreSQL** | Core Application Data (Development) | Used in Replit development environment (built-in database) |
+| **MySQL** (WordPress) | CMS Content | WordPress headless CMS uses its own MySQL database |
 
 ### Data Flow Examples
 
@@ -81,7 +82,7 @@ User → React UI → Laravel API → MySQL/PostgreSQL → Returns account/trans
 
 **User reads a blog post:**
 ```
-User → React UI → Laravel API → WordPress REST API → SQLite → Returns blog content
+User → React UI → Laravel API → WordPress REST API → MySQL (WordPress DB) → Returns blog content
 ```
 
 ---
@@ -95,9 +96,10 @@ We use **TWO databases** that serve different purposes:
 | Database | Type | Environment | Purpose |
 |----------|------|-------------|---------|
 | **Application Database** | MySQL | Production | Core business data (users, transactions, accounts) |
-| **CMS Database** | SQLite | All Environments | WordPress content (blog, pages, FAQs) |
+| **Application Database** | PostgreSQL | Development (Replit) | Same schema, built-in Replit database |
+| **WordPress CMS Database** | MySQL | All Environments | WordPress content (blog, pages, FAQs) |
 
-> **Note**: The application code is database-agnostic. Laravel's Eloquent ORM handles the differences between MySQL and PostgreSQL automatically. No code changes are needed when switching environments.
+> **Note**: The Laravel application code is database-agnostic. Eloquent ORM handles the differences between MySQL and PostgreSQL automatically. WordPress requires its own MySQL database (can be on the same or separate MySQL server).
 
 ### Why Two Databases?
 
@@ -129,8 +131,8 @@ We use **TWO databases** that serve different purposes:
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│                    CMS DATABASE (WordPress/SQLite)                │
-│  Location: storage/wordpress/.ht.sqlite                           │
+│                    CMS DATABASE (WordPress/MySQL)                 │
+│  Database: Configured via WP_DB_* environment variables           │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                   │
 │  ┌──────────────────┐    ┌─────────────────────────────────────┐ │
@@ -151,7 +153,7 @@ We use **TWO databases** that serve different purposes:
 **Important**: The two databases do NOT share data directly. Laravel acts as the bridge:
 
 - When React needs application data → Laravel queries PostgreSQL
-- When React needs content → Laravel calls WordPress REST API → WordPress queries SQLite
+- When React needs content → Laravel calls WordPress REST API → WordPress queries MySQL
 - This separation provides security and flexibility
 
 ---
@@ -178,7 +180,7 @@ php -m
 
 # Required extensions:
 # - pdo_pgsql (PostgreSQL)
-# - pdo_sqlite (SQLite for WordPress)
+# - pdo_mysql (MySQL for WordPress)
 # - curl
 # - mbstring
 # - xml
@@ -287,27 +289,46 @@ php artisan db:seed
 
 If you need the content management features:
 
+**Prerequisites:** WordPress requires a MySQL database. You can:
+- Use the same MySQL server as the main application (with a different database)
+- Use a separate MySQL server for WordPress
+
+**Step 8.1: Create WordPress MySQL Database**
+```sql
+-- Connect to your MySQL server and run:
+CREATE DATABASE wordpress CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+GRANT ALL PRIVILEGES ON wordpress.* TO 'your_username'@'%';
+FLUSH PRIVILEGES;
+```
+
+**Step 8.2: Set WordPress Environment Variables**
+Add these to your `.env` file:
+```env
+WP_DB_HOST=your-mysql-host.com
+WP_DB_NAME=wordpress
+WP_DB_USER=your_username
+WP_DB_PASSWORD=your_password
+```
+
+**Step 8.3: Run WordPress Installation Script**
 ```bash
 # Run WordPress installation script (recommended)
 ./install-wp.sh
 
 # This script automatically:
-# 1. Creates storage/wordpress/ directory for SQLite database
-# 2. Deploys wp-config.php from wordpress-custom/configs/
-# 3. Copies custom plugins and must-use plugins
-# 4. Sets up required permissions
-# 5. Creates the SQLite database at storage/wordpress/.ht.sqlite
+# 1. Deploys wp-config.php from wordpress-custom/configs/
+# 2. Copies custom plugins and must-use plugins
+# 3. Sets up required permissions
+# 4. Configures WordPress to use MySQL (via environment variables)
 ```
 
 **File Structure:**
 ```
 public/wordpress/          # WordPress core (downloaded via Composer)
 wordpress-custom/          # Custom configurations and plugins
-├── configs/               # wp-config.php and other configs
+├── configs/               # wp-config.php (MySQL configuration)
 ├── mu-plugins/            # Must-use plugins
 └── plugins/               # Custom plugins
-storage/wordpress/         # SQLite database location
-└── .ht.sqlite             # WordPress SQLite database
 ```
 
 **Access WordPress Admin:**
@@ -371,7 +392,17 @@ JWT_TTL=60                 # Token lifetime in minutes (default: 60)
 JWT_REFRESH_TTL=20160      # Refresh token lifetime (default: 2 weeks)
 
 #===================================================================
-# WORDPRESS HEADLESS CMS (Optional)
+# WORDPRESS HEADLESS CMS DATABASE (MySQL)
+#===================================================================
+WP_DB_HOST=your-mysql-host.com
+WP_DB_NAME=wordpress
+WP_DB_USER=your_username
+WP_DB_PASSWORD=your_password
+WP_TABLE_PREFIX=wp_              # Optional, default: wp_
+WP_JWT_SECRET=your-jwt-secret    # Optional, for JWT authentication
+
+#===================================================================
+# WORDPRESS LARAVEL API CONFIGURATION
 #===================================================================
 WORDPRESS_API_URL=http://localhost:5000/wordpress
 WORDPRESS_USERNAME=admin
@@ -543,7 +574,7 @@ php artisan config:clear
 **Solution:**
 1. Verify WordPress is installed by running `./install-wp.sh`
 2. Check that `public/wordpress/` directory exists (downloaded via Composer)
-3. Verify SQLite database exists at `storage/wordpress/.ht.sqlite`
+3. Verify WordPress MySQL database connection is correct
 4. Check `WORDPRESS_API_URL` in `.env`
 5. Ensure WordPress REST API is enabled
 ```bash
