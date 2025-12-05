@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, Mail, Phone, MapPin } from 'lucide-react';
 import axios from 'axios';
@@ -13,18 +13,18 @@ function Footer() {
         company_address: '2nd Floor, 81 CMT8 Street, Ben Thanh Ward, District 1, Ho Chi Minh City',
     });
 
-    useEffect(() => {
-        const fetchCompanyInfo = async () => {
-            try {
-                const response = await axios.get('/api/settings/company');
-                setCompanyInfo(response.data);
-            } catch (error) {
-                console.error('Failed to fetch company info:', error);
-                // Use defaults if API call fails
-            }
-        };
-        fetchCompanyInfo();
+    const fetchCompanyInfo = useCallback(async () => {
+        try {
+            const response = await axios.get('/api/settings/company');
+            setCompanyInfo(response.data);
+        } catch (error) {
+            console.error('Failed to fetch company info:', error);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchCompanyInfo();
+    }, [fetchCompanyInfo]);
 
     return (
         <footer className="bg-gray-900 text-gray-300">
