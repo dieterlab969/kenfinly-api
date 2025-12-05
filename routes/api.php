@@ -22,12 +22,14 @@ use App\Http\Controllers\Admin\CacheManagementController;
 use App\Http\Controllers\Admin\TranslationManagementController;
 use App\Http\Controllers\Admin\TransactionManagementController;
 use App\Http\Controllers\Api\WordPressController;
+use App\Http\Controllers\Api\PublicSettingsController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::get('/auth/config', [AuthController::class, 'config']);
+Route::get('/settings/company', [PublicSettingsController::class, 'getCompanyInfo']);
 
 // Email verification routes (public)
 Route::post('/email/verify', [EmailVerificationController::class, 'verify']);

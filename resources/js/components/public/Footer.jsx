@@ -1,9 +1,30 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, Mail, Phone, MapPin } from 'lucide-react';
+import axios from 'axios';
 
 function Footer() {
     const currentYear = new Date().getFullYear();
+    const [companyInfo, setCompanyInfo] = useState({
+        company_name: 'Getkenka',
+        company_tax_code: '0318304909',
+        company_email: 'purchasevn@getkenka.com',
+        company_phone: '+84 0941069969',
+        company_address: '2nd Floor, 81 CMT8 Street, Ben Thanh Ward, District 1, Ho Chi Minh City',
+    });
+
+    useEffect(() => {
+        const fetchCompanyInfo = async () => {
+            try {
+                const response = await axios.get('/api/settings/company');
+                setCompanyInfo(response.data);
+            } catch (error) {
+                console.error('Failed to fetch company info:', error);
+                // Use defaults if API call fails
+            }
+        };
+        fetchCompanyInfo();
+    }, []);
 
     return (
         <footer className="bg-gray-900 text-gray-300">
@@ -73,19 +94,23 @@ function Footer() {
 
                     <div>
                         <h3 className="text-white font-semibold mb-4">Contact</h3>
-                        <p className="text-sm text-yellow-400 font-medium mb-3">Getkenka Ltd – Tax Code: 0318304909</p>
+                        <p className="text-sm text-yellow-400 font-medium mb-3">{companyInfo.company_name} Ltd – Tax Code: {companyInfo.company_tax_code}</p>
                         <ul className="space-y-3">
                             <li className="flex items-center space-x-3">
                                 <Mail className="w-5 h-5 text-blue-500" />
-                                <span>purchasevn@getkenka.com</span>
+                                <a href={`mailto:${companyInfo.company_email}`} className="hover:text-white transition-colors">
+                                    {companyInfo.company_email}
+                                </a>
                             </li>
                             <li className="flex items-center space-x-3">
                                 <Phone className="w-5 h-5 text-blue-500" />
-                                <span>+84 0941069969</span>
+                                <a href={`tel:${companyInfo.company_phone}`} className="hover:text-white transition-colors">
+                                    {companyInfo.company_phone}
+                                </a>
                             </li>
                             <li className="flex items-start space-x-3">
                                 <MapPin className="w-5 h-5 text-blue-500 mt-0.5" />
-                                <span>2nd Floor, 81 CMT8 Street<br />Ben Thanh Ward, Dist 1, HCMC</span>
+                                <span>{companyInfo.company_address}</span>
                             </li>
                         </ul>
                     </div>
