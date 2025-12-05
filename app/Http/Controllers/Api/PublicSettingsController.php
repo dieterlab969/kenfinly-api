@@ -5,8 +5,16 @@ namespace App\Http\Controllers\Api;
 use App\Models\AppSetting;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * Controller to provide public company settings via API.
+ */
 class PublicSettingsController
 {
+    /**
+     * Get company information.
+     *
+     * @return JsonResponse
+     */
     public function getCompanyInfo(): JsonResponse
     {
         return response()->json([
