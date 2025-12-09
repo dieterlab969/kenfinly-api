@@ -6,16 +6,16 @@ import axios from 'axios';
 function Footer() {
     const currentYear = new Date().getFullYear();
     const [companyInfo, setCompanyInfo] = useState({
-        company_name: 'Getkenka',
-        company_tax_code: '0318304909',
-        company_email: 'purchasevn@getkenka.com',
-        company_phone: '+84 0941069969',
-        company_address: '2nd Floor, 81 CMT8 Street, Ben Thanh Ward, District 1, Ho Chi Minh City',
+        company_name: import.meta.env.COMPANY_NAME || process.env.COMPANY_NAME,
+        company_tax_code: import.meta.env.COMPANY_TAX_CODE || process.env.COMPANY_TAX_CODE,
+        company_email: import.meta.env.COMPANY_EMAIL || process.env.COMPANY_EMAIL,
+        company_phone: import.meta.env.COMPANY_PHONE || process.env.COMPANY_PHONE,
+        company_address: import.meta.env.COMPANY_ADDRESS || process.env.COMPANY_ADDRESS,
     });
 
     const fetchCompanyInfo = useCallback(async () => {
         try {
-            const response = await axios.get('/api/settings/company');
+            const response = await axios.get('/settings/company');
             setCompanyInfo(response.data);
         } catch (error) {
             console.error('Failed to fetch company info:', error);
@@ -38,9 +38,7 @@ function Footer() {
                             <span className="text-xl font-bold text-white">Kenfinly</span>
                         </div>
                         <p className="text-gray-400 mb-4 max-w-md">
-                            Take control of your financial future with Kenfinly. Track expenses, 
-                            set budgets, and achieve your financial goals with our intuitive 
-                            personal finance management platform.
+                            Take control of your spending with Kenfinly. Track every expense and transform your personal finance management effortlessly.
                         </p>
                         <div className="flex space-x-4">
                             <a href="#" className="text-gray-400 hover:text-white transition-colors">
@@ -94,7 +92,7 @@ function Footer() {
 
                     <div>
                         <h3 className="text-white font-semibold mb-4">Contact</h3>
-                        <p className="text-sm text-yellow-400 font-medium mb-3">{companyInfo.company_name} Ltd – Tax Code: {companyInfo.company_tax_code}</p>
+                        <p className="text-sm text-yellow-400 font-medium mb-3">{companyInfo.company_name} – Tax Code: {companyInfo.company_tax_code}</p>
                         <ul className="space-y-3">
                             <li className="flex items-center space-x-3">
                                 <Mail className="w-5 h-5 text-blue-500" />

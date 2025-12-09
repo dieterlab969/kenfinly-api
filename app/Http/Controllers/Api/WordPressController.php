@@ -7,15 +7,28 @@ use App\Services\WordPressService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * Class WordPressController
+ */
 class WordPressController extends Controller
 {
+    /**
+     * @var WordPressService
+     */
     private WordPressService $wordPressService;
 
+    /**
+     * @param WordPressService $wordPressService
+     */
     public function __construct(WordPressService $wordPressService)
     {
         $this->wordPressService = $wordPressService;
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function posts(Request $request): JsonResponse
     {
         $params = $this->buildQueryParams($request, [
@@ -36,6 +49,11 @@ class WordPressController extends Controller
         return $this->formatResponse($result, 'posts');
     }
 
+    /**
+     * @param int $id
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function post(int $id, Request $request): JsonResponse
     {
         $useCache = $request->boolean('cache', true);
@@ -44,6 +62,11 @@ class WordPressController extends Controller
         return $this->formatResponse($result, 'post');
     }
 
+    /**
+     * @param string $slug
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function postBySlug(string $slug, Request $request): JsonResponse
     {
         $useCache = $request->boolean('cache', true);
@@ -52,6 +75,10 @@ class WordPressController extends Controller
         return $this->formatResponse($result, 'post');
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function pages(Request $request): JsonResponse
     {
         $params = $this->buildQueryParams($request, [
@@ -69,6 +96,11 @@ class WordPressController extends Controller
         return $this->formatResponse($result, 'pages');
     }
 
+    /**
+     * @param int $id
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function page(int $id, Request $request): JsonResponse
     {
         $useCache = $request->boolean('cache', true);
@@ -77,6 +109,11 @@ class WordPressController extends Controller
         return $this->formatResponse($result, 'page');
     }
 
+    /**
+     * @param string $slug
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function pageBySlug(string $slug, Request $request): JsonResponse
     {
         $useCache = $request->boolean('cache', true);
@@ -85,6 +122,10 @@ class WordPressController extends Controller
         return $this->formatResponse($result, 'page');
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function categories(Request $request): JsonResponse
     {
         $params = $this->buildQueryParams($request, [
@@ -101,6 +142,10 @@ class WordPressController extends Controller
         return $this->formatResponse($result, 'categories');
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function tags(Request $request): JsonResponse
     {
         $params = $this->buildQueryParams($request, [
@@ -116,6 +161,11 @@ class WordPressController extends Controller
         return $this->formatResponse($result, 'tags');
     }
 
+    /**
+     * @param int $id
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function media(int $id, Request $request): JsonResponse
     {
         $useCache = $request->boolean('cache', true);
@@ -124,15 +174,15 @@ class WordPressController extends Controller
         return $this->formatResponse($result, 'media');
     }
 
+    /**
+     * @param string $postType
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function customPostType(string $postType, Request $request): JsonResponse
     {
-        $allowedPostTypes = config('wordpress.custom_post_types', []);
-        
-        if (!empty($allowedPostTypes) && !in_array($postType, $allowedPostTypes)) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Custom post type not allowed',
-            ], 403);
+        if ($errorResponse = $this->validateCustomPostType($postType)) {
+            return $errorResponse;
         }
 
         $params = $this->buildQueryParams($request, [
@@ -149,15 +199,16 @@ class WordPressController extends Controller
         return $this->formatResponse($result, $postType);
     }
 
+    /**
+     * @param string $postType
+     * @param int $id
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function customPostTypeItem(string $postType, int $id, Request $request): JsonResponse
     {
-        $allowedPostTypes = config('wordpress.custom_post_types', []);
-        
-        if (!empty($allowedPostTypes) && !in_array($postType, $allowedPostTypes)) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Custom post type not allowed',
-            ], 403);
+        if ($errorResponse = $this->validateCustomPostType($postType)) {
+            return $errorResponse;
         }
 
         $useCache = $request->boolean('cache', true);
@@ -166,15 +217,16 @@ class WordPressController extends Controller
         return $this->formatResponse($result, $postType);
     }
 
+    /**
+     * @param string $postType
+     * @param string $slug
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function customPostTypeBySlug(string $postType, string $slug, Request $request): JsonResponse
     {
-        $allowedPostTypes = config('wordpress.custom_post_types', []);
-        
-        if (!empty($allowedPostTypes) && !in_array($postType, $allowedPostTypes)) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Custom post type not allowed',
-            ], 403);
+        if ($errorResponse = $this->validateCustomPostType($postType)) {
+            return $errorResponse;
         }
 
         $useCache = $request->boolean('cache', true);
@@ -183,6 +235,10 @@ class WordPressController extends Controller
         return $this->formatResponse($result, $postType);
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function search(Request $request): JsonResponse
     {
         $request->validate([
@@ -200,6 +256,10 @@ class WordPressController extends Controller
         return $this->formatResponse($result, 'search_results');
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function menus(Request $request): JsonResponse
     {
         $useCache = $request->boolean('cache', true);
@@ -208,6 +268,11 @@ class WordPressController extends Controller
         return $this->formatResponse($result, 'menus');
     }
 
+    /**
+     * @param string $location
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function menu(string $location, Request $request): JsonResponse
     {
         $useCache = $request->boolean('cache', true);
@@ -216,6 +281,10 @@ class WordPressController extends Controller
         return $this->formatResponse($result, 'menu');
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function siteInfo(Request $request): JsonResponse
     {
         $useCache = $request->boolean('cache', true);
@@ -224,20 +293,27 @@ class WordPressController extends Controller
         return $this->formatResponse($result, 'site_info');
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function clearCache(Request $request): JsonResponse
     {
         $type = $request->input('type');
-        
+
         $this->wordPressService->clearCache($type);
 
         return response()->json([
             'success' => true,
-            'message' => $type 
+            'message' => $type
                 ? "WordPress {$type} cache cleared successfully"
                 : 'WordPress cache cleared successfully',
         ]);
     }
 
+    /**
+     * @return JsonResponse
+     */
     public function testConnection(): JsonResponse
     {
         $result = $this->wordPressService->testConnection();
@@ -259,10 +335,13 @@ class WordPressController extends Controller
         ], $result['status'] ?? 500);
     }
 
+    /**
+     * @return JsonResponse
+     */
     public function status(): JsonResponse
     {
         $isConfigured = $this->wordPressService->isConfigured();
-        
+
         if (!$isConfigured) {
             return response()->json([
                 'success' => true,
@@ -277,7 +356,7 @@ class WordPressController extends Controller
             'success' => true,
             'configured' => true,
             'connected' => $connectionTest['success'],
-            'message' => $connectionTest['success'] 
+            'message' => $connectionTest['success']
                 ? 'WordPress API is configured and connected'
                 : 'WordPress API is configured but connection failed',
             'details' => $connectionTest['success'] ? [
@@ -287,10 +366,15 @@ class WordPressController extends Controller
         ]);
     }
 
+    /**
+     * @param Request $request
+     * @param array $defaults
+     * @return array
+     */
     private function buildQueryParams(Request $request, array $defaults): array
     {
         $params = [];
-        
+
         foreach ($defaults as $key => $default) {
             $value = $request->input($key, $default);
             if ($value !== null) {
@@ -301,6 +385,11 @@ class WordPressController extends Controller
         return $params;
     }
 
+    /**
+     * @param array $result
+     * @param string $dataKey
+     * @return JsonResponse
+     */
     private function formatResponse(array $result, string $dataKey): JsonResponse
     {
         if ($result['success']) {
@@ -323,5 +412,23 @@ class WordPressController extends Controller
             'success' => false,
             'error' => $result['error'],
         ], $result['status'] ?? 500);
+    }
+
+    /**
+     * Validate if the given custom post type is allowed.
+     * Returns a JsonResponse error if invalid, or null if valid.
+     */
+    private function validateCustomPostType(string $postType): ?JsonResponse
+    {
+        $allowedPostTypes = config('wordpress.custom_post_types', []);
+
+        if (!empty($allowedPostTypes) && !in_array($postType, $allowedPostTypes)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Custom post type not allowed',
+            ], 403);
+        }
+        // Return null if post type is valid
+        return null;
     }
 }

@@ -18,8 +18,7 @@
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "tymon/jwt-auth": "^2.2",
-        "wpackagist-plugin/jwt-authentication-for-wp-rest-api": "^1.4",
-        "wpackagist-plugin/sqlite-database-integration": "^2.2"
+        "wpackagist-plugin/jwt-authentication-for-wp-rest-api": "^1.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

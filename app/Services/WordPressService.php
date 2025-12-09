@@ -8,30 +8,60 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Client\Response;
 use Exception;
 
+/**
+ * Class WordPressService
+ */
 class WordPressService
 {
+    /**
+     * @var string
+     */
     private string $baseUrl;
+    /**
+     * @var string|null
+     */
     private ?string $username = null;
+    /**
+     * @var string|null
+     */
     private ?string $password = null;
+    /**
+     * @var string|null
+     */
     private ?string $applicationPassword = null;
+    /**
+     * @var int
+     */
     private int $timeout;
+    /**
+     * @var int
+     */
     private int $retries;
+    /**
+     * @var array
+     */
     private array $defaultCacheTtl;
 
+    /**
+     *
+     */
     public function __construct()
     {
         $this->initializeConfig();
     }
 
+    /**
+     * @return void
+     */
     private function initializeConfig(): void
     {
         $this->baseUrl = rtrim(config('wordpress.api_url', env('WORDPRESS_API_URL', '')), '/');
         $this->username = config('wordpress.username', env('WORDPRESS_USERNAME'));
         $this->password = config('wordpress.password', env('WORDPRESS_PASSWORD'));
         $this->applicationPassword = config('wordpress.application_password', env('WORDPRESS_APPLICATION_PASSWORD'));
-        $this->timeout = config('wordpress.timeout', 30);
+        $this->timeout = config('wordpress.timeout', 60);
         $this->retries = config('wordpress.retries', 3);
-        
+
         $this->defaultCacheTtl = [
             'posts' => config('wordpress.cache.posts', 300),
             'pages' => config('wordpress.cache.pages', 600),
@@ -43,11 +73,19 @@ class WordPressService
         ];
     }
 
+    /**
+     * @return bool
+     */
     public function isConfigured(): bool
     {
         return !empty($this->baseUrl);
     }
 
+    /**
+     * Laravel's HTTP client
+     *
+     * @return \Illuminate\Http\Client\PendingRequest
+     */
     private function getHttpClient(): \Illuminate\Http\Client\PendingRequest
     {
         $client = Http::timeout($this->timeout)
@@ -57,7 +95,8 @@ class WordPressService
             ->withHeaders([
                 'Accept' => 'application/json',
                 'Content-Type' => 'application/json',
-            ]);
+            ])
+            ->withOptions(['verify' => false]);
 
         if ($this->applicationPassword && $this->username) {
             $client->withBasicAuth($this->username, $this->applicationPassword);
@@ -68,16 +107,30 @@ class WordPressService
         return $client;
     }
 
+    /**
+     * @param string $endpoint
+     * @return string
+     */
     private function buildEndpoint(string $endpoint): string
     {
         return $this->baseUrl . '/wp-json/wp/v2/' . ltrim($endpoint, '/');
     }
 
+    /**
+     * @param string $namespace
+     * @param string $endpoint
+     * @return string
+     */
     private function buildCustomEndpoint(string $namespace, string $endpoint): string
     {
         return $this->baseUrl . '/wp-json/' . trim($namespace, '/') . '/' . ltrim($endpoint, '/');
     }
 
+    /**
+     * @param Response $response
+     * @param string $context
+     * @return array
+     */
     private function handleResponse(Response $response, string $context = ''): array
     {
         if ($response->successful()) {
@@ -105,14 +158,18 @@ class WordPressService
         ];
     }
 
+    /**
+     * @param Response $response
+     * @return string
+     */
     private function parseErrorMessage(Response $response): string
     {
         $body = $response->json();
-        
+
         if (isset($body['message'])) {
             return $body['message'];
         }
-        
+
         if (isset($body['code'])) {
             return "WordPress Error: {$body['code']}";
         }
@@ -129,17 +186,32 @@ class WordPressService
         };
     }
 
+    /**
+     * @param string $type
+     * @param string $identifier
+     * @param array $params
+     * @return string
+     */
     private function getCacheKey(string $type, string $identifier, array $params = []): string
     {
         $paramsHash = md5(json_encode($params));
         return "wordpress:{$type}:{$identifier}:{$paramsHash}";
     }
 
+    /**
+     * @param string $type
+     * @return int
+     */
     private function getCacheTtl(string $type): int
     {
         return $this->defaultCacheTtl[$type] ?? $this->defaultCacheTtl['custom'];
     }
 
+    /**
+     * @param array $params
+     * @param bool $useCache
+     * @return array
+     */
     public function getPosts(array $params = [], bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -147,7 +219,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('posts', 'list', $params);
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -159,14 +231,14 @@ class WordPressService
                 '_embed' => true,
             ];
             $queryParams = array_merge($defaultParams, $params);
-            
+
             $response = $this->getHttpClient()->get(
                 $this->buildEndpoint('posts'),
                 $queryParams
             );
 
             $result = $this->handleResponse($response, 'getPosts');
-            
+
             if ($result['success'] && $useCache) {
                 Cache::put($cacheKey, $result, $this->getCacheTtl('posts'));
             }
@@ -178,6 +250,11 @@ class WordPressService
         }
     }
 
+    /**
+     * @param int $id
+     * @param bool $useCache
+     * @return array
+     */
     public function getPost(int $id, bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -185,7 +262,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('posts', (string) $id);
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -197,7 +274,7 @@ class WordPressService
             );
 
             $result = $this->handleResponse($response, "getPost:{$id}");
-            
+
             if ($result['success'] && $useCache) {
                 Cache::put($cacheKey, $result, $this->getCacheTtl('posts'));
             }
@@ -209,6 +286,11 @@ class WordPressService
         }
     }
 
+    /**
+     * @param string $slug
+     * @param bool $useCache
+     * @return array
+     */
     public function getPostBySlug(string $slug, bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -216,7 +298,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('posts', "slug:{$slug}");
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -228,7 +310,7 @@ class WordPressService
             );
 
             $result = $this->handleResponse($response, "getPostBySlug:{$slug}");
-            
+
             if ($result['success']) {
                 $data = $result['data'];
                 if (empty($data)) {
@@ -239,7 +321,7 @@ class WordPressService
                     ];
                 }
                 $result['data'] = $data[0];
-                
+
                 if ($useCache) {
                     Cache::put($cacheKey, $result, $this->getCacheTtl('posts'));
                 }
@@ -252,6 +334,11 @@ class WordPressService
         }
     }
 
+    /**
+     * @param array $params
+     * @param bool $useCache
+     * @return array
+     */
     public function getPages(array $params = [], bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -259,7 +346,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('pages', 'list', $params);
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -271,14 +358,14 @@ class WordPressService
                 '_embed' => true,
             ];
             $queryParams = array_merge($defaultParams, $params);
-            
+
             $response = $this->getHttpClient()->get(
                 $this->buildEndpoint('pages'),
                 $queryParams
             );
 
             $result = $this->handleResponse($response, 'getPages');
-            
+
             if ($result['success'] && $useCache) {
                 Cache::put($cacheKey, $result, $this->getCacheTtl('pages'));
             }
@@ -290,6 +377,11 @@ class WordPressService
         }
     }
 
+    /**
+     * @param int $id
+     * @param bool $useCache
+     * @return array
+     */
     public function getPage(int $id, bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -297,7 +389,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('pages', (string) $id);
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -309,7 +401,7 @@ class WordPressService
             );
 
             $result = $this->handleResponse($response, "getPage:{$id}");
-            
+
             if ($result['success'] && $useCache) {
                 Cache::put($cacheKey, $result, $this->getCacheTtl('pages'));
             }
@@ -321,6 +413,11 @@ class WordPressService
         }
     }
 
+    /**
+     * @param string $slug
+     * @param bool $useCache
+     * @return array
+     */
     public function getPageBySlug(string $slug, bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -328,7 +425,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('pages', "slug:{$slug}");
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -340,7 +437,7 @@ class WordPressService
             );
 
             $result = $this->handleResponse($response, "getPageBySlug:{$slug}");
-            
+
             if ($result['success']) {
                 $data = $result['data'];
                 if (empty($data)) {
@@ -351,7 +448,7 @@ class WordPressService
                     ];
                 }
                 $result['data'] = $data[0];
-                
+
                 if ($useCache) {
                     Cache::put($cacheKey, $result, $this->getCacheTtl('pages'));
                 }
@@ -364,6 +461,11 @@ class WordPressService
         }
     }
 
+    /**
+     * @param array $params
+     * @param bool $useCache
+     * @return array
+     */
     public function getCategories(array $params = [], bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -371,7 +473,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('categories', 'list', $params);
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -382,14 +484,14 @@ class WordPressService
                 'hide_empty' => true,
             ];
             $queryParams = array_merge($defaultParams, $params);
-            
+
             $response = $this->getHttpClient()->get(
                 $this->buildEndpoint('categories'),
                 $queryParams
             );
 
             $result = $this->handleResponse($response, 'getCategories');
-            
+
             if ($result['success'] && $useCache) {
                 Cache::put($cacheKey, $result, $this->getCacheTtl('categories'));
             }
@@ -401,6 +503,11 @@ class WordPressService
         }
     }
 
+    /**
+     * @param array $params
+     * @param bool $useCache
+     * @return array
+     */
     public function getTags(array $params = [], bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -408,7 +515,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('tags', 'list', $params);
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -419,14 +526,14 @@ class WordPressService
                 'hide_empty' => true,
             ];
             $queryParams = array_merge($defaultParams, $params);
-            
+
             $response = $this->getHttpClient()->get(
                 $this->buildEndpoint('tags'),
                 $queryParams
             );
 
             $result = $this->handleResponse($response, 'getTags');
-            
+
             if ($result['success'] && $useCache) {
                 Cache::put($cacheKey, $result, $this->getCacheTtl('tags'));
             }
@@ -438,6 +545,11 @@ class WordPressService
         }
     }
 
+    /**
+     * @param int $id
+     * @param bool $useCache
+     * @return array
+     */
     public function getMedia(int $id, bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -445,7 +557,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('media', (string) $id);
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -456,7 +568,7 @@ class WordPressService
             );
 
             $result = $this->handleResponse($response, "getMedia:{$id}");
-            
+
             if ($result['success'] && $useCache) {
                 Cache::put($cacheKey, $result, $this->getCacheTtl('media'));
             }
@@ -468,6 +580,12 @@ class WordPressService
         }
     }
 
+    /**
+     * @param string $postType
+     * @param array $params
+     * @param bool $useCache
+     * @return array
+     */
     public function getCustomPostType(string $postType, array $params = [], bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -475,7 +593,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('custom', "{$postType}:list", $params);
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -487,14 +605,14 @@ class WordPressService
                 '_embed' => true,
             ];
             $queryParams = array_merge($defaultParams, $params);
-            
+
             $response = $this->getHttpClient()->get(
                 $this->buildEndpoint($postType),
                 $queryParams
             );
 
             $result = $this->handleResponse($response, "getCustomPostType:{$postType}");
-            
+
             if ($result['success'] && $useCache) {
                 Cache::put($cacheKey, $result, $this->getCacheTtl('custom'));
             }
@@ -506,6 +624,12 @@ class WordPressService
         }
     }
 
+    /**
+     * @param string $postType
+     * @param int $id
+     * @param bool $useCache
+     * @return array
+     */
     public function getCustomPostTypeItem(string $postType, int $id, bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -513,7 +637,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('custom', "{$postType}:{$id}");
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -525,7 +649,7 @@ class WordPressService
             );
 
             $result = $this->handleResponse($response, "getCustomPostTypeItem:{$postType}:{$id}");
-            
+
             if ($result['success'] && $useCache) {
                 Cache::put($cacheKey, $result, $this->getCacheTtl('custom'));
             }
@@ -537,6 +661,12 @@ class WordPressService
         }
     }
 
+    /**
+     * @param string $postType
+     * @param string $slug
+     * @param bool $useCache
+     * @return array
+     */
     public function getCustomPostTypeBySlug(string $postType, string $slug, bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -544,7 +674,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('custom', "{$postType}:slug:{$slug}");
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -556,7 +686,7 @@ class WordPressService
             );
 
             $result = $this->handleResponse($response, "getCustomPostTypeBySlug:{$postType}:{$slug}");
-            
+
             if ($result['success']) {
                 $data = $result['data'];
                 if (empty($data)) {
@@ -567,7 +697,7 @@ class WordPressService
                     ];
                 }
                 $result['data'] = $data[0];
-                
+
                 if ($useCache) {
                     Cache::put($cacheKey, $result, $this->getCacheTtl('custom'));
                 }
@@ -580,6 +710,11 @@ class WordPressService
         }
     }
 
+    /**
+     * @param string $query
+     * @param array $params
+     * @return array
+     */
     public function searchContent(string $query, array $params = []): array
     {
         if (!$this->isConfigured()) {
@@ -594,7 +729,7 @@ class WordPressService
                 '_embed' => true,
             ];
             $queryParams = array_merge($defaultParams, $params);
-            
+
             $response = $this->getHttpClient()->get(
                 $this->buildEndpoint('posts'),
                 $queryParams
@@ -607,6 +742,10 @@ class WordPressService
         }
     }
 
+    /**
+     * @param bool $useCache
+     * @return array
+     */
     public function getMenus(bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -614,7 +753,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('menus', 'all');
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -625,7 +764,7 @@ class WordPressService
             );
 
             $result = $this->handleResponse($response, 'getMenus');
-            
+
             if ($result['success'] && $useCache) {
                 Cache::put($cacheKey, $result, $this->getCacheTtl('menus'));
             }
@@ -637,6 +776,11 @@ class WordPressService
         }
     }
 
+    /**
+     * @param string $location
+     * @param bool $useCache
+     * @return array
+     */
     public function getMenu(string $location, bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -644,7 +788,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('menus', $location);
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -655,7 +799,7 @@ class WordPressService
             );
 
             $result = $this->handleResponse($response, "getMenu:{$location}");
-            
+
             if ($result['success'] && $useCache) {
                 Cache::put($cacheKey, $result, $this->getCacheTtl('menus'));
             }
@@ -667,6 +811,10 @@ class WordPressService
         }
     }
 
+    /**
+     * @param bool $useCache
+     * @return array
+     */
     public function getSiteInfo(bool $useCache = true): array
     {
         if (!$this->isConfigured()) {
@@ -674,7 +822,7 @@ class WordPressService
         }
 
         $cacheKey = $this->getCacheKey('site', 'info');
-        
+
         if ($useCache && Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -685,7 +833,7 @@ class WordPressService
             );
 
             $result = $this->handleResponse($response, 'getSiteInfo');
-            
+
             if ($result['success'] && $useCache) {
                 Cache::put($cacheKey, $result, 3600);
             }
@@ -697,6 +845,10 @@ class WordPressService
         }
     }
 
+    /**
+     * @param string|null $type
+     * @return void
+     */
     public function clearCache(string $type = null): void
     {
         if ($type) {
@@ -705,21 +857,28 @@ class WordPressService
         } else {
             $this->clearCacheByPattern('wordpress:*');
         }
-        
+
         Log::info('WordPress cache cleared', ['type' => $type ?? 'all']);
     }
 
+    /**
+     * @param string $pattern
+     * @return void
+     */
     private function clearCacheByPattern(string $pattern): void
     {
         $cacheStore = Cache::getStore();
-        
+
         if (method_exists($cacheStore, 'flush')) {
             Cache::tags(['wordpress'])->flush();
         }
-        
+
         Cache::forget($pattern);
     }
 
+    /**
+     * @return array
+     */
     private function notConfiguredResponse(): array
     {
         return [
@@ -729,6 +888,11 @@ class WordPressService
         ];
     }
 
+    /**
+     * @param Exception $e
+     * @param string $context
+     * @return array
+     */
     private function handleException(Exception $e, string $context): array
     {
         Log::error("WordPress API Exception [{$context}]", [
@@ -743,6 +907,9 @@ class WordPressService
         ];
     }
 
+    /**
+     * @return array
+     */
     public function testConnection(): array
     {
         if (!$this->isConfigured()) {
@@ -751,7 +918,7 @@ class WordPressService
 
         try {
             $response = $this->getHttpClient()->get($this->baseUrl . '/wp-json');
-            
+
             if ($response->successful()) {
                 $data = $response->json();
                 return [
