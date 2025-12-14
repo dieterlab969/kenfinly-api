@@ -123,6 +123,26 @@ export const wordpressApi = {
             console.error('Error fetching status:', error);
             return { success: false, error: error.message };
         }
+    },
+
+    async getAboutStats() {
+        try {
+            const response = await axios.get(`${API_BASE}/pages/slug/about?meta=stats`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching about stats:', error);
+            return { success: false, stats: null };
+        }
+    },
+
+    async getAboutValues() {
+        try {
+            const response = await axios.get(`${API_BASE}/pages/slug/about?meta=values`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching about values:', error);
+            return { success: false, values: null };
+        }
     }
 };
 

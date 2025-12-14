@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { 
     TrendingUp, 
     Target, 
@@ -10,14 +11,51 @@ import {
     Heart
 } from 'lucide-react';
 import PublicLayout from '../../components/public/PublicLayout';
+import { StatsSkeleton, ValuesSkeleton, ContentSkeleton } from '../../components/public/SkeletonLoaders';
 import wordpressApi from '../../services/wordpressApi';
+
+const DEFAULT_VALUES = [
+    {
+        icon: Shield,
+        title: 'Security First',
+        description: 'Your financial data is protected with enterprise-grade encryption and security measures.'
+    },
+    {
+        icon: Users,
+        title: 'User-Centric',
+        description: 'Every feature is designed with our users in mind, making financial management intuitive.'
+    },
+    {
+        icon: Target,
+        title: 'Goal-Oriented',
+        description: 'We help you set, track, and achieve your financial goals with powerful tools.'
+    },
+    {
+        icon: Heart,
+        title: 'Transparency',
+        description: 'We believe in clear, honest communication about your finances and our services.'
+    }
+];
+
+const DEFAULT_STATS = [
+    { value: '10K+', label: 'Active Users' },
+    { value: '$50M+', label: 'Tracked Annually' },
+    { value: '99.9%', label: 'Uptime' },
+    { value: '4.9/5', label: 'User Rating' }
+];
 
 function AboutPage() {
     const [pageContent, setPageContent] = useState(null);
+    const [stats, setStats] = useState(DEFAULT_STATS);
+    const [values, setValues] = useState(DEFAULT_VALUES);
     const [loading, setLoading] = useState(true);
+    const [statsLoading, setStatsLoading] = useState(true);
+    const [valuesLoading, setValuesLoading] = useState(true);
     const [error, setError] = useState(false);
+    const [statsError, setStatsError] = useState(false);
+    const [valuesError, setValuesError] = useState(false);
 
-    const fetchPage = async () => {
+    const fetchPage = useCallback(async () => {
         setLoading(true);
         setError(false);
         try {
@@ -33,41 +71,49 @@ function AboutPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    const fetchStats = useCallback(async () => {
+        setStatsLoading(true);
+        setStatsError(false);
+        try {
+            const result = await wordpressApi.getAboutStats();
+            if (result.success && result.stats && Array.isArray(result.stats)) {
+                setStats(result.stats);
+            }
+        } catch (err) {
+            console.error('Error fetching stats:', err);
+            setStatsError(true);
+        } finally {
+            setStatsLoading(false);
+        }
+    }, []);
+
+    const fetchValues = useCallback(async () => {
+        setValuesLoading(true);
+        setValuesError(false);
+        try {
+            const result = await wordpressApi.getAboutValues();
+            if (result.success && result.values && Array.isArray(result.values)) {
+                setValues(result.values);
+            }
+        } catch (err) {
+            console.error('Error fetching values:', err);
+            setValuesError(true);
+        } finally {
+            setValuesLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
         fetchPage();
-    }, []);
+        fetchStats();
+        fetchValues();
+    }, [fetchPage, fetchStats, fetchValues]);
 
-    const values = [
-        {
-            icon: Shield,
-            title: 'Security First',
-            description: 'Your financial data is protected with enterprise-grade encryption and security measures.'
-        },
-        {
-            icon: Users,
-            title: 'User-Centric',
-            description: 'Every feature is designed with our users in mind, making financial management intuitive.'
-        },
-        {
-            icon: Target,
-            title: 'Goal-Oriented',
-            description: 'We help you set, track, and achieve your financial goals with powerful tools.'
-        },
-        {
-            icon: Heart,
-            title: 'Transparency',
-            description: 'We believe in clear, honest communication about your finances and our services.'
-        }
-    ];
-
-    const stats = [
-        { value: '10K+', label: 'Active Users' },
-        { value: '$50M+', label: 'Tracked Annually' },
-        { value: '99.9%', label: 'Uptime' },
-        { value: '4.9/5', label: 'User Rating' }
-    ];
+    const sanitizedContent = pageContent?.content?.rendered 
+        ? DOMPurify.sanitize(pageContent.content.rendered)
+        : null;
 
     return (
         <PublicLayout>
@@ -85,19 +131,15 @@ function AboutPage() {
                 </div>
             </section>
 
-            <section className="py-20 bg-white">
+            <section className="py-20 bg-white" aria-labelledby="our-story-heading">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <div>
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+                            <h2 id="our-story-heading" className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
                                 Our Story
                             </h2>
                             {loading ? (
-                                <div className="animate-pulse space-y-4">
-                                    <div className="h-4 bg-gray-200 rounded w-full"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-full"></div>
-                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                                </div>
+                                <ContentSkeleton />
                             ) : error ? (
                                 <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                                     <p className="text-gray-600 mb-4">
@@ -105,16 +147,19 @@ function AboutPage() {
                                     </p>
                                     <button
                                         onClick={fetchPage}
-                                        className="text-blue-600 font-medium hover:text-blue-700 inline-flex items-center"
+                                        className="text-blue-600 font-medium hover:text-blue-700 inline-flex items-center focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 rounded px-2 py-1"
+                                        aria-label="Retry loading our story"
                                     >
                                         Try Again
                                         <ArrowRight className="ml-1 w-4 h-4" />
                                     </button>
                                 </div>
-                            ) : pageContent?.content?.rendered ? (
+                            ) : sanitizedContent ? (
                                 <div 
                                     className="prose prose-lg text-gray-600"
-                                    dangerouslySetInnerHTML={{ __html: pageContent.content.rendered }}
+                                    dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+                                    role="region"
+                                    aria-label="Our Story content"
                                 />
                             ) : (
                                 <div className="space-y-4 text-gray-600">
@@ -138,7 +183,7 @@ function AboutPage() {
                         </div>
                         <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 flex items-center justify-center h-80">
                             <div className="text-center text-white">
-                                <TrendingUp className="w-24 h-24 mx-auto mb-4 opacity-80" />
+                                <TrendingUp className="w-24 h-24 mx-auto mb-4 opacity-80" aria-hidden="true" />
                                 <p className="text-2xl font-semibold">Empowering Financial Freedom</p>
                             </div>
                         </div>
@@ -146,27 +191,44 @@ function AboutPage() {
                 </div>
             </section>
 
-            <section className="py-16 bg-blue-600">
+            <section className="py-16 bg-blue-600" aria-labelledby="stats-heading">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                        {stats.map((stat, index) => (
-                            <div key={index} className="text-white">
-                                <div className="text-4xl md:text-5xl font-bold mb-2">
-                                    {stat.value}
+                    <h2 id="stats-heading" className="sr-only">Our Impact Statistics</h2>
+                    {statsLoading ? (
+                        <StatsSkeleton />
+                    ) : statsError ? (
+                        <div className="text-center text-white">
+                            <p className="mb-4">Unable to load statistics at this moment.</p>
+                            <button
+                                onClick={fetchStats}
+                                className="text-blue-100 hover:text-white inline-flex items-center focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600 rounded px-2 py-1"
+                                aria-label="Retry loading statistics"
+                            >
+                                Try Again
+                                <ArrowRight className="ml-1 w-4 h-4" />
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                            {stats.map((stat, index) => (
+                                <div key={index} className="text-white" role="article" aria-label={`${stat.label}: ${stat.value}`}>
+                                    <div className="text-4xl md:text-5xl font-bold mb-2">
+                                        {stat.value}
+                                    </div>
+                                    <div className="text-blue-100">
+                                        {stat.label}
+                                    </div>
                                 </div>
-                                <div className="text-blue-100">
-                                    {stat.label}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
 
-            <section className="py-20 bg-gray-50">
+            <section className="py-20 bg-gray-50" aria-labelledby="values-heading">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                        <h2 id="values-heading" className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
                             Our Values
                         </h2>
                         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -174,30 +236,49 @@ function AboutPage() {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {values.map((value, index) => (
-                            <div 
-                                key={index}
-                                className="bg-white rounded-xl p-8 text-center hover:shadow-lg transition-shadow"
+                    {valuesLoading ? (
+                        <ValuesSkeleton />
+                    ) : valuesError ? (
+                        <div className="text-center text-gray-600">
+                            <p className="mb-4">Unable to load values at this moment.</p>
+                            <button
+                                onClick={fetchValues}
+                                className="text-blue-600 hover:text-blue-700 inline-flex items-center focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 rounded px-2 py-1"
+                                aria-label="Retry loading our values"
                             >
-                                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-6">
-                                    <value.icon className="w-8 h-8 text-white" />
-                                </div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                                    {value.title}
-                                </h3>
-                                <p className="text-gray-600">
-                                    {value.description}
-                                </p>
-                            </div>
-                        ))}
-                    </div>
+                                Try Again
+                                <ArrowRight className="ml-1 w-4 h-4" />
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {values.map((value, index) => {
+                                const IconComponent = value.icon || Heart;
+                                return (
+                                    <article 
+                                        key={index}
+                                        className="bg-white rounded-xl p-8 text-center hover:shadow-lg transition-shadow focus-within:ring-2 focus-within:ring-blue-600"
+                                    >
+                                        <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-6">
+                                            <IconComponent className="w-8 h-8 text-white" aria-hidden="true" />
+                                        </div>
+                                        <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                                            {value.title}
+                                        </h3>
+                                        <p className="text-gray-600">
+                                            {value.description}
+                                        </p>
+                                    </article>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </section>
 
             <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <Award className="w-16 h-16 mx-auto mb-6 opacity-80" />
+                    <Award className="w-16 h-16 mx-auto mb-6 opacity-80" aria-hidden="true" />
                     <h2 className="text-3xl md:text-4xl font-bold mb-6">
                         Join Our Growing Community
                     </h2>
@@ -208,14 +289,16 @@ function AboutPage() {
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
                         <Link
                             to="/register"
-                            className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all shadow-lg"
+                            className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+                            aria-label="Get Started Free - Register for Kenfinly"
                         >
                             Get Started Free
-                            <ArrowRight className="ml-2 w-5 h-5" />
+                            <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
                         </Link>
                         <Link
                             to="/blog"
-                            className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all"
+                            className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+                            aria-label="Read Our Blog"
                         >
                             Read Our Blog
                         </Link>
