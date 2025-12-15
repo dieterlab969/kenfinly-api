@@ -34,21 +34,30 @@ export const ContentSkeleton = () => (
     </div>
 );
 
-export const PostCardSkeleton = ({ count = 3, columns = 3 }) => (
-    <div className={`grid grid-cols-1 md:grid-cols-${Math.min(columns, 2)} lg:grid-cols-${columns} gap-8`}>
-        {[...Array(count)].map((i) => (
-            <div key={i} className="bg-gray-50 rounded-xl overflow-hidden animate-pulse">
-                <div className="h-48 bg-gray-200"></div>
-                <div className="p-6">
-                    <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
-                    <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+export const PostCardSkeleton = ({ count = 3, columns = 3 }) => {
+    const gridClasses = {
+        1: 'grid grid-cols-1 gap-8',
+        2: 'grid grid-cols-1 md:grid-cols-2 gap-8',
+        3: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8',
+        4: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'
+    };
+    
+    return (
+        <div className={gridClasses[columns] || gridClasses[3]}>
+            {[...Array(count)].map((_, idx) => (
+                <div key={idx} className="bg-gray-50 rounded-xl overflow-hidden animate-pulse">
+                    <div className="h-48 bg-gray-200"></div>
+                    <div className="p-6">
+                        <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+                        <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
+                        <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                    </div>
                 </div>
-            </div>
-        ))}
-    </div>
-);
+            ))}
+        </div>
+    );
+};
 
 export const ArticleSkeleton = () => (
     <div className="max-w-4xl mx-auto px-4 py-16 animate-pulse">
