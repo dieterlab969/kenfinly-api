@@ -13,6 +13,9 @@ import {
     AlertCircle
 } from 'lucide-react';
 import PublicLayout from '../../components/public/PublicLayout';
+import { PostCardSkeleton, CategoryButtonSkeleton } from '../../components/public/SkeletonLoaders';
+import { ErrorState, EmptyState } from '../../components/shared/ErrorState';
+import { stripHtml, truncate, formatDate } from '../../utils/textUtils';
 import wordpressApi from '../../services/wordpressApi';
 
 function BlogPage() {
@@ -28,21 +31,6 @@ function BlogPage() {
     const currentCategory = searchParams.get('category') || '';
     const currentSearch = searchParams.get('search') || '';
     const [searchInput, setSearchInput] = useState(currentSearch);
-
-    // Memoized utility functions - created once, not on every render
-    const stripHtml = useCallback((html) => {
-        if (!html) return '';
-        const tmp = document.createElement('DIV');
-        tmp.innerHTML = html;
-        return tmp.textContent || tmp.innerText || '';
-    }, []);
-
-    const truncate = useCallback((text, length = 150) => {
-        if (!text) return '';
-        const stripped = stripHtml(text);
-        if (stripped.length <= length) return stripped;
-        return stripped.substring(0, length) + '...';
-    }, [stripHtml]);
 
     // Fetch posts based on current page, category, and search
     const fetchPosts = useCallback(async () => {
@@ -179,22 +167,12 @@ function BlogPage() {
         setSearchParams(params);
     }, [currentCategory, setSearchParams]);
 
-    const formatDate = useCallback((dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
-    }, []);
-
     // Sanitize post title
     const getSafeTitle = useCallback((title) => {
         if (!title) return 'Untitled';
         const plain = stripHtml(title);
         return DOMPurify.sanitize(plain, { ALLOWED_TAGS: [] });
-    }, [stripHtml]);
+    }, []);
 
     // Determine no results message
     const noResultsMessage = useMemo(() => {
@@ -262,11 +240,7 @@ function BlogPage() {
                             All Posts
                         </button>
                         {categoriesLoading ? (
-                            <>
-                                {[1, 2, 3].map((i) => (
-                                    <div key={i} className="px-4 py-2 rounded-full bg-gray-200 animate-pulse w-24"></div>
-                                ))}
-                            </>
+                            <CategoryButtonSkeleton count={3} />
                         ) : (
                             categories.map((category) => (
                                 <button
@@ -290,38 +264,14 @@ function BlogPage() {
             <section className="py-16 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {loading ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {[1, 2, 3, 4, 5, 6].map((i) => (
-                                <div key={i} className="bg-gray-50 rounded-xl overflow-hidden animate-pulse">
-                                    <div className="h-48 bg-gray-200"></div>
-                                    <div className="p-6">
-                                        <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-                                        <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
-                                        <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                                        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        <PostCardSkeleton count={6} columns={3} />
                     ) : error ? (
-                        <div className="text-center py-16 bg-gray-50 rounded-xl border border-gray-200">
-                            <AlertCircle className="w-20 h-20 text-red-400 mx-auto mb-6" />
-                            <h3 className="text-2xl font-semibold text-gray-700 mb-3">
-                                Content Temporarily Unavailable
-                            </h3>
-                            <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                                We're having trouble loading our blog content. This may be a temporary issue with our server. 
-                                Please try again or check back later.
-                            </p>
-                            <button
-                                onClick={fetchPosts}
-                                aria-label="Retry loading blog posts"
-                                className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-                            >
-                                Try Again
-                                <ArrowRight className="ml-2 w-4 h-4" />
-                            </button>
-                        </div>
+                        <ErrorState
+                            title="Content Temporarily Unavailable"
+                            message="We're having trouble loading our blog content. This may be a temporary issue with our server. Please try again or check back later."
+                            onRetry={fetchPosts}
+                            retryLabel="Try Again"
+                        />
                     ) : posts.length > 0 ? (
                         <>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

@@ -11,6 +11,8 @@ import {
     Clock
 } from 'lucide-react';
 import PublicLayout from '../../components/public/PublicLayout';
+import { ArticleSkeleton } from '../../components/public/SkeletonLoaders';
+import { stripHtml, truncate, formatDate } from '../../utils/textUtils';
 import wordpressApi from '../../services/wordpressApi';
 
 function BlogPostPage() {
@@ -55,36 +57,12 @@ function BlogPostPage() {
         }
     }, [slug]);
 
-    const formatDate = (dateString) => {
-        if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-        });
-    };
-
     const calculateReadTime = (content) => {
         if (!content) return '5 min read';
-        const text = content.replace(/<[^>]*>/g, '');
+        const text = stripHtml(content);
         const words = text.split(/\s+/).length;
         const minutes = Math.ceil(words / 200);
         return `${minutes} min read`;
-    };
-
-    const stripHtml = (html) => {
-        if (!html) return '';
-        const tmp = document.createElement('DIV');
-        tmp.innerHTML = html;
-        return tmp.textContent || tmp.innerText || '';
-    };
-
-    const truncate = (text, length = 100) => {
-        if (!text) return '';
-        const stripped = stripHtml(text);
-        if (stripped.length <= length) return stripped;
-        return stripped.substring(0, length) + '...';
     };
 
     const handleShare = async () => {
@@ -106,18 +84,7 @@ function BlogPostPage() {
     if (loading) {
         return (
             <PublicLayout>
-                <div className="max-w-4xl mx-auto px-4 py-16">
-                    <div className="animate-pulse">
-                        <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-                        <div className="h-4 bg-gray-200 rounded w-1/4 mb-8"></div>
-                        <div className="h-64 bg-gray-200 rounded mb-8"></div>
-                        <div className="space-y-4">
-                            <div className="h-4 bg-gray-200 rounded w-full"></div>
-                            <div className="h-4 bg-gray-200 rounded w-full"></div>
-                            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                        </div>
-                    </div>
-                </div>
+                <ArticleSkeleton />
             </PublicLayout>
         );
     }

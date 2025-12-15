@@ -13,6 +13,8 @@ import {
     AlertCircle
 } from 'lucide-react';
 import PublicLayout from '../../components/public/PublicLayout';
+import { PostCardSkeleton, TipCardSkeleton } from '../../components/public/SkeletonLoaders';
+import { ErrorState, EmptyState } from '../../components/shared/ErrorState';
 import { stripHtml, truncate, formatDate } from '../../utils/textUtils';
 import wordpressApi from '../../services/wordpressApi';
 
@@ -206,35 +208,15 @@ function LandingPage() {
                     </div>
 
                     {postsLoading ? (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm animate-pulse">
-                                    <div className="h-48 bg-gray-200"></div>
-                                    <div className="p-6">
-                                        <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
-                                        <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
-                                        <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
-                                        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                        <PostCardSkeleton count={3} columns={3} />
                     ) : postsError ? (
-                        <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-                            <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" aria-hidden="true" />
-                            <h3 className="text-xl font-semibold text-gray-700 mb-2">Content Temporarily Unavailable</h3>
-                            <p className="text-gray-500 mb-4">
-                                We're having trouble loading our latest articles. Please check back later or contact support if the issue persists.
-                            </p>
-                            <button
-                                onClick={fetchContent}
-                                aria-label="Retry loading latest blog posts"
-                                className="text-blue-600 font-medium hover:text-blue-700 inline-flex items-center focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 rounded px-2 py-1"
-                            >
-                                Try Again
-                                <ArrowRight className="ml-1 w-4 h-4" aria-hidden="true" />
-                            </button>
-                        </div>
+                        <ErrorState
+                            title="Content Temporarily Unavailable"
+                            message="We're having trouble loading our latest articles. Please check back later or contact support if the issue persists."
+                            onRetry={fetchContent}
+                            retryLabel="Try Again"
+                            variant="card"
+                        />
                     ) : latestPosts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {latestPosts.map((post) => (
@@ -275,13 +257,11 @@ function LandingPage() {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-12 bg-white rounded-xl">
-                            <TrendingUp className="w-16 h-16 text-gray-300 mx-auto mb-4" aria-hidden="true" />
-                            <h3 className="text-xl font-semibold text-gray-700 mb-2">Coming Soon</h3>
-                            <p className="text-gray-500">
-                                Our blog is being set up. Check back soon for financial tips and insights!
-                            </p>
-                        </div>
+                        <EmptyState
+                            title="Coming Soon"
+                            message="Our blog is being set up. Check back soon for financial tips and insights!"
+                            icon={TrendingUp}
+                        />
                     )}
 
                     <div className="md:hidden mt-8 text-center">
@@ -310,34 +290,15 @@ function LandingPage() {
                         </div>
 
                         {tipsLoading ? (
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {[1, 2, 3].map((i) => (
-                                    <div key={i} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100 animate-pulse">
-                                        <div className="w-10 h-10 bg-blue-600 rounded-full mb-4"></div>
-                                        <div className="h-5 bg-gray-300 rounded w-3/4 mb-3"></div>
-                                        <div className="space-y-2">
-                                            <div className="h-4 bg-gray-200 rounded w-full"></div>
-                                            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                            <TipCardSkeleton count={3} />
                         ) : tipsError ? (
-                            <div className="text-center py-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-                                <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" aria-hidden="true" />
-                                <h3 className="text-xl font-semibold text-gray-700 mb-2">Tips Temporarily Unavailable</h3>
-                                <p className="text-gray-500 mb-4">
-                                    We're having trouble loading our financial tips. Please try again later.
-                                </p>
-                                <button
-                                    onClick={fetchContent}
-                                    aria-label="Retry loading financial tips"
-                                    className="text-blue-600 font-medium hover:text-blue-700 inline-flex items-center focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 rounded px-2 py-1"
-                                >
-                                    Try Again
-                                    <ArrowRight className="ml-1 w-4 h-4" aria-hidden="true" />
-                                </button>
-                            </div>
+                            <ErrorState
+                                title="Tips Temporarily Unavailable"
+                                message="We're having trouble loading our financial tips. Please try again later."
+                                onRetry={fetchContent}
+                                retryLabel="Try Again"
+                                variant="blue"
+                            />
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 {financialTips.map((tip) => (
