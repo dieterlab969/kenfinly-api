@@ -19,7 +19,7 @@ class PublicSettingsController
     {
         return response()->json([
             'company_name' => AppSetting::get('company_name', config('company.name')),
-            'company_tax_code' => AppSetting::get('company_tax_code', config('company.phone')),
+            'company_tax_code' => AppSetting::get('company_tax_code', config('company.tax_code')),
             'company_email' => AppSetting::get('company_email', config('company.email')),
             'company_phone' => AppSetting::get('company_phone', config('company.phone')),
             'company_address' => AppSetting::get('company_address', config('company.address')),
