@@ -607,7 +607,7 @@ class WordPressService
             $queryParams = array_merge($defaultParams, $params);
 
             $response = $this->getHttpClient()->get(
-                $this->buildEndpoint($postType),
+                $this->buildCustomEndpoint('headless/v1/content/', $postType),
                 $queryParams
             );
 
