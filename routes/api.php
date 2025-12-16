@@ -21,12 +21,15 @@ use App\Http\Controllers\Admin\SettingsManagementController;
 use App\Http\Controllers\Admin\CacheManagementController;
 use App\Http\Controllers\Admin\TranslationManagementController;
 use App\Http\Controllers\Admin\TransactionManagementController;
+use App\Http\Controllers\Api\WordPressController;
+use App\Http\Controllers\Api\PublicSettingsController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::get('/auth/config', [AuthController::class, 'config']);
+Route::get('/settings/company', [PublicSettingsController::class, 'getCompanyInfo']);
 
 // Email verification routes (public)
 Route::post('/email/verify', [EmailVerificationController::class, 'verify']);
@@ -42,38 +45,38 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::post('/auth/refresh', [AuthController::class, 'refresh']);
     Route::get('/auth/me', [AuthController::class, 'me']);
-    
+
     // Dashboard
     Route::get('/dashboard', [TransactionController::class, 'getDashboardData']);
-    
+
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);
-    
+
     // Accounts
     Route::apiResource('accounts', AccountController::class);
-    
+
     // Transactions
     Route::apiResource('transactions', TransactionController::class);
     Route::post('/transactions/{transaction}/photos', [TransactionController::class, 'addPhoto']);
     Route::delete('/photos/{photoId}', [TransactionController::class, 'deletePhoto']);
-    
+
     // Language preference
     Route::post('/user/language', [LanguageController::class, 'updateUserLanguage']);
-    
+
     // CSV Import & Export
     Route::post('/csv/import', [CsvController::class, 'import']);
     Route::get('/csv/export', [CsvController::class, 'export']);
-    
+
     // Payments & Licenses
     Route::post('/payments/create-intent', [PaymentController::class, 'createPaymentIntent']);
     Route::get('/licenses/my-licenses', [PaymentController::class, 'myLicenses']);
-    
+
     // Participants & Invitations
     Route::post('/participants/invite', [ParticipantController::class, 'invite']);
     Route::post('/invitations/{token}/accept', [ParticipantController::class, 'acceptInvitation']);
     Route::get('/accounts/{accountId}/participants', [ParticipantController::class, 'listParticipants']);
     Route::delete('/accounts/{accountId}/participants/{userId}', [ParticipantController::class, 'removeParticipant']);
-    
+
     // Analytics
     Route::get('/analytics/summary', [AnalyticsController::class, 'getSummary']);
     Route::get('/analytics/category-breakdown', [AnalyticsController::class, 'getCategoryBreakdown']);
@@ -86,30 +89,70 @@ Route::post('/webhooks/payment', [PaymentController::class, 'webhook']);
 // Admin routes (Super Admin only)
 Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index']);
-    
-    Route::apiResource('accounts', AccountManagementController::class);
+
+    Route::apiResource('accounts', AccountManagementController::class)->names('admin.accounts');
     Route::apiResource('users', UserManagementController::class);
     Route::apiResource('roles', RoleManagementController::class);
     Route::apiResource('categories', CategoryManagementController::class);
     Route::apiResource('languages', LanguageManagementController::class);
     Route::apiResource('licenses', LicenseManagementController::class);
-    
+
     Route::get('/settings', [SettingsManagementController::class, 'index']);
     Route::post('/settings', [SettingsManagementController::class, 'store']);
     Route::put('/settings/{id}', [SettingsManagementController::class, 'update']);
     Route::delete('/settings/{id}', [SettingsManagementController::class, 'destroy']);
-    
+
     Route::post('/cache/clear', [CacheManagementController::class, 'clearAllCaches']);
     Route::post('/cache/clear-app', [CacheManagementController::class, 'clearApplicationCache']);
     Route::post('/cache/clear-config', [CacheManagementController::class, 'clearConfigCache']);
     Route::post('/cache/clear-route', [CacheManagementController::class, 'clearRouteCache']);
     Route::post('/cache/clear-view', [CacheManagementController::class, 'clearViewCache']);
-    
+
     Route::get('/translations', [TranslationManagementController::class, 'index']);
     Route::post('/translations', [TranslationManagementController::class, 'store']);
     Route::put('/translations/{id}', [TranslationManagementController::class, 'update']);
     Route::delete('/translations/{id}', [TranslationManagementController::class, 'destroy']);
-    
+
     Route::get('/transactions', [TransactionManagementController::class, 'index']);
     Route::get('/transactions/{id}', [TransactionManagementController::class, 'show']);
+
+    // WordPress Cache Management (Admin only)
+    Route::post('/wordpress/cache/clear', [WordPressController::class, 'clearCache']);
+});
+
+// WordPress CMS Routes (public endpoints for frontend content)
+Route::prefix('wordpress')->group(function () {
+    // Status & Connection Testing
+    Route::get('/status', [WordPressController::class, 'status']);
+    Route::get('/test-connection', [WordPressController::class, 'testConnection']);
+    Route::get('/site-info', [WordPressController::class, 'siteInfo']);
+
+    // Posts
+    Route::get('/posts', [WordPressController::class, 'posts']);
+    Route::get('/posts/{id}', [WordPressController::class, 'post'])->where('id', '[0-9]+');
+    Route::get('/posts/slug/{slug}', [WordPressController::class, 'postBySlug']);
+
+    // Pages
+    Route::get('/pages', [WordPressController::class, 'pages']);
+    Route::get('/pages/{id}', [WordPressController::class, 'page'])->where('id', '[0-9]+');
+    Route::get('/pages/slug/{slug}', [WordPressController::class, 'pageBySlug']);
+
+    // Taxonomies
+    Route::get('/categories', [WordPressController::class, 'categories']);
+    Route::get('/tags', [WordPressController::class, 'tags']);
+
+    // Media
+    Route::get('/media/{id}', [WordPressController::class, 'media'])->where('id', '[0-9]+');
+
+    // Custom Post Types
+    Route::get('/custom/{postType}', [WordPressController::class, 'customPostType']);
+    Route::get('/custom/{postType}/{id}', [WordPressController::class, 'customPostTypeItem'])->where('id', '[0-9]+');
+    Route::get('/custom/{postType}/slug/{slug}', [WordPressController::class, 'customPostTypeBySlug']);
+
+    // Search
+    Route::get('/search', [WordPressController::class, 'search']);
+
+    // Menus
+    Route::get('/menus', [WordPressController::class, 'menus']);
+    Route::get('/menus/{location}', [WordPressController::class, 'menu']);
 });
