@@ -43,4 +43,9 @@ class AppSetting extends Model
     {
         return self::get('recaptcha_enabled', false);
     }
+
+    public static function getGoogleTagManagerId(): ?string
+    {
+        return self::get('google_tag_manager_id');
+    }
 }
