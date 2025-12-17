@@ -21,12 +21,15 @@ use App\Http\Controllers\Admin\SettingsManagementController;
 use App\Http\Controllers\Admin\CacheManagementController;
 use App\Http\Controllers\Admin\TranslationManagementController;
 use App\Http\Controllers\Admin\TransactionManagementController;
+use App\Http\Controllers\Admin\LogoManagementController;
 use App\Http\Controllers\Api\WordPressController;
 use App\Http\Controllers\Api\PublicSettingsController;
+use App\Http\Controllers\Api\PublicLogoController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/auth/register', [AuthController::class, 'register']);
+Route::get('/settings/logos', [PublicLogoController::class, 'index']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::get('/auth/config', [AuthController::class, 'config']);
 Route::get('/settings/company', [PublicSettingsController::class, 'getCompanyInfo']);
@@ -115,6 +118,11 @@ Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])
 
     Route::get('/transactions', [TransactionManagementController::class, 'index']);
     Route::get('/transactions/{id}', [TransactionManagementController::class, 'show']);
+
+    // Logo Management
+    Route::get('/logos', [LogoManagementController::class, 'index']);
+    Route::post('/logos/upload', [LogoManagementController::class, 'upload']);
+    Route::delete('/logos', [LogoManagementController::class, 'delete']);
 
     // WordPress Cache Management (Admin only)
     Route::post('/wordpress/cache/clear', [WordPressController::class, 'clearCache']);

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import axios from 'axios';
+import Logo from '../Logo';
 
 function Footer() {
     const currentYear = useMemo(() => new Date().getFullYear(), []);
@@ -57,9 +58,7 @@ function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className="col-span-1 md:col-span-2">
                         <div className="flex items-center space-x-2 mb-4">
-                            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                                <TrendingUp className="w-6 h-6 text-white" />
-                            </div>
+                            <Logo fallbackSize="default" />
                             <span className="text-xl font-bold text-white">Kenfinly</span>
                         </div>
                         <p className="text-gray-400 mb-4 max-w-md">

@@ -21,6 +21,7 @@ import SettingsManagement from '../pages/admin/SettingsManagement';
 import CacheManagement from '../pages/admin/CacheManagement';
 import TranslationManagement from '../pages/admin/TranslationManagement';
 import TransactionManagement from '../pages/admin/TransactionManagement';
+import LogoManagement from '../pages/admin/LogoManagement';
 import LandingPage from '../pages/public/LandingPage';
 import BlogPage from '../pages/public/BlogPage';
 import BlogPostPage from '../pages/public/BlogPostPage';
@@ -140,6 +141,14 @@ function App({ recaptchaEnabled = false }) {
                             element={
                                 <SuperAdminRoute>
                                     <TransactionManagement />
+                                </SuperAdminRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/admin/logos" 
+                            element={
+                                <SuperAdminRoute>
+                                    <LogoManagement />
                                 </SuperAdminRoute>
                             } 
                         />

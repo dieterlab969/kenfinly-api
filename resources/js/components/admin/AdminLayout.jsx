@@ -15,7 +15,8 @@ import {
     Receipt,
     LogOut,
     Menu,
-    X
+    X,
+    Image
 } from 'lucide-react';
 
 const AdminLayout = ({ children }) => {
@@ -39,6 +40,7 @@ const AdminLayout = ({ children }) => {
         { name: 'Licenses', href: '/admin/licenses', icon: Key },
         { name: 'Translations', href: '/admin/translations', icon: FileText },
         { name: 'Transactions', href: '/admin/transactions', icon: Receipt },
+        { name: 'Logos', href: '/admin/logos', icon: Image },
         { name: 'Settings', href: '/admin/settings', icon: Settings },
         { name: 'Cache', href: '/admin/cache', icon: Database },
     ];
