@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/admin/AdminLayout';
 import ConfirmModal from '../../components/admin/ConfirmModal';
 import api from '../../utils/api';
-import { Plus, Edit, Trash2, Save } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, Tag } from 'lucide-react';
 
 const SettingsManagement = () => {
     const [settings, setSettings] = useState([]);
@@ -10,6 +10,9 @@ const SettingsManagement = () => {
     const [showModal, setShowModal] = useState(false);
     const [editingSetting, setEditingSetting] = useState(null);
     const [deleteModal, setDeleteModal] = useState({ isOpen: false, settingId: null });
+    const [gtmId, setGtmId] = useState('');
+    const [gtmLoading, setGtmLoading] = useState(false);
+    const [gtmMessage, setGtmMessage] = useState('');
     const [formData, setFormData] = useState({
         key: '',
         value: '',
@@ -25,11 +28,39 @@ const SettingsManagement = () => {
             const response = await api.get('/admin/settings');
             if (response.data.success) {
                 setSettings(response.data.data);
+                const gtmSetting = response.data.data.find(s => s.key === 'google_tag_manager_id');
+                if (gtmSetting) {
+                    setGtmId(gtmSetting.value);
+                }
             }
         } catch (error) {
             console.error('Failed to fetch settings:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleGtmUpdate = async (e) => {
+        e.preventDefault();
+        setGtmLoading(true);
+        setGtmMessage('');
+        try {
+            const gtmSetting = settings.find(s => s.key === 'google_tag_manager_id');
+            if (gtmSetting) {
+                const response = await api.put(`/admin/settings/${gtmSetting.id}`, {
+                    value: gtmId,
+                    type: 'string'
+                });
+                if (response.data.success) {
+                    setGtmMessage({ type: 'success', text: 'Google Tag Manager ID updated successfully!' });
+                    fetchSettings();
+                    setTimeout(() => setGtmMessage(''), 3000);
+                }
+            }
+        } catch (error) {
+            setGtmMessage({ type: 'error', text: error.response?.data?.message || 'Failed to update GTM ID' });
+        } finally {
+            setGtmLoading(false);
         }
     };
 
@@ -90,6 +121,51 @@ const SettingsManagement = () => {
                     <p className="text-sm text-blue-800">
                         <strong>Note:</strong> Configuration cache is automatically cleared when you update settings.
                     </p>
+                </div>
+
+                <div className="bg-white shadow rounded-lg p-6">
+                    <div className="flex items-center mb-4">
+                        <Tag className="h-6 w-6 text-indigo-600 mr-2" />
+                        <h2 className="text-lg font-semibold text-gray-900">Google Tag Manager Settings</h2>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-4">Configure your Google Tag Manager container ID for website analytics tracking.</p>
+                    
+                    <form onSubmit={handleGtmUpdate} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Container ID
+                            </label>
+                            <input
+                                type="text"
+                                value={gtmId}
+                                onChange={(e) => setGtmId(e.target.value)}
+                                placeholder="e.g., G-HR6DW8D0GB"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Your Google Analytics 4 measurement ID</p>
+                        </div>
+                        
+                        {gtmMessage && (
+                            <div className={`p-3 rounded-md text-sm ${
+                                gtmMessage.type === 'success' 
+                                    ? 'bg-green-50 text-green-800 border border-green-200' 
+                                    : 'bg-red-50 text-red-800 border border-red-200'
+                            }`}>
+                                {gtmMessage.text}
+                            </div>
+                        )}
+                        
+                        <div className="flex justify-end">
+                            <button
+                                type="submit"
+                                disabled={gtmLoading}
+                                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <Save className="h-4 w-4 mr-2" />
+                                {gtmLoading ? 'Saving...' : 'Save GTM ID'}
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 <div className="flex justify-end">
