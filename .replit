@@ -5,7 +5,7 @@ integrations = ["sendgrid:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["openssh", "unzip"]
+packages = ["openssh", "unzip", "php82Packages.composer"]
 
 [workflows]
 runButton = "Project"
