@@ -6,7 +6,7 @@
         <title>{{ config('app.name', 'Kenfinly') }}</title>
         
         <!-- Google Tag Manager (noscript) -->
-        @if($googleTagManagerId = App\Models\AppSetting::getGoogleTagManagerId())
+        @if(App\Models\AppSetting::isGA4Enabled() && ($googleTagManagerId = App\Models\AppSetting::getGoogleTagManagerId()))
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ $googleTagManagerId }}"
         height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         

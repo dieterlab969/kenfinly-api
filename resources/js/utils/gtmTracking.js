@@ -1,9 +1,22 @@
 /**
  * GTM (Google Tag Manager) Event Tracking Utility
  * Handles all GA4 event tracking across the site
+ * 
+ * Safety Features:
+ * - All tracking functions check if window.gtag exists before calling
+ * - Works safely when GA4 is disabled (no errors, no events sent)
+ * - Environment-aware: respects GA4_ENABLED feature toggle
+ * - Gracefully degrades when GA4 is not available
  */
 
 const gtmTracking = {
+    /**
+     * Check if GA4 tracking is available
+     * @returns {boolean} True if gtag is available and ready
+     */
+    isAvailable: () => {
+        return typeof window !== 'undefined' && typeof window.gtag === 'function';
+    },
     /**
      * Track page view event
      * @param {string} pageName - Name of the page (e.g., 'home', 'blog_list', 'blog_detail')
