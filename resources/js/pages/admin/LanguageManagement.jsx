@@ -17,47 +17,74 @@ const LanguageManagement = () => {
         is_active: true
     });
 
+    // useEffect to fetch languages on component mount
     useEffect(() => {
         fetchLanguages();
     }, []);
 
-    const fetchLanguages = async () => {
-        try {
-            const response = await api.get('/admin/languages');
-            if (response.data.success) {
-                setLanguages(response.data.data);
-            }
-        } catch (error) {
-            console.error('Failed to fetch languages:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    /**
+     * Fetches the list of languages from the API.
+     * Sets the languages state or logs an error if fetching fails.
+     */
+    function fetchLanguages() {
+        api.get('/admin/languages')
+            .then(function (response) {
+                if (response.data && response.data.success) {
+                    setLanguages(response.data.data.data);
+                }
+            })
+            .catch(function (error) {
+                console.error('Failed to fetch languages:', error);
+            })
+            .finally(function () {
+                setLoading(false);
+            });
+    }
 
-    const handleSubmit = async (e) => {
+    /**
+     * Handles form submission for creating or updating a language.
+     * Sends POST or PUT requests based on whether editingLanguage is set.
+     * Provides user feedback on success or failure.
+     * @param {Event} e - Form submit event
+     */
+    function handleSubmit(e) {
         e.preventDefault();
-        try {
-            if (editingLanguage) {
-                const response = await api.put(`/admin/languages/${editingLanguage.id}`, formData);
-                if (response.data.success) {
-                    fetchLanguages();
-                    setShowModal(false);
-                    resetForm();
-                }
-            } else {
-                const response = await api.post('/admin/languages', formData);
-                if (response.data.success) {
-                    fetchLanguages();
-                    setShowModal(false);
-                    resetForm();
-                }
-            }
-        } catch (error) {
-            alert(error.response?.data?.message || 'Operation failed');
-        }
-    };
 
-    const handleEdit = (language) => {
+        if (editingLanguage) {
+            // Update existing language
+            api.put('/admin/languages/' + editingLanguage.id, formData)
+                .then(function (response) {
+                    if (response.data && response.data.success) {
+                        fetchLanguages();
+                        setShowModal(false);
+                        resetForm();
+                    }
+                })
+                .catch(function (error) {
+                    alert((error.response && error.response.data && error.response.data.message) || 'Operation failed');
+                });
+        } else {
+            // Create new language
+            api.post('/admin/languages', formData)
+                .then(function (response) {
+                    if (response.data && response.data.success) {
+                        fetchLanguages();
+                        setShowModal(false);
+                        resetForm();
+                    }
+                })
+                .catch(function (error) {
+                    alert((error.response && error.response.data && error.response.data.message) || 'Operation failed');
+                });
+        }
+    }
+
+    /**
+     * Prepares the form for editing an existing language.
+     * Populates formData with the language's current values and shows the modal.
+     * @param {Object} language - The language object to edit
+     */
+    function handleEdit(language) {
         setEditingLanguage(language);
         setFormData({
             code: language.code,
@@ -66,24 +93,40 @@ const LanguageManagement = () => {
             is_active: language.is_active
         });
         setShowModal(true);
-    };
+    }
 
-    const handleDelete = async () => {
-        try {
-            const response = await api.delete(`/admin/languages/${deleteModal.languageId}`);
-            if (response.data.success) {
-                fetchLanguages();
-                setDeleteModal({ isOpen: false, languageId: null });
-            }
-        } catch (error) {
-            alert(error.response?.data?.message || 'Delete failed');
-        }
-    };
+    /**
+     * Deletes the selected language after confirmation.
+     * Provides user feedback on success or failure.
+     */
+    function handleDelete() {
+        api.delete('/admin/languages/' + deleteModal.languageId)
+            .then(function (response) {
+                if (response.data && response.data.success) {
+                    fetchLanguages();
+                    setDeleteModal({ isOpen: false, languageId: null });
+                }
+            })
+            .catch(function (error) {
+                alert((error.response && error.response.data && error.response.data.message) || 'Delete failed');
+            });
+    }
 
-    const resetForm = () => {
+    /**
+     * Resets the form data and clears the editing language state.
+     */
+    function resetForm() {
         setFormData({ code: '', name: '', native_name: '', is_active: true });
         setEditingLanguage(null);
-    };
+    }
+
+    // Check if languages is an array before mapping
+    var languagesList = [];
+    if (languages && typeof languages.map === 'function') {
+        languagesList = languages;
+    } else {
+        console.error('languages is not an array or does not support map method:', languages);
+    }
 
     return (
         <AdminLayout>
@@ -96,7 +139,7 @@ const LanguageManagement = () => {
 
                 <div className="flex justify-end">
                     <button
-                        onClick={() => setShowModal(true)}
+                        onClick={function () { setShowModal(true); }}
                         className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
                     >
                         <Plus className="h-4 w-4 mr-2" />
@@ -116,7 +159,8 @@ const LanguageManagement = () => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {languages.map((language) => (
+                        {languagesList.map(function (language) {
+                            return (
                                 <tr key={language.id}>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{language.code}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{language.name}</td>
@@ -130,14 +174,14 @@ const LanguageManagement = () => {
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <button
-                                            onClick={() => handleEdit(language)}
+                                            onClick={function () { handleEdit(language); }}
                                             className="text-indigo-600 hover:text-indigo-900 mr-4"
                                         >
                                             <Edit className="h-4 w-4" />
                                         </button>
                                         {!['en', 'vi'].includes(language.code) && (
                                             <button
-                                                onClick={() => setDeleteModal({ isOpen: true, languageId: language.id })}
+                                                onClick={function () { setDeleteModal({ isOpen: true, languageId: language.id }); }}
                                                 className="text-red-600 hover:text-red-900"
                                             >
                                                 <Trash2 className="h-4 w-4" />
@@ -145,16 +189,24 @@ const LanguageManagement = () => {
                                         )}
                                     </td>
                                 </tr>
-                            ))}
+                            );
+                        })}
                         </tbody>
                     </table>
                 </div>
             </div>
 
+            {/* Modal for adding or editing languages */}
             {showModal && (
                 <div className="fixed inset-0 z-50 overflow-y-auto">
                     <div className="flex items-center justify-center min-h-screen px-4">
-                        <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={() => { setShowModal(false); resetForm(); }}></div>
+                        <div
+                            className="fixed inset-0 bg-gray-500 bg-opacity-75"
+                            onClick={function () {
+                                setShowModal(false);
+                                resetForm();
+                            }}
+                        ></div>
                         <div className="relative bg-white rounded-lg p-6 max-w-md w-full">
                             <h3 className="text-lg font-medium mb-4">{editingLanguage ? 'Edit Language' : 'Add New Language'}</h3>
                             <form onSubmit={handleSubmit} className="space-y-4">
@@ -165,10 +217,10 @@ const LanguageManagement = () => {
                                         required
                                         maxLength={2}
                                         value={formData.code}
-                                        onChange={(e) => setFormData({ ...formData, code: e.target.value.toLowerCase() })}
+                                        onChange={function (e) { setFormData(Object.assign({}, formData, { code: e.target.value.toLowerCase() })); }}
                                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         placeholder="e.g., es, fr, de"
-                                        disabled={editingLanguage}
+                                        disabled={!!editingLanguage}
                                     />
                                     <p className="mt-1 text-xs text-gray-500">ISO 639-1 code (2 letters)</p>
                                 </div>
@@ -178,7 +230,7 @@ const LanguageManagement = () => {
                                         type="text"
                                         required
                                         value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                        onChange={function (e) { setFormData(Object.assign({}, formData, { name: e.target.value })); }}
                                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         placeholder="e.g., Spanish"
                                     />
@@ -189,7 +241,7 @@ const LanguageManagement = () => {
                                         type="text"
                                         required
                                         value={formData.native_name}
-                                        onChange={(e) => setFormData({ ...formData, native_name: e.target.value })}
+                                        onChange={function (e) { setFormData(Object.assign({}, formData, { native_name: e.target.value })); }}
                                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                                         placeholder="e.g., Español"
                                     />
@@ -199,7 +251,7 @@ const LanguageManagement = () => {
                                         type="checkbox"
                                         id="is_active"
                                         checked={formData.is_active}
-                                        onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                                        onChange={function (e) { setFormData(Object.assign({}, formData, { is_active: e.target.checked })); }}
                                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                                     />
                                     <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900">
@@ -209,7 +261,10 @@ const LanguageManagement = () => {
                                 <div className="flex justify-end space-x-3 mt-6">
                                     <button
                                         type="button"
-                                        onClick={() => { setShowModal(false); resetForm(); }}
+                                        onClick={function () {
+                                            setShowModal(false);
+                                            resetForm();
+                                        }}
                                         className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
                                     >
                                         Cancel
@@ -227,9 +282,10 @@ const LanguageManagement = () => {
                 </div>
             )}
 
+            {/* Confirmation modal for deleting a language */}
             <ConfirmModal
                 isOpen={deleteModal.isOpen}
-                onClose={() => setDeleteModal({ isOpen: false, languageId: null })}
+                onClose={function () { setDeleteModal({ isOpen: false, languageId: null }); }}
                 onConfirm={handleDelete}
                 title="Delete Language"
                 message="Are you sure you want to delete this language? All translations for this language will also be deleted. This action cannot be undone."
