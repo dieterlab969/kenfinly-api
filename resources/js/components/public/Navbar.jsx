@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import Logo from '../Logo';
+import gtmTracking from '../../utils/gtmTracking';
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -35,6 +36,10 @@ function Navbar() {
                             <Link
                                 key={link.path}
                                 to={link.path}
+                                onClick={() => {
+                                    const navItem = link.name.toLowerCase().replace(/\s+/g, '_');
+                                    gtmTracking.trackHeaderNavClick(navItem);
+                                }}
                                 className={`text-sm font-medium transition-colors ${
                                     isActive(link.path)
                                         ? 'text-blue-600'
@@ -49,12 +54,14 @@ function Navbar() {
                     <div className="hidden md:flex items-center space-x-4">
                         <Link
                             to="/login"
+                            onClick={() => gtmTracking.trackHeaderNavClick('sign_in')}
                             className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
                         >
                             Sign In
                         </Link>
                         <Link
                             to="/register"
+                            onClick={() => gtmTracking.trackHeaderNavClick('get_started')}
                             className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
                         >
                             Get Started
@@ -79,7 +86,11 @@ function Navbar() {
                             <Link
                                 key={link.path}
                                 to={link.path}
-                                onClick={() => setIsMenuOpen(false)}
+                                onClick={() => {
+                                    const navItem = link.name.toLowerCase().replace(/\s+/g, '_');
+                                    gtmTracking.trackHeaderNavClick(navItem);
+                                    setIsMenuOpen(false);
+                                }}
                                 className={`block text-sm font-medium ${
                                     isActive(link.path)
                                         ? 'text-blue-600'
@@ -92,14 +103,20 @@ function Navbar() {
                         <div className="pt-4 border-t space-y-3">
                             <Link
                                 to="/login"
-                                onClick={() => setIsMenuOpen(false)}
+                                onClick={() => {
+                                    gtmTracking.trackHeaderNavClick('sign_in');
+                                    setIsMenuOpen(false);
+                                }}
                                 className="block text-sm font-medium text-gray-600 hover:text-blue-600"
                             >
                                 Sign In
                             </Link>
                             <Link
                                 to="/register"
-                                onClick={() => setIsMenuOpen(false)}
+                                onClick={() => {
+                                    gtmTracking.trackHeaderNavClick('get_started');
+                                    setIsMenuOpen(false);
+                                }}
                                 className="block bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium text-center"
                             >
                                 Get Started

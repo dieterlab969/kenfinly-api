@@ -17,6 +17,7 @@ import { PostCardSkeleton, CategoryButtonSkeleton } from '../../components/publi
 import { ErrorState, EmptyState } from '../../components/shared/ErrorState';
 import { stripHtml, truncate, formatDate } from '../../utils/textUtils';
 import wordpressApi from '../../services/wordpressApi';
+import gtmTracking from '../../utils/gtmTracking';
 
 function BlogPage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -103,6 +104,7 @@ function BlogPage() {
     // Fetch posts when page, category, or search changes
     useEffect(() => {
         fetchPosts();
+        gtmTracking.trackBlogListView();
     }, [fetchPosts]);
 
     // Fetch categories only once on mount (empty dependency array)
@@ -125,11 +127,17 @@ function BlogPage() {
             return;
         }
 
+        // Track search event
+        gtmTracking.trackBlogSearch(trimmedQuery);
+        
         // Update URL with search query
         setSearchParams({ search: trimmedQuery, page: '1' });
     }, [searchInput, setSearchParams]);
 
-    const handleCategoryClick = useCallback((categoryId) => {
+    const handleCategoryClick = useCallback((categoryId, categoryName) => {
+        // Track category selection
+        gtmTracking.trackBlogCategorySelect(categoryName || categoryId.toString());
+        
         // Preserve search if it exists, but reset to page 1
         const params = { category: categoryId.toString(), page: '1' };
         if (currentSearch) {

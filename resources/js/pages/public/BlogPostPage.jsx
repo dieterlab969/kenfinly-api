@@ -14,6 +14,7 @@ import PublicLayout from '../../components/public/PublicLayout';
 import { ArticleSkeleton } from '../../components/public/SkeletonLoaders';
 import { stripHtml, truncate, formatDate } from '../../utils/textUtils';
 import wordpressApi from '../../services/wordpressApi';
+import gtmTracking from '../../utils/gtmTracking';
 
 function BlogPostPage() {
     const { slug } = useParams();
@@ -32,6 +33,8 @@ function BlogPostPage() {
                 
                 if (result.success && result.post) {
                     setPost(result.post);
+                    // Track blog article view
+                    gtmTracking.trackBlogArticleView(result.post.title?.rendered || 'Article', result.post.id);
                     
                     const relatedResult = await wordpressApi.getPosts({ 
                         per_page: 3,
@@ -71,11 +74,13 @@ function BlogPostPage() {
         
         if (navigator.share) {
             try {
+                gtmTracking.trackShareArticle('native_share', title);
                 await navigator.share({ title, url });
             } catch (err) {
                 console.log('Share cancelled');
             }
         } else {
+            gtmTracking.trackShareArticle('copy_link', title);
             await navigator.clipboard.writeText(url);
             alert('Link copied to clipboard!');
         }
