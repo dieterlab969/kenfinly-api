@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import axios from 'axios';
 import Logo from '../Logo';
+import gtmTracking from '../../utils/gtmTracking';
 
 function Footer() {
     const currentYear = useMemo(() => new Date().getFullYear(), []);
@@ -73,6 +74,7 @@ function Footer() {
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         aria-label={label}
+                                        onClick={() => gtmTracking.trackSocialLinkClick(label.toLowerCase())}
                                         className="text-gray-400 hover:text-white transition-colors"
                                     >
                                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -88,27 +90,27 @@ function Footer() {
                         <h3 className="text-white font-semibold mb-4">Quick Links</h3>
                         <ul className="space-y-2">
                             <li>
-                                <Link to="/" className="text-gray-400 hover:text-white transition-colors">
+                                <Link to="/" onClick={() => gtmTracking.trackFooterNavClick('home')} className="text-gray-400 hover:text-white transition-colors">
                                     Home
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/blog" className="text-gray-400 hover:text-white transition-colors">
+                                <Link to="/blog" onClick={() => gtmTracking.trackFooterNavClick('blog')} className="text-gray-400 hover:text-white transition-colors">
                                     Blog
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/about" className="text-gray-400 hover:text-white transition-colors">
+                                <Link to="/about" onClick={() => gtmTracking.trackFooterNavClick('about_us')} className="text-gray-400 hover:text-white transition-colors">
                                     About Us
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/login" className="text-gray-400 hover:text-white transition-colors">
+                                <Link to="/login" onClick={() => gtmTracking.trackFooterNavClick('sign_in')} className="text-gray-400 hover:text-white transition-colors">
                                     Sign In
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/register" className="text-gray-400 hover:text-white transition-colors">
+                                <Link to="/register" onClick={() => gtmTracking.trackFooterNavClick('get_started')} className="text-gray-400 hover:text-white transition-colors">
                                     Get Started
                                 </Link>
                             </li>

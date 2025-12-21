@@ -17,6 +17,7 @@ import { PostCardSkeleton, TipCardSkeleton } from '../../components/public/Skele
 import { ErrorState, EmptyState } from '../../components/shared/ErrorState';
 import { stripHtml, truncate, formatDate } from '../../utils/textUtils';
 import wordpressApi from '../../services/wordpressApi';
+import gtmTracking from '../../utils/gtmTracking';
 
 function LandingPage() {
     const [latestPosts, setLatestPosts] = useState([]);
@@ -69,6 +70,7 @@ function LandingPage() {
 
     useEffect(() => {
         fetchContent();
+        gtmTracking.trackPageView('home', 'Home');
     }, []);
 
     const features = [
@@ -126,6 +128,7 @@ function LandingPage() {
                         <div className="flex flex-col sm:flex-row justify-center gap-4">
                             <Link
                                 to="/register"
+                                onClick={() => gtmTracking.trackHomeCTAClick('get_started')}
                                 aria-label="Start your free 14-day trial of Kenfinly"
                                 className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-blue-600"
                             >
@@ -134,6 +137,7 @@ function LandingPage() {
                             </Link>
                             <Link
                                 to="/login"
+                                onClick={() => gtmTracking.trackHomeCTAClick('sign_in')}
                                 aria-label="Sign in to your Kenfinly account"
                                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-blue-600"
                             >

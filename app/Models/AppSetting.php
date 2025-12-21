@@ -48,4 +48,16 @@ class AppSetting extends Model
     {
         return self::get('google_tag_manager_id');
     }
+
+    public static function isGA4Enabled(): bool
+    {
+        // Check environment variable first (can be overridden per environment)
+        if (env('GA4_ENABLED') !== null) {
+            // If a value exists, it is safely converted to a boolean (true / false).
+            return filter_var(env('GA4_ENABLED'), FILTER_VALIDATE_BOOLEAN); 
+        }
+        
+        // Fall back to app setting
+        return self::get('ga4_enabled', false);
+    }
 }
