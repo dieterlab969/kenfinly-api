@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import Logo from '../Logo';
+import LanguageSwitcher from './LanguageSwitcher';
 import gtmTracking from '../../utils/gtmTracking';
 
 function Navbar() {
@@ -52,6 +53,7 @@ function Navbar() {
                     </div>
 
                     <div className="hidden md:flex items-center space-x-4">
+                        <LanguageSwitcher />
                         <Link
                             to="/login"
                             onClick={() => gtmTracking.trackHeaderNavClick('sign_in')}
@@ -68,7 +70,8 @@ function Navbar() {
                         </Link>
                     </div>
 
-                    <div className="md:hidden flex items-center">
+                    <div className="md:hidden flex items-center gap-3">
+                        <LanguageSwitcher />
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className="text-gray-600 hover:text-gray-900"
