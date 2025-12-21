@@ -37,7 +37,7 @@ function Navbar() {
                                 key={link.path}
                                 to={link.path}
                                 onClick={() => {
-                                    const navItem = link.name.toLowerCase().replace(/\s+/g, '_');
+                                    const navItem = link.name.toLowerCase().replace(/\s+/g, '_'); // Replace spaces with underscores (_)
                                     gtmTracking.trackHeaderNavClick(navItem);
                                 }}
                                 className={`text-sm font-medium transition-colors ${
