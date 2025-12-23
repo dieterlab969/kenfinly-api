@@ -12,19 +12,20 @@ import {
 } from 'lucide-react';
 import PublicLayout from '../../components/public/PublicLayout';
 import { ArticleSkeleton } from '../../components/public/SkeletonLoaders';
-import { stripHtml, truncate, formatDate } from '../../utils/textUtils';
+import { stripHtml, truncate, formatDate, getLocaleFromLanguageCode } from '../../utils/textUtils';
 import wordpressApi from '../../services/wordpressApi';
 import gtmTracking from '../../utils/gtmTracking';
 import {useTranslation} from "@assets/js/contexts/TranslationContext.jsx";
 
 function BlogPostPage() {
-    const { t } = useTranslation();
+    const { t, currentLanguage } = useTranslation();
     const { slug } = useParams();
     const navigate = useNavigate();
     const [post, setPost] = useState(null);
     const [relatedPosts, setRelatedPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const locale = getLocaleFromLanguageCode(currentLanguage?.code || 'en');
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -143,7 +144,7 @@ function BlogPostPage() {
                         <div className="flex flex-wrap items-center gap-4 text-gray-600 mb-6">
                             <div className="flex items-center">
                                 <Calendar className="w-5 h-5 mr-2" />
-                                <span>{formatDate(post?.date)}</span>
+                                <span>{formatDate(post?.date, locale)}</span>
                             </div>
                             <div className="flex items-center">
                                 <Clock className="w-5 h-5 mr-2" />
@@ -208,7 +209,7 @@ function BlogPostPage() {
                                     <div className="p-5">
                                         <div className="flex items-center text-sm text-gray-500 mb-2">
                                             <Calendar className="w-4 h-4 mr-1" />
-                                            <span>{formatDate(relatedPost.date)}</span>
+                                            <span>{formatDate(relatedPost.date, locale)}</span>
                                         </div>
                                         <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
                                             <Link
