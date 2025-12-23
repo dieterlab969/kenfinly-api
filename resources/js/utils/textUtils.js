@@ -14,10 +14,18 @@ export const truncate = (text, length = 150) => {
     return stripped.substring(0, length) + '...';
 };
 
-export const formatDate = (dateString) => {
+export const getLocaleFromLanguageCode = (languageCode) => {
+    const localeMap = {
+        'en': 'en-US',
+        'vi': 'vi-VN'
+    };
+    return localeMap[languageCode] || 'en-US';
+};
+
+export const formatDate = (dateString, locale = 'en-US') => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
+    return date.toLocaleDateString(locale, { 
         year: 'numeric', 
         month: 'long', 
         day: 'numeric' 

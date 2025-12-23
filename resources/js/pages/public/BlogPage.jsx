@@ -15,13 +15,13 @@ import {
 import PublicLayout from '../../components/public/PublicLayout';
 import { PostCardSkeleton, CategoryButtonSkeleton } from '../../components/public/SkeletonLoaders';
 import { ErrorState, EmptyState } from '../../components/shared/ErrorState';
-import { stripHtml, truncate, formatDate } from '../../utils/textUtils';
+import { stripHtml, truncate, formatDate, getLocaleFromLanguageCode } from '../../utils/textUtils';
 import wordpressApi from '../../services/wordpressApi';
 import gtmTracking from '../../utils/gtmTracking';
 import {useTranslation} from "@assets/js/contexts/TranslationContext.jsx";
 
 function BlogPage() {
-    const { t } = useTranslation();
+    const { t, currentLanguage } = useTranslation();
     const [searchParams, setSearchParams] = useSearchParams();
     const [posts, setPosts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -29,6 +29,7 @@ function BlogPage() {
     const [categoriesLoading, setCategoriesLoading] = useState(true);
     const [error, setError] = useState(false);
     const [pagination, setPagination] = useState({ total: 0, totalPages: 1 });
+    const locale = getLocaleFromLanguageCode(currentLanguage?.code || 'en');
 
     const currentPage = parseInt(searchParams.get('page') || '1', 10);
     const currentCategory = searchParams.get('category') || '';
@@ -298,7 +299,7 @@ function BlogPage() {
                                                 <div className="flex items-center">
                                                     <Calendar className="w-4 h-4 mr-1" aria-hidden="true" />
                                                     <time dateTime={post.date}>
-                                                        {formatDate(post.date)}
+                                                        {formatDate(post.date, locale)}
                                                     </time>
                                                 </div>
                                             </div>
