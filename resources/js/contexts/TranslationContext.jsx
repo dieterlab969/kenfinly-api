@@ -103,17 +103,28 @@ export const TranslationProvider = ({ children }) => {
         return FALLBACK_TRANSLATIONS[lang]?.[key] || FALLBACK_TRANSLATIONS['en'][key];
     };
 
-    const t = (key, defaultValue = null) => {
+    const t = (key, variables = null) => {
+        let text = null;
+        
         if (translations[key]) {
-            return translations[key];
+            text = translations[key];
+        } else {
+            text = getFallbackText(key);
         }
         
-        const fallback = getFallbackText(key);
-        if (fallback) {
-            return fallback;
+        if (!text) {
+            return variables?.default || key;
         }
         
-        return defaultValue || key;
+        // Interpolate variables into the translation string
+        if (variables && typeof variables === 'object') {
+            Object.keys(variables).forEach(varName => {
+                const regex = new RegExp(`{{\\s*${varName}\\s*}}`, 'g');
+                text = text.replace(regex, variables[varName]);
+            });
+        }
+        
+        return text;
     };
 
     if (loading) {
