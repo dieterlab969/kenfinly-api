@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-    TrendingUp, 
-    PieChart, 
-    Target, 
-    Shield, 
-    Smartphone, 
+import {
+    TrendingUp,
+    PieChart,
+    Target,
+    Shield,
+    Smartphone,
     Users,
     ArrowRight,
     CheckCircle,
@@ -18,8 +18,10 @@ import { ErrorState, EmptyState } from '../../components/shared/ErrorState';
 import { stripHtml, truncate, formatDate } from '../../utils/textUtils';
 import wordpressApi from '../../services/wordpressApi';
 import gtmTracking from '../../utils/gtmTracking';
+import {useTranslation} from "@assets/js/contexts/TranslationContext.jsx";
 
 function LandingPage() {
+    const { t } = useTranslation();
     const [latestPosts, setLatestPosts] = useState([]);
     const [financialTips, setFinancialTips] = useState([]);
     const [postsLoading, setPostsLoading] = useState(true);
@@ -76,33 +78,33 @@ function LandingPage() {
     const features = [
         {
             icon: PieChart,
-            title: 'Expense Tracking',
-            description: 'Track every expense across multiple accounts and currencies with ease.'
+            title: t('landingpage.feature.expense_tracking_title'),
+            description: t('landingpage.feature.expense_tracking_description')
         },
         {
             icon: Target,
-            title: 'Budget Planning',
-            description: 'Set and monitor budgets to stay on track with your financial goals.'
+            title: t('landingpage.feature.budget_planning_title'),
+            description: t('landingpage.feature.budget_planning_description')
         },
         {
             icon: TrendingUp,
-            title: 'Analytics Dashboard',
-            description: 'Visualize your spending patterns with intuitive charts and reports.'
+            title: t('landingpage.feature.analytics_dashboard_title'),
+            description: t('landingpage.feature.analytics_dashboard_description')
         },
         {
             icon: Shield,
-            title: 'Secure & Private',
-            description: 'Your financial data is encrypted and protected with enterprise-grade security.'
+            title: t('landingpage.feature.secure_private_title'),
+            description: t('landingpage.feature.secure_private_description')
         },
         {
             icon: Smartphone,
-            title: 'Access Anywhere',
-            description: 'Manage your finances on any device with our responsive design.'
+            title: t('landingpage.feature.access_anywhere_title'),
+            description: t('landingpage.feature.access_anywhere_description')
         },
         {
             icon: Users,
-            title: 'Multi-user Support',
-            description: 'Collaborate with family members or partners on shared accounts.'
+            title: t('landingpage.feature.multi_user_support_title'),
+            description: t('landingpage.feature.multi_user_support_description')
         }
     ];
 
@@ -114,16 +116,15 @@ function LandingPage() {
                     <div className="absolute top-20 left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
                     <div className="absolute bottom-20 right-10 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
                 </div>
-                
+
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
                     <div className="text-center">
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                            Take Control of Your
-                            <span className="block text-yellow-300">Financial Future</span>
+                            {t('landingpage.hero.take_control')}
+                            <span className="block text-yellow-300">{t('landingpage.hero.financial_future')}</span>
                         </h1>
                         <p className="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
-                            Track expenses, set budgets, and achieve your financial goals with 
-                            Kenfinly - the intuitive personal finance management platform.
+                            {t('landingpage.feature.expense_tracking_description')}
                         </p>
                         <div className="flex flex-col sm:flex-row justify-center gap-4">
                             <Link
@@ -132,7 +133,7 @@ function LandingPage() {
                                 aria-label="Start your free 14-day trial of Kenfinly"
                                 className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-blue-600"
                             >
-                                Start Free Trial
+                                {t('landingpage.hero.cta.start_free_trial')}
                                 <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
                             </Link>
                             <Link
@@ -141,17 +142,17 @@ function LandingPage() {
                                 aria-label="Sign in to your Kenfinly account"
                                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-blue-600"
                             >
-                                Sign In
+                                {t('landingpage.hero.cta.sign_in')}
                             </Link>
                         </div>
                         <div className="mt-8 flex justify-center items-center space-x-6 text-blue-100">
                             <div className="flex items-center">
                                 <CheckCircle className="w-5 h-5 mr-2 text-green-400" aria-hidden="true" />
-                                <span>Free 14-day trial</span>
+                                <span>{t('landingpage.hero.free_trial_14_days')}</span>
                             </div>
                             <div className="flex items-center">
                                 <CheckCircle className="w-5 h-5 mr-2 text-green-400" aria-hidden="true" />
-                                <span>No credit card required</span>
+                                <span>{t('landingpage.hero.no_credit_card_required')}</span>
                             </div>
                         </div>
                     </div>
@@ -162,16 +163,16 @@ function LandingPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                            Everything You Need to Manage Your Finances
+                            {t('landingpage.feature_heading')}
                         </h2>
                         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                            Powerful features designed to help you understand, control, and grow your money.
+                            {t('landingpage.feature_description')}
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {features.map((feature, index) => (
-                            <div 
+                            <div
                                 key={index}
                                 className="bg-gray-50 rounded-xl p-8 hover:shadow-lg transition-shadow border border-gray-100 focus-within:ring-2 focus-within:ring-blue-600"
                             >
@@ -195,18 +196,18 @@ function LandingPage() {
                     <div className="flex justify-between items-center mb-12">
                         <div>
                             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-                                Latest from Our Blog
+                                {t('landingpage.blog.latest_title')}
                             </h2>
                             <p className="text-xl text-gray-600">
-                                Financial tips, insights, and news to help you succeed.
+                                {t('landingpage.blog.description')}
                             </p>
                         </div>
-                        <Link 
+                        <Link
                             to="/blog"
                             aria-label="View all blog posts"
                             className="hidden md:flex items-center text-blue-600 font-semibold hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 rounded px-2 py-1"
                         >
-                            View All Posts
+                            {t('landingpage.blog.view_all_posts')}
                             <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
                         </Link>
                     </div>
@@ -215,16 +216,16 @@ function LandingPage() {
                         <PostCardSkeleton count={3} columns={3} />
                     ) : postsError ? (
                         <ErrorState
-                            title="Content Temporarily Unavailable"
-                            message="We're having trouble loading our latest articles. Please check back later or contact support if the issue persists."
+                            title={t('landingpage.blog.error_title')}
+                            message={t('landingpage.blog.error_message')}
                             onRetry={fetchContent}
-                            retryLabel="Try Again"
+                            retryLabel={t('landingpage.blog.retry_label')}
                             variant="card"
                         />
                     ) : latestPosts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {latestPosts.map((post) => (
-                                <article 
+                                <article
                                     key={post.id}
                                     className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow focus-within:ring-2 focus-within:ring-blue-600"
                                 >
@@ -239,11 +240,11 @@ function LandingPage() {
                                             </time>
                                         </div>
                                         <h3 className="text-xl font-semibold text-gray-900 mb-3 line-clamp-2">
-                                            <Link 
+                                            <Link
                                                 to={`/blog/${post.slug}`}
                                                 className="hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 rounded px-1"
                                             >
-                                                {stripHtml(post.title?.rendered || 'Untitled')}
+                                                {stripHtml(post.title?.rendered || t('landingpage.blog.post.untitled'))}
                                             </Link>
                                         </h3>
                                         <p className="text-gray-600 mb-4 line-clamp-3">
@@ -253,7 +254,7 @@ function LandingPage() {
                                             to={`/blog/${post.slug}`}
                                             className="text-blue-600 font-medium hover:text-blue-700 inline-flex items-center focus:outline-none focus:ring-2 focus:ring-blue-600 rounded px-1"
                                         >
-                                            Read More
+                                            {t('landingpage.blog.post.read_more')}
                                             <ArrowRight className="ml-1 w-4 h-4" aria-hidden="true" />
                                         </Link>
                                     </div>
@@ -262,19 +263,19 @@ function LandingPage() {
                         </div>
                     ) : (
                         <EmptyState
-                            title="Coming Soon"
-                            message="Our blog is being set up. Check back soon for financial tips and insights!"
+                            title={t('landingpage.blog.empty_state.title')}
+                            message={t('landingpage.blog.empty_state.message')}
                             icon={TrendingUp}
                         />
                     )}
 
                     <div className="md:hidden mt-8 text-center">
-                        <Link 
+                        <Link
                             to="/blog"
                             aria-label="View all blog posts"
                             className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 rounded px-2 py-1"
                         >
-                            View All Posts
+                            {t('landingpage.blog.view_all_posts')}
                             <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
                         </Link>
                     </div>
@@ -286,10 +287,10 @@ function LandingPage() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="text-center mb-12">
                             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                                Financial Tips
+                                {t('landingpage.tips.title')}
                             </h2>
                             <p className="text-xl text-gray-600">
-                                Expert advice to help you make smarter financial decisions.
+                                {t('landingpage.tips.description')}
                             </p>
                         </div>
 
@@ -297,16 +298,16 @@ function LandingPage() {
                             <TipCardSkeleton count={3} />
                         ) : tipsError ? (
                             <ErrorState
-                                title="Tips Temporarily Unavailable"
-                                message="We're having trouble loading our financial tips. Please try again later."
+                                title={t('landingpage.tips.error_title')}
+                                message={t('landingpage.tips.error_message')}
                                 onRetry={fetchContent}
-                                retryLabel="Try Again"
+                                retryLabel={t('landingpage.tips.retry_label')}
                                 variant="blue"
                             />
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 {financialTips.map((tip) => (
-                                    <div 
+                                    <div
                                         key={tip.id}
                                         className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100 focus-within:ring-2 focus-within:ring-blue-600"
                                     >
@@ -314,7 +315,7 @@ function LandingPage() {
                                             <CheckCircle className="w-5 h-5 text-white" aria-hidden="true" />
                                         </div>
                                         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                                            {stripHtml(tip.title?.rendered || 'Financial Tip')}
+                                            {stripHtml(tip.title?.rendered || t('landingpage.tip.default_title'))}
                                         </h3>
                                         <p className="text-gray-600 text-sm">
                                             {truncate(tip.content?.rendered, 120)}
@@ -330,26 +331,26 @@ function LandingPage() {
             <section className="py-20 bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                        Ready to Transform Your Financial Life?
+                        {t('landingpage.cta.ready_title')}
                     </h2>
                     <p className="text-xl text-blue-100 mb-8">
-                        Join thousands of users who have taken control of their finances with Kenfinly.
+                        {t('landingpage.cta.ready_description')}
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
                         <Link
                             to="/register"
-                            aria-label="Get started free with Kenfinly"
+                            aria-label={t('landingpage.cta.get_started_free')}
                             className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
                         >
-                            Get Started Free
+                            {t('landingpage.cta.get_started_free')}
                             <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
                         </Link>
                         <Link
                             to="/blog"
-                            aria-label="Read our financial blog"
+                            aria-label={t('landingpage.cta.read_blog')}
                             className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
                         >
-                            Read Our Blog
+                            {t('landingpage.cta.read_blog')}
                         </Link>
                     </div>
                 </div>

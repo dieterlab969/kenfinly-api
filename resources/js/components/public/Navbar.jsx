@@ -2,17 +2,20 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import Logo from '../Logo';
+import LanguageSwitcher from './LanguageSwitcher';
 import gtmTracking from '../../utils/gtmTracking';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 function Navbar() {
+    const { t } = useTranslation();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const location = useLocation();
 
     const navLinks = [
-        { name: 'Home', path: '/' },
-        { name: 'Features', path: '/#features' },
-        { name: 'Blog', path: '/blog' },
-        { name: 'About', path: '/about' },
+        { name: t('navbar.home'), path: '/' },
+        { name: t('navbar.features'), path: '/#features' },
+        { name: t('navbar.blog'), path: '/blog' },
+        { name: t('navbar.about'), path: '/about' },
     ];
 
     const isActive = (path) => {
@@ -52,23 +55,25 @@ function Navbar() {
                     </div>
 
                     <div className="hidden md:flex items-center space-x-4">
+                        <LanguageSwitcher />
                         <Link
                             to="/login"
                             onClick={() => gtmTracking.trackHeaderNavClick('sign_in')}
                             className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
                         >
-                            Sign In
+                            {t('navbar.sign_in')}
                         </Link>
                         <Link
                             to="/register"
                             onClick={() => gtmTracking.trackHeaderNavClick('get_started')}
                             className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
                         >
-                            Get Started
+                            {t('navbar.get_started')}
                         </Link>
                     </div>
 
-                    <div className="md:hidden flex items-center">
+                    <div className="md:hidden flex items-center gap-3">
+                        <LanguageSwitcher />
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className="text-gray-600 hover:text-gray-900"
@@ -109,7 +114,7 @@ function Navbar() {
                                 }}
                                 className="block text-sm font-medium text-gray-600 hover:text-blue-600"
                             >
-                                Sign In
+                                {t('navbar.sign_in')}
                             </Link>
                             <Link
                                 to="/register"
@@ -119,7 +124,7 @@ function Navbar() {
                                 }}
                                 className="block bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium text-center"
                             >
-                                Get Started
+                                {t('navbar.get_started')}
                             </Link>
                         </div>
                     </div>

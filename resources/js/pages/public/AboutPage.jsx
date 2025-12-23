@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import DOMPurify from 'dompurify';
-import { 
-    TrendingUp, 
-    Target, 
-    Users, 
-    Shield, 
+import {
+    TrendingUp,
+    Target,
+    Users,
+    Shield,
     Award,
     ArrowRight,
     Heart
@@ -13,38 +13,39 @@ import {
 import PublicLayout from '../../components/public/PublicLayout';
 import { StatsSkeleton, ValuesSkeleton, ContentSkeleton } from '../../components/public/SkeletonLoaders';
 import wordpressApi from '../../services/wordpressApi';
-
-const DEFAULT_VALUES = [
-    {
-        icon: Shield,
-        title: 'Security First',
-        description: 'Your financial data is protected with enterprise-grade encryption and security measures.'
-    },
-    {
-        icon: Users,
-        title: 'User-Centric',
-        description: 'Every feature is designed with our users in mind, making financial management intuitive.'
-    },
-    {
-        icon: Target,
-        title: 'Goal-Oriented',
-        description: 'We help you set, track, and achieve your financial goals with powerful tools.'
-    },
-    {
-        icon: Heart,
-        title: 'Transparency',
-        description: 'We believe in clear, honest communication about your finances and our services.'
-    }
-];
-
-const DEFAULT_STATS = [
-    { value: '10K+', label: 'Active Users' },
-    { value: '$50M+', label: 'Tracked Annually' },
-    { value: '99.9%', label: 'Uptime' },
-    { value: '4.9/5', label: 'User Rating' }
-];
+import {useTranslation} from "@assets/js/contexts/TranslationContext.jsx";
 
 function AboutPage() {
+    const { t } = useTranslation();
+    const DEFAULT_VALUES = [
+        {
+            icon: Shield,
+            title: t('aboutus.feature.security_first_title'),
+            description: t('aboutus.feature.security_first_description')
+        },
+        {
+            icon: Users,
+            title: t('aboutus.feature.user_centric_title'),
+            description: t('aboutus.feature.user_centric_description')
+        },
+        {
+            icon: Target,
+            title: t('about.values.goal_oriented.title'),
+            description: t('about.values.goal_oriented.description')
+        },
+        {
+            icon: Heart,
+            title: t('about.values.transparency.title'),
+            description: t('about.values.transparency.description')
+        }
+    ];
+
+    const DEFAULT_STATS = [
+        { value: '10K+', label: t('aboutus.stats.active_users_label') },
+        { value: '$50M+', label: t('aboutus.stats.tracked_annually_label') },
+        { value: '99.9%', label: t('aboutus.stats.uptime_label') },
+        { value: '4.9/5', label: t('aboutus.stats.user_rating_label') }
+    ];
     const [pageContent, setPageContent] = useState(null);
     const [stats, setStats] = useState(DEFAULT_STATS);
     const [values, setValues] = useState(DEFAULT_VALUES);
@@ -54,6 +55,7 @@ function AboutPage() {
     const [error, setError] = useState(false);
     const [statsError, setStatsError] = useState(false);
     const [valuesError, setValuesError] = useState(false);
+
 
     const fetchPage = useCallback(async () => {
         setLoading(true);
@@ -111,7 +113,7 @@ function AboutPage() {
         fetchValues();
     }, [fetchPage, fetchStats, fetchValues]);
 
-    const sanitizedContent = pageContent?.content?.rendered 
+    const sanitizedContent = pageContent?.content?.rendered
         ? DOMPurify.sanitize(pageContent.content.rendered)
         : null;
 
@@ -121,11 +123,10 @@ function AboutPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="max-w-3xl mx-auto text-center">
                         <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                            About Kenfinly
+                            {t('aboutus.hero.title')}
                         </h1>
                         <p className="text-xl text-blue-100">
-                            We're on a mission to help everyone take control of their financial future 
-                            through intuitive, powerful personal finance tools.
+                            {t('aboutus.hero.description')}
                         </p>
                     </div>
                 </div>
@@ -136,26 +137,26 @@ function AboutPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                         <div>
                             <h2 id="our-story-heading" className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                                Our Story
+                                {t('aboutus.section.our_story_title')}
                             </h2>
                             {loading ? (
                                 <ContentSkeleton />
                             ) : error ? (
                                 <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                                     <p className="text-gray-600 mb-4">
-                                        We're having trouble loading our story. The content will be available shortly.
+                                        {t('aboutus.error.loading_story_message')}
                                     </p>
                                     <button
                                         onClick={fetchPage}
                                         className="text-blue-600 font-medium hover:text-blue-700 inline-flex items-center focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 rounded px-2 py-1"
                                         aria-label="Retry loading our story"
                                     >
-                                        Try Again
+                                        {t('aboutus.error.retry_label')}
                                         <ArrowRight className="ml-1 w-4 h-4" />
                                     </button>
                                 </div>
                             ) : sanitizedContent ? (
-                                <div 
+                                <div
                                     className="prose prose-lg text-gray-600"
                                     dangerouslySetInnerHTML={{ __html: sanitizedContent }}
                                     role="region"
@@ -164,19 +165,13 @@ function AboutPage() {
                             ) : (
                                 <div className="space-y-4 text-gray-600">
                                     <p>
-                                        Kenfinly was born from a simple observation: managing personal finances 
-                                        shouldn't be complicated. Too many people struggle with spreadsheets, 
-                                        lose track of expenses, or feel overwhelmed by their financial situation.
+                                        {t('aboutus.story.paragraph1')}
                                     </p>
                                     <p>
-                                        We built Kenfinly to change that. Our platform combines powerful financial 
-                                        tracking with an intuitive interface that anyone can use. Whether you're 
-                                        just starting your financial journey or looking to optimize your wealth 
-                                        management, Kenfinly grows with you.
+                                        {t('aboutus.story.paragraph2')}
                                     </p>
                                     <p>
-                                        Today, thousands of users trust Kenfinly to help them understand their 
-                                        spending, plan their budgets, and achieve their financial goals.
+                                        {t('aboutus.story.paragraph3')}
                                     </p>
                                 </div>
                             )}
@@ -184,7 +179,7 @@ function AboutPage() {
                         <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 flex items-center justify-center h-80">
                             <div className="text-center text-white">
                                 <TrendingUp className="w-24 h-24 mx-auto mb-4 opacity-80" aria-hidden="true" />
-                                <p className="text-2xl font-semibold">Empowering Financial Freedom</p>
+                                <p className="text-2xl font-semibold">{t('aboutus.tagline.empowering_financial_freedom')}</p>
                             </div>
                         </div>
                     </div>
@@ -193,18 +188,18 @@ function AboutPage() {
 
             <section className="py-16 bg-blue-600" aria-labelledby="stats-heading">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 id="stats-heading" className="sr-only">Our Impact Statistics</h2>
+                    <h2 id="stats-heading" className="sr-only">{t('aboutus.stats.heading')}</h2>
                     {statsLoading ? (
                         <StatsSkeleton />
                     ) : statsError ? (
                         <div className="text-center text-white">
-                            <p className="mb-4">Unable to load statistics at this moment.</p>
+                            <p className="mb-4">{t('aboutus.stats.error_message')}</p>
                             <button
                                 onClick={fetchStats}
                                 className="text-blue-100 hover:text-white inline-flex items-center focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600 rounded px-2 py-1"
                                 aria-label="Retry loading statistics"
                             >
-                                Try Again
+                                {t('aboutus.stats.retry_label')}
                                 <ArrowRight className="ml-1 w-4 h-4" />
                             </button>
                         </div>
@@ -229,10 +224,10 @@ function AboutPage() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h2 id="values-heading" className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                            Our Values
+                            {t('aboutus.values.heading')}
                         </h2>
                         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                            The principles that guide everything we do at Kenfinly.
+                            {t('about.values.description')}
                         </p>
                     </div>
 
@@ -240,13 +235,13 @@ function AboutPage() {
                         <ValuesSkeleton />
                     ) : valuesError ? (
                         <div className="text-center text-gray-600">
-                            <p className="mb-4">Unable to load values at this moment.</p>
+                            <p className="mb-4">{t('about.load_error_message')}</p>
                             <button
                                 onClick={fetchValues}
                                 className="text-blue-600 hover:text-blue-700 inline-flex items-center focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 rounded px-2 py-1"
                                 aria-label="Retry loading our values"
                             >
-                                Try Again
+                                {t('about.retry_action_text')}
                                 <ArrowRight className="ml-1 w-4 h-4" />
                             </button>
                         </div>
@@ -255,7 +250,7 @@ function AboutPage() {
                             {values.map((value, index) => {
                                 const IconComponent = value.icon || Heart;
                                 return (
-                                    <article 
+                                    <article
                                         key={index}
                                         className="bg-white rounded-xl p-8 text-center hover:shadow-lg transition-shadow focus-within:ring-2 focus-within:ring-blue-600"
                                     >
@@ -280,27 +275,26 @@ function AboutPage() {
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <Award className="w-16 h-16 mx-auto mb-6 opacity-80" aria-hidden="true" />
                     <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                        Join Our Growing Community
+                        {t('aboutus.community.title')}
                     </h2>
                     <p className="text-xl text-blue-100 mb-8">
-                        Start your journey to financial freedom today. Join thousands of users 
-                        who have transformed their relationship with money.
+                        {t('aboutus.community.description')}
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
                         <Link
                             to="/register"
                             className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
-                            aria-label="Get Started Free - Register for Kenfinly"
+                            aria-label={t('aboutus.community.button_get_started')}
                         >
-                            Get Started Free
+                            {t('aboutus.community.button_get_started')}
                             <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
                         </Link>
                         <Link
                             to="/blog"
                             className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
-                            aria-label="Read Our Blog"
+                            aria-label={t('aboutus.community.button_read_blog')}
                         >
-                            Read Our Blog
+                            {t('aboutus.community.button_read_blog')}
                         </Link>
                     </div>
                 </div>

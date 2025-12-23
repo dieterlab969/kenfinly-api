@@ -4,8 +4,10 @@ import { Mail, Phone, MapPin } from 'lucide-react';
 import axios from 'axios';
 import Logo from '../Logo';
 import gtmTracking from '../../utils/gtmTracking';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 function Footer() {
+    const { t } = useTranslation();
     const currentYear = useMemo(() => new Date().getFullYear(), []);
     const [companyInfo, setCompanyInfo] = useState({
         company_name: import.meta.env.COMPANY_NAME || process.env.COMPANY_NAME,
@@ -63,7 +65,7 @@ function Footer() {
                             <span className="text-xl font-bold text-white">Kenfinly</span>
                         </div>
                         <p className="text-gray-400 mb-4 max-w-md">
-                            Take control of your spending with Kenfinly. Track every expense and transform your personal finance management effortlessly.
+                            {t('footer.description')}
                         </p>
                         <div className="flex space-x-4">
                             {socialLinks.map(({ href, label, svgPath }, idx) =>
@@ -87,39 +89,39 @@ function Footer() {
                     </div>
 
                     <div>
-                        <h3 className="text-white font-semibold mb-4">Quick Links</h3>
+                        <h3 className="text-white font-semibold mb-4">{t('footer.quick_links_title')}</h3>
                         <ul className="space-y-2">
                             <li>
                                 <Link to="/" onClick={() => gtmTracking.trackFooterNavClick('home')} className="text-gray-400 hover:text-white transition-colors">
-                                    Home
+                                    {t('footer.navigation.home')}
                                 </Link>
                             </li>
                             <li>
                                 <Link to="/blog" onClick={() => gtmTracking.trackFooterNavClick('blog')} className="text-gray-400 hover:text-white transition-colors">
-                                    Blog
+                                    {t('footer.navigation.blog')}
                                 </Link>
                             </li>
                             <li>
                                 <Link to="/about" onClick={() => gtmTracking.trackFooterNavClick('about_us')} className="text-gray-400 hover:text-white transition-colors">
-                                    About Us
+                                    {t('footer.navigation.about_us')}
                                 </Link>
                             </li>
                             <li>
                                 <Link to="/login" onClick={() => gtmTracking.trackFooterNavClick('sign_in')} className="text-gray-400 hover:text-white transition-colors">
-                                    Sign In
+                                    {t('footer.navigation.sign_in')}
                                 </Link>
                             </li>
                             <li>
                                 <Link to="/register" onClick={() => gtmTracking.trackFooterNavClick('get_started')} className="text-gray-400 hover:text-white transition-colors">
-                                    Get Started
+                                    {t('footer.navigation.get_started')}
                                 </Link>
                             </li>
                         </ul>
                     </div>
 
                     <div>
-                        <h3 className="text-white font-semibold mb-4">Contact</h3>
-                        <p className="text-sm text-yellow-400 font-medium mb-3">{companyInfo.company_name} – Tax Code: {companyInfo.company_tax_code}</p>
+                        <h3 className="text-white font-semibold mb-4">{t('footer.contact.title')}</h3>
+                        <p className="text-sm text-yellow-400 font-medium mb-3">{companyInfo.company_name} – {t('footer.contact.tax_code_label')} {companyInfo.company_tax_code}</p>
                         <ul className="space-y-3">
                             <li className="flex items-center space-x-3">
                                 <Mail className="w-5 h-5 text-blue-500" aria-hidden="true"/>
@@ -142,7 +144,7 @@ function Footer() {
                 </div>
 
                 <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-                    <p>&copy; {currentYear} Kenfinly. All rights reserved.</p>
+                    <p>&copy; {currentYear} {t('footer.copyright.company_name')} {t('footer.copyright.all_rights_reserved')}</p>
                 </div>
             </div>
         </footer>

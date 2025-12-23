@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Upload } from 'lucide-react';
 import api from '../utils/api';
 import { getCategoryIcon } from '../constants/categories';
-import {useTranslation} from "@assets/js/contexts/TranslationContext.jsx";
+import { useTranslation } from "@assets/js/contexts/TranslationContext.jsx";
 
 const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
     const { t } = useTranslation();

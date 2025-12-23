@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { 
-    Calendar, 
-    User, 
-    Tag, 
+import {
+    Calendar,
+    User,
+    Tag,
     ArrowLeft,
     ArrowRight,
     TrendingUp,
@@ -15,8 +15,10 @@ import { ArticleSkeleton } from '../../components/public/SkeletonLoaders';
 import { stripHtml, truncate, formatDate } from '../../utils/textUtils';
 import wordpressApi from '../../services/wordpressApi';
 import gtmTracking from '../../utils/gtmTracking';
+import {useTranslation} from "@assets/js/contexts/TranslationContext.jsx";
 
 function BlogPostPage() {
+    const { t } = useTranslation();
     const { slug } = useParams();
     const navigate = useNavigate();
     const [post, setPost] = useState(null);
@@ -30,15 +32,15 @@ function BlogPostPage() {
             setError(null);
             try {
                 const result = await wordpressApi.getPostBySlug(slug);
-                
+
                 if (result.success && result.post) {
                     setPost(result.post);
                     // Track blog article view
                     gtmTracking.trackBlogArticleView(result.post.title?.rendered || 'Article', result.post.id);
-                    
-                    const relatedResult = await wordpressApi.getPosts({ 
+
+                    const relatedResult = await wordpressApi.getPosts({
                         per_page: 3,
-                        exclude: result.post.id 
+                        exclude: result.post.id
                     });
                     if (relatedResult.success) {
                         setRelatedPosts(relatedResult.posts || []);
@@ -61,17 +63,20 @@ function BlogPostPage() {
     }, [slug]);
 
     const calculateReadTime = (content) => {
-        if (!content) return '5 min read';
+        if (!content) return t('blogpostpage.post.default_read_time');
         const text = stripHtml(content);
         const words = text.split(/\s+/).length;
         const minutes = Math.ceil(words / 200);
-        return `${minutes} min read`;
+        if (minutes === 1) {
+            return t('blogpostpage.post.read_time_singular', { minutes });
+        }
+        return t('blogpostpage.post.read_time_plural', { minutes });
     };
 
     const handleShare = async () => {
         const url = window.location.href;
-        const title = post?.title?.rendered || 'Kenfinly Blog';
-        
+        const title = post?.title?.rendered || t('blogpostpage.share.default_title');
+
         if (navigator.share) {
             try {
                 gtmTracking.trackShareArticle('native_share', title);
@@ -82,7 +87,7 @@ function BlogPostPage() {
         } else {
             gtmTracking.trackShareArticle('copy_link', title);
             await navigator.clipboard.writeText(url);
-            alert('Link copied to clipboard!');
+            alert(t('blogpostpage.share.copy_success'));
         }
     };
 
@@ -103,14 +108,14 @@ function BlogPostPage() {
                         {error}
                     </h1>
                     <p className="text-gray-600 mb-8">
-                        The article you're looking for doesn't exist or has been removed.
+                        {t('blogpostpage.article_not_found.description')}
                     </p>
                     <Link
                         to="/blog"
                         className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
                     >
                         <ArrowLeft className="mr-2 w-5 h-5" />
-                        Back to Blog
+                        {t('blogpostpage.navigation.back_to_blog')}
                     </Link>
                 </div>
             </PublicLayout>
@@ -126,15 +131,15 @@ function BlogPostPage() {
                         className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700 mb-8"
                     >
                         <ArrowLeft className="mr-2 w-5 h-5" />
-                        Back to Blog
+                        {t('blogpostpage.navigation.back_to_blog')}
                     </Link>
 
                     <header className="mb-8">
-                        <h1 
+                        <h1
                             className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight"
                             dangerouslySetInnerHTML={{ __html: post?.title?.rendered || '' }}
                         />
-                        
+
                         <div className="flex flex-wrap items-center gap-4 text-gray-600 mb-6">
                             <div className="flex items-center">
                                 <Calendar className="w-5 h-5 mr-2" />
@@ -149,7 +154,7 @@ function BlogPostPage() {
                                 className="flex items-center text-blue-600 hover:text-blue-700"
                             >
                                 <Share2 className="w-5 h-5 mr-2" />
-                                <span>Share</span>
+                                <span>{t('blogpostpage.share_section.label')}</span>
                             </button>
                         </div>
                     </header>
@@ -158,7 +163,7 @@ function BlogPostPage() {
                         <TrendingUp className="w-24 h-24 text-white opacity-50" />
                     </div>
 
-                    <div 
+                    <div
                         className="prose prose-lg max-w-none prose-headings:text-gray-900 prose-p:text-gray-600 prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-img:rounded-xl"
                         dangerouslySetInnerHTML={{ __html: post?.content?.rendered || '' }}
                     />
@@ -166,7 +171,7 @@ function BlogPostPage() {
                     <div className="mt-12 pt-8 border-t border-gray-200">
                         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                             <div className="flex items-center space-x-4">
-                                <span className="text-gray-600">Share this article:</span>
+                                <span className="text-gray-600">{t('blogpostpage.post.share_button')}</span>
                                 <button
                                     onClick={handleShare}
                                     className="p-2 bg-blue-100 text-blue-600 rounded-full hover:bg-blue-200 transition-colors"
@@ -178,7 +183,7 @@ function BlogPostPage() {
                                 to="/register"
                                 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all"
                             >
-                                Try Kenfinly Free
+                                {t('blogpostpage.share_section.try_kenfinly')}
                             </Link>
                         </div>
                     </div>
@@ -189,11 +194,11 @@ function BlogPostPage() {
                 <section className="py-16 bg-gray-50">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">
-                            Related Articles
+                            {t('blogpostpage.related_articles.title')}
                         </h2>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {relatedPosts.map((relatedPost) => (
-                                <article 
+                                <article
                                     key={relatedPost.id}
                                     className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow"
                                 >
@@ -206,10 +211,10 @@ function BlogPostPage() {
                                             <span>{formatDate(relatedPost.date)}</span>
                                         </div>
                                         <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                                            <Link 
+                                            <Link
                                                 to={`/blog/${relatedPost.slug}`}
                                                 className="hover:text-blue-600 transition-colors"
-                                                dangerouslySetInnerHTML={{ __html: relatedPost.title?.rendered || 'Untitled' }}
+                                                dangerouslySetInnerHTML={{ __html: relatedPost.title?.rendered || t('blogpostpage.post.untitled') }}
                                             />
                                         </h3>
                                         <p className="text-gray-600 text-sm line-clamp-2">
