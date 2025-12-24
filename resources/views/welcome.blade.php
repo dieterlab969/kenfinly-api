@@ -4,12 +4,21 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ config('app.name', 'Kenfinly') }}</title>
-        
+        @php
+            $favicon = \App\Models\AppSetting::where('key', 'favicon')->value('value');
+        @endphp
+
+        @if($favicon && file_exists(public_path('storage/' . $favicon)))
+            <link rel="icon" href="{{ asset('storage/' . $favicon) }}">
+        @else
+            <link rel="icon" href="{{ asset('favicon.png') }}">
+        @endif
+
         <!-- Google Tag Manager (noscript) -->
         @if(App\Models\AppSetting::isGA4Enabled() && ($googleTagManagerId = App\Models\AppSetting::getGoogleTagManagerId()))
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ $googleTagManagerId }}"
         height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-        
+
         <!-- Google Tag Manager (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ $googleTagManagerId }}"></script>
         <script>
@@ -23,7 +32,7 @@
           });
         </script>
         @endif
-        
+
         @vite(['resources/css/app.css', 'resources/js/app.jsx'])
     </head>
     <body>

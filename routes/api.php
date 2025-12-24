@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\CacheManagementController;
 use App\Http\Controllers\Admin\TranslationManagementController;
 use App\Http\Controllers\Admin\TransactionManagementController;
 use App\Http\Controllers\Admin\LogoManagementController;
+use App\Http\Controllers\Admin\FaviconManagementController;
 use App\Http\Controllers\Api\WordPressController;
 use App\Http\Controllers\Api\PublicSettingsController;
 use App\Http\Controllers\Api\PublicLogoController;
@@ -126,6 +127,9 @@ Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])
 
     // WordPress Cache Management (Admin only)
     Route::post('/wordpress/cache/clear', [WordPressController::class, 'clearCache']);
+
+    Route::get('/favicon', [FaviconManagementController::class, 'show']);
+    Route::post('/favicon', [FaviconManagementController::class, 'update']);
 });
 
 // WordPress CMS Routes (public endpoints for frontend content)
