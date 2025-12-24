@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { 
-    LayoutDashboard, 
-    Users, 
-    UserCircle, 
-    Shield, 
-    FolderTree, 
-    Languages, 
-    Key, 
-    Settings, 
-    Database, 
-    FileText, 
+import {
+    LayoutDashboard,
+    Users,
+    UserCircle,
+    Shield,
+    FolderTree,
+    Languages,
+    Key,
+    Settings,
+    Database,
+    FileText,
     Receipt,
     LogOut,
     Menu,
@@ -43,6 +43,7 @@ const AdminLayout = ({ children }) => {
         { name: 'Logos', href: '/admin/logos', icon: Image },
         { name: 'Settings', href: '/admin/settings', icon: Settings },
         { name: 'Cache', href: '/admin/cache', icon: Database },
+        { name: 'Favicon', href: '/admin/favicon', icon: Image },
     ];
 
     const isActive = (href) => location.pathname === href;
@@ -59,7 +60,7 @@ const AdminLayout = ({ children }) => {
                         <X className="h-6 w-6" />
                     </button>
                 </div>
-                
+
                 <div className="px-4 py-6">
                     <div className="flex items-center space-x-3 mb-6 px-2">
                         <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center">
