@@ -22,6 +22,7 @@ import CacheManagement from '../pages/admin/CacheManagement';
 import TranslationManagement from '../pages/admin/TranslationManagement';
 import TransactionManagement from '../pages/admin/TransactionManagement';
 import LogoManagement from '../pages/admin/LogoManagement';
+import FaviconManagement from '../pages/admin/FaviconManagement';
 import LandingPage from '../pages/public/LandingPage';
 import BlogPage from '../pages/public/BlogPage';
 import BlogPostPage from '../pages/public/BlogPostPage';
@@ -149,6 +150,14 @@ function App({ recaptchaEnabled = false }) {
                             element={
                                 <SuperAdminRoute>
                                     <LogoManagement />
+                                </SuperAdminRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/admin/favicon" 
+                            element={
+                                <SuperAdminRoute>
+                                    <FaviconManagement />
                                 </SuperAdminRoute>
                             } 
                         />
