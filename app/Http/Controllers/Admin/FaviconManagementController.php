@@ -100,7 +100,7 @@ class FaviconManagementController extends Controller
      */
     private function validateAndProcessImage($image)
     {
-        $img = Image::make($image);
+        $img = Image::read($image);
         $width = $img->width();
         $height = $img->height();
 
