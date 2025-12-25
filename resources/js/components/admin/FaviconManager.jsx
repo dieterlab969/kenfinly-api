@@ -52,7 +52,11 @@ const FaviconManager = () => {
         try {
             const response = await axios.get('/api/admin/favicon', getAxiosConfig());
             if (response.data.favicon) {
-                setPreviewUrl(`/storage/${response.data.favicon}`);
+                // Check if the response is already a full URL (starts with http)
+                const faviconUrl = response.data.favicon.startsWith('http')
+                    ? response.data.favicon
+                    : `/storage/${response.data.favicon}`;
+                setPreviewUrl(faviconUrl);
             }
         } catch (error) {
             console.error('Error fetching favicon:', error);
@@ -167,15 +171,20 @@ const FaviconManager = () => {
             setMessage({type: 'success', text: response.data.message});
 
             // Update favicon in browser tabs without refresh
+            const faviconUrl = response.data.favicon.startsWith('http')
+                ? response.data.favicon
+                : `/storage/${response.data.favicon}`;
+            const faviconHref = `${faviconUrl}?t=${new Date().getTime()}`;
+            
             const faviconLinks = document.querySelectorAll("link[rel='icon']");
             if (faviconLinks.length) {
                 faviconLinks.forEach((link) => {
-                    link.href = `/storage/${response.data.favicon}?t=${new Date().getTime()}`;
+                    link.href = faviconHref;
                 });
             } else {
                 const link = document.createElement('link');
                 link.rel = 'icon';
-                link.href = `/storage/${response.data.favicon}?t=${new Date().getTime()}`;
+                link.href = faviconHref;
                 document.head.appendChild(link);
             }
         } catch (error) {
