@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, Edit2, Save, XCircle, Upload, Trash2, Calendar, DollarSign, Tag, FileText, History } from 'lucide-react';
+import { X, Edit2, Save, XCircle, Upload, Trash2, Calendar, DollarSign, Tag, FileText, History, Loader2 } from 'lucide-react';
 import api from '../utils/api';
 import { getCategoryIcon, formatCurrency } from '../constants/categories';
 import { format, parseISO } from 'date-fns';
 import { useTranslation } from '@assets/js/contexts/TranslationContext.jsx';
+import { processImageForUpload, validateImageFile, formatFileSize } from '../utils/imageCompression';
 
 const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
     const [transaction, setTransaction] = useState(null);
@@ -16,6 +17,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
     const [formData, setFormData] = useState({});
     const [selectedTab, setSelectedTab] = useState('details');
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState({ stage: '', progress: 0 });
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -87,25 +89,41 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
         const file = e.target.files[0];
         if (!file) return;
 
-        const fileSizeMB = file.size / (1024 * 1024);
-        if (fileSizeMB > 20) {
-            setError(t('photo_size_error', { size: fileSizeMB.toFixed(2) }));
+        const validation = validateImageFile(file);
+        if (!validation.valid) {
+            setError(validation.error);
+            e.target.value = '';
             return;
         }
 
         setUploadingPhoto(true);
         setError('');
+        setUploadProgress({ stage: 'validating', progress: 0 });
 
         try {
-            const photoData = new FormData();
-            photoData.append('photo', file);
+            const result = await processImageForUpload(file, (progress) => {
+                setUploadProgress(progress);
+            });
 
-            const response = await api.post(`/transactions/${transactionId}/photos`, photoData);
+            if (result.wasCompressed) {
+                console.log(`Image compressed: ${formatFileSize(result.originalSize)} → ${formatFileSize(result.compressedSize)} (${result.compressionRatio}% reduction)`);
+            }
+
+            setUploadProgress({ stage: 'uploading', progress: 90 });
+
+            const photoData = new FormData();
+            photoData.append('photo', result.file);
+
+            await api.post(`/transactions/${transactionId}/photos`, photoData);
+            setUploadProgress({ stage: 'complete', progress: 100 });
             await fetchTransactionDetails();
         } catch (err) {
-            setError(err.response?.data?.message || t('transactions.photos.error.upload_failed'));
+            console.error('Photo upload error:', err);
+            setError(err.response?.data?.message || err.message || t('transactions.photos.error.upload_failed'));
         } finally {
             setUploadingPhoto(false);
+            setUploadProgress({ stage: '', progress: 0 });
+            e.target.value = '';
         }
     };
 
@@ -358,20 +376,41 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                             {selectedTab === 'photos' && (
                                 <div className="space-y-4">
                                     {permissions.can_manage_photos && (
-                                        <div>
-                                            <label className="flex items-center justify-center space-x-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 cursor-pointer transition-colors">
-                                                <Upload className="w-5 h-5 text-gray-400" />
+                                        <div className="space-y-2">
+                                            <label className={`flex items-center justify-center space-x-2 px-4 py-3 border-2 border-dashed rounded-xl transition-colors ${uploadingPhoto ? 'border-blue-400 bg-blue-50 cursor-wait' : 'border-gray-300 hover:border-blue-500 cursor-pointer'}`}>
+                                                {uploadingPhoto ? (
+                                                    <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                                                ) : (
+                                                    <Upload className="w-5 h-5 text-gray-400" />
+                                                )}
                                                 <span className="text-gray-600">
-                                                    {uploadingPhoto ? t('transactions.transaction_uploading_state') : t('transactions.transaction_upload_photo_action')}
+                                                    {uploadingPhoto 
+                                                        ? (uploadProgress.stage === 'compressing' 
+                                                            ? t('transactions.photos.compressing', 'Compressing...') 
+                                                            : uploadProgress.stage === 'uploading'
+                                                                ? t('transactions.photos.uploading', 'Uploading...')
+                                                                : t('transactions.transaction_uploading_state'))
+                                                        : t('transactions.transaction_upload_photo_action')}
                                                 </span>
                                                 <input
                                                     type="file"
-                                                    accept="image/*"
+                                                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                                                     onChange={handlePhotoUpload}
                                                     className="hidden"
                                                     disabled={uploadingPhoto}
                                                 />
                                             </label>
+                                            {uploadingPhoto && (
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div 
+                                                        className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                                        style={{ width: `${uploadProgress.progress}%` }}
+                                                    ></div>
+                                                </div>
+                                            )}
+                                            <p className="text-xs text-gray-500 text-center">
+                                                {t('transactions.photos.size_hint', 'Max 10 MB. Images will be automatically compressed.')}
+                                            </p>
                                         </div>
                                     )}
 
