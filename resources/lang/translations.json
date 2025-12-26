@@ -1074,5 +1074,105 @@
   "transactions.photos.size_info": {
     "en": "Max 10MB. Images will be automatically compressed.",
     "vi": "Tối đa 10MB. Hình ảnh sẽ được tự động nén."
+  },
+  "account.title": {
+    "en": "Account Information",
+    "vi": "Thông tin tài khoản"
+  },
+  "account.full_name": {
+    "en": "Full Name",
+    "vi": "Họ và tên"
+  },
+  "account.email": {
+    "en": "Email Address",
+    "vi": "Địa chỉ email"
+  },
+  "account.verified": {
+    "en": "Verified",
+    "vi": "Đã xác minh"
+  },
+  "account.not_verified": {
+    "en": "Not Verified",
+    "vi": "Chưa xác minh"
+  },
+  "account.email_verified": {
+    "en": "Email Verified",
+    "vi": "Email đã xác minh"
+  },
+  "account.email_not_verified": {
+    "en": "Email Not Verified",
+    "vi": "Email chưa xác minh"
+  },
+  "account.email_readonly": {
+    "en": "Email address cannot be changed.",
+    "vi": "Địa chỉ email không thể thay đổi."
+  },
+  "account.account_status": {
+    "en": "Account Status",
+    "vi": "Trạng thái tài khoản"
+  },
+  "account.status_active": {
+    "en": "Active",
+    "vi": "Hoạt động"
+  },
+  "account.status_pending": {
+    "en": "Pending",
+    "vi": "Đang chờ"
+  },
+  "account.status_suspended": {
+    "en": "Suspended",
+    "vi": "Bị tạm ngưng"
+  },
+  "account.roles": {
+    "en": "Roles",
+    "vi": "Vai trò"
+  },
+  "account.member_since": {
+    "en": "Member Since",
+    "vi": "Thành viên từ"
+  },
+  "account.enter_name": {
+    "en": "Enter your name",
+    "vi": "Nhập tên của bạn"
+  },
+  "account.fetch_error": {
+    "en": "Failed to load profile information.",
+    "vi": "Không thể tải thông tin hồ sơ."
+  },
+  "account.name_required": {
+    "en": "Name is required.",
+    "vi": "Tên là bắt buộc."
+  },
+  "account.name_too_short": {
+    "en": "Name must be at least 2 characters.",
+    "vi": "Tên phải có ít nhất 2 ký tự."
+  },
+  "account.update_success": {
+    "en": "Profile updated successfully.",
+    "vi": "Hồ sơ đã được cập nhật thành công."
+  },
+  "account.update_error": {
+    "en": "Failed to update profile.",
+    "vi": "Không thể cập nhật hồ sơ."
+  },
+  "nav.account": {
+    "en": "Account",
+    "vi": "Tài khoản"
+  },
+  "common.close": {
+    "en": "Close",
+    "vi": "Đóng"
+  },
+  "common.edit": {
+    "en": "Edit",
+    "vi": "Chỉnh sửa"
+  },
+  "common.saving": {
+    "en": "Saving...",
+    "vi": "Đang lưu..."
+  },
+  "common.try_again": {
+    "en": "Try Again",
+    "vi": "Thử lại"
   }
 }

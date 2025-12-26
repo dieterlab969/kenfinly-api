@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\CsvController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AccountManagementController;
 use App\Http\Controllers\Admin\UserManagementController;
@@ -66,6 +67,10 @@ Route::middleware('auth:api')->group(function () {
 
     // Language preference
     Route::post('/user/language', [LanguageController::class, 'updateUserLanguage']);
+
+    // User Profile
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::put('/profile', [ProfileController::class, 'update']);
 
     // CSV Import & Export
     Route::post('/csv/import', [CsvController::class, 'import']);

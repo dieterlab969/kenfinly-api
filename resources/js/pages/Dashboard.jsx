@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/TranslationContext';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Wallet, Settings } from 'lucide-react';
+import { Plus, Wallet, Settings, User } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import api from '../utils/api';
 import AddTransactionModal from '../components/AddTransactionModal';
 import SettingsModal from '../components/SettingsModal';
+import AccountSettingsModal from '../components/AccountSettingsModal';
 import TransactionDetailModal from '../components/TransactionDetailModal';
 import MonthlySummaryCard from '../components/dashboard/MonthlySummaryCard';
 import BalanceTrendChart from '../components/dashboard/BalanceTrendChart';
@@ -21,6 +22,7 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showSettingsModal, setShowSettingsModal] = useState(false);
+    const [showAccountModal, setShowAccountModal] = useState(false);
     const [selectedTransactionId, setSelectedTransactionId] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
 
@@ -124,6 +126,13 @@ const Dashboard = () => {
                             <span className="text-sm text-gray-700">
                                 {t('nav.welcome')}, <span className="font-medium">{user?.name}</span>
                             </span>
+                            <button
+                                onClick={() => setShowAccountModal(true)}
+                                className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                                title={t('nav.account')}
+                            >
+                                <User className="w-5 h-5" />
+                            </button>
                             <button
                                 onClick={() => setShowSettingsModal(true)}
                                 className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
@@ -269,6 +278,11 @@ const Dashboard = () => {
             <SettingsModal
                 isOpen={showSettingsModal}
                 onClose={() => setShowSettingsModal(false)}
+            />
+
+            <AccountSettingsModal
+                isOpen={showAccountModal}
+                onClose={() => setShowAccountModal(false)}
             />
 
             <TransactionDetailModal
