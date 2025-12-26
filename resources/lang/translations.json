@@ -1058,5 +1058,9 @@
   "verifyEmail.register_again": {
     "en": "Register Again",
     "vi": "Đăng ký lại"
+  },
+  "transactions.photos.size_hint": {
+    "en": "Max 10 MB. Images will be automatically compressed.",
+    "vi": "Tối đa 10 MB. Hình ảnh sẽ được tự động nén."
   }
 }
