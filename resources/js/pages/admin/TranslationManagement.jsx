@@ -56,7 +56,7 @@ const TranslationManagement = () => {
         api.get('/admin/languages')
             .then(function (response) {
                 if (response.data && response.data.success) {
-                    setLanguages(response.data.data);
+                    setLanguages(response.data.data.data);
                 }
             })
             .catch(function (error) {

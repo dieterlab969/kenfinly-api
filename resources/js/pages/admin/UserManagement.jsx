@@ -56,7 +56,7 @@ const UserManagement = () => {
         api.get('/admin/roles')
             .then(function (response) {
                 if (response.data && response.data.success) {
-                    setRoles(response.data.data);
+                    setRoles(response.data.data.data);
                 }
             })
             .catch(function (error) {
