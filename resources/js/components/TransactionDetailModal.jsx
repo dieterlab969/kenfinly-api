@@ -386,9 +386,9 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                                 <span className="text-gray-600">
                                                     {uploadingPhoto
                                                         ? (uploadProgress.stage === 'compressing'
-                                                            ? t('transactions.photos.compressing', 'Compressing...')
+                                                            ? t('transactions.photos.compressing')
                                                             : uploadProgress.stage === 'uploading'
-                                                                ? t('transactions.photos.uploading', 'Uploading...')
+                                                                ? t('transactions.photos.uploading')
                                                                 : t('transactions.transaction_uploading_state'))
                                                         : t('transactions.transaction_upload_photo_action')}
                                                 </span>
@@ -409,7 +409,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                                 </div>
                                             )}
                                             <p className="text-xs text-gray-500 text-center">
-                                                {t('transactions.photos.size_hint', 'Max 10 MB. Images will be automatically compressed.')}
+                                                {t('transactions.photos.size_hint')}
                                             </p>
                                         </div>
                                     )}

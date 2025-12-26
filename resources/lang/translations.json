@@ -1062,5 +1062,17 @@
   "transactions.photos.size_hint": {
     "en": "Max 10 MB. Images will be automatically compressed.",
     "vi": "Tối đa 10 MB. Hình ảnh sẽ được tự động nén."
+  },
+  "transactions.photos.compressing": {
+    "en": "Compressing...",
+    "vi": "Đang nén..."
+  },
+  "transactions.photos.uploading": {
+    "en": "transactions.photos.uploading",
+    "vi": "Đang tải lên..."
+  },
+  "transactions.photos.size_info": {
+    "en": "Max 10MB. Images will be automatically compressed.",
+    "vi": "Tối đa 10MB. Hình ảnh sẽ được tự động nén."
   }
 }
