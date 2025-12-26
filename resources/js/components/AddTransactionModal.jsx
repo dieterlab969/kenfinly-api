@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, Upload } from 'lucide-react';
+import { X, Upload, Loader2 } from 'lucide-react';
 import api from '../utils/api';
 import { getCategoryIcon } from '../constants/categories';
 import { useTranslation } from "@assets/js/contexts/TranslationContext.jsx";
+import { processImageForUpload, validateImageFile, formatFileSize } from '../utils/imageCompression';
 
 const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
     const { t } = useTranslation();
@@ -20,6 +21,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [receiptPreview, setReceiptPreview] = useState(null);
+    const [compressionStatus, setCompressionStatus] = useState('');
 
     useEffect(() => {
         if (isOpen) {
@@ -52,15 +54,42 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
         }
     };
 
-    const handleFileChange = (e) => {
+    const handleFileChange = async (e) => {
         const file = e.target.files[0];
-        if (file) {
-            setFormData({ ...formData, receipt: file });
+        if (!file) return;
+
+        const validation = validateImageFile(file);
+        if (!validation.valid) {
+            setError(validation.error);
+            e.target.value = '';
+            return;
+        }
+
+        try {
+            setCompressionStatus(t('transactions.photos.compressing'));
+            setError('');
+
+            const result = await processImageForUpload(file, (progress) => {
+                if (progress.stage === 'compressing') {
+                    setCompressionStatus(t('transactions.photos.compressing'));
+                }
+            });
+
+            if (result.wasCompressed) {
+                console.log(`Image compressed: ${formatFileSize(result.originalSize)} → ${formatFileSize(result.compressedSize)} (${result.compressionRatio}% reduction)`);
+            }
+
+            setFormData({ ...formData, receipt: result.file });
             const reader = new FileReader();
             reader.onloadend = () => {
                 setReceiptPreview(reader.result);
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(result.file);
+        } catch (err) {
+            setError(err.message);
+            e.target.value = '';
+        } finally {
+            setCompressionStatus('');
         }
     };
 
@@ -83,11 +112,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
                 submitData.append('receipt', formData.receipt);
             }
 
-            const response = await api.post('/transactions', submitData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
+            const response = await api.post('/transactions', submitData);
 
             setFormData({
                 amount: '',
@@ -260,19 +285,25 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             {t('transaction.receipt_optional')}
                         </label>
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-500 transition-colors">
+                        <div className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${compressionStatus ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-blue-500'}`}>
                             <input
                                 type="file"
-                                accept="image/*"
+                                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                                 onChange={handleFileChange}
                                 className="hidden"
                                 id="receipt-upload"
+                                disabled={!!compressionStatus}
                             />
                             <label
                                 htmlFor="receipt-upload"
-                                className="cursor-pointer flex flex-col items-center"
+                                className={`flex flex-col items-center ${compressionStatus ? 'cursor-wait' : 'cursor-pointer'}`}
                             >
-                                {receiptPreview ? (
+                                {compressionStatus ? (
+                                    <>
+                                        <Loader2 className="w-8 h-8 text-blue-500 mb-2 animate-spin" />
+                                        <span className="text-sm text-blue-600">{compressionStatus}</span>
+                                    </>
+                                ) : receiptPreview ? (
                                     <img
                                         src={receiptPreview}
                                         alt="Receipt preview"
@@ -281,11 +312,16 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
                                 ) : (
                                     <Upload className="w-8 h-8 text-gray-400 mb-2" />
                                 )}
-                                <span className="text-sm text-gray-600">
-                                    {receiptPreview ? t('transaction.change_receipt') : t('transaction.upload_receipt')}
-                                </span>
+                                {!compressionStatus && (
+                                    <span className="text-sm text-gray-600">
+                                        {receiptPreview ? t('transaction.change_receipt') : t('transaction.upload_receipt')}
+                                    </span>
+                                )}
                             </label>
                         </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                            {t('transactions.photos.size_info')}
+                        </p>
                     </div>
 
                     <div className="flex gap-3 pt-4">

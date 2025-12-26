@@ -384,11 +384,11 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                                     <Upload className="w-5 h-5 text-gray-400" />
                                                 )}
                                                 <span className="text-gray-600">
-                                                    {uploadingPhoto 
-                                                        ? (uploadProgress.stage === 'compressing' 
-                                                            ? t('transactions.photos.compressing', 'Compressing...') 
+                                                    {uploadingPhoto
+                                                        ? (uploadProgress.stage === 'compressing'
+                                                            ? t('transactions.photos.compressing')
                                                             : uploadProgress.stage === 'uploading'
-                                                                ? t('transactions.photos.uploading', 'Uploading...')
+                                                                ? t('transactions.photos.uploading')
                                                                 : t('transactions.transaction_uploading_state'))
                                                         : t('transactions.transaction_upload_photo_action')}
                                                 </span>
@@ -402,14 +402,14 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                             </label>
                                             {uploadingPhoto && (
                                                 <div className="w-full bg-gray-200 rounded-full h-2">
-                                                    <div 
-                                                        className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                                                    <div
+                                                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                                                         style={{ width: `${uploadProgress.progress}%` }}
                                                     ></div>
                                                 </div>
                                             )}
                                             <p className="text-xs text-gray-500 text-center">
-                                                {t('transactions.photos.size_hint', 'Max 10 MB. Images will be automatically compressed.')}
+                                                {t('transactions.photos.size_hint')}
                                             </p>
                                         </div>
                                     )}
@@ -423,7 +423,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                                         alt={photo.original_filename}
                                                         className="w-full h-48 object-cover rounded-lg"
                                                     />
-                                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center">
+                                                    <div className="absolute inset-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center">
                                                         {permissions.can_manage_photos && (
                                                             <button
                                                                 onClick={() => handleDeletePhoto(photo.id)}
