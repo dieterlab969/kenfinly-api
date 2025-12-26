@@ -51,7 +51,7 @@ The backend is built with Laravel 12 (PHP 8.2+) and provides a REST API. Key arc
 - **Payment Module**: Licenses and subscriptions for various user plans.
 - **Multi-user Collaboration**: Participant management with secure invitations.
 - **Admin Dashboard**: 11 management interfaces for Super Administrators covering users, accounts, roles, categories, languages, licenses, settings, cache, translations, and transactions.
-- **Transaction Photo Management**: Upload multiple receipt photos (up to 10 photos, 20MB each) with server-side optimization (resize, compress).
+- **Transaction Photo Management**: Upload multiple receipt photos (up to 10 photos, 10MB original max). Features automatic client-side image compression that converts all images to JPEG format (target 500KB, max 800KB) with progressive quality reduction and resize (max 2048px). Note: Transparency and animation are lost during compression.
 - **Audit Trail**: Tracks creation, updates, deletions, and photo changes on transactions, including who made changes and when.
 
 # WordPress Headless CMS Integration
