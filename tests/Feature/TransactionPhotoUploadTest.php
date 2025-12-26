@@ -222,4 +222,88 @@ class TransactionPhotoUploadTest extends TestCase
         
         $response->assertStatus(400);
     }
+
+    public function test_create_transaction_with_receipt_saves_to_photos()
+    {
+        $file = UploadedFile::fake()->image('receipt.jpg', 800, 600)->size(500);
+        
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->post('/api/transactions', [
+            'account_id' => $this->account->id,
+            'category_id' => $this->category->id,
+            'type' => 'expense',
+            'amount' => 100.00,
+            'transaction_date' => now()->format('Y-m-d'),
+            'receipt' => $file,
+        ]);
+        
+        $response->assertStatus(201)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Transaction created successfully',
+            ]);
+        
+        $transactionId = $response->json('transaction.id');
+        
+        $this->assertDatabaseHas('transaction_photos', [
+            'transaction_id' => $transactionId,
+            'uploaded_by' => $this->user->id,
+        ]);
+        
+        $photos = $response->json('transaction.photos');
+        $this->assertCount(1, $photos);
+    }
+
+    public function test_create_transaction_without_receipt_works()
+    {
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->post('/api/transactions', [
+            'account_id' => $this->account->id,
+            'category_id' => $this->category->id,
+            'type' => 'expense',
+            'amount' => 50.00,
+            'transaction_date' => now()->format('Y-m-d'),
+        ]);
+        
+        $response->assertStatus(201)
+            ->assertJson([
+                'success' => true,
+            ]);
+        
+        $transactionId = $response->json('transaction.id');
+        
+        $this->assertDatabaseMissing('transaction_photos', [
+            'transaction_id' => $transactionId,
+        ]);
+    }
+
+    public function test_view_transaction_shows_photos_from_creation()
+    {
+        $file = UploadedFile::fake()->image('receipt.jpg', 800, 600)->size(500);
+        
+        $createResponse = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->post('/api/transactions', [
+            'account_id' => $this->account->id,
+            'category_id' => $this->category->id,
+            'type' => 'expense',
+            'amount' => 75.00,
+            'transaction_date' => now()->format('Y-m-d'),
+            'receipt' => $file,
+        ]);
+        
+        $transactionId = $createResponse->json('transaction.id');
+        
+        $viewResponse = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->get("/api/transactions/{$transactionId}");
+        
+        $viewResponse->assertStatus(200);
+        
+        $photos = $viewResponse->json('transaction.photos');
+        $this->assertCount(1, $photos);
+        $this->assertNotEmpty($photos[0]['file_path']);
+    }
 }
