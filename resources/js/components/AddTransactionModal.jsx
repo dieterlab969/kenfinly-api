@@ -66,12 +66,12 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
         }
 
         try {
-            setCompressionStatus(t('transactions.photos.compressing', 'Compressing...'));
+            setCompressionStatus(t('transactions.photos.compressing'));
             setError('');
-            
+
             const result = await processImageForUpload(file, (progress) => {
                 if (progress.stage === 'compressing') {
-                    setCompressionStatus(t('transactions.photos.compressing', 'Compressing...'));
+                    setCompressionStatus(t('transactions.photos.compressing'));
                 }
             });
 
@@ -320,7 +320,7 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
                             </label>
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
-                            {t('transactions.photos.size_info', 'Max 10MB. Images will be automatically compressed.')}
+                            {t('transactions.photos.size_info')}
                         </p>
                     </div>
 
