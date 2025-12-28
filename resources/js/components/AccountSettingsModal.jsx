@@ -29,7 +29,7 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
                 setEditedName(response.data.profile.name);
             }
         } catch (err) {
-            setError(t('account.fetch_error') || 'Failed to load profile information.');
+            setError(t('account.fetch_error'));
         } finally {
             setLoading(false);
         }
@@ -37,12 +37,12 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
 
     const handleSave = async () => {
         if (!editedName.trim()) {
-            setError(t('account.name_required') || 'Name is required.');
+            setError(t('account.name_required'));
             return;
         }
 
         if (editedName.trim().length < 2) {
-            setError(t('account.name_too_short') || 'Name must be at least 2 characters.');
+            setError(t('account.name_too_short'));
             return;
         }
 
@@ -55,14 +55,14 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
             if (response.data.success) {
                 setProfile(response.data.profile);
                 setEditing(false);
-                setSuccessMessage(t('account.update_success') || 'Profile updated successfully.');
+                setSuccessMessage(t('account.update_success'));
                 setTimeout(() => setSuccessMessage(null), 3000);
             }
         } catch (err) {
             if (err.response?.data?.errors?.name) {
                 setError(err.response.data.errors.name[0]);
             } else {
-                setError(t('account.update_error') || 'Failed to update profile.');
+                setError(t('account.update_error'));
             }
         } finally {
             setSaving(false);
@@ -89,7 +89,7 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
             <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
                 <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between rounded-t-lg">
                     <h2 className="text-xl font-bold text-gray-900">
-                        {t('account.title') || 'Account Information'}
+                        {t('account.title')}
                     </h2>
                     <button
                         onClick={handleClose}
@@ -112,7 +112,7 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
                                 onClick={fetchProfile}
                                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                             >
-                                {t('common.try_again') || 'Try Again'}
+                                {t('common.try_again')}
                             </button>
                         </div>
                     ) : (
@@ -136,7 +136,7 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         <div className="flex items-center gap-2">
                                             <User className="w-4 h-4" />
-                                            {t('account.full_name') || 'Full Name'}
+                                            {t('account.full_name')}
                                         </div>
                                     </label>
                                     {editing ? (
@@ -145,7 +145,7 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
                                             value={editedName}
                                             onChange={(e) => setEditedName(e.target.value)}
                                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder={t('account.enter_name') || 'Enter your name'}
+                                            placeholder={t('account.enter_name')}
                                             maxLength={100}
                                         />
                                     ) : (
@@ -154,7 +154,7 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
                                             <button
                                                 onClick={() => setEditing(true)}
                                                 className="text-blue-600 hover:text-blue-700 transition-colors"
-                                                title={t('common.edit') || 'Edit'}
+                                                title={t('common.edit')}
                                             >
                                                 <Edit2 className="w-4 h-4" />
                                             </button>
@@ -166,7 +166,7 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         <div className="flex items-center gap-2">
                                             <Mail className="w-4 h-4" />
-                                            {t('account.email') || 'Email Address'}
+                                            {t('account.email')}
                                         </div>
                                     </label>
                                     <div className="flex items-center justify-between px-4 py-2 bg-gray-50 rounded-lg">
@@ -175,38 +175,38 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
                                             <div className="flex items-center gap-1 text-green-600" title={t('account.email_verified') || 'Email Verified'}>
                                                 <CheckCircle className="w-4 h-4" />
                                                 <span className="text-xs font-medium">
-                                                    {t('account.verified') || 'Verified'}
+                                                    {t('account.verified')}
                                                 </span>
                                             </div>
                                         ) : (
                                             <div className="flex items-center gap-1 text-amber-600" title={t('account.email_not_verified') || 'Email Not Verified'}>
                                                 <AlertCircle className="w-4 h-4" />
                                                 <span className="text-xs font-medium">
-                                                    {t('account.not_verified') || 'Not Verified'}
+                                                    {t('account.not_verified')}
                                                 </span>
                                             </div>
                                         )}
                                     </div>
                                     <p className="mt-1 text-xs text-gray-500">
-                                        {t('account.email_readonly') || 'Email address cannot be changed.'}
+                                        {t('account.email_readonly')}
                                     </p>
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        {t('account.account_status') || 'Account Status'}
+                                        {t('account.account_status')}
                                     </label>
                                     <div className="px-4 py-2 bg-gray-50 rounded-lg">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                            profile?.status === 'active' 
+                                            profile?.status === 'active'
                                                 ? 'bg-green-100 text-green-800'
                                                 : profile?.status === 'pending'
                                                 ? 'bg-yellow-100 text-yellow-800'
                                                 : 'bg-red-100 text-red-800'
                                         }`}>
-                                            {profile?.status === 'active' && (t('account.status_active') || 'Active')}
-                                            {profile?.status === 'pending' && (t('account.status_pending') || 'Pending')}
-                                            {profile?.status === 'suspended' && (t('account.status_suspended') || 'Suspended')}
+                                            {profile?.status === 'active' && (t('account.status_active'))}
+                                            {profile?.status === 'pending' && (t('account.status_pending'))}
+                                            {profile?.status === 'suspended' && (t('account.status_suspended'))}
                                         </span>
                                     </div>
                                 </div>
@@ -214,7 +214,7 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
                                 {profile?.roles && profile.roles.length > 0 && (
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            {t('account.roles') || 'Roles'}
+                                            {t('account.roles')}
                                         </label>
                                         <div className="px-4 py-2 bg-gray-50 rounded-lg">
                                             <div className="flex flex-wrap gap-2">
@@ -233,7 +233,7 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        {t('account.member_since') || 'Member Since'}
+                                        {t('account.member_since')}
                                     </label>
                                     <div className="px-4 py-2 bg-gray-50 rounded-lg">
                                         <span className="text-gray-900">
@@ -256,7 +256,7 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
                                             disabled={saving}
                                             className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
                                         >
-                                            {t('common.cancel') || 'Cancel'}
+                                            {t('common.cancel')}
                                         </button>
                                         <button
                                             onClick={handleSave}
@@ -270,12 +270,12 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
                                             {saving ? (
                                                 <>
                                                     <Loader2 className="w-4 h-4 animate-spin" />
-                                                    {t('common.saving') || 'Saving...'}
+                                                    {t('common.saving')}
                                                 </>
                                             ) : (
                                                 <>
                                                     <Save className="w-4 h-4" />
-                                                    {t('common.save') || 'Save'}
+                                                    {t('common.save')}
                                                 </>
                                             )}
                                         </button>
@@ -286,7 +286,7 @@ const AccountSettingsModal = ({ isOpen, onClose }) => {
                                         onClick={handleClose}
                                         className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                                     >
-                                        {t('common.close') || 'Close'}
+                                        {t('common.close')}
                                     </button>
                                 )}
                             </div>
