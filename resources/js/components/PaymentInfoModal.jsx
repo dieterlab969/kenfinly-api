@@ -12,6 +12,8 @@ const PaymentInfoModal = ({ isOpen, onClose, onOpenHistory }) => {
     const [addingMethod, setAddingMethod] = useState(false);
     const [deletingId, setDeletingId] = useState(null);
     const [successMessage, setSuccessMessage] = useState(null);
+    const [editingMethod, setEditingMethod] = useState(null);
+    const [updatingMethod, setUpdatingMethod] = useState(false);
 
     const [newMethod, setNewMethod] = useState({
         type: 'credit_card',
@@ -21,6 +23,13 @@ const PaymentInfoModal = ({ isOpen, onClose, onOpenHistory }) => {
         expiry_year: '',
         holder_name: '',
         email: '',
+        is_default: false,
+    });
+
+    const [editForm, setEditForm] = useState({
+        expiry_month: '',
+        expiry_year: '',
+        holder_name: '',
         is_default: false,
     });
 
@@ -119,6 +128,64 @@ const PaymentInfoModal = ({ isOpen, onClose, onOpenHistory }) => {
         }
     };
 
+    const handleStartEdit = (method) => {
+        setEditingMethod(method);
+        setEditForm({
+            expiry_month: method.expiry_month || '',
+            expiry_year: method.expiry_year || '',
+            holder_name: method.holder_name || '',
+            is_default: method.is_default || false,
+        });
+        setShowAddMethod(false);
+    };
+
+    const handleCancelEdit = () => {
+        setEditingMethod(null);
+        setEditForm({
+            expiry_month: '',
+            expiry_year: '',
+            holder_name: '',
+            is_default: false,
+        });
+    };
+
+    const handleUpdateMethod = async (e) => {
+        e.preventDefault();
+        if (!editingMethod) return;
+
+        if (editingMethod.type === 'credit_card') {
+            if (!editForm.expiry_month || !editForm.expiry_year) {
+                setError(t('payment.expiry_required') || 'Expiry month and year are required');
+                return;
+            }
+        }
+
+        setUpdatingMethod(true);
+        setError(null);
+
+        try {
+            const payload = {
+                is_default: editForm.is_default,
+            };
+            
+            if (editingMethod.type === 'credit_card') {
+                payload.expiry_month = editForm.expiry_month;
+                payload.expiry_year = editForm.expiry_year;
+                payload.holder_name = editForm.holder_name;
+            }
+
+            await api.put(`/payments/methods/${editingMethod.id}`, payload);
+            setSuccessMessage(t('payment.method_updated') || 'Payment method updated successfully');
+            setEditingMethod(null);
+            fetchPaymentInfo();
+            setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (err) {
+            setError(err.response?.data?.message || t('payment.update_error') || 'Failed to update payment method');
+        } finally {
+            setUpdatingMethod(false);
+        }
+    };
+
     const formatCurrency = (amount, currency) => {
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
@@ -138,6 +205,7 @@ const PaymentInfoModal = ({ isOpen, onClose, onOpenHistory }) => {
 
     const handleClose = () => {
         setShowAddMethod(false);
+        setEditingMethod(null);
         setError(null);
         setSuccessMessage(null);
         onClose();
@@ -385,6 +453,95 @@ const PaymentInfoModal = ({ isOpen, onClose, onOpenHistory }) => {
                                     </form>
                                 )}
 
+                                {editingMethod && (
+                                    <form onSubmit={handleUpdateMethod} className="mb-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                                        <h4 className="text-sm font-semibold text-gray-900 mb-3">
+                                            {t('payment.edit_method_title') || 'Edit Payment Method'}
+                                        </h4>
+                                        <div className="space-y-4">
+                                            <div className="p-3 bg-white rounded border">
+                                                <span className="text-sm text-gray-600">
+                                                    {editingMethod.display_name}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                    {t('payment.card_holder') || 'Cardholder Name'}
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={editForm.holder_name}
+                                                    onChange={(e) => setEditForm({ ...editForm, holder_name: e.target.value })}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        {t('payment.expiry_month') || 'Expiry Month'}
+                                                    </label>
+                                                    <select
+                                                        value={editForm.expiry_month}
+                                                        onChange={(e) => setEditForm({ ...editForm, expiry_month: e.target.value })}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                    >
+                                                        <option value="">--</option>
+                                                        {Array.from({ length: 12 }, (_, i) => {
+                                                            const month = String(i + 1).padStart(2, '0');
+                                                            return <option key={month} value={month}>{month}</option>;
+                                                        })}
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                        {t('payment.expiry_year') || 'Expiry Year'}
+                                                    </label>
+                                                    <select
+                                                        value={editForm.expiry_year}
+                                                        onChange={(e) => setEditForm({ ...editForm, expiry_year: e.target.value })}
+                                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                                    >
+                                                        <option value="">----</option>
+                                                        {Array.from({ length: 15 }, (_, i) => {
+                                                            const year = String(new Date().getFullYear() + i);
+                                                            return <option key={year} value={year}>{year}</option>;
+                                                        })}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="checkbox"
+                                                    id="edit_is_default"
+                                                    checked={editForm.is_default}
+                                                    onChange={(e) => setEditForm({ ...editForm, is_default: e.target.checked })}
+                                                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                                />
+                                                <label htmlFor="edit_is_default" className="text-sm text-gray-700">
+                                                    {t('payment.set_as_default') || 'Set as default payment method'}
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-3 mt-4">
+                                            <button
+                                                type="button"
+                                                onClick={handleCancelEdit}
+                                                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                            >
+                                                {t('common.cancel') || 'Cancel'}
+                                            </button>
+                                            <button
+                                                type="submit"
+                                                disabled={updatingMethod}
+                                                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                                            >
+                                                {updatingMethod && <Loader2 className="w-4 h-4 animate-spin" />}
+                                                {t('payment.update_method') || 'Update Method'}
+                                            </button>
+                                        </div>
+                                    </form>
+                                )}
+
                                 {paymentInfo?.payment_methods?.length > 0 ? (
                                     <div className="space-y-3">
                                         {paymentInfo.payment_methods.map((method) => (
@@ -425,6 +582,15 @@ const PaymentInfoModal = ({ isOpen, onClose, onOpenHistory }) => {
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2">
+                                                    {method.type === 'credit_card' && (
+                                                        <button
+                                                            onClick={() => handleStartEdit(method)}
+                                                            className="text-gray-500 hover:text-gray-700"
+                                                            title={t('payment.edit_method') || 'Edit'}
+                                                        >
+                                                            <Edit2 className="w-4 h-4" />
+                                                        </button>
+                                                    )}
                                                     {!method.is_default && (
                                                         <button
                                                             onClick={() => handleSetDefault(method.id)}

@@ -1358,5 +1358,29 @@
   "payment.other": {
     "en": "Other",
     "vi": "Khác"
+  },
+  "payment.edit_method": {
+    "en": "Edit",
+    "vi": "Chỉnh sửa"
+  },
+  "payment.edit_method_title": {
+    "en": "Edit Payment Method",
+    "vi": "Chỉnh sửa phương thức thanh toán"
+  },
+  "payment.update_method": {
+    "en": "Update Method",
+    "vi": "Cập nhật phương thức"
+  },
+  "payment.method_updated": {
+    "en": "Payment method updated successfully",
+    "vi": "Đã cập nhật phương thức thanh toán thành công"
+  },
+  "payment.update_error": {
+    "en": "Failed to update payment method",
+    "vi": "Không thể cập nhật phương thức thanh toán"
+  },
+  "payment.expiry_required": {
+    "en": "Expiry month and year are required",
+    "vi": "Tháng và năm hết hạn là bắt buộc"
   }
 }
