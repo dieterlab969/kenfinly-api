@@ -78,6 +78,13 @@ Route::middleware('auth:api')->group(function () {
 
     // Payments & Licenses
     Route::post('/payments/create-intent', [PaymentController::class, 'createPaymentIntent']);
+    Route::get('/payments/info', [PaymentController::class, 'getPaymentInfo']);
+    Route::get('/payments/history', [PaymentController::class, 'getPaymentHistory']);
+    Route::get('/payments/methods', [PaymentController::class, 'getPaymentMethods']);
+    Route::post('/payments/methods', [PaymentController::class, 'addPaymentMethod']);
+    Route::put('/payments/methods/{id}', [PaymentController::class, 'updatePaymentMethod']);
+    Route::delete('/payments/methods/{id}', [PaymentController::class, 'deletePaymentMethod']);
+    Route::post('/payments/methods/{id}/default', [PaymentController::class, 'setDefaultPaymentMethod']);
     Route::get('/licenses/my-licenses', [PaymentController::class, 'myLicenses']);
 
     // Participants & Invitations
