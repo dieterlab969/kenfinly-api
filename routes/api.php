@@ -104,6 +104,14 @@ Route::post('/webhooks/payment', [PaymentController::class, 'webhook']);
 
 // Admin routes (Super Admin only)
 Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])->prefix('admin')->group(function () {
+    // Payment Gateway Management
+    Route::apiResource('payment-gateways', \App\Http\Controllers\Api\PaymentGatewayController::class);
+    Route::post('/payment-gateways/{paymentGateway}/toggle', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'toggleGateway']);
+    Route::post('/payment-gateways/{paymentGateway}/credentials', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'storeCredential']);
+    Route::put('/payment-gateways/{paymentGateway}/credentials/{credential}', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'updateCredential']);
+    Route::delete('/payment-gateways/{paymentGateway}/credentials/{credential}', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'deleteCredential']);
+    Route::post('/payment-gateways/{paymentGateway}/credentials/{credential}/verify', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'verifyCredential']);
+    Route::get('/payment-gateways/{paymentGateway}/audit-logs', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'auditLogs']);
     Route::get('/dashboard', [AdminDashboardController::class, 'index']);
 
     Route::apiResource('accounts', AccountManagementController::class)->names('admin.accounts');
