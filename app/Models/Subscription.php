@@ -44,6 +44,11 @@ class Subscription extends Model
         return $this->belongsTo(PaymentGateway::class, 'payment_gateway_id');
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     public function isActive(): bool
     {
         return $this->status === 'active' && (!$this->end_date || $this->end_date->isFuture());

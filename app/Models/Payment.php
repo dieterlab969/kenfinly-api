@@ -10,19 +10,24 @@ class Payment extends Model
     protected $fillable = [
         'user_id',
         'subscription_id',
-        'transaction_id',
-        'gateway',
+        'payment_gateway_id',
+        'gateway_transaction_id',
         'amount',
         'currency',
-        'payment_method',
         'status',
+        'payment_method',
         'gateway_response',
+        'metadata',
         'completed_at',
+        'failed_at',
+        'failure_reason',
     ];
 
     protected $casts = [
-        'completed_at' => 'datetime',
         'amount' => 'decimal:2',
+        'completed_at' => 'datetime',
+        'failed_at' => 'datetime',
+        'metadata' => 'array',
     ];
 
     public function user(): BelongsTo
@@ -35,8 +40,23 @@ class Payment extends Model
         return $this->belongsTo(Subscription::class);
     }
 
+    public function gateway(): BelongsTo
+    {
+        return $this->belongsTo(PaymentGateway::class, 'payment_gateway_id');
+    }
+
     public function isCompleted(): bool
     {
         return $this->status === 'completed';
+    }
+
+    public function isFailed(): bool
+    {
+        return $this->status === 'failed';
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
     }
 }

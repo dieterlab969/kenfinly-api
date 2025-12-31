@@ -112,6 +112,11 @@ Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])
     Route::delete('/payment-gateways/{paymentGateway}/credentials/{credential}', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'deleteCredential']);
     Route::post('/payment-gateways/{paymentGateway}/credentials/{credential}/verify', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'verifyCredential']);
     Route::get('/payment-gateways/{paymentGateway}/audit-logs', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'auditLogs']);
+    // Payments
+    Route::post('/payments/process', [\App\Http\Controllers\Api\PaymentController::class, 'processPayment']);
+    Route::get('/payments/history', [\App\Http\Controllers\Api\PaymentController::class, 'history']);
+    Route::get('/payments/{payment}', [\App\Http\Controllers\Api\PaymentController::class, 'show']);
+    Route::post('/payments/{payment}/retry', [\App\Http\Controllers\Api\PaymentController::class, 'retry']);
     // Payment Dashboard (Admin)
     Route::get('/admin/payment-dashboard/overview', [\App\Http\Controllers\Api\PaymentDashboardController::class, 'overview']);
     Route::get('/dashboard', [AdminDashboardController::class, 'index']);
