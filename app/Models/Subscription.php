@@ -10,14 +10,16 @@ class Subscription extends Model
 {
     protected $fillable = [
         'user_id',
-        'plan_name',
+        'plan_id',
+        'payment_gateway_id',
+        'status',
+        'gateway_subscription_id',
         'amount',
         'currency',
-        'status',
         'start_date',
         'end_date',
         'canceled_at',
-        'promo_code',
+        'cancellation_reason',
     ];
 
     protected $casts = [
@@ -32,20 +34,18 @@ class Subscription extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function payments(): HasMany
+    public function plan(): BelongsTo
     {
-        return $this->hasMany(Payment::class);
+        return $this->belongsTo(SubscriptionPlan::class, 'plan_id');
     }
 
-    public function licenses(): HasMany
+    public function gateway(): BelongsTo
     {
-        return $this->hasMany(License::class);
+        return $this->belongsTo(PaymentGateway::class, 'payment_gateway_id');
     }
 
     public function isActive(): bool
     {
-        return $this->status === 'active' && 
-               $this->end_date && 
-               $this->end_date->isFuture();
+        return $this->status === 'active' && (!$this->end_date || $this->end_date->isFuture());
     }
 }
