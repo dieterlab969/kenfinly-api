@@ -21,18 +21,30 @@ class SubscriptionPlanSeeder extends Seeder
         SubscriptionPlan::create([
             'name' => 'Pro',
             'description' => 'Advanced features for enthusiasts',
-            'price' => 9.99,
+            'price' => 50000.00,
+            'currency' => 'VND',
             'billing_cycle' => 'monthly',
-            'features' => ['Multi-account', 'Priority Support', 'Advanced Analytics'],
+            'features' => [
+                'Calendar View',
+                'Advanced Data Visualizations',
+                'Filtering and Sorting',
+                'Time-based Analysis',
+                'Predictive Insights',
+                'Report Exports (PDF, CSV, Excel)'
+            ],
             'sort_order' => 2,
         ]);
 
         SubscriptionPlan::create([
-            'name' => 'Expert',
-            'description' => 'Full suite for power users',
-            'price' => 29.99,
-            'billing_cycle' => 'monthly',
-            'features' => ['Custom Categories', 'Export to Excel', 'Dedicated Account Manager'],
+            'name' => 'Pro Yearly',
+            'description' => 'Best value for power users',
+            'price' => 169000.00,
+            'currency' => 'VND',
+            'billing_cycle' => 'yearly',
+            'features' => [
+                'All Monthly Pro Features',
+                'Yearly Discount'
+            ],
             'sort_order' => 3,
         ]);
     }
