@@ -34,6 +34,17 @@ class License extends Model
         return $this->belongsTo(Subscription::class);
     }
 
+    /**
+     * Scope to find active licenses
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active')
+            ->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            });
+    }
+
     public function isActive(): bool
     {
         return $this->status === 'active' && 

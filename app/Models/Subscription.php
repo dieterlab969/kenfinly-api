@@ -49,6 +49,19 @@ class Subscription extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function licenses(): HasMany
+    {
+        return $this->hasMany(License::class);
+    }
+
+    /**
+     * Get the current active license for this subscription
+     */
+    public function activeLicense()
+    {
+        return $this->licenses()->where('status', 'active')->first();
+    }
+
     public function isActive(): bool
     {
         return $this->status === 'active' && (!$this->end_date || $this->end_date->isFuture());
