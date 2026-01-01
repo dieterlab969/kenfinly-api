@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Check } from 'lucide-react';
 
-export default function PlanSelection({ onSelectPlan }) {
+export default function PlanSelection({ onSelectPlan, subscriptionsEnabled = true }) {
     const [plans, setPlans] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -47,7 +47,7 @@ export default function PlanSelection({ onSelectPlan }) {
                                     onClick={() => onSelectPlan(plan)}
                                     className="mt-8 block w-full bg-blue-600 border border-transparent rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-blue-700"
                                 >
-                                    Select {plan.name}
+                                    {subscriptionsEnabled ? `Select ${plan.name}` : 'Notify Me'}
                                 </button>
                             </div>
                             <div className="pt-6 pb-8 px-6">

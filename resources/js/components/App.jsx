@@ -37,6 +37,7 @@ export const useRecaptchaConfig = () => useContext(RecaptchaConfigContext);
 function PricingPage() {
     const [selectedPlan, setSelectedPlan] = useState(null);
     const [success, setSuccess] = useState(false);
+    const subscriptionsEnabled = import.meta.env.VITE_SUBSCRIPTIONS_ENABLED === 'true';
 
     if (success) {
         return (
@@ -50,13 +51,72 @@ function PricingPage() {
         );
     }
 
+    if (!subscriptionsEnabled && selectedPlan) {
+        return (
+            <div className="bg-gray-50 min-h-screen py-12 px-4">
+                <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
+                    <h2 className="text-2xl font-bold mb-4">Join the Waitlist</h2>
+                    <p className="text-gray-600 mb-6">
+                        We're putting the finishing touches on our {selectedPlan.name} features. 
+                        Join the waitlist to be the first to know when we launch!
+                    </p>
+                    <WaitlistForm plan={selectedPlan} onComplete={() => setSuccess(true)} />
+                    <button onClick={() => setSelectedPlan(null)} className="mt-6 block w-full text-center text-blue-600 hover:underline">Back to plans</button>
+                </div>
+            </div>
+        );
+    }
+
     return selectedPlan ? (
         <div className="bg-gray-50 min-h-screen py-12">
             <CheckoutForm plan={selectedPlan} onPaymentSuccess={() => setSuccess(true)} />
             <button onClick={() => setSelectedPlan(null)} className="mt-4 block mx-auto text-blue-600 hover:underline">Back to plans</button>
         </div>
     ) : (
-        <PlanSelection onSelectPlan={setSelectedPlan} />
+        <PlanSelection onSelectPlan={setSelectedPlan} subscriptionsEnabled={subscriptionsEnabled} />
+    );
+}
+
+function WaitlistForm({ plan, onComplete }) {
+    const [email, setEmail] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            await axios.post('/api/waitlist', { email, plan_interest: plan.name });
+            onComplete();
+        } catch (err) {
+            setMessage(err.response?.data?.message || 'Something went wrong. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+                <label className="block text-sm font-medium text-gray-700">Email Address</label>
+                <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    placeholder="you@example.com"
+                />
+            </div>
+            <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700 disabled:opacity-50"
+            >
+                {loading ? 'Joining...' : 'Notify Me'}
+            </button>
+            {message && <p className="text-red-600 text-sm mt-2">{message}</p>}
+        </form>
     );
 }
 
