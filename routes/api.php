@@ -112,6 +112,9 @@ Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])
     Route::delete('/payment-gateways/{paymentGateway}/credentials/{credential}', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'deleteCredential']);
     Route::post('/payment-gateways/{paymentGateway}/credentials/{credential}/verify', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'verifyCredential']);
     Route::get('/payment-gateways/{paymentGateway}/audit-logs', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'auditLogs']);
+    // Subscription Plans
+    Route::get('/subscription-plans', [\App\Http\Controllers\Api\SubscriptionPlanController::class, 'index']);
+    Route::post('/subscriptions', [\App\Http\Controllers\Api\SubscriptionController::class, 'store']);
     // Payments
     Route::post('/payments/process', [\App\Http\Controllers\Api\PaymentController::class, 'processPayment']);
     Route::get('/payments/history', [\App\Http\Controllers\Api\PaymentController::class, 'history']);

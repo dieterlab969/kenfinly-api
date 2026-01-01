@@ -27,10 +27,38 @@ import LandingPage from '../pages/public/LandingPage';
 import BlogPage from '../pages/public/BlogPage';
 import BlogPostPage from '../pages/public/BlogPostPage';
 import AboutPage from '../pages/public/AboutPage';
+import PlanSelection from './subscription/PlanSelection';
+import CheckoutForm from './subscription/CheckoutForm';
 
 const RecaptchaConfigContext = createContext({ enabled: false });
 
 export const useRecaptchaConfig = () => useContext(RecaptchaConfigContext);
+
+function PricingPage() {
+    const [selectedPlan, setSelectedPlan] = useState(null);
+    const [success, setSuccess] = useState(false);
+
+    if (success) {
+        return (
+            <div className="py-20 text-center bg-gray-50 min-h-screen">
+                <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
+                    <h1 className="text-3xl font-bold text-green-600">Subscription Successful!</h1>
+                    <p className="mt-4 text-gray-600">Thank you for upgrading. Your premium features are now active.</p>
+                    <button onClick={() => window.location.href = '/dashboard'} className="mt-8 w-full bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700">Go to Dashboard</button>
+                </div>
+            </div>
+        );
+    }
+
+    return selectedPlan ? (
+        <div className="bg-gray-50 min-h-screen py-12">
+            <CheckoutForm plan={selectedPlan} onPaymentSuccess={() => setSuccess(true)} />
+            <button onClick={() => setSelectedPlan(null)} className="mt-4 block mx-auto text-blue-600 hover:underline">Back to plans</button>
+        </div>
+    ) : (
+        <PlanSelection onSelectPlan={setSelectedPlan} />
+    );
+}
 
 function App({ recaptchaEnabled = false }) {
     return (
@@ -42,6 +70,7 @@ function App({ recaptchaEnabled = false }) {
                         <Route path="/blog" element={<BlogPage />} />
                         <Route path="/blog/:slug" element={<BlogPostPage />} />
                         <Route path="/about" element={<AboutPage />} />
+                        <Route path="/pricing" element={<PricingPage />} />
                         
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
