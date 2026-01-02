@@ -11,10 +11,20 @@ use App\Services\PaymentProcessingService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * Controller responsible for handling payment-related API requests.
+ *
+ * This includes processing payments, retrieving payment history and details,
+ * and retrying failed payments. Access is restricted to authenticated users.
+ */
 class PaymentController extends Controller
 {
     private PaymentProcessingService $paymentService;
 
+    /**
+     * PaymentController constructor.
+     * Applies authentication middleware and initializes the payment processing service.
+     */
     public function __construct()
     {
         $this->middleware('auth:api');
@@ -22,7 +32,13 @@ class PaymentController extends Controller
     }
 
     /**
-     * Process payment for a subscription
+     * Process a payment for a subscription.
+     *
+     * Validates the request data, verifies subscription ownership or admin role,
+     * and delegates payment processing to the PaymentProcessingService.
+     *
+     * @param Request $request Incoming HTTP request containing payment data.
+     * @return JsonResponse JSON response with payment status and details or error message.
      */
     public function processPayment(Request $request): JsonResponse
     {
@@ -37,8 +53,8 @@ class PaymentController extends Controller
             $subscription = Subscription::findOrFail($validated['subscription_id']);
             $gateway = PaymentGateway::findOrFail($validated['payment_gateway_id']);
 
-            // Verify user owns subscription
-            if ($subscription->user_id !== auth()->id() && !auth()->user()->hasRole('admin')) {
+            // Verify user owns subscription or has super admin role
+            if ($subscription->user_id !== auth()->id() && !auth()->user()->hasRole('super_admin')) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
 
@@ -62,7 +78,12 @@ class PaymentController extends Controller
     }
 
     /**
-     * Get payment history
+     * Retrieve paginated payment history for the authenticated user.
+     *
+     * Loads related subscription plans and payment gateways for context.
+     *
+     * @param Request $request Incoming HTTP request.
+     * @return JsonResponse JSON response containing paginated payment records.
      */
     public function history(Request $request): JsonResponse
     {
@@ -75,11 +96,16 @@ class PaymentController extends Controller
     }
 
     /**
-     * Get payment details
+     * Retrieve details of a specific payment.
+     *
+     * Verifies ownership or admin role before returning payment data with related models.
+     *
+     * @param Payment $payment Payment model instance to show.
+     * @return JsonResponse JSON response containing payment details or unauthorized message.
      */
     public function show(Payment $payment): JsonResponse
     {
-        if ($payment->user_id !== auth()->id() && !auth()->user()->hasRole('admin')) {
+        if ($payment->user_id !== auth()->id() && !auth()->user()->hasRole('super_admin')) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -87,13 +113,25 @@ class PaymentController extends Controller
     }
 
     /**
-     * Retry failed payment
+     * Retry a failed payment.
+     *
+     * Checks that the payment belongs to the authenticated user and that its status is 'failed'.
+     * Validates optional payment method input and delegates retry logic to the PaymentProcessingService.
+     *
+     * @param Payment $payment Payment model instance to retry.
+     * @param Request $request Incoming HTTP request with optional payment method.
+     * @return JsonResponse JSON response with updated payment status or error message.
      */
     public function retry(Payment $payment, Request $request): JsonResponse
     {
         try {
             if ($payment->user_id !== auth()->id()) {
                 return response()->json(['message' => 'Unauthorized'], 403);
+            }
+
+            // Only allow retry if payment status is 'failed'
+            if ($payment->status !== 'failed') {
+                return response()->json(['message' => 'Only failed payments can be retried'], 400);
             }
 
             $validated = $request->validate([

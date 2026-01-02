@@ -23,7 +23,7 @@ A complete Payment Gateway Management system has been implemented with secure cr
 #### 3. API Controller
 - `PaymentGatewayController` - RESTful endpoints for managing gateways
 - Protected by `auth:api` middleware (all endpoints)
-- Protected by `admin` middleware (management endpoints)
+  Protected by `super_admin` middleware (management endpoints)
 
 ## Features Implemented
 
@@ -59,7 +59,7 @@ A complete Payment Gateway Management system has been implemented with secure cr
 
 ### ✅ Access Control
 - `auth:api` middleware on all endpoints
-- `admin` middleware on management endpoints
+- `super_admin` middleware on management endpoints
 - Super admin role requirement (via SuperAdminMiddleware)
 
 ## API Endpoints

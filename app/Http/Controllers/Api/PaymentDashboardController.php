@@ -11,14 +11,31 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
+/**
+ * Controller to provide payment dashboard metrics and overview.
+ *
+ * Provides aggregated data on transactions, gateways, subscriptions,
+ * recent transactions, and system alerts for super admin users.
+ */
 class PaymentDashboardController extends Controller
 {
+    /**
+     * PaymentDashboardController constructor.
+     * Applies authentication and super admin middleware.
+     */
     public function __construct()
     {
         $this->middleware('auth:api');
-        $this->middleware('admin');
+        $this->middleware('super_admin');
     }
 
+    /**
+     * Returns an overview of payment-related metrics based on the requested period.
+     *
+     * @param Request $request HTTP request containing optional 'period' query parameter.
+     * @return JsonResponse JSON response containing transactions, gateways, subscriptions,
+     * recent transactions, and alerts.
+     */
     public function overview(Request $request): JsonResponse
     {
         $period = $request->get('period', 'monthly');
@@ -33,10 +50,16 @@ class PaymentDashboardController extends Controller
         ]);
     }
 
-    private function getTransactionMetrics($startDate): array
+    /**
+     * Calculate transaction metrics since the given start date.
+     *
+     * @param Carbon $startDate The start date for filtering transactions.
+     * @return array Metrics including total, success rate, failure rate, refund rate, and counts.
+     */
+    private function getTransactionMetrics(Carbon $startDate): array
     {
         $subscriptions = Subscription::where('created_at', '>=', $startDate)->get();
-        
+
         $total = count($subscriptions);
         $successful = $subscriptions->where('status', 'active')->count();
         $failed = $subscriptions->where('status', 'failed')->count();
@@ -53,6 +76,13 @@ class PaymentDashboardController extends Controller
         ];
     }
 
+    /**
+     * Retrieve status and uptime information for all payment gateways.
+     *
+     * Uptime is calculated based on audit logs over the past 7 days.
+     *
+     * @return array List of gateways with status, uptime, error counts, and credential counts.
+     */
     private function getGatewayStatus(): array
     {
         return PaymentGateway::with('credentials')
@@ -82,7 +112,15 @@ class PaymentDashboardController extends Controller
             ->toArray();
     }
 
-    private function getSubscriptionMetrics($startDate): array
+    /**
+     * Calculate subscription metrics since the given start date.
+     *
+     * Includes total new subscriptions, active count, canceled count, and churn rate.
+     *
+     * @param Carbon $startDate The start date for filtering subscriptions.
+     * @return array Subscription metrics.
+     */
+    private function getSubscriptionMetrics(Carbon $startDate): array
     {
         $subscriptions = Subscription::where('created_at', '>=', $startDate)->get();
         $activeCount = Subscription::where('status', 'active')->count();
@@ -96,6 +134,11 @@ class PaymentDashboardController extends Controller
         ];
     }
 
+    /**
+     * Retrieve the 10 most recent subscription transactions with related user, plan, and gateway info.
+     *
+     * @return array List of recent transactions.
+     */
     private function getRecentTransactions(): array
     {
         return Subscription::with('user', 'plan', 'gateway')
@@ -117,6 +160,11 @@ class PaymentDashboardController extends Controller
             ->toArray();
     }
 
+    /**
+     * Generate alerts based on inactive gateways, failed transactions, and unverified credentials.
+     *
+     * @return array List of alert messages with type, title, message, and severity.
+     */
     private function getAlerts(): array
     {
         $alerts = [];
@@ -158,7 +206,15 @@ class PaymentDashboardController extends Controller
         return $alerts;
     }
 
-    private function getStartDate($period): Carbon
+    /**
+     * Determine the start date based on the requested period.
+     *
+     * Supported periods: daily, weekly, monthly (default), yearly.
+     *
+     * @param string $period The period string.
+     * @return Carbon The calculated start date.
+     */
+    private function getStartDate(string $period): Carbon
     {
         return match ($period) {
             'daily' => Carbon::now()->subDay(),

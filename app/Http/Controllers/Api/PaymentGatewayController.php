@@ -15,7 +15,7 @@ class PaymentGatewayController extends Controller
     public function __construct()
     {
         $this->middleware('auth:api');
-        $this->middleware('admin')->only(['index', 'store', 'show', 'update', 'destroy', 'storeCredential', 'updateCredential', 'deleteCredential', 'toggleGateway']);
+        $this->middleware('super_admin')->only(['index', 'store', 'show', 'update', 'destroy', 'storeCredential', 'updateCredential', 'deleteCredential', 'toggleGateway']);
     }
 
     public function index(Request $request): JsonResponse
