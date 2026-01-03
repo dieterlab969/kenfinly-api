@@ -19,7 +19,21 @@ class PaymentProcessingService
     }
 
     /**
-     * Process a payment for a subscription
+     * Processes a payment for a given subscription using the specified payment gateway.
+     *
+     * This method validates the subscription and gateway status, creates a payment record,
+     * retrieves the appropriate gateway credentials, and attempts to process the payment.
+     * It updates the payment and subscription status based on the gateway response.
+     *
+     * Use this method to handle payment workflows end-to-end for subscription billing.
+     *
+     * @param Subscription $subscription The subscription to be billed.
+     * @param PaymentGateway $gateway The payment gateway to process the payment.
+     * @param array $paymentData Additional payment data such as payment method, user IP, and user agent.
+     *
+     * @return Payment Returns the Payment model instance representing the processed payment.
+     *
+     * @throws Exception Throws exceptions if subscription or gateway validation fails or processing errors occur.
      */
     public function processPayment(
         Subscription $subscription,
@@ -27,12 +41,10 @@ class PaymentProcessingService
         array $paymentData
     ): Payment {
         try {
-            // Validate subscription and gateway
             if (!$subscription->exists || !$gateway->is_active) {
                 throw new Exception('Invalid subscription or inactive gateway');
             }
 
-            // Create payment record
             $payment = Payment::create([
                 'user_id' => $subscription->user_id,
                 'subscription_id' => $subscription->id,
@@ -48,13 +60,12 @@ class PaymentProcessingService
                 ],
             ]);
 
-            // Get gateway credentials
             $credentials = $this->getGatewayCredentials($gateway, $subscription);
+
             if (!$credentials) {
                 throw new Exception('No credentials found for gateway');
             }
 
-            // Process payment based on gateway type
             $gatewayResponse = $this->processWithGateway(
                 $gateway,
                 $credentials,
@@ -63,7 +74,6 @@ class PaymentProcessingService
                 $paymentData
             );
 
-            // Update payment with response
             $payment->update([
                 'gateway_transaction_id' => $gatewayResponse['transaction_id'] ?? null,
                 'gateway_response' => json_encode($gatewayResponse),
@@ -73,7 +83,6 @@ class PaymentProcessingService
                 'failure_reason' => $gatewayResponse['error'] ?? null,
             ]);
 
-            // Update subscription status
             if ($gatewayResponse['status'] === 'completed') {
                 $subscription->update([
                     'status' => 'active',
@@ -97,13 +106,21 @@ class PaymentProcessingService
                 'gateway' => $gateway->name ?? 'unknown',
                 'error' => $e->getMessage(),
             ]);
-
             throw $e;
         }
     }
 
     /**
-     * Get gateway credentials for processing
+     * Retrieves verified gateway credentials for the current environment.
+     *
+     * This method fetches credentials associated with the payment gateway that match
+     * the application's environment (e.g., production, staging) and are marked as verified.
+     * It returns an associative array mapping credential keys to their decrypted values.
+     *
+     * @param PaymentGateway $gateway The payment gateway whose credentials are requested.
+     * @param Subscription $subscription The subscription context (unused here but available for extension).
+     *
+     * @return array|null Returns an associative array of credential keys and values, or null if none found.
      */
     private function getGatewayCredentials(PaymentGateway $gateway, Subscription $subscription): ?array
     {
@@ -120,7 +137,19 @@ class PaymentProcessingService
     }
 
     /**
-     * Process payment with specific gateway
+     * Processes a payment through a specific payment gateway.
+     *
+     * This method contains the gateway-specific logic to execute a payment transaction.
+     * It validates payment data, simulates processing, and returns a structured response.
+     * Replace the mock implementation with real gateway API calls as needed.
+     *
+     * @param PaymentGateway $gateway The payment gateway to use.
+     * @param array $credentials The decrypted credentials for authentication.
+     * @param Subscription $subscription The subscription being billed.
+     * @param Payment $payment The payment record being processed.
+     * @param array $paymentData Additional payment details.
+     *
+     * @return array Returns an array with keys like 'status', 'transaction_id', 'error', etc.
      */
     private function processWithGateway(
         PaymentGateway $gateway,
@@ -169,7 +198,17 @@ class PaymentProcessingService
     }
 
     /**
-     * Retry failed payment
+     * Retries a previously failed payment.
+     *
+     * This method allows retrying payments that have failed by re-processing
+     * the payment with the original subscription and gateway details.
+     *
+     * @param Payment $payment The failed payment to retry.
+     * @param array $paymentData Additional payment data for retry.
+     *
+     * @return Payment Returns the new Payment instance after retry.
+     *
+     * @throws Exception Throws if the payment is not in a failed state.
      */
     public function retryPayment(Payment $payment, array $paymentData): Payment
     {
@@ -184,7 +223,14 @@ class PaymentProcessingService
     }
 
     /**
-     * Verify payment with gateway
+     * Verifies a payment with the payment gateway.
+     *
+     * This method checks the payment status with the gateway using stored credentials.
+     * If verification succeeds, it updates the payment and subscription status accordingly.
+     *
+     * @param Payment $payment The payment to verify.
+     *
+     * @return bool Returns true if verification is successful, false otherwise.
      */
     public function verifyPayment(Payment $payment): bool
     {
