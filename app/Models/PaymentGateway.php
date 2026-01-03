@@ -53,6 +53,7 @@ class PaymentGateway extends Model
         $this->update([
             'is_active' => true,
             'activated_at' => now(),
+            'deactivated_at' => null,
         ]);
     }
 
@@ -61,6 +62,7 @@ class PaymentGateway extends Model
         $this->update([
             'is_active' => false,
             'deactivated_at' => now(),
+            'activated_at' => null,
         ]);
     }
 
