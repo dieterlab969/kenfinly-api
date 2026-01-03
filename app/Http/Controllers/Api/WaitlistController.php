@@ -31,6 +31,11 @@ class WaitlistController extends Controller
 
         Waitlist::create($request->only(['email', 'plan_interest']));
 
-        return response()->json(['message' => 'Successfully joined the waitlist!'], 201);
+        $translations = json_decode(file_get_contents(resource_path('lang/translations.json')), true);
+        $locale = $request->header('Accept-Language', 'en');
+        $locale = in_array($locale, ['en', 'vi']) ? $locale : 'en';
+        $message = $translations['payment.waitlist_success'][$locale] ?? 'Successfully joined the waitlist!';
+
+        return response()->json(['message' => $message], 201);
     }
 }
