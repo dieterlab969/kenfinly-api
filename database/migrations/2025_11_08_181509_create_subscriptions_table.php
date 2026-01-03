@@ -14,13 +14,17 @@ return new class extends Migration
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('plan_name')->default('annual');
-            $table->decimal('amount', 10, 2);
-            $table->string('currency', 3)->default('USD');
-            $table->enum('status', ['active', 'canceled', 'expired', 'pending'])->default('pending');
+            $table->foreignId('plan_id')->nullable()->constrained('subscription_plans')->onDelete('set null');
+            $table->string('plan_name')->nullable();
+            $table->decimal('amount', 12, 2)->default(0);
+            $table->string('currency', 3)->default('VND');
+            $table->enum('status', ['active', 'canceled', 'expired', 'pending', 'failed'])->default('pending');
+            $table->string('gateway_subscription_id')->nullable();
+            $table->unsignedBigInteger('payment_gateway_id')->nullable();
             $table->timestamp('start_date')->nullable();
             $table->timestamp('end_date')->nullable();
             $table->timestamp('canceled_at')->nullable();
+            $table->string('cancellation_reason')->nullable();
             $table->string('promo_code')->nullable();
             $table->timestamps();
             
