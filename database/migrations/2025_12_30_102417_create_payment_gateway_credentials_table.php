@@ -24,10 +24,13 @@ return new class extends Migration
             $table->timestamp('last_used_at')->nullable();
             $table->unsignedBigInteger('updated_by')->nullable();
             $table->timestamps();
-            
+
             $table->foreign('payment_gateway_id')->references('id')->on('payment_gateways')->onDelete('cascade');
             $table->foreign('updated_by')->references('id')->on('users')->onDelete('set null');
-            $table->unique(['payment_gateway_id', 'environment', 'credential_key']);
+            $table->unique(
+                ['payment_gateway_id', 'environment', 'credential_key'],
+                'pgw_env_cred_unique'
+            );
             $table->index('environment');
             $table->index('verified');
         });
