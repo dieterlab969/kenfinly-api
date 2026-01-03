@@ -1174,5 +1174,329 @@
   "common.try_again": {
     "en": "Try Again",
     "vi": "Thử lại"
+  },
+  "nav.payment": {
+    "en": "Payment",
+    "vi": "Thanh toán"
+  },
+  "payment.title": {
+    "en": "Payment Information",
+    "vi": "Thông tin thanh toán"
+  },
+  "payment.upcoming_payment": {
+    "en": "Upcoming Payment",
+    "vi": "Thanh toán sắp tới"
+  },
+  "payment.no_upcoming": {
+    "en": "No upcoming payments",
+    "vi": "Không có thanh toán sắp tới"
+  },
+  "payment.plan": {
+    "en": "Plan",
+    "vi": "Gói"
+  },
+  "payment.payment_methods": {
+    "en": "Payment Methods",
+    "vi": "Phương thức thanh toán"
+  },
+  "payment.add_method": {
+    "en": "Add Method",
+    "vi": "Thêm phương thức"
+  },
+  "payment.no_methods": {
+    "en": "No payment methods saved",
+    "vi": "Chưa có phương thức thanh toán nào được lưu"
+  },
+  "payment.method_type": {
+    "en": "Payment Type",
+    "vi": "Loại thanh toán"
+  },
+  "payment.credit_card": {
+    "en": "Credit Card",
+    "vi": "Thẻ tín dụng"
+  },
+  "payment.paypal": {
+    "en": "PayPal",
+    "vi": "PayPal"
+  },
+  "payment.card_holder": {
+    "en": "Cardholder Name",
+    "vi": "Tên chủ thẻ"
+  },
+  "payment.card_brand": {
+    "en": "Card Brand",
+    "vi": "Loại thẻ"
+  },
+  "payment.last_four": {
+    "en": "Last 4 Digits",
+    "vi": "4 số cuối"
+  },
+  "payment.expiry_month": {
+    "en": "Expiry Month",
+    "vi": "Tháng hết hạn"
+  },
+  "payment.expiry_year": {
+    "en": "Expiry Year",
+    "vi": "Năm hết hạn"
+  },
+  "payment.paypal_email": {
+    "en": "PayPal Email",
+    "vi": "Email PayPal"
+  },
+  "payment.set_as_default": {
+    "en": "Set as default payment method",
+    "vi": "Đặt làm phương thức thanh toán mặc định"
+  },
+  "payment.save_method": {
+    "en": "Save Method",
+    "vi": "Lưu phương thức"
+  },
+  "payment.default": {
+    "en": "Default",
+    "vi": "Mặc định"
+  },
+  "payment.expired": {
+    "en": "Expired",
+    "vi": "Hết hạn"
+  },
+  "payment.expires": {
+    "en": "Expires",
+    "vi": "Hết hạn"
+  },
+  "payment.make_default": {
+    "en": "Make default",
+    "vi": "Đặt làm mặc định"
+  },
+  "payment.delete_method": {
+    "en": "Delete",
+    "vi": "Xóa"
+  },
+  "payment.view_history": {
+    "en": "View Payment History",
+    "vi": "Xem lịch sử thanh toán"
+  },
+  "payment.fetch_error": {
+    "en": "Failed to load payment information",
+    "vi": "Không thể tải thông tin thanh toán"
+  },
+  "payment.method_added": {
+    "en": "Payment method added successfully",
+    "vi": "Đã thêm phương thức thanh toán thành công"
+  },
+  "payment.add_error": {
+    "en": "Failed to add payment method",
+    "vi": "Không thể thêm phương thức thanh toán"
+  },
+  "payment.confirm_delete": {
+    "en": "Are you sure you want to delete this payment method?",
+    "vi": "Bạn có chắc chắn muốn xóa phương thức thanh toán này?"
+  },
+  "payment.method_deleted": {
+    "en": "Payment method deleted",
+    "vi": "Đã xóa phương thức thanh toán"
+  },
+  "payment.delete_error": {
+    "en": "Failed to delete payment method",
+    "vi": "Không thể xóa phương thức thanh toán"
+  },
+  "payment.default_updated": {
+    "en": "Default payment method updated",
+    "vi": "Đã cập nhật phương thức thanh toán mặc định"
+  },
+  "payment.default_error": {
+    "en": "Failed to update default method",
+    "vi": "Không thể cập nhật phương thức mặc định"
+  },
+  "payment.history_title": {
+    "en": "Payment History",
+    "vi": "Lịch sử thanh toán"
+  },
+  "payment.history_error": {
+    "en": "Failed to load payment history",
+    "vi": "Không thể tải lịch sử thanh toán"
+  },
+  "payment.no_history": {
+    "en": "No payment history found",
+    "vi": "Không tìm thấy lịch sử thanh toán"
+  },
+  "payment.no_history_desc": {
+    "en": "Your payment transactions will appear here.",
+    "vi": "Các giao dịch thanh toán của bạn sẽ xuất hiện ở đây."
+  },
+  "payment.status_completed": {
+    "en": "Completed",
+    "vi": "Hoàn thành"
+  },
+  "payment.status_pending": {
+    "en": "Pending",
+    "vi": "Đang chờ"
+  },
+  "payment.status_failed": {
+    "en": "Failed",
+    "vi": "Thất bại"
+  },
+  "payment.status_refunded": {
+    "en": "Refunded",
+    "vi": "Đã hoàn tiền"
+  },
+  "payment.waitlist_title": {
+    "en": "Join the Waitlist",
+    "vi": "Tham gia danh sách chờ"
+  },
+  "payment.waitlist_desc": {
+    "en": "We're putting the finishing touches on our {{plan}} features. Join the waitlist to be the first to know when we launch!",
+    "vi": "Chúng tôi đang hoàn thiện các tính năng của gói {{plan}}. Hãy tham gia danh sách chờ để là người đầu tiên biết khi chúng tôi ra mắt!"
+  },
+  "payment.notify_me": {
+    "en": "Notify Me",
+    "vi": "Thông báo cho tôi"
+  },
+  "payment.joining": {
+    "en": "Joining...",
+    "vi": "Đang tham gia..."
+  },
+  "payment.email_address": {
+    "en": "Email Address",
+    "vi": "Địa chỉ Email"
+  },
+  "payment.waitlist_success": {
+    "en": "Successfully joined the waitlist!",
+    "vi": "Đã tham gia danh sách chờ thành công!"
+  },
+  "payment.pricing_title": {
+    "en": "Choose the right plan for you",
+    "vi": "Chọn gói dịch vụ phù hợp cho bạn"
+  },
+  "payment.pricing_subtitle": {
+    "en": "Unlock premium features and take control of your finances.",
+    "vi": "Mở khóa các tính năng cao cấp và làm chủ tài chính của bạn."
+  },
+  "payment.select_plan": {
+    "en": "Select {{plan}}",
+    "vi": "Chọn gói {{plan}}"
+  },
+  "payment.whats_included": {
+    "en": "What's included",
+    "vi": "Bao gồm những gì"
+  },
+  "payment.checkout_title": {
+    "en": "Checkout",
+    "vi": "Thanh toán"
+  },
+  "payment.order_summary": {
+    "en": "Order Summary",
+    "vi": "Tóm tắt đơn hàng"
+  },
+  "payment.billed_cycle": {
+    "en": "Billed {{cycle}}",
+    "vi": "Thanh toán {{cycle}}"
+  },
+  "payment.secure_transaction": {
+    "en": "Secure encrypted transaction",
+    "vi": "Giao dịch được mã hóa an toàn"
+  },
+  "payment.pay_and_subscribe": {
+    "en": "Pay {{amount}} & Subscribe",
+    "vi": "Thanh toán {{amount}} & Đăng ký"
+  },
+  "payment.processing": {
+    "en": "Processing...",
+    "vi": "Đang xử lý..."
+  },
+  "payment.checkout_error": {
+    "en": "An error occurred during checkout.",
+    "vi": "Đã xảy ra lỗi trong quá trình thanh toán."
+  },
+  "payment.dashboard_title": {
+    "en": "Payment Dashboard",
+    "vi": "Bảng điều khiển thanh toán"
+  },
+  "payment.total_transactions": {
+    "en": "Total Transactions",
+    "vi": "Tổng giao dịch"
+  },
+  "payment.success_rate": {
+    "en": "Success Rate",
+    "vi": "Tỷ lệ thành công"
+  },
+  "payment.active_gateways": {
+    "en": "Active Gateways",
+    "vi": "Cổng thanh toán đang hoạt động"
+  },
+  "payment.active_subscriptions": {
+    "en": "Active Subscriptions",
+    "vi": "Gói đăng ký đang hoạt động"
+  },
+  "payment.transaction_distribution": {
+    "en": "Transaction Distribution",
+    "vi": "Phân bổ giao dịch"
+  },
+  "payment.gateway_uptime": {
+    "en": "Gateway Uptime",
+    "vi": "Thời gian hoạt động của cổng"
+  },
+  "payment.recent_transactions_title": {
+    "en": "Recent Transactions",
+    "vi": "Giao dịch gần đây"
+  },
+  "payment.user": {
+    "en": "User",
+    "vi": "Người dùng"
+  },
+  "payment.plan_label": {
+    "en": "Plan",
+    "vi": "Gói"
+  },
+  "payment.amount_label": {
+    "en": "Amount",
+    "vi": "Số tiền"
+  },
+  "payment.gateway_label": {
+    "en": "Gateway",
+    "vi": "Cổng"
+  },
+  "payment.subscription": {
+    "en": "Subscription",
+    "vi": "Đăng ký"
+  },
+  "payment.transaction_id": {
+    "en": "Transaction",
+    "vi": "Mã giao dịch"
+  },
+  "payment.showing": {
+    "en": "Showing",
+    "vi": "Hiển thị"
+  },
+  "payment.of": {
+    "en": "of",
+    "vi": "trong tổng số"
+  },
+  "payment.other": {
+    "en": "Other",
+    "vi": "Khác"
+  },
+  "payment.edit_method": {
+    "en": "Edit",
+    "vi": "Chỉnh sửa"
+  },
+  "payment.edit_method_title": {
+    "en": "Edit Payment Method",
+    "vi": "Chỉnh sửa phương thức thanh toán"
+  },
+  "payment.update_method": {
+    "en": "Update Method",
+    "vi": "Cập nhật phương thức"
+  },
+  "payment.method_updated": {
+    "en": "Payment method updated successfully",
+    "vi": "Đã cập nhật phương thức thanh toán thành công"
+  },
+  "payment.update_error": {
+    "en": "Failed to update payment method",
+    "vi": "Không thể cập nhật phương thức thanh toán"
+  },
+  "payment.expiry_required": {
+    "en": "Expiry month and year are required",
+    "vi": "Tháng và năm hết hạn là bắt buộc"
   }
 }

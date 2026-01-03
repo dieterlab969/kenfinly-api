@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::get('/settings/logos', [PublicLogoController::class, 'index']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+Route::post('/waitlist', [\App\Http\Controllers\Api\WaitlistController::class, 'store']);
 Route::get('/auth/config', [AuthController::class, 'config']);
 Route::get('/settings/company', [PublicSettingsController::class, 'getCompanyInfo']);
 
@@ -78,6 +79,13 @@ Route::middleware('auth:api')->group(function () {
 
     // Payments & Licenses
     Route::post('/payments/create-intent', [PaymentController::class, 'createPaymentIntent']);
+    Route::get('/payments/info', [PaymentController::class, 'getPaymentInfo']);
+    Route::get('/payments/history', [PaymentController::class, 'getPaymentHistory']);
+    Route::get('/payments/methods', [PaymentController::class, 'getPaymentMethods']);
+    Route::post('/payments/methods', [PaymentController::class, 'addPaymentMethod']);
+    Route::put('/payments/methods/{id}', [PaymentController::class, 'updatePaymentMethod']);
+    Route::delete('/payments/methods/{id}', [PaymentController::class, 'deletePaymentMethod']);
+    Route::post('/payments/methods/{id}/default', [PaymentController::class, 'setDefaultPaymentMethod']);
     Route::get('/licenses/my-licenses', [PaymentController::class, 'myLicenses']);
 
     // Participants & Invitations
@@ -97,6 +105,24 @@ Route::post('/webhooks/payment', [PaymentController::class, 'webhook']);
 
 // Admin routes (Super Admin only)
 Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])->prefix('admin')->group(function () {
+    // Payment Gateway Management
+    Route::apiResource('payment-gateways', \App\Http\Controllers\Api\PaymentGatewayController::class);
+    Route::post('/payment-gateways/{paymentGateway}/toggle', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'toggleGateway']);
+    Route::post('/payment-gateways/{paymentGateway}/credentials', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'storeCredential']);
+    Route::put('/payment-gateways/{paymentGateway}/credentials/{credential}', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'updateCredential']);
+    Route::delete('/payment-gateways/{paymentGateway}/credentials/{credential}', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'deleteCredential']);
+    Route::post('/payment-gateways/{paymentGateway}/credentials/{credential}/verify', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'verifyCredential']);
+    Route::get('/payment-gateways/{paymentGateway}/audit-logs', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'auditLogs']);
+    // Subscription Plans
+    Route::get('/subscription-plans', [\App\Http\Controllers\Api\SubscriptionPlanController::class, 'index']);
+    Route::post('/subscriptions', [\App\Http\Controllers\Api\SubscriptionController::class, 'store']);
+    // Payments
+    Route::post('/payments/process', [\App\Http\Controllers\Api\PaymentController::class, 'processPayment']);
+    Route::get('/payments/history', [\App\Http\Controllers\Api\PaymentController::class, 'history']);
+    Route::get('/payments/{payment}', [\App\Http\Controllers\Api\PaymentController::class, 'show']);
+    Route::post('/payments/{payment}/retry', [\App\Http\Controllers\Api\PaymentController::class, 'retry']);
+    // Payment Dashboard (Admin)
+    Route::get('/admin/payment-dashboard/overview', [\App\Http\Controllers\Api\PaymentDashboardController::class, 'overview']);
     Route::get('/dashboard', [AdminDashboardController::class, 'index']);
 
     Route::apiResource('accounts', AccountManagementController::class)->names('admin.accounts');

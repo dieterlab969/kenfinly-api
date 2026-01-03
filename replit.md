@@ -54,6 +54,13 @@ The backend is built with Laravel 12 (PHP 8.2+) and provides a REST API. Key arc
 - **Transaction Photo Management**: Upload multiple receipt photos (up to 10 photos, 10MB original max). Features automatic client-side image compression that converts all images to JPEG format (target 500KB, max 800KB) with progressive quality reduction and resize (max 2048px). Note: Transparency and animation are lost during compression.
 - **Audit Trail**: Tracks creation, updates, deletions, and photo changes on transactions, including who made changes and when.
 - **Account Information Management**: Users can view and edit their personal account details including full name, email (read-only), email verification status, account status, roles, and membership date. Accessible via User icon in the dashboard navigation.
+- **Payment Information Management**: Users can view and manage their payment details via CreditCard icon in dashboard navigation. Features include:
+  - Upcoming payment date and amount display
+  - Current payment methods management (credit cards, PayPal)
+  - Add/remove payment methods with secure forms
+  - Set default payment method
+  - View payment history with pagination
+  - Charge description note for billing transparency
 
 # WordPress Headless CMS Integration
 

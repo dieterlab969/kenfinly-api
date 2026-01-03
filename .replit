@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "php-8.2", "bash", "web"]
+modules = ["nodejs-20", "php-8.2", "bash", "web", "postgresql-16"]
 [agent]
 expertMode = true
 integrations = ["sendgrid:1.0.0"]
