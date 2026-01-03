@@ -1331,6 +1331,62 @@
     "en": "Pending",
     "vi": "Đang chờ"
   },
+  "plan.free.name": {
+    "en": "Free",
+    "vi": "Miễn phí"
+  },
+  "plan.free.description": {
+    "en": "Basic financial tracking for everyone.",
+    "vi": "Theo dõi tài chính cơ bản cho mọi người."
+  },
+  "plan.pro_monthly.name": {
+    "en": "Pro Monthly",
+    "vi": "Pro Hàng tháng"
+  },
+  "plan.pro_monthly.description": {
+    "en": "Advanced features for monthly control.",
+    "vi": "Các tính năng nâng cao để kiểm soát hàng tháng."
+  },
+  "plan.pro_yearly.name": {
+    "en": "Pro Yearly",
+    "vi": "Pro Hàng năm"
+  },
+  "plan.pro_yearly.description": {
+    "en": "Best value for long-term financial health.",
+    "vi": "Giá trị tốt nhất cho sức khỏe tài chính lâu dài."
+  },
+  "plan.feature.basic_tracking": {
+    "en": "Basic tracking",
+    "vi": "Theo dõi cơ bản"
+  },
+  "plan.feature.limited_accounts": {
+    "en": "Limited accounts",
+    "vi": "Tài khoản giới hạn"
+  },
+  "plan.feature.standard_support": {
+    "en": "Standard support",
+    "vi": "Hỗ trợ tiêu chuẩn"
+  },
+  "plan.feature.all_free_features": {
+    "en": "All free features",
+    "vi": "Tất cả tính năng miễn phí"
+  },
+  "plan.feature.advanced_analytics": {
+    "en": "Advanced analytics",
+    "vi": "Phân tích nâng cao"
+  },
+  "plan.feature.unlimited_accounts": {
+    "en": "Unlimited accounts",
+    "vi": "Không giới hạn tài khoản"
+  },
+  "plan.feature.priority_support": {
+    "en": "Priority support",
+    "vi": "Hỗ trợ ưu tiên"
+  },
+  "plan.feature.save_20_percent": {
+    "en": "Save 20% compared to monthly",
+    "vi": "Tiết kiệm 20% so với hàng tháng"
+  },
   "payment.status_failed": {
     "en": "Failed",
     "vi": "Thất bại"
