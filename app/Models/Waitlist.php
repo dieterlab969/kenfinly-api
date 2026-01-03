@@ -6,5 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Waitlist extends Model
 {
-    protected $fillable = ['email', 'plan_interest'];
+    /**
+     * The attributes that are mass assignable.
+     *
+     * Use these attributes to capture user interest in subscription plans.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'email',
+        'plan_interest',
+    ];
 }
