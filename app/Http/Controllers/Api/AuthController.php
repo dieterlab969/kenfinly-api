@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
+use App\Models\SubscriptionPlan;
+use App\Models\Subscription;
+
 class AuthController extends Controller
 {
     public function __construct(
@@ -68,6 +71,19 @@ class AuthController extends Controller
         ]);
 
         $user->assignRole('owner');
+
+        // Automatically enroll in Free plan
+        $freePlan = SubscriptionPlan::where('name', 'Free')->first();
+        if ($freePlan) {
+            Subscription::create([
+                'user_id' => $user->id,
+                'plan_id' => $freePlan->id,
+                'status' => 'active',
+                'amount' => 0,
+                'currency' => 'VND',
+                'start_date' => now(),
+            ]);
+        }
 
         try {
             $verification = $this->emailVerificationService->sendVerificationEmail($user);
