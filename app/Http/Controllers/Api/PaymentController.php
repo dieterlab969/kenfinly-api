@@ -19,11 +19,18 @@ use Illuminate\Http\JsonResponse;
  */
 class PaymentController extends Controller
 {
+    /**
+     * Service that handles the payment processing logic.
+     *
+     * @var PaymentProcessingService
+     */
     private PaymentProcessingService $paymentService;
 
     /**
      * PaymentController constructor.
+     *
      * Applies authentication middleware and initializes the payment processing service.
+     * You must be authenticated to access any of the payment endpoints.
      */
     public function __construct()
     {
