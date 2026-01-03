@@ -5,10 +5,24 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Waitlist;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
+/**
+ * Controller to manage waitlist sign-ups.
+ *
+ * Handles storing new email entries with optional plan interest.
+ */
 class WaitlistController extends Controller
 {
-    public function store(Request $request)
+    /**
+     * Store a new waitlist entry.
+     *
+     * Validates the email and optional plan interest, then creates a new waitlist record.
+     *
+     * @param Request $request Incoming HTTP request containing email and optional plan_interest.
+     * @return JsonResponse JSON response confirming successful waitlist sign-up.
+     */
+    public function store(Request $request): JsonResponse
     {
         $request->validate([
             'email' => 'required|email|unique:waitlists,email',

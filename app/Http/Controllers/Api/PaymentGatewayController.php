@@ -10,14 +10,31 @@ use App\Services\EncryptionService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * Controller for managing Payment Gateways and their credentials.
+ *
+ * Provides endpoints for CRUD operations on gateways and credentials,
+ * toggling gateway status, verifying credentials, and retrieving audit logs.
+ * Protected by authentication and admin middleware.
+ */
 class PaymentGatewayController extends Controller
 {
+    /**
+     * PaymentGatewayController constructor.
+     * Applies authentication and admin middleware to relevant endpoints.
+     */
     public function __construct()
     {
         $this->middleware('auth:api');
         $this->middleware('super_admin')->only(['index', 'store', 'show', 'update', 'destroy', 'storeCredential', 'updateCredential', 'deleteCredential', 'toggleGateway']);
     }
 
+    /**
+     * List payment gateways with optional filters and pagination.
+     *
+     * @param Request $request HTTP request with optional filters: is_active, environment.
+     * @return JsonResponse Paginated list of payment gateways with credentials and creator info.
+     */
     public function index(Request $request): JsonResponse
     {
         $gateways = PaymentGateway::with('credentials', 'createdBy')
@@ -29,6 +46,12 @@ class PaymentGatewayController extends Controller
         return response()->json($gateways);
     }
 
+    /**
+     * Create a new payment gateway.
+     *
+     * @param Request $request HTTP request with gateway details.
+     * @return JsonResponse Newly created payment gateway.
+     */
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -54,11 +77,24 @@ class PaymentGatewayController extends Controller
         return response()->json($gateway, 201);
     }
 
+    /**
+     * Show details of a specific payment gateway.
+     *
+     * @param PaymentGateway $paymentGateway The payment gateway instance.
+     * @return JsonResponse Payment gateway with credentials and audit logs.
+     */
     public function show(PaymentGateway $paymentGateway): JsonResponse
     {
         return response()->json($paymentGateway->load('credentials', 'auditLogs.user'));
     }
 
+    /**
+     * Update a payment gateway's description and metadata.
+     *
+     * @param Request $request HTTP request with update data.
+     * @param PaymentGateway $paymentGateway The payment gateway instance.
+     * @return JsonResponse Updated payment gateway.
+     */
     public function update(Request $request, PaymentGateway $paymentGateway): JsonResponse
     {
         $validated = $request->validate([
@@ -81,6 +117,12 @@ class PaymentGatewayController extends Controller
         return response()->json($paymentGateway);
     }
 
+    /**
+     * Delete a payment gateway.
+     *
+     * @param PaymentGateway $paymentGateway The payment gateway instance.
+     * @return JsonResponse Success message.
+     */
     public function destroy(PaymentGateway $paymentGateway): JsonResponse
     {
         $name = $paymentGateway->name;
@@ -96,6 +138,12 @@ class PaymentGatewayController extends Controller
         return response()->json(['message' => 'Gateway deleted successfully']);
     }
 
+    /**
+     * Toggle the active status of a payment gateway.
+     *
+     * @param PaymentGateway $paymentGateway The payment gateway instance.
+     * @return JsonResponse Status message and updated gateway.
+     */
     public function toggleGateway(PaymentGateway $paymentGateway): JsonResponse
     {
         $action = $paymentGateway->is_active ? 'deactivate' : 'activate';
@@ -114,6 +162,13 @@ class PaymentGatewayController extends Controller
         ]);
     }
 
+    /**
+     * Add a new credential to a payment gateway.
+     *
+     * @param Request $request HTTP request with credential data.
+     * @param PaymentGateway $paymentGateway The payment gateway instance.
+     * @return JsonResponse Success message and credential data.
+     */
     public function storeCredential(Request $request, PaymentGateway $paymentGateway): JsonResponse
     {
         $validated = $request->validate([
@@ -157,6 +212,14 @@ class PaymentGatewayController extends Controller
         ], 201);
     }
 
+    /**
+     * Update an existing credential's value.
+     *
+     * @param Request $request HTTP request with new credential value.
+     * @param PaymentGateway $paymentGateway The payment gateway instance.
+     * @param PaymentGatewayCredential $credential The credential instance.
+     * @return JsonResponse Success message and updated credential data.
+     */
     public function updateCredential(Request $request, PaymentGateway $paymentGateway, PaymentGatewayCredential $credential): JsonResponse
     {
         $validated = $request->validate([
@@ -181,6 +244,13 @@ class PaymentGatewayController extends Controller
         ]);
     }
 
+    /**
+     * Delete a credential from a payment gateway.
+     *
+     * @param PaymentGateway $paymentGateway The payment gateway instance.
+     * @param PaymentGatewayCredential $credential The credential instance.
+     * @return JsonResponse Success message.
+     */
     public function deleteCredential(PaymentGateway $paymentGateway, PaymentGatewayCredential $credential): JsonResponse
     {
         $credentialKey = $credential->credential_key;
@@ -197,6 +267,13 @@ class PaymentGatewayController extends Controller
         return response()->json(['message' => 'Credential deleted successfully']);
     }
 
+    /**
+     * Verify a credential for a payment gateway.
+     *
+     * @param PaymentGateway $paymentGateway The payment gateway instance.
+     * @param PaymentGatewayCredential $credential The credential instance.
+     * @return JsonResponse Success message and verified credential data.
+     */
     public function verifyCredential(PaymentGateway $paymentGateway, PaymentGatewayCredential $credential): JsonResponse
     {
         $credential->verify();
@@ -216,6 +293,13 @@ class PaymentGatewayController extends Controller
         ]);
     }
 
+    /**
+     * Retrieve audit logs for a payment gateway with optional filtering by action.
+     *
+     * @param PaymentGateway $paymentGateway The payment gateway instance.
+     * @param Request $request HTTP request with optional 'action' filter.
+     * @return JsonResponse Paginated list of audit logs with user information.
+     */
     public function auditLogs(PaymentGateway $paymentGateway, Request $request): JsonResponse
     {
         $logs = $paymentGateway->auditLogs()
