@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { AlertCircle, TrendingUp, DollarSign, Activity, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
+import { useTranslation } from '../contexts/TranslationContext';
 
 export default function PaymentDashboard() {
+  const { t } = useTranslation();
   const [data, setData] = useState(null);
   const [period, setPeriod] = useState('monthly');
   const [loading, setLoading] = useState(true);
@@ -26,8 +28,8 @@ export default function PaymentDashboard() {
     }
   };
 
-  if (loading) return <div className="p-8">Loading dashboard...</div>;
-  if (!data) return <div className="p-8 text-red-600">Failed to load dashboard</div>;
+  if (loading) return <div className="p-8">{t('common.loading') || 'Loading dashboard...'}</div>;
+  if (!data) return <div className="p-8 text-red-600">{t('payment.dashboard_error') || 'Failed to load dashboard'}</div>;
 
   const transactionMetrics = data.transactions;
   const gateways = data.gateways;
@@ -35,25 +37,25 @@ export default function PaymentDashboard() {
   const alerts = data.alerts || [];
 
   const chartData = [
-    { name: 'Success', value: transactionMetrics.successful_count, fill: '#10b981' },
-    { name: 'Failed', value: transactionMetrics.failed_count, fill: '#ef4444' },
-    { name: 'Refunded', value: transactionMetrics.refunded_count, fill: '#f59e0b' },
+    { name: t('payment.status_completed') || 'Success', value: transactionMetrics.successful_count, fill: '#10b981' },
+    { name: t('payment.status_failed') || 'Failed', value: transactionMetrics.failed_count, fill: '#ef4444' },
+    { name: t('payment.status_refunded') || 'Refunded', value: transactionMetrics.refunded_count, fill: '#f59e0b' },
   ];
 
   return (
     <div className="space-y-6 p-6 bg-gray-50">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Payment Dashboard</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{t('payment.dashboard_title') || 'Payment Dashboard'}</h1>
         <select 
           value={period} 
           onChange={(e) => setPeriod(e.target.value)}
           className="px-4 py-2 border border-gray-300 rounded-lg"
         >
-          <option value="daily">Daily</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
+          <option value="daily">{t('payment.period_daily') || 'Daily'}</option>
+          <option value="weekly">{t('payment.period_weekly') || 'Weekly'}</option>
+          <option value="monthly">{t('payment.period_monthly') || 'Monthly'}</option>
+          <option value="yearly">{t('payment.period_yearly') || 'Yearly'}</option>
         </select>
       </div>
 
@@ -80,17 +82,17 @@ export default function PaymentDashboard() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-4 gap-4">
-        <MetricCard title="Total Transactions" value={transactionMetrics.total} icon={DollarSign} />
-        <MetricCard title="Success Rate" value={`${transactionMetrics.success_rate}%`} icon={TrendingUp} />
-        <MetricCard title="Active Gateways" value={gateways.filter(g => g.is_active).length} icon={Activity} />
-        <MetricCard title="Active Subscriptions" value={subscriptions.active_total} icon={TrendingUp} />
+        <MetricCard title={t('payment.total_transactions') || "Total Transactions"} value={transactionMetrics.total} icon={DollarSign} />
+        <MetricCard title={t('payment.success_rate') || "Success Rate"} value={`${transactionMetrics.success_rate}%`} icon={TrendingUp} />
+        <MetricCard title={t('payment.active_gateways') || "Active Gateways"} value={gateways.filter(g => g.is_active).length} icon={Activity} />
+        <MetricCard title={t('payment.active_subscriptions') || "Active Subscriptions"} value={subscriptions.active_total} icon={TrendingUp} />
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-2 gap-6">
         {/* Transaction Distribution */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4">Transaction Distribution</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('payment.transaction_distribution') || 'Transaction Distribution'}</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie data={chartData} cx="50%" cy="50%" labelLine={false} label dataKey="value">
@@ -106,7 +108,7 @@ export default function PaymentDashboard() {
 
         {/* Gateway Status */}
         <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-semibold mb-4">Gateway Uptime</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('payment.gateway_uptime') || 'Gateway Uptime'}</h3>
           <div className="space-y-3">
             {gateways.map(gateway => (
               <div key={gateway.id} className="flex justify-between items-center">
@@ -125,17 +127,17 @@ export default function PaymentDashboard() {
 
       {/* Recent Transactions */}
       <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="text-lg font-semibold mb-4">Recent Transactions</h3>
+        <h3 className="text-lg font-semibold mb-4">{t('payment.recent_transactions_title') || 'Recent Transactions'}</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b">
               <tr>
-                <th className="text-left py-2 px-4">User</th>
-                <th className="text-left py-2 px-4">Plan</th>
-                <th className="text-left py-2 px-4">Amount</th>
-                <th className="text-left py-2 px-4">Status</th>
-                <th className="text-left py-2 px-4">Gateway</th>
-                <th className="text-left py-2 px-4">Date</th>
+                <th className="text-left py-2 px-4">{t('payment.user') || 'User'}</th>
+                <th className="text-left py-2 px-4">{t('payment.plan_label') || 'Plan'}</th>
+                <th className="text-left py-2 px-4">{t('payment.amount_label') || 'Amount'}</th>
+                <th className="text-left py-2 px-4">{t('transaction.status') || 'Status'}</th>
+                <th className="text-left py-2 px-4">{t('payment.gateway_label') || 'Gateway'}</th>
+                <th className="text-left py-2 px-4">{t('transaction.date') || 'Date'}</th>
               </tr>
             </thead>
             <tbody>

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Check } from 'lucide-react';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 export default function PlanSelection({ onSelectPlan, subscriptionsEnabled = true }) {
+    const { t } = useTranslation();
     const [plans, setPlans] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -20,17 +22,17 @@ export default function PlanSelection({ onSelectPlan, subscriptionsEnabled = tru
         fetchPlans();
     }, []);
 
-    if (loading) return <div className="p-8 text-center">Loading plans...</div>;
+    if (loading) return <div className="p-8 text-center">{t('common.loading') || 'Loading plans...'}</div>;
 
     return (
         <div className="py-12 bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center">
                     <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-                        Choose the right plan for you
+                        {t('payment.pricing_title') || 'Choose the right plan for you'}
                     </h2>
                     <p className="mt-4 text-xl text-gray-600">
-                        Unlock premium features and take control of your finances.
+                        {t('payment.pricing_subtitle') || 'Unlock premium features and take control of your finances.'}
                     </p>
                 </div>
                 <div className="mt-12 space-y-4 sm:mt-16 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:mx-0 xl:grid-cols-3">
@@ -47,11 +49,11 @@ export default function PlanSelection({ onSelectPlan, subscriptionsEnabled = tru
                                     onClick={() => onSelectPlan(plan)}
                                     className="mt-8 block w-full bg-blue-600 border border-transparent rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-blue-700"
                                 >
-                                    {subscriptionsEnabled ? `Select ${plan.name}` : 'Notify Me'}
+                                    {subscriptionsEnabled ? (t('payment.select_plan', { plan: plan.name }) || `Select ${plan.name}`) : (t('payment.notify_me') || 'Notify Me')}
                                 </button>
                             </div>
                             <div className="pt-6 pb-8 px-6">
-                                <h4 className="text-sm font-medium text-gray-900 tracking-wide uppercase">What's included</h4>
+                                <h4 className="text-sm font-medium text-gray-900 tracking-wide uppercase">{t('payment.whats_included') || "What's included"}</h4>
                                 <ul className="mt-6 space-y-4">
                                     {(plan.features || []).map((feature, idx) => (
                                         <li key={idx} className="flex space-x-3">
