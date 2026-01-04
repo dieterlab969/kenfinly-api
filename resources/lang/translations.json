@@ -739,6 +739,10 @@
     "en": "Home",
     "vi": "Trang Chủ"
   },
+  "navbar.pricing": {
+    "en": "Pricing",
+    "vi": "Bảng Giá"
+  },
   "navbar.features": {
     "en": "Features",
     "vi": "Tính Năng"

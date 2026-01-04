@@ -14,6 +14,7 @@ function Navbar() {
     const navLinks = [
         { name: t('navbar.home'), path: '/' },
         { name: t('navbar.features'), path: '/#features' },
+        { name: t('navbar.pricing') || t('navbar.plans'), path: '/pricing' },
         { name: t('navbar.blog'), path: '/blog' },
         { name: t('navbar.about'), path: '/about' },
     ];
