@@ -58,12 +58,19 @@ class PaymentDashboardController extends Controller
      */
     private function getTransactionMetrics(Carbon $startDate): array
     {
-        $subscriptions = Subscription::where('created_at', '>=', $startDate)->get();
+        $metrics = Subscription::where('created_at', '>=', $startDate)
+            ->selectRaw('
+                COUNT(*) as total,
+                COUNT(CASE WHEN status = "active" THEN 1 END) as successful,
+                COUNT(CASE WHEN status = "failed" THEN 1 END) as failed,
+                COUNT(CASE WHEN status = "canceled" THEN 1 END) as refunded
+            ')
+            ->first();
 
-        $total = count($subscriptions);
-        $successful = $subscriptions->where('status', 'active')->count();
-        $failed = $subscriptions->where('status', 'failed')->count();
-        $refunded = $subscriptions->where('status', 'canceled')->count();
+        $total = $metrics->total;
+        $successful = $metrics->successful;
+        $failed = $metrics->failed;
+        $refunded = $metrics->refunded;
 
         return [
             'total' => $total,
@@ -122,12 +129,12 @@ class PaymentDashboardController extends Controller
      */
     private function getSubscriptionMetrics(Carbon $startDate): array
     {
-        $subscriptions = Subscription::where('created_at', '>=', $startDate)->get();
+        $newCount = Subscription::where('created_at', '>=', $startDate)->count();
         $activeCount = Subscription::where('status', 'active')->count();
         $canceledCount = Subscription::where('canceled_at', '>=', $startDate)->count();
 
         return [
-            'total_new' => count($subscriptions),
+            'total_new' => $newCount,
             'active_total' => $activeCount,
             'canceled_in_period' => $canceledCount,
             'churn_rate' => $activeCount > 0 ? round(($canceledCount / $activeCount) * 100, 2) : 0,
