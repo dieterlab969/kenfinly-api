@@ -1459,9 +1459,9 @@
     "en": "Unlock premium features and take control of your finances.",
     "vi": "Mở khóa các tính năng cao cấp và làm chủ tài chính của bạn."
   },
-  "payment.select_plan": {
-    "en": "Select {{plan}}",
-    "vi": "Chọn gói {{plan}}"
+  "payment.get_started_free": {
+    "en": "Get started for free",
+    "vi": "Bắt đầu miễn phí"
   },
   "payment.whats_included": {
     "en": "What's included",
