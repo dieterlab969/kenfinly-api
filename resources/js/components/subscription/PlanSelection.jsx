@@ -57,10 +57,21 @@ export default function PlanSelection({ onSelectPlan, subscriptionsEnabled = tru
                                     <span className="text-base font-medium text-gray-500">/{t(`plan.cycle.${plan.billing_cycle}`) || plan.billing_cycle}</span>
                                 </p>
                                 <button
-                                    onClick={() => onSelectPlan(plan)}
+                                    onClick={() => {
+                                        if (plan.price == 0) {
+                                            window.location.href = '/register';
+                                        } else {
+                                            onSelectPlan(plan);
+                                        }
+                                    }}
                                     className="mt-8 block w-full bg-blue-600 border border-transparent rounded-md py-2 text-sm font-semibold text-white text-center hover:bg-blue-700"
                                 >
-                                    {subscriptionsEnabled ? (t('payment.select_plan', { plan: t(`plan.${(plan.slug || plan.name).toLowerCase().replace(/\s+/g, '_')}.name`) || plan.name }) || `Select ${plan.name}`) : (t('payment.notify_me') || 'Notify Me')}
+                                    {plan.price == 0 
+                                        ? (t('payment.get_started_free') || 'Get started for free')
+                                        : (subscriptionsEnabled 
+                                            ? (t('payment.select_plan', { plan: t(`plan.${(plan.slug || plan.name).toLowerCase().replace(/\s+/g, '_')}.name`) || plan.name }) || `Select ${plan.name}`) 
+                                            : (t('payment.notify_me') || 'Notify Me'))
+                                    }
                                 </button>
                             </div>
                             <div className="pt-6 pb-8 px-6">
