@@ -1337,59 +1337,87 @@
   },
   "plan.free.name": {
     "en": "Free",
-    "vi": "Miễn phí"
+    "vi": "Miễn Phí"
   },
   "plan.free.description": {
-    "en": "Basic financial tracking for everyone.",
-    "vi": "Theo dõi tài chính cơ bản cho mọi người."
+    "en": "Basic features for personal use",
+    "vi": "Các tính năng cơ bản cho mục đích sử dụng cá nhân"
   },
-  "plan.pro_monthly.name": {
-    "en": "Pro Monthly",
-    "vi": "Pro Hàng tháng"
+  "plan.pro.name": {
+    "en": "Pro",
+    "vi": "Chuyên nghiệp"
   },
-  "plan.pro_monthly.description": {
-    "en": "Advanced features for monthly control.",
-    "vi": "Các tính năng nâng cao để kiểm soát hàng tháng."
+  "plan.pro.description": {
+    "en": "Advanced features for enthusiasts",
+    "vi": "Các tính năng nâng cao dành cho người đam mê"
   },
   "plan.pro_yearly.name": {
     "en": "Pro Yearly",
-    "vi": "Pro Hàng năm"
+    "vi": "Pro Hàng Năm"
   },
   "plan.pro_yearly.description": {
-    "en": "Best value for long-term financial health.",
-    "vi": "Giá trị tốt nhất cho sức khỏe tài chính lâu dài."
+    "en": "Best value for power users",
+    "vi": "Giá trị tốt nhất cho người dùng chuyên sâu"
+  },
+  "plan.cycle.forever": {
+    "en": "forever",
+    "vi": "vĩnh viễn"
+  },
+  "plan.cycle.monthly": {
+    "en": "monthly",
+    "vi": "hàng tháng"
+  },
+  "plan.cycle.yearly": {
+    "en": "yearly",
+    "vi": "hàng năm"
   },
   "plan.feature.basic_tracking": {
-    "en": "Basic tracking",
+    "en": "Basic Tracking",
     "vi": "Theo dõi cơ bản"
   },
-  "plan.feature.limited_accounts": {
-    "en": "Limited accounts",
-    "vi": "Tài khoản giới hạn"
+  "plan.feature.1_account": {
+    "en": "1 Account",
+    "vi": "1 Tài khoản"
   },
   "plan.feature.standard_support": {
-    "en": "Standard support",
+    "en": "Standard Support",
     "vi": "Hỗ trợ tiêu chuẩn"
   },
-  "plan.feature.all_free_features": {
-    "en": "All free features",
-    "vi": "Tất cả tính năng miễn phí"
+  "plan.feature.calendar_view": {
+    "en": "Calendar View",
+    "vi": "Chế độ xem lịch"
   },
-  "plan.feature.advanced_analytics": {
-    "en": "Advanced analytics",
-    "vi": "Phân tích nâng cao"
+  "plan.feature.advanced_data_visualizations": {
+    "en": "Advanced Data Visualizations",
+    "vi": "Trực quan hóa dữ liệu nâng cao"
   },
-  "plan.feature.unlimited_accounts": {
-    "en": "Unlimited accounts",
-    "vi": "Không giới hạn tài khoản"
+  "plan.feature.filtering_and_sorting": {
+    "en": "Filtering and Sorting",
+    "vi": "Lọc và sắp xếp"
   },
-  "plan.feature.priority_support": {
-    "en": "Priority support",
-    "vi": "Hỗ trợ ưu tiên"
+  "plan.feature.time-based_analysis": {
+    "en": "Time-based Analysis",
+    "vi": "Phân tích theo thời gian"
   },
-  "plan.feature.save_20_percent": {
-    "en": "Save 20% compared to monthly",
-    "vi": "Tiết kiệm 20% so với hàng tháng"
+  "plan.feature.predictive_insights": {
+    "en": "Predictive Insights",
+    "vi": "Thông tin dự đoán"
+  },
+  "plan.feature.report_exports_(pdf,_csv,_excel)": {
+    "en": "Report Exports (PDF, CSV, Excel)",
+    "vi": "Xuất báo cáo (PDF, CSV, Excel)"
+  },
+  "plan.feature.all_monthly_pro_features": {
+    "en": "All Monthly Pro Features",
+    "vi": "Tất cả tính năng của gói Pro hàng tháng"
+  },
+  "plan.feature.yearly_discount": {
+    "en": "Yearly Discount",
+    "vi": "Giảm giá hàng năm"
+  },
+  "common.back_to_plans": {
+    "en": "Back to plans",
+    "vi": "Quay lại danh sách gói"
   },
   "payment.status_failed": {
     "en": "Failed",
