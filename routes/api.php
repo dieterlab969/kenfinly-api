@@ -30,6 +30,7 @@ use App\Http\Controllers\Api\PublicLogoController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
+Route::get('/subscription-plans', [\App\Http\Controllers\Api\SubscriptionPlanController::class, 'index']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::get('/settings/logos', [PublicLogoController::class, 'index']);
 Route::post('/auth/login', [AuthController::class, 'login']);
@@ -114,7 +115,6 @@ Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])
     Route::post('/payment-gateways/{paymentGateway}/credentials/{credential}/verify', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'verifyCredential']);
     Route::get('/payment-gateways/{paymentGateway}/audit-logs', [\App\Http\Controllers\Api\PaymentGatewayController::class, 'auditLogs']);
     // Subscription Plans
-    Route::get('/subscription-plans', [\App\Http\Controllers\Api\SubscriptionPlanController::class, 'index']);
     Route::post('/subscriptions', [\App\Http\Controllers\Api\SubscriptionController::class, 'store']);
     // Payments
     Route::post('/payments/process', [\App\Http\Controllers\Api\PaymentController::class, 'processPayment']);
