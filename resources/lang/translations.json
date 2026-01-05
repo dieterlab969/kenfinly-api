@@ -1019,6 +1019,10 @@
     "en": "Back to Login",
     "vi": "Quay lại đăng nhập"
   },
+  "verification.verify_your_email": {
+    "en": "Verify Your Email",
+    "vi": "Xác minh địa chỉ email của bạn"
+  },
   "verifyEmail.invalid_link_no_token": {
     "en": "Invalid verification link. No token provided.",
     "vi":  "Liên kết xác minh không hợp lệ. Không có mã token được cung cấp."
