@@ -1586,5 +1586,45 @@
   "payment.expiry_required": {
     "en": "Expiry month and year are required",
     "vi": "Tháng và năm hết hạn là bắt buộc"
+  },
+  "payment.success_title": {
+    "en": "Subscription Successful!",
+    "vi": "Đăng ký thành công!"
+  },
+  "payment.success_message": {
+    "en": "Thank you for upgrading. Your premium features are now active.",
+    "vi": "Cảm ơn bạn đã nâng cấp. Các tính năng cao cấp của bạn đã được kích hoạt."
+  },
+  "nav.dashboard": {
+    "en": "Go to Dashboard",
+    "vi": "Đến Bảng điều khiển"
+  },
+  "payment.waitlist_title": {
+    "en": "Join the Waitlist",
+    "vi": "Tham gia danh sách chờ"
+  },
+  "payment.waitlist_desc": {
+    "en": "We're putting the finishing touches on our {plan} features. Join the waitlist to be the first to know when we launch!",
+    "vi": "Chúng tôi đang hoàn thiện các tính năng {plan}. Tham gia danh sách chờ để là người đầu tiên biết khi chúng tôi ra mắt!"
+  },
+  "common.back_to_plans": {
+    "en": "Back to plans",
+    "vi": "Quay lại các gói"
+  },
+  "common.error_generic": {
+    "en": "Something went wrong. Please try again.",
+    "vi": "Đã xảy ra lỗi. Vui lòng thử lại."
+  },
+  "payment.email_address": {
+    "en": "Email Address",
+    "vi": "Địa chỉ Email"
+  },
+  "payment.joining": {
+    "en": "Joining...",
+    "vi": "Đang tham gia..."
+  },
+  "payment.notify_me": {
+    "en": "Notify Me",
+    "vi": "Thông báo cho tôi"
   }
 }
