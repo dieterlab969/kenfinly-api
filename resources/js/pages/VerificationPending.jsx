@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Loader, CheckCircle } from 'lucide-react';
 import axios from 'axios';
+import { useTranslation } from '../contexts/TranslationContext';
 
 export default function VerificationPending() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [userEmail, setUserEmail] = useState(location.state?.user?.email || '');
