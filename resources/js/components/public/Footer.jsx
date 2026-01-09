@@ -120,8 +120,11 @@ function Footer() {
                     </div>
 
                     <div>
-                        <h3 className="text-white font-semibold mb-4">{t('footer.contact.title')}</h3>
-                        <p className="text-sm text-yellow-400 font-medium mb-3">{companyInfo.company_name} – {t('footer.contact.tax_code_label')} {companyInfo.company_tax_code}</p>
+                        <h3 className="text-white font-semibold mb-4">CÔNG TY TNHH GETKENKA</h3>
+                        <p className="text-sm text-gray-400 mb-2">
+                            Registered office address: Tầng 2, 81 Cách Mạng Tháng Tám, Phường Bến Thành, Thành phố Hồ Chí Minh, Việt Nam
+                        </p>
+                        <p className="text-sm text-gray-400 mb-4">Tax code: 0318304909</p>
                         <ul className="space-y-3">
                             <li className="flex items-center space-x-3">
                                 <Mail className="w-5 h-5 text-blue-500" aria-hidden="true"/>
@@ -135,16 +138,13 @@ function Footer() {
                                     {companyInfo.company_phone}
                                 </a>
                             </li>
-                            <li className="flex items-start space-x-3">
-                                <MapPin className="w-5 h-5 text-blue-500 mt-0.5" aria-hidden="true"/>
-                                <span>{companyInfo.company_address}</span>
-                            </li>
                         </ul>
                     </div>
                 </div>
 
-                <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-                    <p>&copy; {currentYear} {t('footer.copyright.company_name')} {t('footer.copyright.all_rights_reserved')}</p>
+                <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-xs">
+                    <p className="mb-2">Copyright © 2024–2026 Convert Case Ltd | Last updated: January 2026</p>
+                    <p>Concept by Dieter R. | Privacy Policy | Terms of Service | Sitemap</p>
                 </div>
             </div>
         </footer>
