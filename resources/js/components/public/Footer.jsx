@@ -120,6 +120,17 @@ function Footer() {
                     </div>
 
                     <div>
+                        <h3 className="text-white font-semibold mb-4">Small Utilities</h3>
+                        <ul className="space-y-2">
+                            <li>
+                                <Link to="/textcase" className="text-gray-400 hover:text-white transition-colors">
+                                    Convert Case Tool
+                                </Link>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div>
                         <h3 className="text-white font-semibold mb-4">CÔNG TY TNHH GETKENKA</h3>
                         <p className="text-sm text-gray-400 mb-2">
                             Registered office address: Tầng 2, 81 Cách Mạng Tháng Tám, Phường Bến Thành, Thành phố Hồ Chí Minh, Việt Nam

@@ -66,8 +66,8 @@ function TextCaseConverter() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Left Ad Space */}
-                    <div className="hidden lg:block bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-4 flex items-center justify-center text-gray-400 text-sm italic h-[600px]">
-                        Ad Placement Space
+                    <div className="hidden lg:block bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-4 flex items-center justify-center text-gray-400 text-sm italic h-[600px] text-center">
+                        For advertising inquiries, please contact: 0941 069 969.
                     </div>
 
                     <div className="lg:col-span-2 space-y-6">
@@ -102,14 +102,14 @@ function TextCaseConverter() {
                     </div>
 
                     {/* Right Ad Space */}
-                    <div className="hidden lg:block bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-4 flex items-center justify-center text-gray-400 text-sm italic h-[600px]">
-                        Ad Placement Space
+                    <div className="hidden lg:block bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-4 flex items-center justify-center text-gray-400 text-sm italic h-[600px] text-center">
+                        For advertising inquiries, please contact: 0941 069 969.
                     </div>
                 </div>
 
                 {/* Bottom Ad Space */}
-                <div className="mt-12 w-full bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-8 flex items-center justify-center text-gray-400 text-sm italic min-h-[150px]">
-                    Banner Ad Space (AdSense Friendly)
+                <div className="mt-12 w-full bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-8 flex items-center justify-center text-gray-400 text-sm italic min-h-[150px] text-center">
+                    For advertising inquiries, please contact: 0941 069 969.
                 </div>
             </div>
         </PublicLayout>
