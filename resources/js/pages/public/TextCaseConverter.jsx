@@ -60,56 +60,56 @@ function TextCaseConverter() {
         <PublicLayout>
             <div className="max-w-5xl mx-auto px-4 py-12">
                 <div className="text-center mb-10">
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">Convert Case</h1>
-                    <p className="text-lg text-gray-600">Fast, simple, and minimalist text case converter.</p>
+                    <h1 className="text-4xl font-bold text-gray-900 mb-4">{t('textcase.title')}</h1>
+                    <p className="text-lg text-gray-600">{t('textcase.subtitle')}</p>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Left Ad Space */}
                     <div className="hidden lg:block bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-4 flex items-center justify-center text-gray-400 text-sm italic h-[600px] text-center">
-                        For advertising inquiries, please contact: 0941 069 969.
+                        {t('textcase.ad_inquiry')}
                     </div>
 
                     <div className="lg:col-span-2 space-y-6">
                         <textarea
                             value={text}
                             onChange={(e) => setText(e.target.value)}
-                            placeholder="Type or paste your content here..."
+                            placeholder={t('textcase.placeholder')}
                             className="w-full h-96 p-6 text-lg border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none resize-none shadow-sm"
                         />
 
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <button onClick={convertToSentenceCase} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">Sentence case</button>
-                            <button onClick={convertToLower} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">lower case</button>
-                            <button onClick={convertToUpper} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">UPPER CASE</button>
-                            <button onClick={convertToCapitalized} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">Capitalized Case</button>
-                            <button onClick={convertToAlternating} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">aLtErNaTiNg cAsE</button>
-                            <button onClick={convertToTitle} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">Title Case</button>
-                            <button onClick={convertToInverse} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">InVeRsE CaSe</button>
+                            <button onClick={convertToSentenceCase} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">{t('textcase.sentence_case')}</button>
+                            <button onClick={convertToLower} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">{t('textcase.lower_case')}</button>
+                            <button onClick={convertToUpper} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">{t('textcase.upper_case')}</button>
+                            <button onClick={convertToCapitalized} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">{t('textcase.capitalized_case')}</button>
+                            <button onClick={convertToAlternating} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">{t('textcase.alternating_case')}</button>
+                            <button onClick={convertToTitle} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">{t('textcase.title_case')}</button>
+                            <button onClick={convertToInverse} className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">{t('textcase.inverse_case')}</button>
                         </div>
 
                         <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-100">
                             <button onClick={handleCopy} className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all shadow-md hover:shadow-lg active:scale-95">
-                                <Copy size={18} /> Copy to Clipboard
+                                <Copy size={18} /> {t('textcase.copy')}
                             </button>
                             <button onClick={handleDownload} className="flex items-center gap-2 px-6 py-3 bg-gray-800 text-white rounded-xl font-semibold hover:bg-gray-900 transition-all shadow-md hover:shadow-lg active:scale-95">
-                                <Download size={18} /> Download
+                                <Download size={18} /> {t('textcase.download')}
                             </button>
                             <button onClick={handleClear} className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-red-100 text-red-600 rounded-xl font-semibold hover:bg-red-50 transition-all active:scale-95">
-                                <Trash2 size={18} /> Clear
+                                <Trash2 size={18} /> {t('textcase.clear')}
                             </button>
                         </div>
                     </div>
 
                     {/* Right Ad Space */}
                     <div className="hidden lg:block bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-4 flex items-center justify-center text-gray-400 text-sm italic h-[600px] text-center">
-                        For advertising inquiries, please contact: 0941 069 969.
+                        {t('textcase.ad_inquiry')}
                     </div>
                 </div>
 
                 {/* Bottom Ad Space */}
                 <div className="mt-12 w-full bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl p-8 flex items-center justify-center text-gray-400 text-sm italic min-h-[150px] text-center">
-                    For advertising inquiries, please contact: 0941 069 969.
+                    {t('textcase.ad_inquiry')}
                 </div>
             </div>
         </PublicLayout>

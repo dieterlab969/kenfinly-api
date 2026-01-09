@@ -1630,5 +1630,69 @@
   "payment.notify_me": {
     "en": "Notify Me",
     "vi": "Thông báo cho tôi"
+  },
+  "footer.utilities_title": {
+    "en": "Small Utilities",
+    "vi": "Tiện ích nhỏ"
+  },
+  "footer.convert_case_tool": {
+    "en": "Convert Case Tool",
+    "vi": "Công cụ chuyển đổi chữ hoa chữ thường"
+  },
+  "textcase.title": {
+    "en": "Convert Case",
+    "vi": "Chuyển đổi chữ hoa chữ thường"
+  },
+  "textcase.subtitle": {
+    "en": "Fast, simple, and minimalist text case converter.",
+    "vi": "Công cụ chuyển đổi chữ hoa chữ thường nhanh chóng, đơn giản và tối giản."
+  },
+  "textcase.placeholder": {
+    "en": "Type or paste your content here...",
+    "vi": "Nhập hoặc dán nội dung của bạn vào đây..."
+  },
+  "textcase.ad_inquiry": {
+    "en": "For advertising inquiries, please contact: 0941 069 969.",
+    "vi": "Để liên hệ quảng cáo, vui lòng liên hệ: 0941 069 969."
+  },
+  "textcase.copy": {
+    "en": "Copy to Clipboard",
+    "vi": "Sao chép vào bộ nhớ tạm"
+  },
+  "textcase.download": {
+    "en": "Download",
+    "vi": "Tải về"
+  },
+  "textcase.clear": {
+    "en": "Clear",
+    "vi": "Xóa"
+  },
+  "textcase.sentence_case": {
+    "en": "Sentence case",
+    "vi": "Chữ đầu câu hoa"
+  },
+  "textcase.lower_case": {
+    "en": "lower case",
+    "vi": "chữ thường"
+  },
+  "textcase.upper_case": {
+    "en": "UPPER CASE",
+    "vi": "CHỮ HOA"
+  },
+  "textcase.capitalized_case": {
+    "en": "Capitalized Case",
+    "vi": "Viết Hoa Chữ Cái Đầu"
+  },
+  "textcase.alternating_case": {
+    "en": "aLtErNaTiNg cAsE",
+    "vi": "cHữ hOa tHưỜnG xEn kẼ"
+  },
+  "textcase.title_case": {
+    "en": "Title Case",
+    "vi": "Tiêu Đề"
+  },
+  "textcase.inverse_case": {
+    "en": "InVeRsE CaSe",
+    "vi": "ĐảO nGượC cHữ hOa tHưỜnG"
   }
 }

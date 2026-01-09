@@ -120,11 +120,11 @@ function Footer() {
                     </div>
 
                     <div>
-                        <h3 className="text-white font-semibold mb-4">Small Utilities</h3>
+                        <h3 className="text-white font-semibold mb-4">{t('footer.utilities_title')}</h3>
                         <ul className="space-y-2">
                             <li>
                                 <Link to="/textcase" className="text-gray-400 hover:text-white transition-colors">
-                                    Convert Case Tool
+                                    {t('footer.convert_case_tool')}
                                 </Link>
                             </li>
                         </ul>
