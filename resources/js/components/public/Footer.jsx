@@ -143,7 +143,7 @@ function Footer() {
                 </div>
 
                 <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-xs">
-                    <p className="mb-2">Copyright © 2024–2026 Convert Case Ltd | Last updated: January 2026</p>
+                    <p className="mb-2">Copyright © 2024–2026 Getkenka Ltd | Last updated: January 2026</p>
                     <p>Concept by Dieter R. | Privacy Policy | Terms of Service | Sitemap</p>
                 </div>
             </div>
