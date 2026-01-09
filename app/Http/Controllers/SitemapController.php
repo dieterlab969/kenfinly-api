@@ -2,86 +2,121 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Services\WordPressService;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 use Carbon\Carbon;
-use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Log;
 
 class SitemapController extends Controller
 {
-    public function generate() {
+    /**
+     * @var WordPressService
+     */
+    private WordPressService $wordPressService;
+
+    /**
+     * @param WordPressService $wordPressService
+     */
+    public function __construct(WordPressService $wordPressService)
+    {
+        $this->wordPressService = $wordPressService;
+    }
+
+    /**
+     * Generate the sitemap.xml
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function generate()
+    {
         $sitemap = Sitemap::create();
 
-        $sitemap->add(Url::create('/')
-                      ->setLastModificationDate(Carbon::yesterday())
-                      ->setChangeFrequency('daily')
-                      ->setPriority(1.0));
-        $sitemap->add(Url::create('/about')
-                       ->setLastModificationDate(Carbon::yesterday())
-                       ->setChangeFrequency('monthly')
-                       ->setPriority(0.8));
-        $sitemap->add(Url::create('/contact')
-                       ->setLastModificationDate(Carbon::yesterday())
-                       ->setChangeFrequency('monthly')
-                        ->setPriority(0.8));
+        // Static Pages
+        $staticPages = [
+            '/' => ['priority' => 1.0, 'freq' => 'daily'],
+            '/about' => ['priority' => 0.8, 'freq' => 'monthly'],
+            '/contact' => ['priority' => 0.8, 'freq' => 'monthly'],
+            '/pricing' => ['priority' => 0.8, 'freq' => 'monthly'],
+            '/blog' => ['priority' => 0.9, 'freq' => 'daily'],
+            '/textcase' => ['priority' => 0.7, 'freq' => 'weekly'],
+        ];
 
-        $client = new Client();
-         $wpApiBase = config('services.wordpress.api_base_url', env('WORDPRESS_API_BASE_URL', null));
-         if (!$wpApiBase) {
-              Log::error('WORDPRESS_API_BASE_URL not configured');
-              return response()->json(['success' => false, 'message' => 'WordPress API base URL not configured'], 500);
-         }
+        foreach ($staticPages as $path => $config) {
+            $sitemap->add(
+                Url::create($path)
+                    ->setLastModificationDate(Carbon::yesterday())
+                    ->setChangeFrequency($config['freq'])
+                    ->setPriority($config['priority'])
+            );
+        }
 
-        $perPage = 100; 
+        // Dynamic Blog Posts
         $page = 1;
         $postsFetched = 0;
-          try {
-              do {
-                    $response = $client->request('GET', $wpApiBase . '/wp/v2/posts', [
-                                                  'query' => [
-                                                   'per_page' => $perPage,
-                                                  'page' => $page,
-                                                   'status' => 'publish', // Only published posts
-                                                  '_fields' => 'slug,date_gmt,modified_gmt',
-                                                    ],
-                                                  'http_errors' => false,
-                                                  ]);
-                    if ($response->getStatusCode() !== 200) {
-                         Log::error("Failed to fetch posts from WordPress API. Status code: " . $response->getStatusCode());
-                         break;
-                    }
+        $hasMore = true;
 
-                    $posts = json_decode($response->getBody(), true);
-                   foreach ($posts as $post) {
-                        $slug = $post['slug'] ?? null;
-                        $lastModified = $post['modified_gmt'] ?? $post['date_gmt'] ?? null;
+        try {
+            while ($hasMore) {
+                $result = $this->wordPressService->getPosts([
+                    'per_page' => 100,
+                    'page' => $page,
+                    'status' => 'publish',
+                    '_fields' => 'slug,date_gmt,modified_gmt',
+                ], false); // Disable cache for sitemap generation to get fresh data
 
-                       if (!$slug) {
-                            continue;
-                       }
-                        $postUrl = url("/blog/{$slug}");
-                        $lastModDate = $lastModified ? Carbon::parse($lastModified . 'UTC') : Carbon::now();
-                        $sitemap->add(Url::create($postUrl)
-                                       ->setLastModificationDate($lastModDate)
-                                      ->setChangeFrequency('weekly')
-                                        ->setPriority(0.9));
-                   }
-                    $postsCount = count($posts);
-                  $postsFetched += $postsCount;
-                   $page++;
-              } while ($postsCount === $perPage); 
-          } catch (\Exception $e) {
-                  Log::error('Error fetching WordPress posts for sitemap: ' . $e->getMessage());
-                  return response()->json(['success' => false, 'message' => 'Error fetching WordPress posts'], 500);
-              }
-        
-         
-        $sitemap->writeToFile(public_path('sitemap.xml'));
+                if (!$result['success']) {
+                    Log::error("Sitemap: Failed to fetch posts page {$page}: " . ($result['error'] ?? 'Unknown error'));
+                    break;
+                }
+
+                $posts = $result['data'];
+                if (empty($posts)) {
+                    $hasMore = false;
+                    continue;
+                }
+
+                foreach ($posts as $post) {
+                    $slug = $post['slug'] ?? null;
+                    if (!$slug) continue;
+
+                    $lastModified = $post['modified_gmt'] ?? $post['date_gmt'] ?? null;
+                    $lastModDate = $lastModified ? Carbon::parse($lastModified . ' UTC') : Carbon::now();
+
+                    $sitemap->add(
+                        Url::create("/blog/{$slug}")
+                            ->setLastModificationDate($lastModDate)
+                            ->setChangeFrequency('weekly')
+                            ->setPriority(0.9)
+                    );
+                }
+
+                $postsFetched += count($posts);
+                
+                // Check if we have more pages based on WordPress headers
+                $totalPages = (int) ($result['headers']['total_pages'] ?? 1);
+                if ($page >= $totalPages) {
+                    $hasMore = false;
+                } else {
+                    $page++;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Sitemap: Error generating dynamic routes: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error fetching blog content'], 500);
+        }
+
+        try {
+            $sitemap->writeToFile(public_path('sitemap.xml'));
+        } catch (\Exception $e) {
+            Log::error('Sitemap: Failed to write file: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to save sitemap'], 500);
+        }
+
         return response()->json([
             'success' => true,
             'message' => "Sitemap generated successfully with {$postsFetched} blog posts.",
+            'path' => '/sitemap.xml'
         ]);
     }
 }
