@@ -81,7 +81,7 @@ class SitemapController extends Controller
                     if (!$slug) continue;
 
                     $lastModified = $post['modified_gmt'] ?? $post['date_gmt'] ?? null;
-                    $lastModDate = $lastModified ? Carbon::parse($lastModified . ' UTC') : Carbon::now();
+                    $lastModDate = $lastModified ? Carbon::parse($lastModified . ' UTC')->timezone('Asia/Ho_Chi_Minh') : Carbon::now('Asia/Ho_Chi_Minh');
 
                     $sitemap->add(
                         Url::create("/blog/{$slug}")
