@@ -34,11 +34,8 @@ class SitemapController extends Controller
 
         // Static Pages
         $staticPages = [
-            '/' => ['priority' => 1.0, 'freq' => 'daily'],
-            '/about' => ['priority' => 0.8, 'freq' => 'monthly'],
-            '/contact' => ['priority' => 0.8, 'freq' => 'monthly'],
-            '/pricing' => ['priority' => 0.8, 'freq' => 'monthly'],
-            '/blog' => ['priority' => 0.9, 'freq' => 'daily'],
+            '/login' => ['priority' => 0.8, 'freq' => 'monthly'],
+            '/register' => ['priority' => 0.8, 'freq' => 'monthly'],
             '/textcase' => ['priority' => 0.7, 'freq' => 'weekly'],
         ];
 
@@ -52,8 +49,9 @@ class SitemapController extends Controller
         }
 
         // Dynamic Blog Posts
-        $page = 1;
         $postsFetched = 0;
+        /*
+        $page = 1;
         $hasMore = true;
 
         try {
@@ -105,6 +103,7 @@ class SitemapController extends Controller
             Log::error('Sitemap: Error generating dynamic routes: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Error fetching blog content'], 500);
         }
+        */
 
         try {
             $sitemap->writeToFile(public_path('sitemap.xml'));
