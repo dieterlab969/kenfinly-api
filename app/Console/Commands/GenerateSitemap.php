@@ -1,37 +1,52 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Console\Commands;
 
+use Illuminate\Console\Command;
 use App\Services\WordPressService;
 use Spatie\Sitemap\Sitemap;
 use Spatie\Sitemap\Tags\Url;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
-use Illuminate\Http\JsonResponse;
-
-class SitemapController extends Controller
+class GenerateSitemap extends Command
 {
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'app:generate-sitemap';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Generate the sitemap.xml file including WordPress posts';
+
     /**
      * @var WordPressService
      */
     private WordPressService $wordPressService;
 
     /**
+     * Create a new command instance.
+     *
      * @param WordPressService $wordPressService
      */
     public function __construct(WordPressService $wordPressService)
     {
+        parent::__construct();
         $this->wordPressService = $wordPressService;
     }
 
     /**
-     * Generate the sitemap.xml
-     *
-     * @return JsonResponse
+     * Execute the console command.
      */
-    public function generate(): JsonResponse
+    public function handle()
     {
+        $this->info('Starting sitemap generation...');
         $sitemap = Sitemap::create();
 
         // Static Pages
@@ -65,10 +80,10 @@ class SitemapController extends Controller
                     'page' => $page,
                     'status' => 'publish',
                     '_fields' => 'slug,date_gmt,modified_gmt',
-                ], false); // Disable cache for sitemap generation to get fresh data
+                ], false);
 
                 if (!$result['success']) {
-                    Log::error("Sitemap: Failed to fetch posts page {$page}: " . ($result['error'] ?? 'Unknown error'));
+                    $this->error("Failed to fetch posts page {$page}: " . ($result['error'] ?? 'Unknown error'));
                     break;
                 }
 
@@ -94,9 +109,8 @@ class SitemapController extends Controller
                 }
 
                 $postsFetched += count($posts);
-                
-                // Check if we have more pages based on WordPress headers
                 $totalPages = (int) ($result['headers']['total_pages'] ?? 1);
+                
                 if ($page >= $totalPages) {
                     $hasMore = false;
                 } else {
@@ -104,21 +118,18 @@ class SitemapController extends Controller
                 }
             }
         } catch (\Exception $e) {
-            Log::error('Sitemap: Error generating dynamic routes: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Error fetching blog content'], 500);
+            $this->error('Error generating dynamic routes: ' . $e->getMessage());
+            return 1;
         }
 
         try {
             $sitemap->writeToFile(public_path('sitemap.xml'));
+            $this->info("Sitemap generated successfully with {$postsFetched} blog posts.");
         } catch (\Exception $e) {
-            Log::error('Sitemap: Failed to write file: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Failed to save sitemap'], 500);
+            $this->error('Failed to write sitemap file: ' . $e->getMessage());
+            return 1;
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => "Sitemap generated successfully with {$postsFetched} blog posts.",
-            'path' => '/sitemap.xml'
-        ]);
+        return 0;
     }
 }
