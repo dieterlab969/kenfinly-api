@@ -6,7 +6,7 @@ import Logo from '../Logo';
 import gtmTracking from '../../utils/gtmTracking';
 import { useTranslation } from '../../contexts/TranslationContext';
 
-function Footer() {
+function Footer({ showCopyright = true }) {
     const { t } = useTranslation();
     const currentYear = useMemo(() => new Date().getFullYear(), []);
     const [companyInfo, setCompanyInfo] = useState({
@@ -16,8 +16,8 @@ function Footer() {
         company_phone: import.meta.env.COMPANY_PHONE || process.env.COMPANY_PHONE,
         company_address: import.meta.env.COMPANY_ADDRESS || process.env.COMPANY_ADDRESS,
     });
-      const [loading, setLoading] = useState(true);
-     const [error, setError] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
 
     const fetchCompanyInfo = useCallback(async () => {
         setLoading(true);
@@ -153,12 +153,14 @@ function Footer() {
                     </div>
                 </div>
 
-                <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-xs">
-                    <p className="mb-2">Copyright © 2024–2026 Getkenka Ltd | Last updated: January 2026</p>
-                    <p>
-                        Concept by <a href="https://www.linkedin.com/in/dieter-entrepreneur/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Dieter R.</a> | Privacy Policy | Terms of Service | Sitemap
-                    </p>
-                </div>
+                {showCopyright && (
+                    <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-xs">
+                        <p className="mb-2">Copyright © 2024–2026 Getkenka Ltd | Last updated: January 2026</p>
+                        <p>
+                            Concept by <a href="https://www.linkedin.com/in/dieter-entrepreneur/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Dieter R.</a> | Privacy Policy | Terms of Service | Sitemap
+                        </p>
+                    </div>
+                )}
             </div>
         </footer>
     );

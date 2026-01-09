@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Copy, Download, Trash2, ArrowRight } from 'lucide-react';
-import PublicLayout from '../../components/public/PublicLayout';
+import { Copy, Download, Trash2 } from 'lucide-react';
+import Layout2 from '../../components/public/Layout2';
 import { useTranslation } from '../../contexts/TranslationContext';
 
 function TextCaseConverter() {
@@ -57,7 +57,7 @@ function TextCaseConverter() {
     };
 
     return (
-        <PublicLayout>
+        <Layout2>
             <div className="max-w-5xl mx-auto px-4 py-12">
                 <div className="text-center mb-10">
                     <h1 className="text-4xl font-bold text-gray-900 mb-4">{t('textcase.title')}</h1>
@@ -112,7 +112,7 @@ function TextCaseConverter() {
                     {t('textcase.ad_inquiry')}
                 </div>
             </div>
-        </PublicLayout>
+        </Layout2>
     );
 }
 
