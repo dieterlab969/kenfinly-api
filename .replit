@@ -1,9 +1,11 @@
-modules = ["php-8.2", "web", "nodejs-20", "php-8.3"]
+modules = ["nodejs-20", "php-8.2", "bash", "web", "postgresql-16"]
 [agent]
 expertMode = true
+integrations = ["sendgrid:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
+packages = ["openssh", "unzip", "php82Packages.composer"]
 
 [workflows]
 runButton = "Project"
@@ -21,13 +23,13 @@ args = "dev-server"
 name = "dev-server"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run serve"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php -S 0.0.0.0:5000 server.php"
+waitForPort = 5000
 
 [[ports]]
 localPort = 5000
@@ -37,6 +39,10 @@ externalPort = 80
 localPort = 5173
 externalPort = 5173
 
-[[ports]]
-localPort = 39743
-externalPort = 3000
+[userenv]
+
+[userenv.development]
+
+[userenv.shared]
+GA4_ENABLED = "false"
+DB_CONNECTION = "pgsql"

@@ -19,19 +19,23 @@
 /storage/*.key
 /storage/pail
 /vendor
-/.idea
-/.vscode
-/.env
-/.env.backup
 Homestead.json
 Homestead.yaml
 npm-debug.log
 yarn-error.log
-.phpunit.result.cache
-/.phpunit.cache
 /storage/debugbar
 /storage/framework/cache/data
 /storage/logs
 /storage/app/public
-.DS_Store
 Thumbs.db
+/public/sitemap.xml
+
+# WordPress - Exclude source code (installed via Composer)
+/public/wordpress/
+!/public/wordpress/.gitkeep
+
+# WordPress database storage
+/storage/wordpress/
+
+# Keep custom WordPress files (configs, plugins, themes)
+!/wordpress-custom/

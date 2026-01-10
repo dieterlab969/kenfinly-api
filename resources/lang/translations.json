@@ -1,0 +1,1698 @@
+{
+  "app.name": {
+    "en": "Kenfinly",
+    "vi": "Kenfinly"
+  },
+  "app.tagline": {
+    "en": "Understand your finances better",
+    "vi": "Hiểu rõ hơn về tài chính của bạn"
+  },
+  "auth.login": {
+    "en": "Sign in to Kenfinly",
+    "vi": "Đăng nhập vào Kenfinly"
+  },
+  "auth.register": {
+    "en": "Create your Kenfinly account",
+    "vi": "Tạo tài khoản Kenfinly của bạn"
+  },
+  "auth.register_subtitle": {
+    "en": "Start managing your finances today",
+    "vi": "Bắt đầu quản lý tài chính ngay hôm nay"
+  },
+  "auth.email": {
+    "en": "Email address",
+    "vi": "Địa chỉ email"
+  },
+  "auth.password": {
+    "en": "Password",
+    "vi": "Mật khẩu"
+  },
+  "auth.name": {
+    "en": "Full name",
+    "vi": "Họ và tên"
+  },
+  "auth.confirm_password": {
+    "en": "Confirm password",
+    "vi": "Xác nhận mật khẩu"
+  },
+  "auth.sign_in": {
+    "en": "Sign in",
+    "vi": "Đăng nhập"
+  },
+  "auth.sign_up": {
+    "en": "Sign up",
+    "vi": "Đăng ký"
+  },
+  "auth.logout": {
+    "en": "Logout",
+    "vi": "Đăng xuất"
+  },
+  "auth.no_account": {
+    "en": "Don't have an account?",
+    "vi": "Chưa có tài khoản?"
+  },
+  "auth.have_account": {
+    "en": "Already have an account?",
+    "vi": "Đã có tài khoản?"
+  },
+  "auth.register_here": {
+    "en": "Register here",
+    "vi": "Đăng ký tại đây"
+  },
+  "auth.login_here": {
+    "en": "Sign in here",
+    "vi": "Đăng nhập tại đây"
+  },
+  "auth.login_failed": {
+    "en": "Login failed. Please check your credentials.",
+    "vi": "Đăng nhập thất bại. Vui lòng kiểm tra thông tin đăng nhập."
+  },
+  "auth.login_error": {
+    "en": "An error occurred during login. Please try again.",
+    "vi": "Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại."
+  },
+  "auth.register_error": {
+    "en": "An error occurred during registration. Please try again.",
+    "vi": "Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại."
+  },
+  "auth.register_success": {
+    "en": "Registration successful! Redirecting to dashboard...",
+    "vi": "Đăng ký thành công! Đang chuyển đến bảng điều khiển..."
+  },
+  "nav.welcome": {
+    "en": "Welcome",
+    "vi": "Chào mừng"
+  },
+  "nav.settings": {
+    "en": "Settings",
+    "vi": "Cài đặt"
+  },
+  "dashboard.monthly_summary": {
+    "en": "Monthly Summary",
+    "vi": "Tổng kết tháng"
+  },
+  "dashboard.expenses_7days": {
+    "en": "Expenses - Last 7 Days",
+    "vi": "Chi tiêu - 7 ngày qua"
+  },
+  "dashboard.balance": {
+    "en": "Balance",
+    "vi": "Số dư"
+  },
+  "dashboard.total_balance": {
+    "en": "Total Balance",
+    "vi": "Tổng số dư"
+  },
+  "dashboard.total_amount_owned": {
+    "en": "Total amount owned:",
+    "vi": "Tổng số tiền hiện có:"
+  },
+  "dashboard.income": {
+    "en": "Income",
+    "vi": "Thu nhập"
+  },
+  "dashboard.expense": {
+    "en": "Expense",
+    "vi": "Chi tiêu"
+  },
+  "dashboard.total": {
+    "en": "Total",
+    "vi": "Tổng"
+  },
+  "dashboard.recent_transactions": {
+    "en": "Recent Transactions",
+    "vi": "Giao dịch gần đây"
+  },
+  "dashboard.view_all": {
+    "en": "View All",
+    "vi": "Xem tất cả"
+  },
+  "dashboard.no_transactions": {
+    "en": "No transactions yet",
+    "vi": "Chưa có giao dịch nào"
+  },
+  "dashboard.add_first_transaction": {
+    "en": "Add your first transaction",
+    "vi": "Thêm giao dịch đầu tiên"
+  },
+  "dashboard.loading": {
+    "en": "Loading dashboard...",
+    "vi": "Đang tải bảng điều khiển..."
+  },
+  "transaction.add": {
+    "en": "Add Transaction",
+    "vi": "Thêm giao dịch"
+  },
+  "transaction.type": {
+    "en": "Type",
+    "vi": "Loại"
+  },
+  "transaction.amount": {
+    "en": "Amount",
+    "vi": "Số tiền"
+  },
+  "transaction.category": {
+    "en": "Category",
+    "vi": "Danh mục"
+  },
+  "transaction.account": {
+    "en": "Account",
+    "vi": "Tài khoản"
+  },
+  "transaction.date": {
+    "en": "Date",
+    "vi": "Ngày"
+  },
+  "transaction.notes": {
+    "en": "Notes",
+    "vi": "Ghi chú"
+  },
+  "transaction.notes_optional": {
+    "en": "Notes (Optional)",
+    "vi": "Ghi chú (Tùy chọn)"
+  },
+  "transaction.receipt": {
+    "en": "Receipt",
+    "vi": "Hóa đơn"
+  },
+  "transaction.receipt_optional": {
+    "en": "Receipt (Optional)",
+    "vi": "Hóa đơn (Tùy chọn)"
+  },
+  "transaction.select_category": {
+    "en": "Select a category",
+    "vi": "Chọn danh mục"
+  },
+  "transaction.upload_receipt": {
+    "en": "Upload receipt",
+    "vi": "Tải lên hóa đơn"
+  },
+  "transaction.change_receipt": {
+    "en": "Change receipt",
+    "vi": "Thay đổi hóa đơn"
+  },
+  "transaction.adding": {
+    "en": "Adding...",
+    "vi": "Đang thêm..."
+  },
+  "transaction.add_button_label": {
+    "en": "Add transaction",
+    "vi": "Thêm giao dịch"
+  },
+  "transaction.notes_placeholder": {
+    "en": "Add notes about this transaction...",
+    "vi": "Thêm ghi chú về giao dịch này..."
+  },
+  "common.cancel": {
+    "en": "Cancel",
+    "vi": "Hủy"
+  },
+  "common.save": {
+    "en": "Save",
+    "vi": "Lưu"
+  },
+  "common.loading": {
+    "en": "Loading...",
+    "vi": "Đang tải..."
+  },
+  "common.error_title": {
+    "en": "Translation Error",
+    "vi": "Lỗi dịch thuật"
+  },
+  "common.error_message": {
+    "en": "Failed to load translations. Please refresh the page.",
+    "vi": "Không thể tải bản dịch. Vui lòng làm mới trang."
+  },
+  "common.reload_page": {
+    "en": "Reload Page",
+    "vi": "Tải lại trang"
+  },
+  "settings.title": {
+    "en": "Settings",
+    "vi": "Cài đặt"
+  },
+  "settings.language": {
+    "en": "Language",
+    "vi": "Ngôn ngữ"
+  },
+  "settings.select_language": {
+    "en": "Select your preferred language",
+    "vi": "Chọn ngôn ngữ ưa thích của bạn"
+  },
+  "balanceChart.title": {
+    "en": "Balance",
+    "vi": "Số dư"
+  },
+  "balanceChart.totalAmountOwned": {
+    "en": "Total amount owned:",
+    "vi": "Tổng số tiền sở hữu:"
+  },
+  "monthlySummary.title": {
+    "en": "Monthly Summary",
+    "vi": "Tổng kết tháng"
+  },
+  "monthlySummary.income": {
+    "en": "Income:",
+    "vi": "Thu nhập:"
+  },
+  "monthlySummary.expense": {
+    "en": "Expense:",
+    "vi": "Chi tiêu:"
+  },
+  "monthlySummary.total": {
+    "en": "Total:",
+    "vi": "Tổng:"
+  },
+  "landingpage.feature.expense_tracking_title": {
+    "en": "Expense Tracking",
+    "vi": "Quản Lý Chi Tiêu"
+  },
+  "landingpage.feature.expense_tracking_description": {
+    "en": "Track every expense across multiple accounts and currencies with ease.",
+    "vi": "Dễ dàng theo dõi mọi khoản chi tiêu qua nhiều tài khoản và loại tiền tệ khác nhau."
+  },
+  "landingpage.feature.budget_planning_title": {
+    "en": "Budget Planning",
+    "vi": "Lập Kế Hoạch Ngân Sách"
+  },
+  "landingpage.feature.budget_planning_description": {
+    "en": "Set and monitor budgets to stay on track with your financial goals.",
+    "vi": "Thiết lập và giám sát ngân sách để theo sát các mục tiêu tài chính của bạn."
+  },
+  "landingpage.feature.analytics_dashboard_title": {
+    "en": "Analytics Dashboard",
+    "vi": "Phân Tích Trực Quan"
+  },
+  "landingpage.feature.analytics_dashboard_description": {
+    "en": "Visualize your spending patterns with intuitive charts and reports.",
+    "vi": "Nắm bắt rõ ràng xu hướng chi tiêu thông qua biểu đồ và báo cáo trực quan sinh động."
+  },
+  "landingpage.feature.secure_private_title": {
+    "en": "Secure & Private",
+    "vi": "An Toàn & Riêng Tư"
+  },
+  "landingpage.feature.secure_private_description": {
+    "en": "Your financial data is encrypted and protected with enterprise-grade security.",
+    "vi": "Thông tin tài chính của bạn được mã hóa và bảo vệ bằng hệ thống bảo mật chuyên nghiệp."
+  },
+  "landingpage.feature.access_anywhere_title": {
+    "en": "Access Anywhere",
+    "vi": "Truy Cập Mọi Nơi "
+  },
+  "landingpage.feature.access_anywhere_description": {
+    "en": "Manage your finances on any device with our responsive design.",
+    "vi": "Quản lý tài chính linh hoạt trên mọi thiết bị với giao diện tiện dụng."
+  },
+  "landingpage.feature.multi_user_support_title": {
+    "en": "Multi-user Support",
+    "vi": "Hỗ Trợ Nhiều Người Dùng"
+  },
+  "landingpage.feature.multi_user_support_description": {
+    "en": "Collaborate with family members or partners on shared accounts.",
+    "vi": "Hợp tác với các thành viên gia đình hoặc đối tác trên các tài khoản chung."
+  },
+  "landingpage.hero.take_control": {
+    "en": "Take Control of Your",
+    "vi": "Làm Chủ Tương Lai"
+  },
+  "landingpage.hero.financial_future": {
+    "en": "Financial Future",
+    "vi": "Tài Chính Của Bạn"
+  },
+  "landingpage.hero.description": {
+    "en": "Track expenses, set budgets, and achieve your financial goals with\n                            Kenfinly - the intuitive personal finance management platform.",
+    "vi": "Kiểm soát chi tiêu, thiết lập ngân sách hợp lý, và biến mục tiêu tài chính thành hiện thực cùng Kenfinly - nền tảng quản lý tài chính cá nhân thông minh và dễ sử dụng."
+  },
+  "landingpage.hero.cta.start_free_trial": {
+    "en": "Start Free Trial",
+    "vi": "Dùng thử miễn phí"
+  },
+  "landingpage.hero.cta.sign_in": {
+    "en": "Sign In",
+    "vi": "Đăng Nhập"
+  },
+  "landingpage.hero.free_trial_14_days": {
+    "en": "Free 14-day trial",
+    "vi": "Dùng thử miễn phí 14 ngày"
+  },
+  "landingpage.hero.no_credit_card_required": {
+    "en": "No credit card required",
+    "vi": "Không cần thông tin thẻ tín dụng"
+  },
+  "landingpage.feature_heading": {
+    "en": "Everything You Need to Manage Your Finances",
+    "vi": "Mọi thứ bạn cần để quản lý tài chính của mình"
+  },
+  "landingpage.feature_description": {
+    "en": "Powerful features designed to help you understand, control, and grow your money.",
+    "vi": "Các tính năng mạnh mẽ được thiết kế để giúp bạn hiểu, kiểm soát và gia tăng tài sản của mình"
+  },
+  "landingpage.blog.latest_title": {
+    "en": "Latest from Our Blog",
+    "vi": "Bài Viết Mới Nhất Từ Blog"
+  },
+  "landingpage.blog.description": {
+    "en": "Financial tips, insights, and news to help you succeed.",
+    "vi": "Mẹo hay, phân tích sâu sắc và tin tức tài chính giúp bạn vươn tới thành công."
+  },
+  "landingpage.blog.view_all_posts": {
+    "en": "View All Posts",
+    "vi": "Xem Tất Cả Bài Viết"
+  },
+  "landingpage.blog.error_title": {
+    "en": "Content Temporarily Unavailable",
+    "vi": "Nội Dung Tạm Thời Không Truy Cập Được"
+  },
+  "landingpage.blog.error_message": {
+    "en": "We're having trouble loading our latest articles. Please check back later or contact support if the issue persists.",
+    "vi": "Chúng tôi đang gặp khó khăn khi tải các bài viết mới nhất. Vui lòng quay lại sau hoặc liên hệ đội ngũ hỗ trợ nếu vấn đề vẫn tiếp tục."
+  },
+  "landingpage.blog.retry_label": {
+    "en": "Try Again",
+    "vi": "Thử Lại"
+  },
+  "landingpage.blog.post.untitled": {
+    "en": "Untitled",
+    "vi": "Chưa Đặt Tiêu Đề"
+  },
+  "landingpage.blog.post.read_more": {
+    "en": "Read More",
+    "vi": "Xem Thêm"
+  },
+  "landingpage.blog.empty_state.title": {
+    "en": "Coming Soon",
+    "vi": "Sắp Ra Mắt"
+  },
+  "landingpage.blog.empty_state.message": {
+    "en": "Our blog is being set up. Check back soon for financial tips and insights!",
+    "vi": "Blog của chúng tôi đang trong quá trình hoàn thiện. Hãy quay lại sớm để khám phá những mẹo và phân tích tài chính hữu ích!"
+  },
+  "landingpage.tips.title": {
+    "en": "Financial Tips",
+    "vi": "Mẹo Tài Chính"
+  },
+  "landingpage.tips.description": {
+    "en": "Expert advice to help you make smarter financial decisions.",
+    "vi": "Lời khuyên từ chuyên gia giúp bạn đưa ra quyết định tài chính thông thái."
+  },
+  "landingpage.tips.error_title": {
+    "en": "Tips Temporarily Unavailable",
+    "vi": "Mẹo Tài Chính Tạm Thời Không Khả Dụng"
+  },
+  "landingpage.tips.error_message": {
+    "en": "We're having trouble loading our financial tips. Please try again later.",
+    "vi": "Chúng tôi đang gặp trục trặc khi tải các mẹo tài chính. Vui lòng thử lại sau."
+  },
+  "landingpage.tips.retry_label": {
+    "en": "Try Again",
+    "vi": "Thử Lại"
+  },
+  "landingpage.tip.default_title": {
+    "en": "Financial Tip",
+    "vi": "Mẹo Tài Chính"
+  },
+  "landingpage.cta.ready_title": {
+    "en": "Ready to Transform Your Financial Life?",
+    "vi": "Sẵn Sàng Thay Đổi Cuộc Sống Tài Chính?"
+  },
+  "landingpage.cta.ready_description": {
+    "en": "Join thousands of users who have taken control of their finances with Kenfinly.",
+    "vi": "Hãy tham gia cùng hàng nghìn người đã làm chủ tài chính của họ với Kenfinly."
+  },
+  "landingpage.cta.get_started_free": {
+    "en": "Get Started Free",
+    "vi": "Bắt Đầu Ngay - Miễn Phí"
+  },
+  "landingpage.cta.read_blog": {
+    "en": "Read Our Blog",
+    "vi": "Khám Phá Blog Của Chúng Tôi"
+  },
+  "aboutus.feature.security_first_title": {
+    "en": "Security First",
+    "vi": "An Ninh Hàng Đầu"
+  },
+  "aboutus.feature.security_first_description": {
+    "en": "Your financial data is protected with enterprise-grade encryption and security measures.",
+    "vi": "Dữ liệu tài chính của bạn được bảo vệ bằng hệ thống mã hóa và giải pháp bảo mật cấp doanh nghiệp."
+  },
+  "aboutus.feature.user_centric_title": {
+    "en": "User-Centric",
+    "vi": "Lấy Người Dùng Làm Trọng Tâm"
+  },
+  "aboutus.feature.user_centric_description": {
+    "en": "Every feature is designed with our users in mind, making financial management intuitive.",
+    "vi": "Mọi tính năng đều được thiết kế với trải nghiệm người dùng là ưu tiên, giúp quản lý tài chính trở nên trực quan và dễ dàng."
+  },
+  "about.values.goal_oriented.title": {
+    "en": "Goal-Oriented",
+    "vi": "Hướng Đến Mục Tiêu"
+  },
+  "about.values.goal_oriented.description": {
+    "en": "We help you set, track, and achieve your financial goals with powerful tools.",
+    "vi": "Chúng tôi hỗ trợ bạn thiết lập, theo dõi và đạt được các mục tiêu tài chính với bộ công cụ mạnh mẽ."
+  },
+  "about.values.transparency.title": {
+    "en": "Transparency",
+    "vi": "Minh Bạch"
+  },
+  "about.values.transparency.description": {
+    "en": "We believe in clear, honest communication about your finances and our services.",
+    "vi": "Chúng tôi luôn đề cao sự rõ ràng và trung thực trong giao tiếp về tài chính cá nhân và dịch vụ của mình."
+  },
+  "aboutus.stats.active_users_label": {
+    "en": "Active Users",
+    "vi": "Người Dùng Tích Cực"
+  },
+  "aboutus.stats.tracked_annually_label": {
+    "en": "Tracked Annually",
+    "vi": "Tổng Chi Tiêu Được Theo Dõi Hàng Năm"
+  },
+  "aboutus.stats.uptime_label": {
+    "en": "Uptime",
+    "vi": "Thời Gian Hoạt Động"
+  },
+  "aboutus.stats.user_rating_label": {
+    "en": "User Rating",
+    "vi": "Điểm Đánh Giá Từ Người Dùng"
+  },
+  "aboutus.hero.title": {
+    "en": "About Kenfinly",
+    "vi": "Về Kenfinly"
+  },
+  "aboutus.hero.description": {
+    "en": "We're on a mission to help everyone take control of their financial future \n                            through intuitive, powerful personal finance tools.",
+    "vi": "Sứ mệnh của chúng tôi là giúp mọi người làm chủ tương lai tài chính thông qua các công cụ quản lý tài chính cá nhân mạnh mẽ và dễ sử dụng."
+  },
+  "aboutus.section.our_story_title": {
+    "en": "Our Story",
+    "vi": "Câu Chuyện Của Chúng Tôi"
+  },
+  "aboutus.error.loading_story_message": {
+    "en": "We're having trouble loading our story. The content will be available shortly.",
+    "vi": "Chúng tôi đang gặp trục trặc khi tải nội dung. Thông tin sẽ sớm được cập nhật."
+  },
+  "aboutus.error.retry_label": {
+    "en": "Try Again",
+    "vi": "Thử Lại"
+  },
+  "aboutus.story.paragraph1": {
+    "en": "Kenfinly was born from a simple observation: managing personal finances \n                                        shouldn't be complicated. Too many people struggle with spreadsheets, \n                                        lose track of expenses, or feel overwhelmed by their financial situation.",
+    "vi": "Kenfinly ra đời từ một nhận định đơn giản: quản lý tài chính cá nhân không nên là việc phức tạp. Quá nhiều người đang phải vật lộn với các bảng tính rắc rối, dễ mất kiểm soát chi tiêu, hoặc cảm thấy choáng ngợp trước tình hình tài chính của họ. "
+  },
+  "aboutus.story.paragraph2": {
+    "en": "We built Kenfinly to change that. Our platform combines powerful financial \n                                        tracking with an intuitive interface that anyone can use. Whether you're \n                                        just starting your financial journey or looking to optimize your wealth \n                                        management, Kenfinly grows with you.",
+    "vi": "Chúng tôi đã xây dựng Kenfinly để thay đổi điều đó. Nền tảng của chúng tôi kết hợp công nghệ theo dõi tài chính tiên tiến với giao diện trực quan mà ai cũng có thể sử dụng. Dù bạn mới bắt đầu hành trình tài chính hay đang tìm cách tối ưu hóa quản lý tài sản, Kenfinly sẽ phát triển cùng bạn."
+  },
+  "aboutus.story.paragraph3": {
+    "en": "Today, thousands of users trust Kenfinly to help them understand their \n                                        spending, plan their budgets, and achieve their financial goals.",
+    "vi": "Hiện nay, hàng nghìn người đang tin tưởng Kenfinly để giúp họ hiểu rõ chi tiêu, lập kế hoạch ngân sách hợp lý và đạt được các mục tiêu tài chính đã đề ra."
+  },
+  "aboutus.tagline.empowering_financial_freedom": {
+    "en": "Empowering Financial Freedom",
+    "vi": "Kiến Tạo Tự Do Tài Chính"
+  },
+  "aboutus.stats.heading": {
+    "en": "Our Impact Statistics",
+    "vi": "Thống Kê Tác Động"
+  },
+  "aboutus.stats.error_message": {
+    "en": "Unable to load statistics at this moment.",
+    "vi": "Không thể tải dữ liệu thống kê tại thời điểm này."
+  },
+  "aboutus.stats.retry_label": {
+    "en": "Try Again",
+    "vi": "Thử Lại"
+  },
+  "aboutus.community.title": {
+    "en": "Join Our Growing Community",
+    "vi": "Tham Gia Cộng Đồng Ngày Càng Phát Triển"
+  },
+  "aboutus.community.description": {
+    "en": "Start your journey to financial freedom today. Join thousands of users \n                        who have transformed their relationship with money.",
+    "vi": "Bắt đầu hành trình hướng tới tự do tài chính ngay hôm nay. Hãy tham gia cùng hàng nghìn người đã thay đổi mối quan hệ của họ với tiền bạc."
+  },
+  "aboutus.community.button_get_started": {
+    "en": "Get Started Free",
+    "vi": "Bắt Đầu Ngay - Miễn Phí"
+  },
+  "aboutus.community.button_read_blog": {
+    "en": "Read Our Blog",
+    "vi": "Khám Phá Blog Của Chúng Tôi"
+  },
+  "aboutus.values.heading": {
+    "en": "Our Values",
+    "vi": "Giá Trị Cốt Lõi"
+  },
+  "about.values.description": {
+    "en": "The principles that guide everything we do at Kenfinly.",
+    "vi": "Những nguyên tắc định hướng mọi hoạt động của Kenfinly."
+  },
+  "about.load_error_message": {
+    "en": "Unable to load values at this moment.",
+    "vi": "Không thể tải dữ liệu vào lúc này."
+  },
+  "about.retry_action_text":  {
+    "en": "Try Again",
+    "vi": "Thử lại"
+  },
+  "blogpage.search.no_results": {
+    "en": "No results found for \"{{keyword}}\". Try a different search term.",
+    "vi": "Không tìm thấy kết quả cho \"{{keyword}}\". Hãy thử từ khóa khác."
+  },
+  "blogpage.category.no_results": {
+    "en": "No posts found in this category. Try a different category.",
+    "vi": "Không tìm thấy bài viết nào trong danh mục này. Vui lòng thử danh mục khác."
+  },
+  "blogpage.initial.no_posts": {
+    "en": "Our blog is being set up. Check back soon for financial tips and insights!",
+    "vi": "Blog của chúng tôi đang trong quá trình hoàn thiện. Hãy quay lại sớm để khám phá những mẹo và phân tích tài chính hữu ích!"
+  },
+  "blogpage.header.title": {
+    "en": "Kenfinly Blog",
+    "vi": "Blog Kenfinly"
+  },
+  "blogpage.all_posts_filter_label": {
+    "en": "All Posts",
+    "vi": "Xem tất cả bài viết"
+  },
+  "blogpostpage.header.description": {
+    "en": "Financial tips, insights, and strategies to help you achieve your money goals.",
+    "vi": "Mẹo tài chính, phân tích chuyên sâu và chiến lược hiệu quả giúp bạn chinh phục mục tiêu tài chính."
+  },
+  "blogpage.search.label": {
+    "en": "Search blog articles",
+    "vi": "Tìm kiếm bài viết blog"
+  },
+  "blogpage.search.placeholder": {
+    "en": "Search articles...",
+    "vi": "Tìm kiếm bài viết..."
+  },
+  "blogpage.search.button": {
+    "en": "Search",
+    "vi": "Tìm Kiếm"
+  },
+  "blogpage.error.title": {
+    "en": "Content Temporarily Unavailable",
+    "vi": "Nội Dung Tạm Thời Không Khả Dụng"
+  },
+  "blogpage.error.message": {
+    "en": "We're having trouble loading our blog content. This may be a temporary issue with our server. Please try again or check back later.",
+    "vi": "Chúng tôi đang gặp trục trặc khi tải nội dung blog. Đây có thể là sự cố tạm thời từ phía máy chủ. Vui lòng thử lại hoặc quay lại sau."
+  },
+  "blogpage.error.retry_button": {
+    "en": "Try Again",
+    "vi": "Thử Lại"
+  },
+  "blogpage.post.untitled": {
+    "en": "Untitled",
+    "vi": "Chưa Đặt Tiêu Đề"
+  },
+  "blogpage.post.read_more": {
+    "en": "Read More",
+    "vi": "Đọc thêm"
+  },
+  "blogpage.pagination.previous": {
+    "en": "Previous",
+    "vi": "Trang Trước"
+  },
+  "blogpage.pagination.next": {
+    "en": "Next",
+    "vi": "Trang Sau"
+  },
+  "blogpage.no_posts.title": {
+    "en": "No Posts Found",
+    "vi": "Không Tìm Thấy Bài Viết"
+  },
+  "blogpage.no_posts.clear_search": {
+    "en": "Clear Search",
+    "vi": "Xóa Kết Quả Tìm Kiếm"
+  },
+  "blogpage.cta.title": {
+    "en": "Ready to Start Your Financial Journey?",
+    "vi": "Sẵn Sàng Bước Vào Hành Trình Tài Chính?"
+  },
+  "blogpage.cta.description": {
+    "en": "Join Kenfinly today and take control of your finances.",
+    "vi": "Tham gia Kenfinly ngay hôm nay và làm chủ tương lai tài chính của bạn."
+  },
+  "blogpage.cta.button": {
+    "en": "Get Started Free",
+    "vi": "Bắt Đầu Ngay - Hoàn Toàn Miễn Phí"
+  },
+  "blogpostpage.post.read_time_singular": {
+    "en": "{{minutes}} min read",
+    "vi": "{{minutes}} phút đọc"
+  },
+  "blogpostpage.post.read_time_plural": {
+    "en": "{{minutes}} mins read",
+    "vi": "{{minutes}} phút đọc"
+  },
+  "blogpostpage.post.default_read_time": {
+    "en": "5 mins read",
+    "vi": "5 phút đọc"
+  },
+  "blogpostpage.share.default_title": {
+    "en": "Kenfinly Blog",
+    "vi": "Blog Kenfinly"
+  },
+  "blogpostpage.share.copy_success": {
+    "en": "Link copied to clipboard!",
+    "vi": "Đã sao chép liên kết!"
+  },
+  "blogpostpage.article_not_found.description": {
+    "en": "The article you're looking for doesn't exist or has been removed.",
+    "vi": "Bài viết bạn đang tìm kiếm không còn tồn tại hoặc đã được gỡ bỏ."
+  },
+  "blogpostpage.article_not_found.back_link": {
+    "en": "Back to Blog",
+    "vi": "Quay Lại Trang Blog"
+  },
+  "blogpostpage.navigation.back_to_blog": {
+    "en": "Back to Blog",
+    "vi": "Quay Lại Trang Blog"
+  },
+  "blogpostpage.post.share_button": {
+    "en": "Share this article:",
+    "vi": "Chia sẻ bài viết này:"
+  },
+  "blogpostpage.share_section.label": {
+    "en": "Share",
+    "vi": "Chia Sẻ Ngay"
+  },
+  "blogpostpage.share_section.try_kenfinly": {
+    "en": "Try Kenfinly Free",
+    "vi": "Trải Nghiệm Kenfinly Miễn Phí"
+  },
+  "blogpostpage.related_articles.title": {
+    "en": "Related Articles",
+    "vi": "Bài Viết Liên Quan"
+  },
+  "blogpostpage.post.untitled": {
+    "en": "Untitled",
+    "vi": "Chưa Có Tiêu Đề"
+  },
+  "footer.description": {
+    "en": "Take control of your spending with Kenfinly. Track every expense and transform your personal finance management effortlessly.",
+    "vi": "Làm chủ chi tiêu của bạn cùng Kenfinly. Theo dõi mọi khoản chi và biến việc quản lý tài chính cá nhân trở nên dễ dàng."
+  },
+  "footer.quick_links_title": {
+    "en": "Quick Links",
+    "vi":  "Liên kết nhanh"
+  },
+  "footer.navigation.home": {
+    "en": "Home",
+    "vi": "Trang Chủ"
+  },
+  "footer.navigation.blog": {
+    "en": "Blog",
+    "vi": "Blog"
+  },
+  "footer.navigation.about_us": {
+    "en": "About Us",
+    "vi": "Về Chúng Tôi"
+  },
+  "footer.navigation.sign_in": {
+    "en": "Sign In",
+    "vi": "Đăng Nhập"
+  },
+  "footer.navigation.get_started": {
+    "en": "Get Started",
+    "vi": "Bắt Đầu Ngay"
+  },
+  "footer.contact.title": {
+    "en": "Contact",
+    "vi": "Liên Hệ"
+  },
+  "footer.contact.tax_code_label": {
+    "en": "Tax Code:",
+    "vi": "Mã Số Thuế:"
+  },
+  "footer.copyright.company_name": {
+    "en": "Kenfinly.",
+    "vi": "Kenfinly."
+  },
+  "footer.copyright.all_rights_reserved": {
+    "en": "All rights reserved.",
+    "vi": "Bản quyền thuộc về Kenfinly."
+  },
+  "navbar.home": {
+    "en": "Home",
+    "vi": "Trang Chủ"
+  },
+  "navbar.pricing": {
+    "en": "Pricing",
+    "vi": "Bảng Giá"
+  },
+  "navbar.features": {
+    "en": "Features",
+    "vi": "Tính Năng"
+  },
+  "navbar.blog": {
+    "en": "Blog",
+    "vi": "Blog"
+  },
+  "navbar.about": {
+    "en": "About",
+    "vi": "Giới Thiệu"
+  },
+  "navbar.sign_in": {
+    "en": "Sign In",
+    "vi": "Đăng Nhập"
+  },
+  "navbar.get_started": {
+    "en": "Get Started",
+    "vi": "Bắt Đầu Ngay"
+  },
+  "errorstate.title": {
+    "en": "Content Temporarily Unavailable",
+    "vi": "Nội Dung Tạm Thời Không Hiển Thị"
+  },
+  "errorstate.message": {
+    "en": "We're having trouble loading this content. Please try again.",
+    "vi": "Chúng tôi đang gặp khó khăn khi tải nội dung này. Vui lòng thử lại sau."
+  },
+  "errorstate.retry_label": {
+    "en": "Try Again",
+    "vi": "Thử Lại"
+  },
+  "errorstate.empty_state_title": {
+    "en": "No Content Found",
+    "vi": "Không tìm thấy nội dung"
+  },
+  "errorstate.empty_state_message": {
+    "en": "Check back soon for new content!",
+    "vi": "Hãy quay lại sớm để xem nội dung mới!"
+  },
+  "protectedroute.loading": {
+    "en": "Loading...",
+    "vi": "Đang tải dữ liệu..."
+  },
+  "transactions.photos.error.size_exceeded": {
+    "en": "",
+    "vi": ""
+  },
+  "transactions.photos.error.upload_failed": {
+    "en": "Failed to upload photo",
+    "vi": "Không thể tải ảnh lên"
+  },
+  "transactions.photos.delete_photo_confirmation": {
+    "en": "Are you sure you want to delete this photo?",
+    "vi": "Bạn có chắc chắn muốn xóa ảnh này không?"
+  },
+  "transactions.photos.delete_photo_error": {
+    "en": "Failed to delete photo",
+    "vi": "Xóa ảnh không thành công"
+  },
+  "transactions.transaction_detail_title": {
+    "en": "Transaction Details",
+    "vi": "Chi Tiết Giao Dịch"
+  },
+  "transactions.transaction_detail_loading": {
+    "en": "Loading...",
+    "vi": "Đang Tải..."
+  },
+  "transactions.transaction_tab_details": {
+    "en": "Details",
+    "vi": "Thông Tin Chi Tiết"
+  },
+  "transactions.transaction_tab_photos": {
+    "en": "Photos",
+    "vi": "Ảnh"
+  },
+  "transactions.transaction_tab_history": {
+    "en": "History",
+    "vi": "Lịch Sử Giao Dịch"
+  },
+  "transactions.transaction_field_category": {
+    "en": "Category",
+    "vi": "Loại Giao Dịch"
+  },
+  "transactions.transaction_field_notes": {
+    "en": "Notes",
+    "vi": "Ghi Chú"
+  },
+  "transactions.transaction_edit_action": {
+    "en": "Edit Transaction",
+    "vi": "Sửa Giao Dịch"
+  },
+  "transactions.transaction_save_action": {
+    "en": "Save Changes",
+    "vi": "Lưu Thay Đổi"
+  },
+  "transactions.transaction_saving_state": {
+    "en": "Saving...",
+    "vi": "Đang Lưu..."
+  },
+  "transactions.transaction_form_amount_label": {
+    "en": "Amount",
+    "vi": "Số Tiền"
+  },
+  "transactions.transaction_form_account_label": {
+    "en": "Account",
+    "vi": "Tài Khoản"
+  },
+  "transactions.transaction_form_date_label": {
+    "en": "Date",
+    "vi": "Ngày Thực Hiện"
+  },
+  "transactions.transaction_form_notes_label": {
+    "en": "Notes",
+    "vi": "Ghi Chú"
+  },
+  "transactions.transaction_upload_photo_action": {
+    "en": "Upload Photo (Max 20MB)",
+    "vi": "Tải Ảnh Lên (Dung Lượng Tối Đa 20MB)"
+  },
+  "transactions.transaction_uploading_state": {
+    "en": "Uploading...",
+    "vi": "Đang Tải Ảnh..."
+  },
+  "transactions.transaction_no_photos_message": {
+    "en": "No photos uploaded yet",
+    "vi": "Chưa Có Ảnh Nào Được Tải Lên"
+  },
+  "transactions.transaction_history_created": {
+    "en": "Transaction Created",
+    "vi": "Giao Dịch Đã Được Tạo"
+  },
+  "transactions.transaction_history_updated": {
+    "en": "Transaction Updated",
+    "vi": "Giao Dịch Đã Cập Nhật"
+  },
+  "transactions.transaction_history_deleted": {
+    "en": "Transaction Deleted",
+    "vi": "Ảnh Đã Bị Xóa"
+  },
+  "transactions.transaction_history_photo_added": {
+    "en": "Photo Added",
+    "vi": "Ảnh Đã Được Thêm Vào"
+  },
+  "transactions.transaction_history_photo_removed": {
+    "en": "Photo Removed",
+    "vi": "Ảnh Đã Bị Xóa"
+  },
+  "transactions.transaction_history_by": {
+    "en": "by",
+    "vi": "bởi"
+  },
+  "transactions.transaction_history_unknown_user": {
+    "en": "Unknown",
+    "vi": "Người Dùng Không Xác Định"
+  },
+  "transactions.transaction_no_history_message": {
+    "en": "No history available",
+    "vi": "Chưa Có Lịch Sử Giao Dịch"
+  },
+  "auth.verification.resend_success": {
+    "en": "Verification email sent successfully!",
+    "vi": "Email xác nhận đã được gửi thành công!"
+  },
+  "auth.verification.resend_failed": {
+    "en": "Failed to resend email.",
+    "vi": "Không thể gửi lại email xác nhận."
+  },
+  "auth.verification.error.rate_limited": {
+    "en": "Too many requests. Please wait before trying again.",
+    "vi": "Quá nhiều yêu cầu. Vui lòng đợi một lát trước khi thử lại."
+  },
+  "auth.verification.error.generic": {
+    "en": "An error occurred. Please try again later.",
+    "vi": "Đã có lỗi xảy ra. Vui lòng thử lại sau."
+  },
+  "transaction_detail_modal.photo_size_error": {
+    "en": "Photo size ({size}MB) exceeds the maximum allowed size of 20MB. Please remove or resize the photo and try again.",
+    "vi": "Kích thước ảnh ({size}MB) vượt quá giới hạn tối đa cho phép là 20MB. Vui lòng xóa hoặc thay đổi kích thước ảnh và thử lại."
+  },
+  "transaction_detail_modal.failed_to_load_transaction_details": {
+    "en": "Failed to load transaction details",
+    "vi": "Không thể tải chi tiết giao dịch"
+  },
+  "transaction_detail_modal.failed_to_fetch_categories": {
+    "en": "Failed to fetch categories:",
+    "vi": "Không thể truy xuất danh sách category"
+  },
+  "transaction_detail_modal.failed_to_fetch_accounts": {
+    "en": "Failed to fetch accounts:",
+    "vi": "Không thể truy xuất danh sách tài khoản"
+  },
+  "transaction_detail_modal.failed_to_update_transaction": {
+    "en": "Failed to update transaction",
+    "vi": "Cập nhật giao dịch thất bại"
+  },
+  "transaction_detail_modal.history": {
+    "en": "History",
+    "vi": "Lịch sử giao dịch"
+  },
+  "transaction_detail_modal.field.date": {
+    "en": "Date",
+    "vi": "Ngày"
+  },
+  "transaction_detail_modal.field.category": {
+    "en": "Category",
+    "vi": "Danh mục"
+  },
+  "transaction_detail_modal.no_photos_uploaded_yet": {
+    "en": "No photos uploaded yet",
+    "vi": "Chưa có ảnh nào được tải lên"
+  },
+  "transaction_detail_modal.no_history_available": {
+    "en": "No history available",
+    "vi": "Chưa có lịch sử giao dịch"
+  },
+  "verification.email_sent_success": {
+    "en": "Verification email sent successfully!",
+    "vi": "Email xác minh đã được gửi thành công!"
+  },
+  "verification.email_resend_failed": {
+    "en": "Failed to resend email.",
+    "vi": "Gửi lại email thất bại."
+  },
+  "verification.too_many_requests": {
+    "en": "Too many requests. Please wait before trying again.",
+    "vi": "Quá nhiều yêu cầu. Vui lòng đợi trước khi thử lại."
+  },
+  "verification.generic_error": {
+    "en": "An error occurred. Please try again later.",
+    "vi": "Đã xảy ra lỗi. Vui lòng thử lại sau."
+  },
+  "verification.login_prompt": {
+    "en": "To complete your login, please verify your email address. ",
+    "vi": "Để hoàn tất đăng nhập, vui lòng xác minh địa chỉ email của bạn."
+  },
+  "verification.email_sent_to": {
+    "en": "We've sent a verification email to",
+    "vi": "Chúng tôi đã gửi email xác minh đến"
+  },
+  "verification.login_continue": {
+    "en": "Please check your inbox and click the verification link to continue",
+    "vi": "Vui lòng kiểm tra hộp thư và nhấp vào liên kết xác minh để tiếp tục"
+  },
+  "verification.activate_account": {
+    "en": "Please check your inbox and click the verification link to continue activate your account",
+    "vi": "Vui lòng kiểm tra hộp thư và nhấp vào liên kết xác minh để kích hoạt tài khoản của bạn"
+  },
+  "verification.did_not_receive": {
+    "en": "Didn't receive the email?",
+    "vi": "Không nhận được email?"
+  },
+  "verification.check_spam": {
+    "en": "To complete your login, please verify your email address.",
+    "vi": "Để hoàn tất đăng nhập, vui lòng xác minh địa chỉ email của bạn."
+  },
+  "verification.check_email_correct": {
+    "en": "Make sure the email address is correct",
+    "vi": "Đảm bảo địa chỉ email là chính xác."
+  },
+  "verification.wait_and_resend": {
+    "en": "Wait a few minutes and try resending",
+    "vi": "Chờ vài phút và thử gửi lại."
+  },
+  "verification.sending": {
+    "en": "Sending...",
+    "vi": "Đang gửi..."
+  },
+  "verification.resend_email": {
+    "en": "Resend Verification Email",
+    "vi": "Gửi lại email xác minh"
+  },
+  "verification.back_to_login": {
+    "en": "Back to Login",
+    "vi": "Quay lại đăng nhập"
+  },
+  "verification.verify_your_email": {
+    "en": "Verify Your Email",
+    "vi": "Xác minh địa chỉ email của bạn"
+  },
+  "verifyEmail.invalid_link_no_token": {
+    "en": "Invalid verification link. No token provided.",
+    "vi":  "Liên kết xác minh không hợp lệ. Không có mã token được cung cấp."
+  },
+  "verifyEmail.email_verified_success": {
+    "en": "Your email has been verified successfully!",
+    "vi": "Email của bạn đã được xác minh thành công!"
+  },
+  "verifyEmail.email_verified_redirect_message": {
+    "en": "Email verified! You can now log in.",
+    "vi": "Email đã được xác minh! Bạn có thể đăng nhập ngay bây giờ."
+  },
+  "verifyEmail.generic_error": {
+    "en": "An error occurred during verification. Please try again later.",
+    "vi": "Đã xảy ra lỗi trong quá trình xác minh. Vui lòng thử lại sau."
+  },
+  "verifyEmail.verifying_email": {
+    "en": "Verifying Your Email",
+    "vi": "Đang xác minh email của bạn"
+  },
+  "verifyEmail.please_wait": {
+    "en": "Please wait while we verify your email address...",
+    "vi": "Vui lòng chờ trong khi chúng tôi xác minh địa chỉ email của bạn..."
+  },
+  "verifyEmail.email_verified": {
+    "en": "Email Verified!",
+    "vi": "Email đã được xác minh!"
+  },
+  "verifyEmail.redirecting_login": {
+    "en": "Redirecting you to login page...",
+    "vi": "Đang chuyển hướng bạn đến trang đăng nhập..."
+  },
+  "verifyEmail.verification_failed": {
+    "en": "Verification Failed",
+    "vi": "Xác minh thất bại"
+  },
+  "verifyEmail.go_to_login": {
+    "en": "Go to Login",
+    "vi": "Đến trang đăng nhập"
+  },
+  "verifyEmail.register_again": {
+    "en": "Register Again",
+    "vi": "Đăng ký lại"
+  },
+  "transactions.photos.size_hint": {
+    "en": "Max 10 MB. Images will be automatically compressed.",
+    "vi": "Tối đa 10 MB. Hình ảnh sẽ được tự động nén."
+  },
+  "transactions.photos.compressing": {
+    "en": "Compressing...",
+    "vi": "Đang nén..."
+  },
+  "transactions.photos.uploading": {
+    "en": "transactions.photos.uploading",
+    "vi": "Đang tải lên..."
+  },
+  "transactions.photos.size_info": {
+    "en": "Max 10MB. Images will be automatically compressed.",
+    "vi": "Tối đa 10MB. Hình ảnh sẽ được tự động nén."
+  },
+  "account.title": {
+    "en": "Account Information",
+    "vi": "Thông tin tài khoản"
+  },
+  "account.full_name": {
+    "en": "Full Name",
+    "vi": "Họ và tên"
+  },
+  "account.email": {
+    "en": "Email Address",
+    "vi": "Địa chỉ email"
+  },
+  "account.verified": {
+    "en": "Verified",
+    "vi": "Đã xác minh"
+  },
+  "account.not_verified": {
+    "en": "Not Verified",
+    "vi": "Chưa xác minh"
+  },
+  "account.email_verified": {
+    "en": "Email Verified",
+    "vi": "Email đã xác minh"
+  },
+  "account.email_not_verified": {
+    "en": "Email Not Verified",
+    "vi": "Email chưa xác minh"
+  },
+  "account.email_readonly": {
+    "en": "Email address cannot be changed.",
+    "vi": "Địa chỉ email không thể thay đổi."
+  },
+  "account.account_status": {
+    "en": "Account Status",
+    "vi": "Trạng thái tài khoản"
+  },
+  "account.status_active": {
+    "en": "Active",
+    "vi": "Hoạt động"
+  },
+  "account.status_pending": {
+    "en": "Pending",
+    "vi": "Đang chờ"
+  },
+  "account.status_suspended": {
+    "en": "Suspended",
+    "vi": "Bị tạm ngưng"
+  },
+  "account.roles": {
+    "en": "Roles",
+    "vi": "Vai trò"
+  },
+  "account.member_since": {
+    "en": "Member Since",
+    "vi": "Thành viên từ"
+  },
+  "account.enter_name": {
+    "en": "Enter your name",
+    "vi": "Nhập tên của bạn"
+  },
+  "account.fetch_error": {
+    "en": "Failed to load profile information.",
+    "vi": "Không thể tải thông tin hồ sơ."
+  },
+  "account.name_required": {
+    "en": "Name is required.",
+    "vi": "Tên là bắt buộc."
+  },
+  "account.name_too_short": {
+    "en": "Name must be at least 2 characters.",
+    "vi": "Tên phải có ít nhất 2 ký tự."
+  },
+  "account.update_success": {
+    "en": "Profile updated successfully.",
+    "vi": "Hồ sơ đã được cập nhật thành công."
+  },
+  "account.update_error": {
+    "en": "Failed to update profile.",
+    "vi": "Không thể cập nhật hồ sơ."
+  },
+  "nav.account": {
+    "en": "Account",
+    "vi": "Tài khoản"
+  },
+  "common.close": {
+    "en": "Close",
+    "vi": "Đóng"
+  },
+  "common.edit": {
+    "en": "Edit",
+    "vi": "Chỉnh sửa"
+  },
+  "common.saving": {
+    "en": "Saving...",
+    "vi": "Đang lưu..."
+  },
+  "common.try_again": {
+    "en": "Try Again",
+    "vi": "Thử lại"
+  },
+  "nav.payment": {
+    "en": "Payment",
+    "vi": "Thanh toán"
+  },
+  "payment.title": {
+    "en": "Payment Information",
+    "vi": "Thông tin thanh toán"
+  },
+  "payment.upcoming_payment": {
+    "en": "Upcoming Payment",
+    "vi": "Thanh toán sắp tới"
+  },
+  "payment.no_upcoming": {
+    "en": "No upcoming payments",
+    "vi": "Không có thanh toán sắp tới"
+  },
+  "payment.plan": {
+    "en": "Plan",
+    "vi": "Gói"
+  },
+  "payment.payment_methods": {
+    "en": "Payment Methods",
+    "vi": "Phương thức thanh toán"
+  },
+  "payment.add_method": {
+    "en": "Add Method",
+    "vi": "Thêm phương thức"
+  },
+  "payment.no_methods": {
+    "en": "No payment methods saved",
+    "vi": "Chưa có phương thức thanh toán nào được lưu"
+  },
+  "payment.method_type": {
+    "en": "Payment Type",
+    "vi": "Loại thanh toán"
+  },
+  "payment.credit_card": {
+    "en": "Credit Card",
+    "vi": "Thẻ tín dụng"
+  },
+  "payment.paypal": {
+    "en": "PayPal",
+    "vi": "PayPal"
+  },
+  "payment.card_holder": {
+    "en": "Cardholder Name",
+    "vi": "Tên chủ thẻ"
+  },
+  "payment.card_brand": {
+    "en": "Card Brand",
+    "vi": "Loại thẻ"
+  },
+  "payment.last_four": {
+    "en": "Last 4 Digits",
+    "vi": "4 số cuối"
+  },
+  "payment.expiry_month": {
+    "en": "Expiry Month",
+    "vi": "Tháng hết hạn"
+  },
+  "payment.expiry_year": {
+    "en": "Expiry Year",
+    "vi": "Năm hết hạn"
+  },
+  "payment.paypal_email": {
+    "en": "PayPal Email",
+    "vi": "Email PayPal"
+  },
+  "payment.set_as_default": {
+    "en": "Set as default payment method",
+    "vi": "Đặt làm phương thức thanh toán mặc định"
+  },
+  "payment.save_method": {
+    "en": "Save Method",
+    "vi": "Lưu phương thức"
+  },
+  "payment.default": {
+    "en": "Default",
+    "vi": "Mặc định"
+  },
+  "payment.expired": {
+    "en": "Expired",
+    "vi": "Hết hạn"
+  },
+  "payment.expires": {
+    "en": "Expires",
+    "vi": "Hết hạn"
+  },
+  "payment.make_default": {
+    "en": "Make default",
+    "vi": "Đặt làm mặc định"
+  },
+  "payment.delete_method": {
+    "en": "Delete",
+    "vi": "Xóa"
+  },
+  "payment.view_history": {
+    "en": "View Payment History",
+    "vi": "Xem lịch sử thanh toán"
+  },
+  "payment.fetch_error": {
+    "en": "Failed to load payment information",
+    "vi": "Không thể tải thông tin thanh toán"
+  },
+  "payment.method_added": {
+    "en": "Payment method added successfully",
+    "vi": "Đã thêm phương thức thanh toán thành công"
+  },
+  "payment.add_error": {
+    "en": "Failed to add payment method",
+    "vi": "Không thể thêm phương thức thanh toán"
+  },
+  "payment.confirm_delete": {
+    "en": "Are you sure you want to delete this payment method?",
+    "vi": "Bạn có chắc chắn muốn xóa phương thức thanh toán này?"
+  },
+  "payment.method_deleted": {
+    "en": "Payment method deleted",
+    "vi": "Đã xóa phương thức thanh toán"
+  },
+  "payment.delete_error": {
+    "en": "Failed to delete payment method",
+    "vi": "Không thể xóa phương thức thanh toán"
+  },
+  "payment.default_updated": {
+    "en": "Default payment method updated",
+    "vi": "Đã cập nhật phương thức thanh toán mặc định"
+  },
+  "payment.default_error": {
+    "en": "Failed to update default method",
+    "vi": "Không thể cập nhật phương thức mặc định"
+  },
+  "payment.history_title": {
+    "en": "Payment History",
+    "vi": "Lịch sử thanh toán"
+  },
+  "payment.history_error": {
+    "en": "Failed to load payment history",
+    "vi": "Không thể tải lịch sử thanh toán"
+  },
+  "payment.no_history": {
+    "en": "No payment history found",
+    "vi": "Không tìm thấy lịch sử thanh toán"
+  },
+  "payment.no_history_desc": {
+    "en": "Your payment transactions will appear here.",
+    "vi": "Các giao dịch thanh toán của bạn sẽ xuất hiện ở đây."
+  },
+  "payment.status_completed": {
+    "en": "Completed",
+    "vi": "Hoàn thành"
+  },
+  "payment.status_pending": {
+    "en": "Pending",
+    "vi": "Đang chờ"
+  },
+  "plan.free.name": {
+    "en": "Free",
+    "vi": "Miễn Phí"
+  },
+  "plan.free.description": {
+    "en": "Basic features for personal use",
+    "vi": "Các tính năng cơ bản cho mục đích sử dụng cá nhân"
+  },
+  "plan.pro.name": {
+    "en": "Pro",
+    "vi": "Chuyên nghiệp"
+  },
+  "plan.pro.description": {
+    "en": "Advanced features for enthusiasts",
+    "vi": "Các tính năng nâng cao dành cho người đam mê"
+  },
+  "plan.pro_yearly.name": {
+    "en": "Pro Yearly",
+    "vi": "Pro Hàng Năm"
+  },
+  "plan.pro_yearly.description": {
+    "en": "Best value for power users",
+    "vi": "Giá trị tốt nhất cho người dùng chuyên sâu"
+  },
+  "plan.cycle.forever": {
+    "en": "forever",
+    "vi": "vĩnh viễn"
+  },
+  "plan.cycle.monthly": {
+    "en": "monthly",
+    "vi": "hàng tháng"
+  },
+  "plan.cycle.yearly": {
+    "en": "yearly",
+    "vi": "hàng năm"
+  },
+  "plan.feature.basic_tracking": {
+    "en": "Basic Tracking",
+    "vi": "Theo dõi cơ bản"
+  },
+  "plan.feature.1_account": {
+    "en": "1 Account",
+    "vi": "1 Tài khoản"
+  },
+  "plan.feature.standard_support": {
+    "en": "Standard Support",
+    "vi": "Hỗ trợ tiêu chuẩn"
+  },
+  "plan.feature.calendar_view": {
+    "en": "Calendar View",
+    "vi": "Chế độ xem lịch"
+  },
+  "plan.feature.advanced_data_visualizations": {
+    "en": "Advanced Data Visualizations",
+    "vi": "Trực quan hóa dữ liệu nâng cao"
+  },
+  "plan.feature.filtering_and_sorting": {
+    "en": "Filtering and Sorting",
+    "vi": "Lọc và sắp xếp"
+  },
+  "plan.feature.time-based_analysis": {
+    "en": "Time-based Analysis",
+    "vi": "Phân tích theo thời gian"
+  },
+  "plan.feature.predictive_insights": {
+    "en": "Predictive Insights",
+    "vi": "Thông tin dự đoán"
+  },
+  "plan.feature.report_exports_(pdf,_csv,_excel)": {
+    "en": "Report Exports (PDF, CSV, Excel)",
+    "vi": "Xuất báo cáo (PDF, CSV, Excel)"
+  },
+  "plan.feature.all_monthly_pro_features": {
+    "en": "All Monthly Pro Features",
+    "vi": "Tất cả tính năng của gói Pro hàng tháng"
+  },
+  "plan.feature.yearly_discount": {
+    "en": "Yearly Discount",
+    "vi": "Giảm giá hàng năm"
+  },
+  "common.back_to_plans": {
+    "en": "Back to plans",
+    "vi": "Quay lại danh sách gói"
+  },
+  "payment.status_failed": {
+    "en": "Failed",
+    "vi": "Thất bại"
+  },
+  "payment.status_refunded": {
+    "en": "Refunded",
+    "vi": "Đã hoàn tiền"
+  },
+  "payment.waitlist_title": {
+    "en": "Join the Waitlist",
+    "vi": "Tham gia danh sách chờ"
+  },
+  "payment.waitlist_desc": {
+    "en": "We're putting the finishing touches on our {{plan}} features. Join the waitlist to be the first to know when we launch!",
+    "vi": "Chúng tôi đang hoàn thiện các tính năng của gói {{plan}}. Hãy tham gia danh sách chờ để là người đầu tiên biết khi chúng tôi ra mắt!"
+  },
+  "payment.notify_me": {
+    "en": "Notify Me",
+    "vi": "Thông báo cho tôi"
+  },
+  "payment.joining": {
+    "en": "Joining...",
+    "vi": "Đang tham gia..."
+  },
+  "payment.email_address": {
+    "en": "Email Address",
+    "vi": "Địa chỉ Email"
+  },
+  "payment.waitlist_success": {
+    "en": "Successfully joined the waitlist!",
+    "vi": "Đã tham gia danh sách chờ thành công!"
+  },
+  "payment.pricing_title": {
+    "en": "Choose the right plan for you",
+    "vi": "Chọn gói dịch vụ phù hợp cho bạn"
+  },
+  "payment.pricing_subtitle": {
+    "en": "Unlock premium features and take control of your finances.",
+    "vi": "Mở khóa các tính năng cao cấp và làm chủ tài chính của bạn."
+  },
+  "payment.get_started_free": {
+    "en": "Get started for free",
+    "vi": "Bắt đầu miễn phí"
+  },
+  "payment.whats_included": {
+    "en": "What's included",
+    "vi": "Bao gồm những gì"
+  },
+  "payment.checkout_title": {
+    "en": "Checkout",
+    "vi": "Thanh toán"
+  },
+  "payment.order_summary": {
+    "en": "Order Summary",
+    "vi": "Tóm tắt đơn hàng"
+  },
+  "payment.billed_cycle": {
+    "en": "Billed {{cycle}}",
+    "vi": "Thanh toán {{cycle}}"
+  },
+  "payment.secure_transaction": {
+    "en": "Secure encrypted transaction",
+    "vi": "Giao dịch được mã hóa an toàn"
+  },
+  "payment.pay_and_subscribe": {
+    "en": "Pay {{amount}} & Subscribe",
+    "vi": "Thanh toán {{amount}} & Đăng ký"
+  },
+  "payment.processing": {
+    "en": "Processing...",
+    "vi": "Đang xử lý..."
+  },
+  "payment.checkout_error": {
+    "en": "An error occurred during checkout.",
+    "vi": "Đã xảy ra lỗi trong quá trình thanh toán."
+  },
+  "payment.dashboard_title": {
+    "en": "Payment Dashboard",
+    "vi": "Bảng điều khiển thanh toán"
+  },
+  "payment.total_transactions": {
+    "en": "Total Transactions",
+    "vi": "Tổng giao dịch"
+  },
+  "payment.success_rate": {
+    "en": "Success Rate",
+    "vi": "Tỷ lệ thành công"
+  },
+  "payment.active_gateways": {
+    "en": "Active Gateways",
+    "vi": "Cổng thanh toán đang hoạt động"
+  },
+  "payment.active_subscriptions": {
+    "en": "Active Subscriptions",
+    "vi": "Gói đăng ký đang hoạt động"
+  },
+  "payment.transaction_distribution": {
+    "en": "Transaction Distribution",
+    "vi": "Phân bổ giao dịch"
+  },
+  "payment.gateway_uptime": {
+    "en": "Gateway Uptime",
+    "vi": "Thời gian hoạt động của cổng"
+  },
+  "payment.recent_transactions_title": {
+    "en": "Recent Transactions",
+    "vi": "Giao dịch gần đây"
+  },
+  "payment.user": {
+    "en": "User",
+    "vi": "Người dùng"
+  },
+  "payment.plan_label": {
+    "en": "Plan",
+    "vi": "Gói"
+  },
+  "payment.amount_label": {
+    "en": "Amount",
+    "vi": "Số tiền"
+  },
+  "payment.gateway_label": {
+    "en": "Gateway",
+    "vi": "Cổng"
+  },
+  "payment.subscription": {
+    "en": "Subscription",
+    "vi": "Đăng ký"
+  },
+  "payment.transaction_id": {
+    "en": "Transaction",
+    "vi": "Mã giao dịch"
+  },
+  "payment.showing": {
+    "en": "Showing",
+    "vi": "Hiển thị"
+  },
+  "payment.of": {
+    "en": "of",
+    "vi": "trong tổng số"
+  },
+  "payment.other": {
+    "en": "Other",
+    "vi": "Khác"
+  },
+  "payment.edit_method": {
+    "en": "Edit",
+    "vi": "Chỉnh sửa"
+  },
+  "payment.edit_method_title": {
+    "en": "Edit Payment Method",
+    "vi": "Chỉnh sửa phương thức thanh toán"
+  },
+  "payment.update_method": {
+    "en": "Update Method",
+    "vi": "Cập nhật phương thức"
+  },
+  "payment.method_updated": {
+    "en": "Payment method updated successfully",
+    "vi": "Đã cập nhật phương thức thanh toán thành công"
+  },
+  "payment.update_error": {
+    "en": "Failed to update payment method",
+    "vi": "Không thể cập nhật phương thức thanh toán"
+  },
+  "payment.expiry_required": {
+    "en": "Expiry month and year are required",
+    "vi": "Tháng và năm hết hạn là bắt buộc"
+  },
+  "payment.success_title": {
+    "en": "Subscription Successful!",
+    "vi": "Đăng ký thành công!"
+  },
+  "payment.success_message": {
+    "en": "Thank you for upgrading. Your premium features are now active.",
+    "vi": "Cảm ơn bạn đã nâng cấp. Các tính năng cao cấp của bạn đã được kích hoạt."
+  },
+  "nav.dashboard": {
+    "en": "Go to Dashboard",
+    "vi": "Đến Bảng điều khiển"
+  },
+  "payment.waitlist_title": {
+    "en": "Join the Waitlist",
+    "vi": "Tham gia danh sách chờ"
+  },
+  "payment.waitlist_desc": {
+    "en": "We're putting the finishing touches on our {plan} features. Join the waitlist to be the first to know when we launch!",
+    "vi": "Chúng tôi đang hoàn thiện các tính năng {plan}. Tham gia danh sách chờ để là người đầu tiên biết khi chúng tôi ra mắt!"
+  },
+  "common.back_to_plans": {
+    "en": "Back to plans",
+    "vi": "Quay lại các gói"
+  },
+  "common.error_generic": {
+    "en": "Something went wrong. Please try again.",
+    "vi": "Đã xảy ra lỗi. Vui lòng thử lại."
+  },
+  "payment.email_address": {
+    "en": "Email Address",
+    "vi": "Địa chỉ Email"
+  },
+  "payment.joining": {
+    "en": "Joining...",
+    "vi": "Đang tham gia..."
+  },
+  "payment.notify_me": {
+    "en": "Notify Me",
+    "vi": "Thông báo cho tôi"
+  },
+  "footer.utilities_title": {
+    "en": "Small Utilities",
+    "vi": "Tiện ích nhỏ"
+  },
+  "footer.convert_case_tool": {
+    "en": "Convert Case Tool",
+    "vi": "Convert Case Tool"
+  },
+  "textcase.title": {
+    "en": "Convert Case",
+    "vi": "Chuyển đổi chữ hoa chữ thường"
+  },
+  "textcase.subtitle": {
+    "en": "Fast, simple, and minimalist text case converter.",
+    "vi": "Công cụ chuyển đổi chữ hoa chữ thường nhanh chóng, đơn giản và tối giản."
+  },
+  "textcase.placeholder": {
+    "en": "Type or paste your content here...",
+    "vi": "Nhập hoặc dán nội dung của bạn vào đây..."
+  },
+  "textcase.ad_inquiry": {
+    "en": "For advertising inquiries, please contact: 0941 069 969.",
+    "vi": "Để liên hệ quảng cáo, vui lòng liên hệ: 0941 069 969."
+  },
+  "textcase.copy": {
+    "en": "Copy to Clipboard",
+    "vi": "Sao chép vào bộ nhớ tạm"
+  },
+  "textcase.download": {
+    "en": "Download",
+    "vi": "Tải về"
+  },
+  "textcase.clear": {
+    "en": "Clear",
+    "vi": "Xóa"
+  },
+  "textcase.sentence_case": {
+    "en": "Sentence case",
+    "vi": "Chữ đầu câu hoa"
+  },
+  "textcase.lower_case": {
+    "en": "lower case",
+    "vi": "chữ thường"
+  },
+  "textcase.upper_case": {
+    "en": "UPPER CASE",
+    "vi": "CHỮ HOA"
+  },
+  "textcase.capitalized_case": {
+    "en": "Capitalized Case",
+    "vi": "Viết Hoa Chữ Cái Đầu"
+  },
+  "textcase.alternating_case": {
+    "en": "aLtErNaTiNg cAsE",
+    "vi": "cHữ hOa tHưỜnG xEn kẼ"
+  },
+  "textcase.title_case": {
+    "en": "Title Case",
+    "vi": "Tiêu Đề"
+  },
+  "textcase.inverse_case": {
+    "en": "InVeRsE CaSe",
+    "vi": "ĐảO nGượC cHữ hOa tHưỜnG"
+  }
+}

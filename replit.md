@@ -1,8 +1,6 @@
 # Overview
 
-Kenfinly is a personal finance application built to help users understand, track, and improve their financial health. The application provides expense and income tracking with multi-account and multi-currency support, budget planning, analytics dashboards, goal-oriented savings plans, and smart notifications for spending insights.
-
-The backend is powered by Laravel 12 (PHP 8.2+) providing a REST API, with a frontend built using Vite, Tailwind CSS 4.0, and basic JavaScript. The application is designed to be deployed with Docker support via Laravel Sail and includes comprehensive development tooling for code quality and testing.
+Kenfinly is a personal finance application designed to help users track, understand, and improve their financial health. It offers features such as multi-account and multi-currency expense/income tracking, budget planning, analytical dashboards, goal-oriented savings, and smart spending notifications. The project aims to provide a comprehensive and intuitive tool for personal financial management with strong market potential for users seeking robust financial control.
 
 # User Preferences
 
@@ -10,263 +8,196 @@ Preferred communication style: Simple, everyday language.
 
 # System Architecture
 
-## Backend Architecture
+## UI/UX Design
 
-**Framework**: Laravel 12 (PHP 8.2+)
-- **Rationale**: Laravel provides a robust, well-documented framework with built-in features for API development, authentication, queuing, and database management
-- **Pros**: Extensive ecosystem, strong community support, built-in security features, excellent ORM (Eloquent), middleware support
-- **Cons**: PHP-based (may be slower than compiled languages for high-performance scenarios)
+The frontend is a Single Page Application (SPA) built with React 19.2, Vite 7.x, and Tailwind CSS 4.0. It features a responsive design with a blue gradient theme, interactive dashboards using Recharts, and modals for transaction entry with real-time updates. A dedicated admin UI with a dark sidebar navigation and consistent layout is implemented for super administrators. The application also supports multilanguage functionality, specifically English and Vietnamese, with a shared translation manifest architecture ensuring graceful degradation in offline mode.
 
-**Authentication**: JWT (JSON Web Tokens) via tymon/jwt-auth
-- **Rationale**: Stateless authentication suitable for REST APIs and mobile/SPA clients
-- **Pros**: Scalable, no server-side session storage required, works well with SPAs
-- **Cons**: Token revocation requires additional infrastructure
+### Public Pages (WordPress-Powered)
+- **Landing Page** (`/`) - Marketing homepage with navigation, hero section, features, blog preview, and CTAs
+- **Blog Page** (`/blog`) - Blog listing with search, category filtering, and pagination
+- **Blog Post Page** (`/blog/:slug`) - Individual article view with related posts
+- **About Page** (`/about`) - Company information and values
+- **Login Page** (`/login`) - User authentication
+- **Register Page** (`/register`) - New user registration
 
-**API Design**: RESTful architecture
-- **Rationale**: Standard approach for building scalable, stateless web services
-- **Pros**: Well-understood patterns, cacheable, stateless
-- **Cons**: May require multiple requests for complex operations
+### Public Components
+- `Navbar.jsx` - Responsive navigation with mobile menu
+- `Footer.jsx` - Site-wide footer with links and contact
+- `PublicLayout.jsx` - Layout wrapper for public pages
 
-## Frontend Architecture
+### WordPress API Service
+- `resources/js/services/wordpressApi.js` - React service for WordPress REST API integration
+- Handles posts, pages, categories, custom post types (financial_tip, news, faq)
+- Graceful error handling with "Try Again" functionality
 
-**Build Tool**: Vite 7.x
-- **Rationale**: Modern, fast build tool with excellent HMR (Hot Module Replacement)
-- **Pros**: Lightning-fast development server, optimized production builds, native ES modules support
-- **Cons**: Relatively newer compared to Webpack
+## Technical Implementation
 
-**Styling**: Tailwind CSS 4.0 with @tailwindcss/vite plugin
-- **Rationale**: Utility-first CSS framework for rapid UI development
-- **Pros**: Highly customizable, small production bundle sizes, consistent design system
-- **Cons**: Initial learning curve, markup can become verbose
+The backend is built with Laravel 12 (PHP 8.2+) and provides a REST API. Key architectural decisions include:
+- **Authentication**: JWT via `tymon/jwt-auth` for stateless API authentication.
+- **Database**: MySQL (Production) / PostgreSQL (Development on Replit) with Eloquent ORM.
+- **Authorization**: Role-Based Access Control (RBAC) with 'owner', 'editor', and 'viewer' roles, enforced via custom middleware. Super Admin roles have full system-wide management capabilities through a dedicated admin dashboard.
+- **Core Models**: `users`, `roles`, `user_roles`, `accounts`, `categories`, and `transactions`.
+- **Transaction Management**: Comprehensive detail viewing, photo management (with server-side image optimization), and detailed change history tracking (audit trail).
+- **CSV Import/Export**: Web-based functionality with date filtering, detailed validation, and role-based access.
+- **Email Verification**: Two-step email verification for new user registrations to enhance security.
+- **Bot Protection**: Google reCAPTCHA v3 implemented on login and registration forms, configurable via command-line.
+- **Development Environment**: Dockerized using Laravel Sail.
+- **Concurrency**: `npm-concurrently` for running multiple development services.
 
-**JavaScript Framework**: React 19.2 with React Router
-- **Rationale**: Modern component-based framework for building interactive UIs with client-side routing
-- **Pros**: Component reusability, strong ecosystem, excellent developer experience, virtual DOM performance
-- **Cons**: Learning curve for team members new to React
-- **Implementation**: Separate Login (/login) and Registration (/register) pages with JWT authentication flow
-- **State Management**: React Context API for authentication state and user session management
+## Feature Specifications
 
-**Asset Pipeline**: Laravel Vite Plugin
-- **Rationale**: Seamless integration between Laravel backend and Vite frontend tooling
-- **Pros**: Auto-refresh on asset changes, optimized build process
-- **Cons**: Requires both PHP and Node.js environments
+- **Multi-currency Support**: USD, VND, with conversion services.
+- **Web-based CSV**: Import/export with date filtering and detailed validation.
+- **Payment Module**: Licenses and subscriptions for various user plans.
+- **Multi-user Collaboration**: Participant management with secure invitations.
+- **Admin Dashboard**: 11 management interfaces for Super Administrators covering users, accounts, roles, categories, languages, licenses, settings, cache, translations, and transactions.
+- **Transaction Photo Management**: Upload multiple receipt photos (up to 10 photos, 10MB original max). Features automatic client-side image compression that converts all images to JPEG format (target 500KB, max 800KB) with progressive quality reduction and resize (max 2048px). Note: Transparency and animation are lost during compression.
+- **Audit Trail**: Tracks creation, updates, deletions, and photo changes on transactions, including who made changes and when.
+- **Account Information Management**: Users can view and edit their personal account details including full name, email (read-only), email verification status, account status, roles, and membership date. Accessible via User icon in the dashboard navigation.
+- **Payment Information Management**: Users can view and manage their payment details via CreditCard icon in dashboard navigation. Features include:
+  - Upcoming payment date and amount display
+  - Current payment methods management (credit cards, PayPal)
+  - Add/remove payment methods with secure forms
+  - Set default payment method
+  - View payment history with pagination
+  - Charge description note for billing transparency
 
-## Data Storage
+# WordPress Headless CMS Integration
 
-**Database**: PostgreSQL (Implemented as of 2025-10-28)
-- **Rationale**: Relational database suitable for financial data with ACID compliance, chosen for superior features over MySQL
-- **Pros**: Strong data integrity, transaction support, mature tooling, advanced features (JSON support, full-text search), better performance
-- **Cons**: Schema migrations required for changes
-- **Current State**: Deployed on Replit with native PostgreSQL database integration
+## Overview
+The application includes a comprehensive WordPress headless CMS integration for content management. This allows the React frontend to fetch blog posts, pages, and custom content from an external WordPress site.
 
-**ORM**: Laravel Eloquent
-- **Rationale**: Built-in Laravel ORM with Active Record pattern
-- **Pros**: Intuitive syntax, relationship management, query builder
-- **Cons**: Can generate inefficient queries if not used carefully
+## Configuration
+Set the following environment variables to enable WordPress integration:
+- `WORDPRESS_API_URL`: WordPress site URL (e.g., https://your-wordpress-site.com)
+- `WORDPRESS_USERNAME`: API authentication username
+- `WORDPRESS_APPLICATION_PASSWORD`: WordPress Application Password (recommended)
+- `WORDPRESS_TIMEOUT`: Request timeout in seconds (default: 30)
+- `WORDPRESS_RETRIES`: Number of retry attempts (default: 3)
 
-**Database Schema** (Core tables implemented):
-- **users**: User account information with name, email, password
-- **roles**: Role definitions (owner, editor, viewer)
-- **user_roles**: Many-to-many pivot table linking users to roles
-- **accounts**: Financial accounts with currency support
-- **categories**: Transaction categories with hierarchical support
-- **transactions**: Financial transactions with account and category references
+## Available Endpoints
+- `GET /api/wordpress/posts` - List blog posts
+- `GET /api/wordpress/pages` - List pages
+- `GET /api/wordpress/categories` - List categories
+- `GET /api/wordpress/search?q={query}` - Search content
+- `GET /api/wordpress/status` - Check integration status
 
-## Development & Deployment
+## Caching
+Content is automatically cached with configurable TTL:
+- Posts: 5 minutes
+- Pages: 10 minutes
+- Categories/Tags: 1 hour
+- Clear cache via Admin: `POST /api/admin/wordpress/cache/clear`
 
-**Development Server**: Concurrent Laravel (port 5000) and Vite (port 5173)
-- Laravel serves the backend API and routes all frontend requests to React
-- Vite provides hot module replacement for React development
-- Access the application through the Replit webview for proper HTTPS URL handling
-- Note: The app must be accessed via the Replit webview URL (not localhost) for proper CORS handling between Laravel and Vite dev servers
+## Files
+- `app/Services/WordPressService.php` - WordPress API client with caching
+- `app/Http/Controllers/Api/WordPressController.php` - API endpoints
+- `config/wordpress.php` - Configuration settings
 
-**Containerization**: Docker via Laravel Sail
-- **Rationale**: Consistent development environment across team members
-- **Pros**: Eliminates "works on my machine" issues, includes all necessary services
-- **Cons**: Resource overhead, requires Docker knowledge
-
-**Package Management**:
-- **PHP**: Composer
-- **JavaScript**: npm
-
-**Development Tooling**:
-- **Code Quality**: Laravel Pint (PHP CS Fixer wrapper)
-- **Testing**: PHPUnit for backend tests
-- **Logging**: Laravel Pail for real-time log viewing
-- **REPL**: Laravel Tinker for interactive debugging
-
-**CI/CD**: GitHub Actions
-- **Rationale**: Integrated with GitHub, free for public repositories
-- **Pros**: Easy configuration, good integration with GitHub
-- **Cons**: Limited to GitHub ecosystem
-
-**Development Workflow**: Concurrent processes via npm-concurrently
-- Runs Laravel server, queue workers, log monitoring, and Vite dev server simultaneously
-- **Rationale**: Streamlined development experience with all services running
-- **Pros**: Single command to start all services
-- **Cons**: Higher resource usage during development
-
-## External Dependencies
-
-**HTTP Client**: Guzzle 7.x
-- Purpose: Making HTTP requests to external services
-- Use cases: Potential integrations with banking APIs, third-party financial data providers
-
-**Error Handling**: Whoops (filp/whoops)
-- Purpose: Beautiful error pages during development
-- Use cases: Development debugging
-
-**CORS**: Fruitcake PHP-CORS
-- Purpose: Cross-Origin Resource Sharing support
-- Use cases: Allowing frontend applications from different origins to access the API
-
-**Testing & Development**:
-- **Faker**: Generate fake data for testing and seeding
-- **Mockery**: Mock objects in tests
-- **Hamcrest**: Enhanced test assertions
-
-**Utilities**:
-- **Carbon**: DateTime manipulation library
-- **Monolog**: Logging library
-- **Ramsey UUID**: UUID generation for unique identifiers
-- **Symfony Components**: Various Symfony components for console, error handling, HTTP foundation
-
-**Cron Expression Parsing**: dragonmantank/cron-expression
-- Purpose: Scheduled task management
-- Use cases: Recurring transactions, budget resets, notification scheduling
-
-**String Manipulation**: 
-- doctrine/inflector: Pluralization and singularization
-- doctrine/lexer: String parsing
-
-**No Third-Party Integrations Currently**: The application does not yet integrate with external banking APIs, payment processors, or cloud storage services. These are planned for future releases as noted in the README (cloud synchronization planned for future).
-
-# Authentication & Authorization System
-
-**Implementation Date**: October 28, 2025  
-**Status**: Fully Implemented and Tested
+# Database Architecture (Two-Database System)
 
 ## Overview
 
-The application uses JWT (JSON Web Token) authentication with role-based access control (RBAC) to secure API endpoints and manage user permissions.
+Kenfinly uses a **two-database architecture** for separation of concerns:
 
-## Authentication Flow
+| Database | Type | Environment | Purpose |
+|----------|------|-------------|---------|
+| **Application Database** | MySQL | Production | Core business data (users, transactions, accounts, roles) |
+| **Application Database** | PostgreSQL | Development (Replit) | Same schema, built-in Replit database |
+| **WordPress CMS Database** | MySQL | All Environments | Content management (blog posts, pages, FAQs, tips) |
 
-1. **Registration** (`POST /api/auth/register`)
-   - Users register with name, email, and password
-   - Passwords are hashed using bcrypt
-   - New users are automatically assigned the "viewer" role
-   - Returns JWT token and user information
+> **Note**: The code is database-agnostic. Laravel's Eloquent ORM handles MySQL/PostgreSQL differences automatically. WordPress uses its own MySQL database (can share the same MySQL server with a different database name).
 
-2. **Login** (`POST /api/auth/login`)
-   - Users authenticate with email and password
-   - Returns JWT token (valid for 1 hour) and user information with roles
+## Data Flow
 
-3. **Logout** (`POST /api/auth/logout`)
-   - Invalidates the current JWT token
-   - Requires valid authentication
-
-4. **Token Refresh** (`POST /api/auth/refresh`)
-   - Allows users to refresh their JWT token without re-logging in
-   - Extends session without requiring password
-
-5. **Get Current User** (`GET /api/auth/me`)
-   - Returns authenticated user information with roles
-   - Requires valid JWT token
-
-## Authorization (Role-Based Access Control)
-
-### Available Roles
-
-1. **Owner** (`owner`)
-   - Full access to all resources
-   - Can manage users and assign roles
-   - Can perform all CRUD operations
-   - Assigned to primary account holders
-
-2. **Editor** (`editor`)
-   - Can create, edit, and delete own resources
-   - Can view all resources
-   - Limited administrative capabilities
-   - Suitable for family members or collaborators
-
-3. **Viewer** (`viewer`)
-   - Read-only access to resources
-   - Cannot modify any data
-   - Default role for new users
-   - Suitable for accountants, advisors
-
-### Role Enforcement
-
-**Middleware**: `EnsureUserHasRole`
-- Applied to routes requiring specific role permissions
-- Supports multiple roles (OR logic): user needs at least one of the specified roles
-- Returns 403 Forbidden if user lacks required role
-- Returns 401 Unauthorized if user is not authenticated
-
-**Usage Example**:
-```php
-// Accessible by owners and editors
-Route::middleware(['auth:api', 'role:owner,editor'])->group(function () {
-    Route::get('/transactions', [TransactionController::class, 'index']);
-});
-
-// Accessible only by owners
-Route::middleware(['auth:api', 'role:owner'])->group(function () {
-    Route::delete('/account/{id}', [AccountController::class, 'destroy']);
-});
+```
+React Frontend
+      │
+      ▼
+Laravel API (Middleware)
+      │
+      ├──────────────────────┬─────────────────────────────┐
+      ▼                      ▼                             │
+MySQL/PostgreSQL      WordPress REST API                   │
+ (App Data)                  │                             │
+                             ▼                             │
+                         MySQL                             │
+                    (WordPress CMS Data)                   │
 ```
 
-## Security Features
+## Why Two Databases?
 
-- **Password Hashing**: All passwords are hashed using bcrypt with configurable rounds (default: 12)
-- **JWT Secret**: Securely stored in environment variables, never exposed in code
-- **Token Expiration**: JWT tokens expire after 1 hour for security
-- **Input Validation**: All endpoints validate input data before processing
-- **Protected Routes**: All sensitive endpoints require valid JWT authentication
-- **CORS Protection**: Configured to prevent unauthorized cross-origin requests
-- **SQL Injection Prevention**: Eloquent ORM prevents SQL injection attacks
+1. **Security**: Financial data isolated from public content
+2. **Independence**: CMS can be updated without affecting core application
+3. **Performance**: Each database optimized for its specific use case
+4. **Flexibility**: Marketing team manages content via WordPress admin
 
-## Database Models
+## No Direct Database Link
 
-### User Model
-- Implements `JWTSubject` interface for JWT authentication
-- Has many-to-many relationship with roles
-- Helper methods: `hasRole()`, `hasAnyRole()`, `assignRole()`, `removeRole()`
-- Automatically hashes passwords on creation/update
+The two databases do NOT share data directly. Laravel acts as the middleware:
+- Application data requests → Laravel queries PostgreSQL
+- Content requests → Laravel calls WordPress REST API → WordPress queries MySQL
 
-### Role Model
-- Defines available roles in the system
-- Has many-to-many relationship with users
-- Seeded with default roles: owner, editor, viewer
+# Quick Start (Development Setup)
 
-## API Endpoints
+**For comprehensive setup instructions, see: `docs/SETUP_MANUAL.md`**
 
-### Public Endpoints (No Authentication Required)
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login and receive JWT token
+## Quick Setup
 
-### Protected Endpoints (Require Authentication)
-- `POST /api/auth/logout` - Logout current user
-- `POST /api/auth/refresh` - Refresh JWT token
-- `GET /api/auth/me` - Get current authenticated user
+```bash
+# 1. Install dependencies
+composer install && npm install
 
-### Test Users (Seeded)
-- **Owner**: owner@example.com / password
-- **Viewer**: viewer@example.com / password
+# 2. Set up environment
+cp .env.example .env
+php artisan key:generate
+php artisan jwt:secret
 
-## Configuration Files
+# 3. Database setup
+php artisan migrate --seed
 
-- **Auth Guard**: `config/auth.php` - Defines JWT guard for API
-- **JWT Config**: `config/jwt.php` - JWT package configuration
-- **Middleware**: `bootstrap/app.php` - Registers role middleware
-- **Routes**: `routes/api.php` - API route definitions
+# 4. Start servers
+php artisan serve --host=0.0.0.0 --port=5000 & npm run dev
+```
 
-## Future Enhancements
+## Test Credentials
 
-- Password reset functionality via email
-- Two-factor authentication (2FA)
-- Refresh token rotation for enhanced security
-- Role permissions for granular access control
-- API rate limiting per role
-- Audit logging for security-sensitive actions
+| Email | Password | Role |
+|-------|----------|------|
+| owner@example.com | password | Owner |
+| viewer@example.com | password | Viewer |
+| admin@kenfinly.com | Admin@123 | Super Admin |
+
+## Database Seeders
+All seeders are idempotent and can be run multiple times safely:
+- `RoleSeeder` - Creates owner, editor, viewer roles
+- `LanguageSeeder` - Creates English and Vietnamese languages with translations
+- `CategorySeeder` - Creates default expense and income categories
+- `SuperAdminSeeder` - Creates the super admin user
+
+# Documentation
+
+| Document | Location | Purpose |
+|----------|----------|---------|
+| Setup Manual | `docs/SETUP_MANUAL.md` | Complete installation guide |
+| WordPress API | `docs/WORDPRESS_HEADLESS_CMS_API.md` | CMS API reference |
+| API Testing | `docs/WORDPRESS_LARAVEL_API_TESTING.md` | API testing guide |
+
+# Company Information
+
+- **Company**: Getkenka Ltd
+- **Tax Code**: 0318304909
+- **Email**: purchasevn@getkenka.com
+- **Phone**: +84 0941069969
+- **Address**: 2nd Floor, 81 CMT8 Street, Ben Thanh Ward, Dist 1, HCMC
+
+# External Dependencies
+
+- **HTTP Client**: Guzzle 7.x
+- **Error Handling (Dev)**: Whoops
+- **CORS**: Fruitcake PHP-CORS
+- **Date/Time**: Carbon
+- **UUID Generation**: Ramsey UUID
+- **Image Processing**: Intervention Image (for photo optimization)
+- **Email Service**: SendGrid (via Replit integrations for email verification)
+- **WordPress Integration**: Laravel HTTP Client for headless CMS content

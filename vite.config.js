@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import path from 'path';
 
 const replitDomain = process.env.REPLIT_DOMAINS || 
     (process.env.REPL_SLUG && process.env.REPL_OWNER 
@@ -17,16 +18,25 @@ export default defineConfig({
         react(),
         tailwindcss(),
     ],
+    resolve: {
+        alias: {
+            '@assets': path.resolve(__dirname, './resources'),
+        },
+    },
     server: {
         host: '0.0.0.0',
         port: 5173,
-        cors: true,
+        cors: {
+            origin: '*',
+            methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+            credentials: true,
+        },
         strictPort: true,
         hmr: {
             host: replitDomain,
             clientPort: 443,
             protocol: replitDomain === 'localhost' ? 'ws' : 'wss',
         },
-        origin: replitDomain === 'localhost' ? `http://localhost:5173` : `https://${replitDomain}`,
     },
 });

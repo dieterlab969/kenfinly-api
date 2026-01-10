@@ -18,19 +18,20 @@ class DatabaseSeeder extends Seeder
         // Seed roles first
         $this->call(RoleSeeder::class);
 
-        // Create a test user with owner role
-        $testUser = User::factory()->create([
-            'name' => 'Test Owner',
-            'email' => 'owner@example.com',
-        ]);
-        $testUser->assignRole('owner');
+        // Seed languages and translations
+        $this->call(LanguageSeeder::class);
 
-        // Create a viewer user
-        $viewerUser = User::factory()->create([
-            'name' => 'Test Viewer',
-            'email' => 'viewer@example.com',
-        ]);
-        $viewerUser->assignRole('viewer');
+        // Seed categories
+        $this->call(CategorySeeder::class);
+
+        // Create super admin user
+        $this->call(SuperAdminSeeder::class);
+
+        // Create test users with proper credentials
+        $this->call(TestUsersSeeder::class);
+
+        // Seed accounts for test users
+        $this->call(AccountSeeder::class);
 
         $this->command->info('Database seeded successfully!');
     }
