@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Setting;
+use App\Models\AppSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -12,10 +12,10 @@ class LogoController extends Controller
 {
     public function getLogo()
     {
-        $logo = Setting::where('key', 'site_logo')->first();
+        $logoPath = AppSetting::get('site_logo');
         return response()->json([
             'success' => true,
-            'logo_url' => $logo && $logo->value ? Storage::url($logo->value) : null
+            'logo_url' => $logoPath ? Storage::url($logoPath) : null
         ]);
     }
 
@@ -30,17 +30,14 @@ class LogoController extends Controller
         }
 
         if ($request->hasFile('logo')) {
-            $oldLogo = Setting::where('key', 'site_logo')->first();
-            if ($oldLogo && $oldLogo->value) {
-                Storage::disk('public')->delete($oldLogo->value);
+            $oldLogoPath = AppSetting::get('site_logo');
+            if ($oldLogoPath) {
+                Storage::disk('public')->delete($oldLogoPath);
             }
 
             $path = $request->file('logo')->store('logos', 'public');
             
-            Setting::updateOrCreate(
-                ['key' => 'site_logo'],
-                ['value' => $path]
-            );
+            AppSetting::set('site_logo', $path);
 
             return response()->json([
                 'success' => true,
