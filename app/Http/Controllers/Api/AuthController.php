@@ -27,25 +27,16 @@ use App\Models\Subscription;
  */
 class AuthController extends Controller
 {
-    public function __construct(
-        private EmailVerificationService $emailVerificationService,
-        private EmailValidationService $emailValidationService
-    ) {}
-    /**
-     * Email verification service instance.
-     *
-     * @var EmailVerificationService
-     */
-    private EmailVerificationService $emailVerificationService;
-
     /**
      * AuthController constructor.
      *
      * @param EmailVerificationService $emailVerificationService
+     * @param EmailValidationService $emailValidationService
      */
-    public function __construct(EmailVerificationService $emailVerificationService)
-    {
-        $this->emailVerificationService = $emailVerificationService;
+    public function __construct(
+        private EmailVerificationService $emailVerificationService,
+        private EmailValidationService $emailValidationService
+    ) {
     }
 
     /**
