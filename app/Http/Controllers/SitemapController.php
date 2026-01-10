@@ -45,8 +45,8 @@ class SitemapController extends Controller
                 '/contact' => ['priority' => 0.8, 'freq' => 'monthly'],
                 '/pricing' => ['priority' => 0.8, 'freq' => 'monthly'],
                 '/blog' => ['priority' => 0.9, 'freq' => 'daily'],
-                '/login' => ['priority' => 0.8, 'freq' => 'monthly'],
-                '/register' => ['priority' => 0.8, 'freq' => 'monthly'],
+                '/login' => ['priority' => 0.6, 'freq' => 'monthly'],
+                '/register' => ['priority' => 0.6, 'freq' => 'monthly'],
                 '/textcase' => ['priority' => 0.7, 'freq' => 'weekly'],
             ];
 

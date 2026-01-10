@@ -157,7 +157,7 @@ Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])
     Route::delete('/logos', [LogoManagementController::class, 'delete']);
 
     // Sitemap Management
-    Route::post('/sitemap/generate', [\App\Http\Controllers\SitemapController::class, 'generate']);
+    Route::post('/sitemap/generate', [\App\Http\Controllers\SitemapController::class, 'generate'])->middleware('api');
 
     // WordPress Cache Management (Admin only)
     Route::post('/wordpress/cache/clear', [WordPressController::class, 'clearCache']);
