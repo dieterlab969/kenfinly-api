@@ -28,6 +28,7 @@ yarn-error.log
 /storage/logs
 /storage/app/public
 Thumbs.db
+/public/sitemap.xml
 
 # WordPress - Exclude source code (installed via Composer)
 /public/wordpress/
