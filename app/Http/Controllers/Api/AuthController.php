@@ -16,18 +16,47 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
+use App\Models\SubscriptionPlan;
+use App\Models\Subscription;
+
+/**
+ * Controller handling user authentication and registration via API.
+ *
+ * Provides endpoints for user registration, login, token refresh, logout,
+ * and retrieving authenticated user info and app configuration.
+ */
 class AuthController extends Controller
 {
     public function __construct(
         private EmailVerificationService $emailVerificationService,
         private EmailValidationService $emailValidationService
     ) {}
+    /**
+     * Email verification service instance.
+     *
+     * @var EmailVerificationService
+     */
+    private EmailVerificationService $emailVerificationService;
+
+    /**
+     * AuthController constructor.
+     *
+     * @param EmailVerificationService $emailVerificationService
+     */
+    public function __construct(EmailVerificationService $emailVerificationService)
+    {
+        $this->emailVerificationService = $emailVerificationService;
+    }
 
     /**
      * Register a new user.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * Validates input data, creates the user with a pending status,
+     * assigns the "owner" role, and enrolls the user in the Free subscription plan automatically.
+     * Sends an email verification link and returns registration status.
+     *
+     * @param \Illuminate\Http\Request $request Incoming registration request
+     * @return \Illuminate\Http\JsonResponse JSON response with registration result and verification info
      */
     public function register(Request $request)
     {
@@ -127,9 +156,22 @@ class AuthController extends Controller
 
         $user->assignRole('owner');
 
+        // Automatically enroll in Free plan
+        $freePlan = SubscriptionPlan::where('name', 'Free')->first();
+        if ($freePlan) {
+            Subscription::create([
+                'user_id' => $user->id,
+                'plan_id' => $freePlan->id,
+                'status' => 'active',
+                'amount' => 0,
+                'currency' => 'VND',
+                'start_date' => now(),
+            ]);
+        }
+
         try {
             $verification = $this->emailVerificationService->sendVerificationEmail($user);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Registration successful! Please check your email to verify your account.',
@@ -143,7 +185,7 @@ class AuthController extends Controller
                 'verification_sent' => true,
                 'verification_expires_at' => $verification->expires_at,
             ], 201);
-            
+
         } catch (\Exception $e) {
             Log::error('Failed to send verification email during registration', [
                 'user_id' => $user->id,
@@ -166,10 +208,14 @@ class AuthController extends Controller
     }
 
     /**
-     * Get a JWT via given credentials.
+     * Authenticate user and issue a JWT token.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * Validates login credentials, checks email verification and suspension status,
+     * and returns an access token if successful.
+     * Sends verification email if email is unverified and throttles repeated sends.
+     *
+     * @param \Illuminate\Http\Request $request Incoming login request
+     * @return \Illuminate\Http\JsonResponse JSON response with authentication result or verification prompt
      */
     public function login(Request $request)
     {
@@ -212,31 +258,31 @@ class AuthController extends Controller
 
         if (!$user->isEmailVerified()) {
             auth('api')->logout();
-            
+
             $verificationSent = false;
             $verificationExpiresAt = null;
-            
+
             try {
                 $recentVerification = $user->emailVerifications()
                     ->whereNull('verified_at')
                     ->latest()
                     ->first();
-                
-                $shouldSendEmail = !$recentVerification || 
+
+                $shouldSendEmail = !$recentVerification ||
                     $recentVerification->created_at->diffInMinutes(now()) >= 5;
-                
+
                 if ($shouldSendEmail) {
                     $verification = $this->emailVerificationService->sendVerificationEmail($user);
                     $verificationSent = true;
                     $verificationExpiresAt = $verification->expires_at;
-                    
+
                     Log::info('Verification email sent during login', [
                         'user_id' => $user->id,
                         'email' => $user->email,
                     ]);
                 } else {
                     $verificationExpiresAt = $recentVerification->expires_at;
-                    
+
                     Log::info('Skipped sending verification email (too recent)', [
                         'user_id' => $user->id,
                         'minutes_since_last' => $recentVerification->created_at->diffInMinutes(now()),
@@ -248,7 +294,7 @@ class AuthController extends Controller
                     'error' => $e->getMessage(),
                 ]);
             }
-            
+
             return response()->json([
                 'success' => false,
                 'action' => 'verify_email',
@@ -266,7 +312,7 @@ class AuthController extends Controller
 
         if ($user->isSuspended()) {
             auth('api')->logout();
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Your account has been suspended. Please contact support.',
@@ -278,9 +324,11 @@ class AuthController extends Controller
     }
 
     /**
-     * Get the authenticated User.
+     * Get the currently authenticated user.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * Loads the user's roles and returns user data.
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with authenticated user data
      */
     public function me()
     {
@@ -294,9 +342,11 @@ class AuthController extends Controller
     }
 
     /**
-     * Get app configuration including reCAPTCHA status.
+     * Get application configuration details.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * Returns status of reCAPTCHA feature and the site key.
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with app configuration
      */
     public function config()
     {
@@ -310,9 +360,9 @@ class AuthController extends Controller
     }
 
     /**
-     * Log the user out (Invalidate the token).
+     * Log out the authenticated user by invalidating the token.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse JSON response confirming logout
      */
     public function logout()
     {
@@ -325,9 +375,11 @@ class AuthController extends Controller
     }
 
     /**
-     * Refresh a token.
+     * Refresh the JWT token.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * Issues a new token and returns it with user info.
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with refreshed token
      */
     public function refresh()
     {
@@ -335,11 +387,12 @@ class AuthController extends Controller
     }
 
     /**
-     * Get the token array structure.
+     * Format and return the token response structure.
      *
-     * @param  string $token
+     * Includes the token, token type, expiration, and authenticated user data.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @param string $token JWT access token
+     * @return \Illuminate\Http\JsonResponse JSON response with token and user info
      */
     protected function respondWithToken($token)
     {

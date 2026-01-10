@@ -1,10 +1,11 @@
-modules = ["php-8.2", "nodejs-20", "bash", "web"]
+modules = ["nodejs-20", "php-8.2", "bash", "web", "postgresql-16"]
 [agent]
 expertMode = true
 integrations = ["sendgrid:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
+packages = ["openssh", "unzip", "php82Packages.composer"]
 
 [workflows]
 runButton = "Project"
@@ -27,7 +28,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "php artisan serve --host=0.0.0.0 --port=5000"
+args = "php -S 0.0.0.0:5000 server.php"
 waitForPort = 5000
 
 [[ports]]
@@ -38,58 +39,10 @@ externalPort = 80
 localPort = 5173
 externalPort = 5173
 
-[[ports]]
-localPort = 33673
-externalPort = 8000
+[userenv]
 
-[[ports]]
-localPort = 33969
-externalPort = 4200
+[userenv.development]
 
-[[ports]]
-localPort = 34249
-externalPort = 8099
-
-[[ports]]
-localPort = 34961
-externalPort = 3002
-
-[[ports]]
-localPort = 36997
-externalPort = 5000
-
-[[ports]]
-localPort = 37517
-externalPort = 3001
-
-[[ports]]
-localPort = 38171
-externalPort = 6000
-
-[[ports]]
-localPort = 38325
-externalPort = 4200
-
-[[ports]]
-localPort = 38615
-externalPort = 8081
-
-[[ports]]
-localPort = 39743
-externalPort = 3000
-
-[[ports]]
-localPort = 39955
-externalPort = 8080
-
-[[ports]]
-localPort = 40745
-externalPort = 6800
-
-[[ports]]
-localPort = 43385
-externalPort = 3003
-
-[[ports]]
-localPort = 44597
-externalPort = 8008
+[userenv.shared]
+GA4_ENABLED = "false"
+DB_CONNECTION = "pgsql"

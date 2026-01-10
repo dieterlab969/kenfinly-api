@@ -24,7 +24,7 @@ class TransactionPhotoService
         $filePath = 'receipts/' . $filename;
 
         $image = Image::read($file);
-        
+
         if ($image->width() > 2048 || $image->height() > 2048) {
             $maxDimension = max($image->width(), $image->height());
             $scaleFactor = 2048 / $maxDimension;
@@ -33,11 +33,12 @@ class TransactionPhotoService
                 height: (int)($image->height() * $scaleFactor)
             );
         }
-        
-        $image->encodeByMediaType(quality: 85);
-        
-        Storage::disk('public')->put($filePath, (string) $image);
-        
+
+        // Get the encoded image content instead of casting to string
+        $encodedImage = $image->encodeByMediaType(quality: 85)->toString();
+
+        Storage::disk('public')->put($filePath, $encodedImage);
+
         $optimizedSize = Storage::disk('public')->size($filePath);
 
         return TransactionPhoto::create([
@@ -59,10 +60,10 @@ class TransactionPhotoService
     protected function validatePhoto(UploadedFile $file): void
     {
         $fileSizeKB = $file->getSize() / 1024;
-        
+
         if ($fileSizeKB > self::MAX_PHOTO_SIZE) {
             throw new \Exception(
-                "Photo size ({$fileSizeKB}KB) exceeds the maximum allowed size of " . 
+                "Photo size ({$fileSizeKB}KB) exceeds the maximum allowed size of " .
                 self::MAX_PHOTO_SIZE . "KB (20MB). Please remove or resize the photo and try again."
             );
         }
@@ -77,10 +78,10 @@ class TransactionPhotoService
     protected function validatePhotoCount(Transaction $transaction): void
     {
         $currentCount = $transaction->photos()->count();
-        
+
         if ($currentCount >= self::MAX_PHOTOS_PER_TRANSACTION) {
             throw new \Exception(
-                "Maximum number of photos (" . self::MAX_PHOTOS_PER_TRANSACTION . 
+                "Maximum number of photos (" . self::MAX_PHOTOS_PER_TRANSACTION .
                 ") reached for this transaction."
             );
         }

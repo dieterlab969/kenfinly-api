@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class TransactionController extends Controller
 {
@@ -23,7 +24,7 @@ class TransactionController extends Controller
     ) {
         $this->photoService = $photoService;
         $this->changeLogService = $changeLogService;
-        //$this->authorizeResource(Transaction::class, 'transaction');
+        $this->authorizeResource(Transaction::class, 'transaction');
     }
     public function index(Request $request)
     {
@@ -89,13 +90,10 @@ class TransactionController extends Controller
             ->where('user_id', $user->id)
             ->firstOrFail();
 
+        $uploadedPhotoPath = null;
+        
         DB::beginTransaction();
         try {
-            $receiptPath = null;
-            if ($request->hasFile('receipt')) {
-                $receiptPath = $request->file('receipt')->store('receipts', 'public');
-            }
-
             $transaction = Transaction::create([
                 'user_id' => $user->id,
                 'account_id' => $request->account_id,
@@ -104,8 +102,33 @@ class TransactionController extends Controller
                 'amount' => $request->amount,
                 'notes' => $request->notes,
                 'transaction_date' => $request->transaction_date,
-                'receipt_path' => $receiptPath,
             ]);
+
+            if ($request->hasFile('receipt')) {
+                $file = $request->file('receipt');
+                
+                Log::info('Receipt upload during transaction creation', [
+                    'transaction_id' => $transaction->id,
+                    'user_id' => $user->id,
+                    'original_filename' => $file->getClientOriginalName(),
+                    'mime_type' => $file->getMimeType(),
+                    'size_kb' => round($file->getSize() / 1024, 2),
+                ]);
+                
+                $photo = $this->photoService->uploadPhoto($transaction, $file, $user);
+                $uploadedPhotoPath = $photo->file_path;
+                
+                $this->changeLogService->logPhotoAdded(
+                    $transaction,
+                    $user,
+                    $photo->original_filename
+                );
+                
+                Log::info('Receipt saved successfully', [
+                    'transaction_id' => $transaction->id,
+                    'photo_id' => $photo->id,
+                ]);
+            }
 
             $balanceChange = $request->type === 'income' 
                 ? $request->amount 
@@ -117,7 +140,7 @@ class TransactionController extends Controller
 
             DB::commit();
 
-            $transaction->load(['category', 'account']);
+            $transaction->load(['category', 'account', 'photos']);
 
             return response()->json([
                 'success' => true,
@@ -127,13 +150,21 @@ class TransactionController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            if ($receiptPath) {
-                Storage::disk('public')->delete($receiptPath);
+            if ($uploadedPhotoPath) {
+                Storage::disk('public')->delete($uploadedPhotoPath);
+                Log::info('Cleaned up orphaned photo after transaction creation failure', [
+                    'file_path' => $uploadedPhotoPath,
+                ]);
             }
+            
+            Log::error('Failed to create transaction', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create transaction'
+                'message' => 'Failed to create transaction: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -296,6 +327,13 @@ class TransactionController extends Controller
         ]);
 
         if ($validator->fails()) {
+            Log::warning('Photo upload validation failed', [
+                'transaction_id' => $transaction->id,
+                'errors' => $validator->errors()->toArray(),
+                'content_type' => $request->header('Content-Type'),
+                'has_file' => $request->hasFile('photo'),
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
@@ -304,9 +342,19 @@ class TransactionController extends Controller
 
         try {
             $user = auth('api')->user();
+            $file = $request->file('photo');
+            
+            Log::info('Photo upload started', [
+                'transaction_id' => $transaction->id,
+                'user_id' => $user->id,
+                'original_filename' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'size_kb' => round($file->getSize() / 1024, 2),
+            ]);
+            
             $photo = $this->photoService->uploadPhoto(
                 $transaction,
-                $request->file('photo'),
+                $file,
                 $user
             );
 
@@ -318,12 +366,24 @@ class TransactionController extends Controller
 
             $photo->load('uploader:id,name,email');
 
+            Log::info('Photo upload successful', [
+                'transaction_id' => $transaction->id,
+                'photo_id' => $photo->id,
+                'stored_size_kb' => round($photo->file_size / 1024, 2),
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Photo uploaded successfully',
                 'photo' => $photo
             ], 201);
         } catch (\Exception $e) {
+            Log::error('Photo upload failed', [
+                'transaction_id' => $transaction->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()

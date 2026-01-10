@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, Edit2, Save, XCircle, Upload, Trash2, Calendar, DollarSign, Tag, FileText, History } from 'lucide-react';
+import { X, Edit2, Save, XCircle, Upload, Trash2, Calendar, DollarSign, Tag, FileText, History, Loader2 } from 'lucide-react';
 import api from '../utils/api';
 import { getCategoryIcon, formatCurrency } from '../constants/categories';
 import { format, parseISO } from 'date-fns';
 import { useTranslation } from '@assets/js/contexts/TranslationContext.jsx';
+import { processImageForUpload, validateImageFile, formatFileSize } from '../utils/imageCompression';
 
 const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
     const [transaction, setTransaction] = useState(null);
@@ -16,6 +17,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
     const [formData, setFormData] = useState({});
     const [selectedTab, setSelectedTab] = useState('details');
     const [uploadingPhoto, setUploadingPhoto] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState({ stage: '', progress: 0 });
     const { t } = useTranslation();
 
     useEffect(() => {
@@ -41,7 +43,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
             });
             setError('');
         } catch (err) {
-            setError('Failed to load transaction details');
+            setError(t('transaction_detail_modal.failed_to_load_transaction_details'));
             console.error(err);
         } finally {
             setLoading(false);
@@ -53,7 +55,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
             const response = await api.get('/categories');
             setCategories(response.data.categories);
         } catch (err) {
-            console.error('Failed to fetch categories:', err);
+            console.error(t('transaction_detail_modal.failed_to_fetch_categories'), err);
         }
     };
 
@@ -62,7 +64,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
             const response = await api.get('/accounts');
             setAccounts(response.data.accounts);
         } catch (err) {
-            console.error('Failed to fetch accounts:', err);
+            console.error(t('transaction_detail_modal.failed_to_fetch_accounts'), err);
         }
     };
 
@@ -77,7 +79,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
             setIsEditing(false);
             if (onUpdate) onUpdate();
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to update transaction');
+            setError(err.response?.data?.message || t('transaction_detail_modal.failed_to_update_transaction'));
         } finally {
             setLoading(false);
         }
@@ -87,36 +89,52 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
         const file = e.target.files[0];
         if (!file) return;
 
-        const fileSizeMB = file.size / (1024 * 1024);
-        if (fileSizeMB > 20) {
-            setError(`Photo size (${fileSizeMB.toFixed(2)}MB) exceeds the maximum allowed size of 20MB. Please remove or resize the photo and try again.`);
+        const validation = validateImageFile(file);
+        if (!validation.valid) {
+            setError(validation.error);
+            e.target.value = '';
             return;
         }
 
         setUploadingPhoto(true);
         setError('');
+        setUploadProgress({ stage: 'validating', progress: 0 });
 
         try {
-            const photoData = new FormData();
-            photoData.append('photo', file);
+            const result = await processImageForUpload(file, (progress) => {
+                setUploadProgress(progress);
+            });
 
-            const response = await api.post(`/transactions/${transactionId}/photos`, photoData);
+            if (result.wasCompressed) {
+                console.log(`Image compressed: ${formatFileSize(result.originalSize)} → ${formatFileSize(result.compressedSize)} (${result.compressionRatio}% reduction)`);
+            }
+
+            setUploadProgress({ stage: 'uploading', progress: 90 });
+
+            const photoData = new FormData();
+            photoData.append('photo', result.file);
+
+            await api.post(`/transactions/${transactionId}/photos`, photoData);
+            setUploadProgress({ stage: 'complete', progress: 100 });
             await fetchTransactionDetails();
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to upload photo');
+            console.error('Photo upload error:', err);
+            setError(err.response?.data?.message || err.message || t('transactions.photos.error.upload_failed'));
         } finally {
             setUploadingPhoto(false);
+            setUploadProgress({ stage: '', progress: 0 });
+            e.target.value = '';
         }
     };
 
     const handleDeletePhoto = async (photoId) => {
-        if (!confirm('Are you sure you want to delete this photo?')) return;
+        if (!confirm(t('transactions.photos.delete_photo_confirmation'))) return;
 
         try {
             await api.delete(`/photos/${photoId}`);
             await fetchTransactionDetails();
         } catch (err) {
-            setError('Failed to delete photo');
+            setError(t('transactions.photos.delete_photo_error'));
         }
     };
 
@@ -132,7 +150,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
                 <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                    <h2 className="text-2xl font-bold text-gray-900">Transaction Details</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">{t('transactions.transaction_detail_title')}</h2>
                     <button
                         onClick={onClose}
                         className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -149,7 +167,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
 
                 {loading && !transaction ? (
                     <div className="flex-1 flex items-center justify-center">
-                        <div className="text-gray-500">Loading...</div>
+                        <div className="text-gray-500">{t('transactions.transaction_detail_loading')}</div>
                     </div>
                 ) : transaction ? (
                     <>
@@ -162,7 +180,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                         : 'text-gray-600 hover:text-gray-900'
                                     }`}
                                 >
-                                    Details
+                                    {t('transactions.transaction_tab_details')}
                                 </button>
                                 <button
                                     onClick={() => setSelectedTab('photos')}
@@ -171,7 +189,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                         : 'text-gray-600 hover:text-gray-900'
                                     }`}
                                 >
-                                    Photos ({transaction.photos?.length || 0})
+                                    {t('transactions.transaction_tab_photos')} ({transaction.photos?.length || 0})
                                 </button>
                                 <button
                                     onClick={() => setSelectedTab('history')}
@@ -180,7 +198,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                         : 'text-gray-600 hover:text-gray-900'
                                     }`}
                                 >
-                                    History
+                                    {t('transaction_detail_modal.history')}
                                 </button>
                             </div>
                         </div>
@@ -218,7 +236,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                                 <div className="flex items-center space-x-3">
                                                     <Calendar className="w-5 h-5 text-gray-400" />
                                                     <div>
-                                                        <div className="text-sm text-gray-500">Date</div>
+                                                        <div className="text-sm text-gray-500">{t('transaction_detail_modal.field.date')}</div>
                                                         <div className="font-medium text-gray-900">
                                                             {format(parseISO(transaction.transaction_date), 'MMMM dd, yyyy')}
                                                         </div>
@@ -228,7 +246,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                                 <div className="flex items-center space-x-3">
                                                     <Tag className="w-5 h-5 text-gray-400" />
                                                     <div>
-                                                        <div className="text-sm text-gray-500">Category</div>
+                                                        <div className="text-sm text-gray-500">{t('transaction_detail_modal.field.category')}</div>
                                                         <div className="font-medium text-gray-900">
                                                             {transaction.category?.name}
                                                         </div>
@@ -239,7 +257,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                                     <div className="flex items-start space-x-3">
                                                         <FileText className="w-5 h-5 text-gray-400 mt-1" />
                                                         <div className="flex-1">
-                                                            <div className="text-sm text-gray-500">Notes</div>
+                                                            <div className="text-sm text-gray-500">{t('transactions.transaction_field_notes')}</div>
                                                             <div className="text-gray-900">{transaction.notes}</div>
                                                         </div>
                                                     </div>
@@ -252,7 +270,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                                     className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
                                                 >
                                                     <Edit2 className="w-5 h-5" />
-                                                    <span>Edit Transaction</span>
+                                                    <span>{t('transactions.transaction_edit_action')}</span>
                                                 </button>
                                             )}
                                         </div>
@@ -260,7 +278,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                         <form onSubmit={handleUpdate} className="space-y-4">
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Amount
+                                                    {t('transactions.transaction_form_amount_label')}
                                                 </label>
                                                 <input
                                                     type="number"
@@ -274,7 +292,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
 
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Category
+                                                    {t('transactions.transaction_form_account_label')}
                                                 </label>
                                                 <select
                                                     value={formData.category_id}
@@ -292,7 +310,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
 
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Account
+                                                    {t('transactions.transaction_form_account_label')}
                                                 </label>
                                                 <select
                                                     value={formData.account_id}
@@ -310,7 +328,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
 
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Date
+                                                    {t('transactions.transaction_form_date_label')}
                                                 </label>
                                                 <input
                                                     type="date"
@@ -323,7 +341,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
 
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Notes
+                                                    {t('transactions.transaction_form_notes_label')}
                                                 </label>
                                                 <textarea
                                                     value={formData.notes}
@@ -340,7 +358,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                                     className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
                                                 >
                                                     <Save className="w-5 h-5" />
-                                                    <span>{loading ? 'Saving...' : 'Save Changes'}</span>
+                                                    <span>{loading ? t('transactions.transaction_saving_state') : t('transactions.transaction_save_action')}</span>
                                                 </button>
                                                 <button
                                                     type="button"
@@ -358,20 +376,41 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                             {selectedTab === 'photos' && (
                                 <div className="space-y-4">
                                     {permissions.can_manage_photos && (
-                                        <div>
-                                            <label className="flex items-center justify-center space-x-2 px-4 py-3 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-500 cursor-pointer transition-colors">
-                                                <Upload className="w-5 h-5 text-gray-400" />
+                                        <div className="space-y-2">
+                                            <label className={`flex items-center justify-center space-x-2 px-4 py-3 border-2 border-dashed rounded-xl transition-colors ${uploadingPhoto ? 'border-blue-400 bg-blue-50 cursor-wait' : 'border-gray-300 hover:border-blue-500 cursor-pointer'}`}>
+                                                {uploadingPhoto ? (
+                                                    <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                                                ) : (
+                                                    <Upload className="w-5 h-5 text-gray-400" />
+                                                )}
                                                 <span className="text-gray-600">
-                                                    {uploadingPhoto ? 'Uploading...' : 'Upload Photo (Max 20MB)'}
+                                                    {uploadingPhoto
+                                                        ? (uploadProgress.stage === 'compressing'
+                                                            ? t('transactions.photos.compressing')
+                                                            : uploadProgress.stage === 'uploading'
+                                                                ? t('transactions.photos.uploading')
+                                                                : t('transactions.transaction_uploading_state'))
+                                                        : t('transactions.transaction_upload_photo_action')}
                                                 </span>
                                                 <input
                                                     type="file"
-                                                    accept="image/*"
+                                                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                                                     onChange={handlePhotoUpload}
                                                     className="hidden"
                                                     disabled={uploadingPhoto}
                                                 />
                                             </label>
+                                            {uploadingPhoto && (
+                                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                                    <div
+                                                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                                        style={{ width: `${uploadProgress.progress}%` }}
+                                                    ></div>
+                                                </div>
+                                            )}
+                                            <p className="text-xs text-gray-500 text-center">
+                                                {t('transactions.photos.size_hint')}
+                                            </p>
                                         </div>
                                     )}
 
@@ -384,7 +423,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                                         alt={photo.original_filename}
                                                         className="w-full h-48 object-cover rounded-lg"
                                                     />
-                                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center">
+                                                    <div className="absolute inset-0 group-hover:bg-opacity-50 transition-all rounded-lg flex items-center justify-center">
                                                         {permissions.can_manage_photos && (
                                                             <button
                                                                 onClick={() => handleDeletePhoto(photo.id)}
@@ -405,7 +444,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                         </div>
                                     ) : (
                                         <div className="text-center py-12 text-gray-500">
-                                            No photos uploaded yet
+                                            {t('transaction_detail_modal.no_photos_uploaded_yet')}
                                         </div>
                                     )}
                                 </div>
@@ -422,14 +461,14 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                                             <History className="w-5 h-5 text-gray-400" />
                                                             <div>
                                                                 <div className="font-medium text-gray-900">
-                                                                    {log.action === 'created' && 'Transaction Created'}
-                                                                    {log.action === 'updated' && 'Transaction Updated'}
-                                                                    {log.action === 'deleted' && 'Transaction Deleted'}
-                                                                    {log.action === 'photo_added' && 'Photo Added'}
-                                                                    {log.action === 'photo_removed' && 'Photo Removed'}
+                                                                    {log.action === 'created' && t('transactions.transaction_history_created')}
+                                                                    {log.action === 'updated' && t('transactions.transaction_history_updated')}
+                                                                    {log.action === 'deleted' && t('transactions.transaction_history_deleted')}
+                                                                    {log.action === 'photo_added' && t('transactions.transaction_history_photo_added')}
+                                                                    {log.action === 'photo_removed' && t('transactions.transaction_history_photo_removed')}
                                                                 </div>
                                                                 <div className="text-sm text-gray-500">
-                                                                    by {log.user?.name || 'Unknown'} • {format(parseISO(log.created_at), 'MMM dd, yyyy h:mm a')}
+                                                                    {t('transactions.transaction_history_by')} {log.user?.name || t('transactions.transaction_history_unknown_user')} • {format(parseISO(log.created_at), 'MMM dd, yyyy h:mm a')}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -456,7 +495,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                         </div>
                                     ) : (
                                         <div className="text-center py-12 text-gray-500">
-                                            No history available
+                                            {t('transaction_detail_modal.no_history_available')}
                                         </div>
                                     )}
                                 </div>

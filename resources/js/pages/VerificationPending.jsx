@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Loader, CheckCircle } from 'lucide-react';
 import axios from 'axios';
+import { useTranslation } from '../contexts/TranslationContext';
 
 export default function VerificationPending() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const [userEmail, setUserEmail] = useState(location.state?.user?.email || '');
@@ -27,23 +29,23 @@ export default function VerificationPending() {
 
     try {
       const response = await axios.post('/api/email/resend', { email: userEmail });
-      
+
       if (response.data.success) {
         setResendStatus('success');
-        setResendMessage(response.data.message || 'Verification email sent successfully!');
+        setResendMessage(response.data.message || t('verification.email_sent_success'));
       } else {
         setResendStatus('error');
-        setResendMessage(response.data.message || 'Failed to resend email.');
+        setResendMessage(response.data.message || t('verification.email_resend_failed'));
       }
     } catch (error) {
       setResendStatus('error');
-      
+
       if (error.response?.status === 429) {
-        setResendMessage(error.response.data.message || 'Too many requests. Please wait before trying again.');
+        setResendMessage(error.response.data.message || t('verification.too_many_requests'));
       } else if (error.response?.data?.message) {
         setResendMessage(error.response.data.message);
       } else {
-        setResendMessage('An error occurred. Please try again later.');
+        setResendMessage(t('verification.generic_error'));
       }
     } finally {
       setIsResending(false);
@@ -61,33 +63,34 @@ export default function VerificationPending() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 rounded-full mb-4">
             <Mail className="w-8 h-8 text-yellow-600" />
           </div>
-          
+
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Verify Your Email
+            {t('verification.verify_your_email')}
           </h2>
-          
+
           {customMessage ? (
             <p className="text-gray-600 mb-4">{customMessage}</p>
           ) : null}
-          
+
           <p className="text-gray-600 mb-6">
-            {source === 'login' 
-              ? 'To complete your login, please verify your email address. ' 
-              : ''
-            }
-            We've sent a verification email to{' '}
-            <span className="font-medium text-gray-900">{userEmail}</span>.
-            Please check your inbox and click the verification link to {source === 'login' ? 'continue' : 'activate your account'}.
+            {source === 'login'
+              ? t('verification.login_prompt')
+              : ''}
+            {t('verification.email_sent_to')}{' '}
+            <span className="font-medium text-gray-900">{userEmail}</span>.{' '}
+            {source === 'login'
+              ? t('verification.login_continue')
+              : t('verification.activate_account')}
           </p>
 
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
             <h3 className="text-sm font-medium text-blue-900 mb-2">
-              Didn't receive the email?
+              {t('verification.did_not_receive')}
             </h3>
             <ul className="text-sm text-blue-700 text-left space-y-1">
-              <li>• Check your spam or junk folder</li>
-              <li>• Make sure the email address is correct</li>
-              <li>• Wait a few minutes and try resending</li>
+              <li>• {t('verification.check_spam')}</li>
+              <li>• {t('verification.check_email_correct')}</li>
+              <li>• {t('verification.wait_and_resend')}</li>
             </ul>
           </div>
 
@@ -113,10 +116,10 @@ export default function VerificationPending() {
               {isResending ? (
                 <>
                   <Loader className="w-4 h-4 mr-2 animate-spin" />
-                  Sending...
+                  {t('verification.sending')}
                 </>
               ) : (
-                'Resend Verification Email'
+                t('verification.resend_email')
               )}
             </button>
 
@@ -124,7 +127,7 @@ export default function VerificationPending() {
               onClick={handleBackToLogin}
               className="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
             >
-              Back to Login
+              {t('verification.back_to_login')}
             </button>
           </div>
         </div>

@@ -5,12 +5,22 @@
     "description": "The skeleton application for the Laravel framework.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://wpackagist.org"
+        }
+    ],
     "require": {
         "php": "^8.2",
+        "intervention/image": "^3.11",
         "intervention/image-laravel": "^1.5",
+        "johnpbloch/wordpress": "^6.7",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "tymon/jwt-auth": "^2.2"
+        "spatie/laravel-sitemap": "^7.3",
+        "tymon/jwt-auth": "^2.2",
+        "wpackagist-plugin/jwt-authentication-for-wp-rest-api": "^1.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -72,6 +82,11 @@
     "extra": {
         "laravel": {
             "dont-discover": []
+        },
+        "wordpress-install-dir": "public/wordpress",
+        "installer-paths": {
+            "public/wordpress/wp-content/plugins/{$name}/": ["type:wordpress-plugin"],
+            "public/wordpress/wp-content/themes/{$name}/": ["type:wordpress-theme"]
         }
     },
     "config": {
@@ -80,7 +95,9 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "johnpbloch/wordpress-core-installer": true,
+            "composer/installers": true
         }
     },
     "minimum-stability": "stable",

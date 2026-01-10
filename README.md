@@ -621,6 +621,218 @@ Valid sample CSV files are available in the repository:
 ---
 
 
+---
+
+## Production Deployment Guide (Safe Data Migration)
+
+This guide provides step-by-step instructions for deploying updates to production **without risking existing user data**. Follow these procedures carefully to ensure a safe deployment.
+
+### Pre-Deployment Checklist
+
+Before deploying any changes to production:
+
+- [ ] **Backup Production Database** - Create a full backup before any deployment
+- [ ] **Review Migration Files** - Ensure no destructive operations (DROP TABLE, TRUNCATE, etc.)
+- [ ] **Test in Staging** - Deploy and test all changes in a staging environment first
+- [ ] **Notify Stakeholders** - Inform team members of scheduled deployment window
+
+### Step 1: Backup Production Database
+
+**CRITICAL: Always backup before deployment**
+
+```bash
+# PostgreSQL backup
+pg_dump -h your-db-host -U your-db-user -d kenfinly_production > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# MySQL backup
+mysqldump -h your-db-host -u your-db-user -p kenfinly_production > backup_$(date +%Y%m%d_%H%M%S).sql
+```
+
+Store the backup in a secure location (cloud storage, separate server, etc.).
+
+### Step 2: Review Pending Migrations
+
+Before running migrations, review what changes will be applied:
+
+```bash
+# List pending migrations
+php artisan migrate:status
+
+# Preview migration SQL (dry run)
+php artisan migrate --pretend
+```
+
+**Important:** Look for any `DROP`, `TRUNCATE`, `DELETE`, or `ALTER TABLE ... DROP COLUMN` statements that could affect existing data.
+
+### Step 3: Deploy Code Changes
+
+```bash
+# Pull latest code
+git pull origin main
+
+# Install/update dependencies
+composer install --optimize-autoloader --no-dev
+npm install
+
+# Build frontend assets
+npm run build
+```
+
+### Step 4: Run Safe Migrations
+
+For production deployments, **NEVER use `--seed` with migrations** as this can overwrite existing data:
+
+```bash
+# Safe migration command - runs ONLY structural changes
+php artisan migrate --force
+
+# DO NOT RUN seeders on production unless absolutely necessary
+# php artisan db:seed  <- DANGEROUS: May overwrite user data!
+```
+
+### Step 5: Verify Deployment
+
+After deployment, verify the application is working correctly:
+
+```bash
+# Clear and rebuild caches
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# Verify application health
+php artisan about
+```
+
+### Step 6: WordPress Integration Configuration
+
+If deploying the WordPress CMS integration, add the following environment variables:
+
+```env
+# WordPress API Configuration
+WORDPRESS_API_URL=https://your-wordpress-site.com
+WORDPRESS_USERNAME=your-api-username
+WORDPRESS_APPLICATION_PASSWORD=your-app-password
+
+# Optional: Cache settings (in seconds)
+WORDPRESS_CACHE_POSTS=300
+WORDPRESS_CACHE_PAGES=600
+WORDPRESS_CACHE_CATEGORIES=3600
+
+# Optional: Allowed custom post types (comma-separated)
+WORDPRESS_CUSTOM_POST_TYPES=financial_tips,news,faq
+```
+
+Test the connection:
+```bash
+curl https://your-app.com/api/wordpress/test-connection
+```
+
+### Rollback Procedures
+
+If something goes wrong, roll back immediately:
+
+```bash
+# Rollback last migration batch
+php artisan migrate:rollback --step=1
+
+# Restore from backup (PostgreSQL)
+psql -h your-db-host -U your-db-user -d kenfinly_production < backup_YYYYMMDD_HHMMSS.sql
+
+# Restore from backup (MySQL)
+mysql -h your-db-host -u your-db-user -p kenfinly_production < backup_YYYYMMDD_HHMMSS.sql
+
+# Rollback code changes
+git checkout HEAD~1
+```
+
+### Safe Seeding Guidelines
+
+If you need to add new seed data to production:
+
+1. **Create Additive Seeders Only** - Seeders should use `updateOrCreate()` or `firstOrCreate()` instead of truncating tables
+2. **Use Targeted Seeders** - Run specific seeders instead of `db:seed`:
+   ```bash
+   php artisan db:seed --class=LanguageSeeder  # Adds missing languages only
+   ```
+3. **Test Seeder Idempotency** - Run the seeder twice in staging to ensure it doesn't create duplicates
+
+### Environment-Specific Configuration
+
+Production environment variables that differ from development:
+
+```env
+# Core Settings
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://your-production-domain.com
+
+# Database (use production credentials)
+DB_CONNECTION=pgsql
+DB_HOST=your-production-db-host
+DB_PORT=5432
+DB_DATABASE=kenfinly_production
+DB_USERNAME=production_user
+DB_PASSWORD=secure_production_password
+
+# Cache (use Redis in production)
+CACHE_DRIVER=redis
+SESSION_DRIVER=redis
+QUEUE_CONNECTION=redis
+
+# Mail (production settings)
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.sendgrid.net
+MAIL_PORT=587
+```
+
+### Database Migration Best Practices
+
+When creating new migrations, follow these guidelines to protect production data:
+
+1. **Always Add Columns as Nullable First**
+   ```php
+   // Safe: Add nullable column
+   $table->string('new_column')->nullable();
+   
+   // Later migration: Make required after data backfill
+   $table->string('new_column')->nullable(false)->change();
+   ```
+
+2. **Never Delete Columns in the Same Release**
+   - Release 1: Add new column, migrate data
+   - Release 2: Remove old column after verification
+
+3. **Use Transactions for Critical Operations**
+   ```php
+   public function up()
+   {
+       DB::transaction(function () {
+           // Multiple related operations
+       });
+   }
+   ```
+
+4. **Add Indexes Concurrently (PostgreSQL)**
+   ```php
+   DB::statement('CREATE INDEX CONCURRENTLY idx_name ON table_name (column)');
+   ```
+
+### Monitoring After Deployment
+
+After deployment, monitor for issues:
+
+```bash
+# Watch Laravel logs
+tail -f storage/logs/laravel.log
+
+# Check for errors
+grep -i "error\|exception" storage/logs/laravel.log | tail -20
+```
+
+---
+
 *Prepared by a Dieter R. with focus on clarity, completeness, and operational excellence.*  
-*Date: 2025-10-28*
+*Date: 2025-10-28*  
+*Updated: 2025-11-28 - Added WordPress Integration and Production Deployment Guide*
 
