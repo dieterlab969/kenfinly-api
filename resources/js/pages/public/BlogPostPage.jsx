@@ -92,40 +92,6 @@ function BlogPostPage() {
         }
     };
 
-    if (loading) {
-        return (
-            <PublicLayout>
-                <ArticleSkeleton />
-            </PublicLayout>
-        );
-    }
-
-    if (error) {
-        return (
-            <PublicLayout>
-                <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-                    <TrendingUp className="w-20 h-20 text-gray-300 mx-auto mb-6" />
-                    <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                        {error}
-                    </h1>
-                    <p className="text-gray-600 mb-8">
-                        {t('blogpostpage.article_not_found.description')}
-                    </p>
-                    <Link
-                        to="/blog"
-                        className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700"
-                    >
-                        <ArrowLeft className="mr-2 w-5 h-5" />
-                        {t('blogpostpage.navigation.back_to_blog')}
-                    </Link>
-                </div>
-            </PublicLayout>
-        );
-    }
-
-    return (
-        <PublicLayout>
-            <article className="py-12">
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                     <Link
                         to="/blog"
