@@ -8,6 +8,8 @@ use Spatie\Sitemap\Tags\Url;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
+use Illuminate\Http\JsonResponse;
+
 class SitemapController extends Controller
 {
     /**
@@ -26,9 +28,9 @@ class SitemapController extends Controller
     /**
      * Generate the sitemap.xml
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function generate()
+    public function generate(): JsonResponse
     {
         $cacheKey = 'sitemap_posts_data';
         $postsData = \Illuminate\Support\Facades\Cache::get($cacheKey);
@@ -43,8 +45,8 @@ class SitemapController extends Controller
                 '/contact' => ['priority' => 0.8, 'freq' => 'monthly'],
                 '/pricing' => ['priority' => 0.8, 'freq' => 'monthly'],
                 '/blog' => ['priority' => 0.9, 'freq' => 'daily'],
-                '/login' => ['priority' => 0.8, 'freq' => 'monthly'],
-                '/register' => ['priority' => 0.8, 'freq' => 'monthly'],
+                '/login' => ['priority' => 0.6, 'freq' => 'monthly'],
+                '/register' => ['priority' => 0.6, 'freq' => 'monthly'],
                 '/textcase' => ['priority' => 0.7, 'freq' => 'weekly'],
             ];
 

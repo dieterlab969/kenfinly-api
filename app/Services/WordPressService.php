@@ -59,8 +59,8 @@ class WordPressService
         $this->username = config('wordpress.username', env('WORDPRESS_USERNAME'));
         $this->password = config('wordpress.password', env('WORDPRESS_PASSWORD'));
         $this->applicationPassword = config('wordpress.application_password', env('WORDPRESS_APPLICATION_PASSWORD'));
-        $this->timeout = config('wordpress.timeout', 60);
-        $this->retries = config('wordpress.retries', 3);
+        $this->timeout = (int) config('wordpress.timeout', 60);
+        $this->retries = (int) config('wordpress.retries', 3);
 
         $this->defaultCacheTtl = [
             'posts' => config('wordpress.cache.posts', 300),
