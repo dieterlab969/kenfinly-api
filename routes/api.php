@@ -29,7 +29,10 @@ use App\Http\Controllers\Api\PublicSettingsController;
 use App\Http\Controllers\Api\PublicLogoController;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\Api\LogoController;
+
 // Public routes
+Route::get('/logo', [LogoController::class, 'getLogo']);
 Route::get('/subscription-plans', [\App\Http\Controllers\Api\SubscriptionPlanController::class, 'index']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::get('/settings/logos', [PublicLogoController::class, 'index']);
@@ -47,14 +50,17 @@ Route::get('/email/verification-status', [EmailVerificationController::class, 's
 Route::get('/languages', [LanguageController::class, 'index']);
 Route::get('/languages/{code}/translations', [LanguageController::class, 'getTranslations']);
 
-// Protected routes (require authentication)
-Route::middleware('auth:api')->group(function () {
-    Route::post('/auth/logout', [AuthController::class, 'logout']);
-    Route::post('/auth/refresh', [AuthController::class, 'refresh']);
-    Route::get('/auth/me', [AuthController::class, 'me']);
+    // Protected routes (require authentication)
+    Route::middleware('auth:api')->group(function () {
+        Route::post('/auth/logout', [AuthController::class, 'logout']);
+        Route::post('/auth/refresh', [AuthController::class, 'refresh']);
+        Route::get('/auth/me', [AuthController::class, 'me']);
 
-    // Dashboard
-    Route::get('/dashboard', [TransactionController::class, 'getDashboardData']);
+        // Logo management
+        Route::post('/logo/upload', [LogoController::class, 'uploadLogo']);
+
+        // Dashboard
+        Route::get('/dashboard', [TransactionController::class, 'getDashboardData']);
 
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);

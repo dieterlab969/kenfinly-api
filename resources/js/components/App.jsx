@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from '../contexts/AuthContext';
+import { LogoProvider } from '../contexts/LogoContext';
 import { TranslationProvider, useTranslation } from '../contexts/TranslationContext';
 import axios from 'axios';
 import Login from '../pages/Login';
@@ -127,8 +128,9 @@ function App({ recaptchaEnabled = false }) {
     return (
         <RecaptchaConfigContext.Provider value={{ enabled: recaptchaEnabled }}>
             <TranslationProvider>
-                <AuthProvider>
-                    <Routes>
+                <LogoProvider>
+                    <AuthProvider>
+                        <Routes>
                         <Route path="/" element={<LandingPage />} />
                         <Route path="/blog" element={<BlogPage />} />
                         <Route path="/blog/:slug" element={<BlogPostPage />} />
@@ -258,6 +260,7 @@ function App({ recaptchaEnabled = false }) {
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </AuthProvider>
+                </LogoProvider>
             </TranslationProvider>
         </RecaptchaConfigContext.Provider>
     );

@@ -4,6 +4,7 @@ import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/TranslationContext';
 import { useRecaptchaConfig } from '../components/App';
+import DynamicLogo from '../components/DynamicLogo';
 import { Wallet } from 'lucide-react';
 
 const Register = () => {
@@ -94,9 +95,7 @@ const Register = () => {
             <div className="max-w-md w-full space-y-8">
                 <div className="text-center">
                     <div className="flex justify-center mb-4">
-                        <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center">
-                            <Wallet className="w-10 h-10 text-white" />
-                        </div>
+                        <DynamicLogo className="w-16 h-16" iconClassName="w-10 h-10" textClassName="text-3xl font-extrabold" />
                     </div>
                     <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
                         {t('auth.register')}
