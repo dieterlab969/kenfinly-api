@@ -2,9 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import axios from 'axios';
-import Logo from '../Logo';
-import gtmTracking from '../../utils/gtmTracking';
-import { useTranslation } from '../../contexts/TranslationContext';
+import DynamicLogo from '../DynamicLogo';
 
 function Footer({ showCopyright = true }) {
     const { t } = useTranslation();
@@ -61,8 +59,7 @@ function Footer({ showCopyright = true }) {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className="col-span-1 md:col-span-2">
                         <div className="flex items-center space-x-2 mb-4">
-                            <Logo fallbackSize="default" />
-                            <span className="text-xl font-bold text-white">Kenfinly</span>
+                            <DynamicLogo className="w-10 h-10" textClassName="text-xl font-bold text-white" />
                         </div>
                         <p className="text-gray-400 mb-4 max-w-md">
                             {t('footer.description')}
