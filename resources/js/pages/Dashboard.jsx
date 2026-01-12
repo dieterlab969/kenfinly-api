@@ -7,6 +7,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { format, parseISO } from 'date-fns';
 import api from '../utils/api';
 import AddTransactionModal from '../components/AddTransactionModal';
+import DynamicLogo from '../components/DynamicLogo';
 import SettingsModal from '../components/SettingsModal';
 import AccountSettingsModal from '../components/AccountSettingsModal';
 import PaymentInfoModal from '../components/PaymentInfoModal';
@@ -117,14 +118,7 @@ const Dashboard = () => {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16">
                         <div className="flex items-center">
-                            <div className="flex items-center space-x-2">
-                                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                                    <Wallet className="w-5 h-5 text-white" />
-                                </div>
-                                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                                    {t('app.name')}
-                                </h1>
-                            </div>
+                            <DynamicLogo className="w-8 h-8" iconClassName="w-5 h-5" textClassName="text-xl font-bold" />
                         </div>
                         <div className="flex items-center space-x-4">
                             <span className="text-sm text-gray-700">

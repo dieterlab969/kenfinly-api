@@ -1,218 +1,124 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Upload, CheckCircle, AlertCircle } from 'lucide-react';
+import { useTranslation } from '../../contexts/TranslationContext';
 import AdminLayout from '../../components/admin/AdminLayout';
-import api from '../../utils/api';
-import { Upload, Trash2, Image, AlertCircle, CheckCircle } from 'lucide-react';
 
 const LogoManagement = () => {
-    const [logos, setLogos] = useState({ logo_1x: '', logo_2x: '', logo_4x: '' });
-    const [loading, setLoading] = useState(true);
-    const [uploading, setUploading] = useState({ '1x': false, '2x': false, '4x': false });
-    const [message, setMessage] = useState(null);
-    
-    const fileInputRefs = {
-        '1x': useRef(null),
-        '2x': useRef(null),
-        '4x': useRef(null)
-    };
+    const { t } = useTranslation();
+    const [logo, setLogo] = useState(null);
+    const [logoUrl, setLogoUrl] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [message, setMessage] = useState({ type: '', text: '' });
 
     useEffect(() => {
-        fetchLogos();
+        fetchLogo();
     }, []);
 
-    const fetchLogos = async () => {
+    const fetchLogo = async () => {
         try {
-            const response = await api.get('/admin/logos');
+            const response = await axios.get('/api/logo');
             if (response.data.success) {
-                setLogos(response.data.data);
+                setLogoUrl(response.data.logo_url);
             }
         } catch (error) {
-            console.error('Failed to fetch logos:', error);
-        } finally {
-            setLoading(false);
+            console.error('Error fetching logo:', error);
         }
     };
 
-    const handleUpload = async (version, file) => {
-        if (!file) return;
+    const handleFileChange = (e) => {
+        setLogo(e.target.files[0]);
+    };
 
-        const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp'];
-        if (!allowedTypes.includes(file.type)) {
-            setMessage({ type: 'error', text: 'Invalid file type. Allowed: PNG, JPG, SVG, WebP' });
-            return;
-        }
+    const handleUpload = async (e) => {
+        e.preventDefault();
+        if (!logo) return;
 
-        if (file.size > 5 * 1024 * 1024) {
-            setMessage({ type: 'error', text: 'File size exceeds 5MB limit' });
-            return;
-        }
-
-        setUploading(prev => ({ ...prev, [version]: true }));
-        setMessage(null);
+        setUploading(true);
+        setMessage({ type: '', text: '' });
 
         const formData = new FormData();
-        formData.append('logo', file);
-        formData.append('version', version);
+        formData.append('logo', logo);
 
         try {
-            const response = await api.post('/admin/logos/upload', formData, {
+            const response = await axios.post('/api/logo/upload', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            
+
             if (response.data.success) {
-                setMessage({ type: 'success', text: response.data.message });
-                fetchLogos();
-                setTimeout(() => setMessage(null), 3000);
+                setLogoUrl(response.data.logo_url);
+                setMessage({ type: 'success', text: 'Logo uploaded successfully!' });
+                setLogo(null);
+                // Trigger a global logo refresh event if needed
+                window.dispatchEvent(new CustomEvent('logo-updated', { detail: response.data.logo_url }));
             }
         } catch (error) {
-            setMessage({ type: 'error', text: error.response?.data?.message || 'Upload failed' });
-        } finally {
-            setUploading(prev => ({ ...prev, [version]: false }));
-        }
-    };
-
-    const handleDelete = async (version) => {
-        if (!confirm(`Are you sure you want to delete the ${version} logo?`)) return;
-
-        try {
-            const response = await api.request({
-                method: 'DELETE',
-                url: '/admin/logos',
-                data: { version }
+            setMessage({ 
+                type: 'error', 
+                text: error.response?.data?.message || 'Error uploading logo.' 
             });
-            if (response.data.success) {
-                setMessage({ type: 'success', text: response.data.message });
-                fetchLogos();
-                setTimeout(() => setMessage(null), 3000);
-            }
-        } catch (error) {
-            setMessage({ type: 'error', text: error.response?.data?.message || 'Delete failed' });
+        } finally {
+            setUploading(false);
         }
     };
-
-    const logoVersions = [
-        { version: '1x', label: 'Logo (1x)', desc: 'Default resolution - standard screens' },
-        { version: '2x', label: 'Logo (2x)', desc: 'Retina resolution - high-density screens' },
-        { version: '4x', label: 'Logo (4x)', desc: 'High resolution - 4K displays' }
-    ];
-
-    if (loading) {
-        return (
-            <AdminLayout>
-                <div className="flex items-center justify-center h-64">
-                    <div className="text-lg text-gray-600">Loading...</div>
-                </div>
-            </AdminLayout>
-        );
-    }
 
     return (
         <AdminLayout>
-            <div className="space-y-6">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Logo Management</h2>
-                    <p className="mt-1 text-sm text-gray-600">
-                        Upload and manage your website logos for different screen resolutions.
-                    </p>
-                </div>
-
-                {message && (
-                    <div className={`flex items-center p-4 rounded-md ${
-                        message.type === 'success' 
-                            ? 'bg-green-50 text-green-800 border border-green-200' 
-                            : 'bg-red-50 text-red-800 border border-red-200'
-                    }`}>
-                        {message.type === 'success' ? (
-                            <CheckCircle className="h-5 w-5 mr-2" />
-                        ) : (
-                            <AlertCircle className="h-5 w-5 mr-2" />
-                        )}
-                        {message.text}
-                    </div>
-                )}
-
-                <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                    <div className="flex items-start">
-                        <AlertCircle className="h-5 w-5 text-blue-600 mr-2 mt-0.5" />
-                        <div className="text-sm text-blue-800">
-                            <p className="font-medium">Supported formats:</p>
-                            <p>PNG, JPG, SVG, WebP (max 5MB per file)</p>
+            <div className="p-6">
+                <h1 className="text-2xl font-bold mb-6">Logo Management</h1>
+                
+                <div className="bg-white rounded-lg shadow p-6 max-w-2xl">
+                    <div className="mb-8">
+                        <h2 className="text-lg font-semibold mb-4">Current Logo</h2>
+                        <div className="border rounded-lg p-4 bg-gray-50 flex items-center justify-center min-h-[200px]">
+                            {logoUrl ? (
+                                <img src={logoUrl} alt="Site Logo" className="max-h-32 object-contain" />
+                            ) : (
+                                <p className="text-gray-500 italic">No logo uploaded yet</p>
+                            )}
                         </div>
                     </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {logoVersions.map(({ version, label, desc }) => (
-                        <div key={version} className="bg-white shadow rounded-lg p-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-2">{label}</h3>
-                            <p className="text-sm text-gray-500 mb-4">{desc}</p>
-                            
-                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 mb-4 min-h-[120px] flex items-center justify-center bg-gray-50">
-                                {logos[`logo_${version}`] ? (
-                                    <img 
-                                        src={logos[`logo_${version}`].startsWith('/') ? logos[`logo_${version}`] : `/${logos[`logo_${version}`]}`}
-                                        alt={`Logo ${version}`}
-                                        className="max-h-24 max-w-full object-contain"
-                                    />
-                                ) : (
-                                    <div className="text-center text-gray-400">
-                                        <Image className="h-12 w-12 mx-auto mb-2" />
-                                        <p className="text-sm">No logo uploaded</p>
-                                    </div>
-                                )}
-                            </div>
-
+                    <form onSubmit={handleUpload}>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Upload New Logo
+                            </label>
                             <input
                                 type="file"
-                                ref={fileInputRefs[version]}
-                                onChange={(e) => handleUpload(version, e.target.files[0])}
-                                accept="image/png,image/jpeg,image/jpg,image/svg+xml,image/webp"
-                                className="hidden"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                             />
-
-                            <div className="flex space-x-2">
-                                <button
-                                    onClick={() => fileInputRefs[version].current?.click()}
-                                    disabled={uploading[version]}
-                                    className="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <Upload className="h-4 w-4 mr-2" />
-                                    {uploading[version] ? 'Uploading...' : 'Upload'}
-                                </button>
-                                
-                                {logos[`logo_${version}`] && (
-                                    <button
-                                        onClick={() => handleDelete(version)}
-                                        className="inline-flex items-center px-3 py-2 border border-red-300 rounded-md shadow-sm text-sm font-medium text-red-700 bg-white hover:bg-red-50"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </button>
-                                )}
-                            </div>
+                            <p className="mt-2 text-xs text-gray-500">
+                                Recommended: PNG or SVG with transparent background. Max size 2MB.
+                            </p>
                         </div>
-                    ))}
-                </div>
 
-                <div className="bg-white shadow rounded-lg p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Preview</h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                        This is how your logo will appear on the website. The correct version will be displayed based on screen resolution.
-                    </p>
-                    <div className="bg-gray-100 p-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#94edfd' }}>
-                        {logos.logo_1x ? (
-                            <img 
-                                src={logos.logo_1x.startsWith('/') ? logos.logo_1x : `/${logos.logo_1x}`}
-                                srcSet={[
-                                    logos.logo_1x && `${logos.logo_1x.startsWith('/') ? logos.logo_1x : '/' + logos.logo_1x} 1x`,
-                                    logos.logo_2x && `${logos.logo_2x.startsWith('/') ? logos.logo_2x : '/' + logos.logo_2x} 2x`,
-                                    logos.logo_4x && `${logos.logo_4x.startsWith('/') ? logos.logo_4x : '/' + logos.logo_4x} 4x`
-                                ].filter(Boolean).join(', ')}
-                                alt="Logo Preview"
-                                className="max-h-20 object-contain"
-                            />
-                        ) : (
-                            <p className="text-gray-500">No logo uploaded</p>
+                        {message.text && (
+                            <div className={`mb-4 p-3 rounded-md flex items-center space-x-2 ${
+                                message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                            }`}>
+                                {message.type === 'success' ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+                                <span>{message.text}</span>
+                            </div>
                         )}
-                    </div>
+
+                        <button
+                            type="submit"
+                            disabled={!logo || uploading}
+                            className="w-full bg-blue-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                        >
+                            {uploading ? (
+                                <span>Uploading...</span>
+                            ) : (
+                                <>
+                                    <Upload className="w-5 h-5" />
+                                    <span>Upload Logo</span>
+                                </>
+                            )}
+                        </button>
+                    </form>
                 </div>
             </div>
         </AdminLayout>
