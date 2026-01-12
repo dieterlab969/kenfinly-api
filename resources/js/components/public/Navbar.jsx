@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
-import Logo from '../Logo';
 import LanguageSwitcher from './LanguageSwitcher';
 import gtmTracking from '../../utils/gtmTracking';
 import { useTranslation } from '../../contexts/TranslationContext';
+import DynamicLogo from '../DynamicLogo';
 
 function Navbar() {
     const { t } = useTranslation();
@@ -29,10 +29,7 @@ function Navbar() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
                     <div className="flex items-center">
-                        <Link to="/" className="flex items-center space-x-2">
-                            <Logo fallbackSize="default" />
-                            <span className="text-xl font-bold text-gray-900">Kenfinly</span>
-                        </Link>
+                        <DynamicLogo className="w-10 h-10" />
                     </div>
 
                     <div className="hidden md:flex items-center space-x-8">
