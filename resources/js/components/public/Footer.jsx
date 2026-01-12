@@ -61,7 +61,7 @@ function Footer({ showCopyright = true }) {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     <div className="col-span-1 md:col-span-2">
                         <div className="flex items-center space-x-2 mb-4">
-                            <DynamicLogo className="w-10 h-10" textClassName="text-xl font-bold text-white font-['Montserrat']" />
+                            <DynamicLogo className="w-10 h-10" showText={true} textClassName="text-xl font-bold text-white font-['Montserrat']" />
                         </div>
                         <p className="text-gray-400 mb-4 max-w-md">
                             {t('footer.description')}
