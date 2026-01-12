@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import axios from 'axios';
+import gtmTracking from '../../utils/gtmTracking';
+import { useTranslation } from '../../contexts/TranslationContext';
 import DynamicLogo from '../DynamicLogo';
 
 function Footer({ showCopyright = true }) {

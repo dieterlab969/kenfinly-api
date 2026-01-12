@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import LanguageSwitcher from './LanguageSwitcher';
+import gtmTracking from '../../utils/gtmTracking';
+import { useTranslation } from '../../contexts/TranslationContext';
 import DynamicLogo from '../DynamicLogo';
 
 function Navbar() {
