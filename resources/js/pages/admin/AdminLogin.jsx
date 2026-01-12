@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Shield } from 'lucide-react';
 
+import DynamicLogo from '../../components/DynamicLogo';
+
 const AdminLogin = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -63,9 +65,7 @@ const AdminLogin = () => {
             <div className="max-w-md w-full space-y-8">
                 <div className="text-center">
                     <div className="flex justify-center mb-4">
-                        <div className="bg-indigo-600 p-3 rounded-full">
-                            <Shield className="h-12 w-12 text-white" />
-                        </div>
+                        <DynamicLogo className="w-16 h-16" iconClassName="w-10 h-10" />
                     </div>
                     <h2 className="text-3xl font-bold text-white">
                         Admin Portal
