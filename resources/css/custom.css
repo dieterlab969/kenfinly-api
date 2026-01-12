@@ -1,0 +1,10 @@
+@layer components {
+    .logo-container {
+        caret-color: transparent;
+        user-select: none;
+    }
+
+    .logo-container img {
+        pointer-events: none;
+    }
+}

@@ -7,7 +7,7 @@ const DynamicLogo = ({ className = "w-10 h-10", iconClassName = "w-6 h-6", textC
     const { logoUrl } = useLogo();
 
     return (
-        <Link to="/" className="flex items-center space-x-2">
+        <Link to="/" className="flex items-center space-x-2 logo-container">
             {logoUrl ? (
                 <img src={logoUrl} alt="Kenfinly Logo" className={`${className} object-contain`} />
             ) : (
