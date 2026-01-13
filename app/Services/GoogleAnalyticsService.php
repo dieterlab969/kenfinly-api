@@ -38,7 +38,7 @@ class GoogleAnalyticsService
                      new Metric(['name' => 'sessions']),
                  ],
              ]);
-    
+
              return $this->formatTrafficData($response);
          });
     }
@@ -58,5 +58,11 @@ class GoogleAnalyticsService
             'weekly_sessions' => number_format($totalSessions),
             'updated_at' => now()->toIso8601String()
         ];
+    }
+
+    public function clearCache()
+    {
+        Cache::forget('analytics_weekly_traffic');
+        Cache::forget('analytics_monthly_traffic');
     }
 }

@@ -44,6 +44,7 @@ Route::get('/settings/company', [PublicSettingsController::class, 'getCompanyInf
 Route::get('/analytics/public-stats', [PublicAnalyticsController::class, 'getPublicStats']);
 Route::post('/consent', [ConsentController::class, 'store']);
 Route::get('/consent', [ConsentController::class, 'show']);
+Route::delete('/consent',[ConsentController::class, 'destroy']);
 
 // Email verification routes (public)
 Route::post('/email/verify', [EmailVerificationController::class, 'verify']);
