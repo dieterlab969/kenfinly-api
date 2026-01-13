@@ -28,7 +28,8 @@ use App\Http\Controllers\Api\WordPressController;
 use App\Http\Controllers\Api\PublicSettingsController;
 use App\Http\Controllers\Api\PublicLogoController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Api\PublicAnalyticsController;
+use App\Http\Controllers\Api\ConsentController;
 use App\Http\Controllers\Api\LogoController;
 
 // Public routes
@@ -40,6 +41,9 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/waitlist', [\App\Http\Controllers\Api\WaitlistController::class, 'store']);
 Route::get('/auth/config', [AuthController::class, 'config']);
 Route::get('/settings/company', [PublicSettingsController::class, 'getCompanyInfo']);
+Route::get('/analytics/public-stats', [PublicAnalyticsController::class, 'getPublicStats']);
+Route::post('/consent', [ConsentController::class, 'store']);
+Route::get('/consent', [ConsentController::class, 'show']);
 
 // Email verification routes (public)
 Route::post('/email/verify', [EmailVerificationController::class, 'verify']);

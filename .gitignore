@@ -39,3 +39,6 @@ Thumbs.db
 
 # Keep custom WordPress files (configs, plugins, themes)
 !/wordpress-custom/
+
+# Prevent credential files from being committed to Git
+/storage/app/google/*.json
