@@ -6,7 +6,26 @@ import gtmTracking from '../../utils/gtmTracking';
 import { useTranslation } from '../../contexts/TranslationContext';
 import DynamicLogo from '../DynamicLogo';
 
-function Footer({ showCopyright = true }) {
+const StatCard = ({ title, value, icon, color }) => {
+    const colorClasses = {
+        blue: 'text-blue-600 bg-blue-50',
+        green: 'text-green-600 bg-green-50',
+        purple: 'text-purple-600 bg-purple-50',
+        orange: 'text-orange-600 bg-orange-50',
+    };
+
+    return (
+        <div className="mb-4 p-4 rounded border border-gray-700 bg-gray-800 flex items-center justify-between hover:shadow-md transition-shadow">
+            <div className="flex items-center space-x-3">
+                <span className="text-2xl">{icon}</span>
+                <div className={`text-lg font-semibold ${colorClasses[color]}`}>{title}</div>
+            </div>
+            <div className={`text-3xl font-bold ${colorClasses[color].split(' ')[0]}`}>{value}</div>
+        </div>
+    );
+};
+
+function Footer({ showCopyright = true, showAnalytics = true }) {
     const { t } = useTranslation();
     const currentYear = useMemo(() => new Date().getFullYear(), []);
     const [companyInfo, setCompanyInfo] = useState({
@@ -18,6 +37,11 @@ function Footer({ showCopyright = true }) {
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+
+    // Analytics state
+    const [stats, setStats] = useState(null);
+    const [statsLoading, setStatsLoading] = useState(true);
+    const [statsError, setStatsError] = useState(null);
 
     const fetchCompanyInfo = useCallback(async () => {
         setLoading(true);
@@ -33,9 +57,35 @@ function Footer({ showCopyright = true }) {
         }
     }, []);
 
+    const fetchAnalytics = useCallback(async () => {
+        if (!showAnalytics) return;
+        try {
+            const response = await axios.get('/api/analytics/public-stats');
+            if (response.data.success) {
+                setStats(response.data.data);
+                setStatsError(null);
+            } else {
+                setStatsError(t('analyticsFooter.loadFailed'));
+            }
+        } catch (err) {
+            setStatsError(t('analyticsFooter.unableToLoad'));
+            console.error('Analytics fetch error:', err);
+        } finally {
+            setStatsLoading(false);
+        }
+    }, [showAnalytics, t]);
+
     useEffect(() => {
         fetchCompanyInfo();
     }, [fetchCompanyInfo]);
+
+    useEffect(() => {
+        if (showAnalytics) {
+            fetchAnalytics();
+            const interval = setInterval(fetchAnalytics, 300000);
+            return () => clearInterval(interval);
+        }
+    }, [showAnalytics, fetchAnalytics]);
 
     const socialLinks = [
         {
@@ -57,16 +107,70 @@ function Footer({ showCopyright = true }) {
 
     return (
         <footer className="bg-gray-900 text-gray-300">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    <div className="col-span-1 md:col-span-2">
-                        <div className="flex items-center space-x-2 mb-4">
-                            <DynamicLogo className="w-10 h-10" showText={true} textClassName="text-xl font-bold text-white font-['Montserrat']" />
+            {showAnalytics && stats && !statsError && (
+                <div className="border-b border-gray-800 py-12">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <h3 className="text-xl font-semibold text-white mb-8 text-center">
+                            {t('analyticsFooter.title')}
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="bg-gray-800/50 rounded-xl p-8 border border-gray-700">
+                                <h4 className="text-lg font-semibold mb-6 text-blue-400 flex items-center">
+                                    <span className="mr-2">📈</span> {t('analyticsFooter.weeklyStats')}
+                                </h4>
+                                <div className="space-y-4">
+                                    <StatCard
+                                        title={t('analyticsFooter.visitors')}
+                                        value={stats.weekly.formatted_users}
+                                        icon="👥"
+                                        color="blue"
+                                    />
+                                    <StatCard
+                                        title={t('analyticsFooter.totalSessions')}
+                                        value={stats.weekly.formatted_sessions}
+                                        icon="🔄"
+                                        color="green"
+                                    />
+                                </div>
+                            </div>
+                            <div className="bg-gray-800/50 rounded-xl p-8 border border-gray-700">
+                                <h4 className="text-lg font-semibold mb-6 text-purple-400 flex items-center">
+                                    <span className="mr-2">📊</span> {t('analyticsFooter.monthlyStats')}
+                                </h4>
+                                <div className="space-y-4">
+                                    <StatCard
+                                        title={t('analyticsFooter.visitors')}
+                                        value={stats.monthly.formatted_users}
+                                        icon="👥"
+                                        color="purple"
+                                    />
+                                    <StatCard
+                                        title={t('analyticsFooter.totalSessions')}
+                                        value={stats.monthly.formatted_sessions}
+                                        icon="🔄"
+                                        color="orange"
+                                    />
+                                </div>
+                            </div>
                         </div>
-                        <p className="text-gray-400 mb-4 max-w-md">
+                        <div className="mt-8 text-center text-sm text-gray-500">
+                            <p>{t('analyticsFooter.lastUpdated', { date: new Date(stats.weekly.updated_at).toLocaleString() })}</p>
+                            <p className="mt-2 max-w-2xl mx-auto italic">{t('analyticsFooter.disclaimer')}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+                    <div className="col-span-1 md:col-span-2">
+                        <div className="flex items-center space-x-2 mb-6">
+                            <DynamicLogo className="w-12 h-12" showText={true} textClassName="text-2xl font-bold text-white font-['Montserrat']" />
+                        </div>
+                        <p className="text-gray-400 mb-6 text-lg leading-relaxed max-w-md">
                             {t('footer.description')}
                         </p>
-                        <div className="flex space-x-4">
+                        <div className="flex space-x-5">
                             {socialLinks.map(({ href, label, svgPath }, idx) =>
                                 href ? (
                                     <a
@@ -76,9 +180,9 @@ function Footer({ showCopyright = true }) {
                                         rel="noopener noreferrer"
                                         aria-label={label}
                                         onClick={() => gtmTracking.trackSocialLinkClick(label.toLowerCase())}
-                                        className="text-gray-400 hover:text-white transition-colors"
+                                        className="text-gray-400 hover:text-white transition-all transform hover:scale-110"
                                     >
-                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                                             <path d={svgPath} />
                                         </svg>
                                     </a>
@@ -88,63 +192,61 @@ function Footer({ showCopyright = true }) {
                     </div>
 
                     <div>
-                        <h3 className="text-white font-semibold mb-4">{t('footer.quick_links_title')}</h3>
-                        <ul className="space-y-2">
+                        <h3 className="text-white font-bold text-lg mb-6 uppercase tracking-wider">{t('footer.quick_links_title')}</h3>
+                        <ul className="space-y-4">
                             <li>
-                                <Link to="/" onClick={() => gtmTracking.trackFooterNavClick('home')} className="text-gray-400 hover:text-white transition-colors">
-                                    {t('footer.navigation.home')}
+                                <Link to="/" onClick={() => gtmTracking.trackFooterNavClick('home')} className="text-gray-400 hover:text-white transition-colors flex items-center">
+                                    <span className="mr-2">›</span> {t('footer.navigation.home')}
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/blog" onClick={() => gtmTracking.trackFooterNavClick('blog')} className="text-gray-400 hover:text-white transition-colors">
-                                    {t('footer.navigation.blog')}
+                                <Link to="/blog" onClick={() => gtmTracking.trackFooterNavClick('blog')} className="text-gray-400 hover:text-white transition-colors flex items-center">
+                                    <span className="mr-2">›</span> {t('footer.navigation.blog')}
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/about" onClick={() => gtmTracking.trackFooterNavClick('about_us')} className="text-gray-400 hover:text-white transition-colors">
-                                    {t('footer.navigation.about_us')}
+                                <Link to="/about" onClick={() => gtmTracking.trackFooterNavClick('about_us')} className="text-gray-400 hover:text-white transition-colors flex items-center">
+                                    <span className="mr-2">›</span> {t('footer.navigation.about_us')}
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/login" onClick={() => gtmTracking.trackFooterNavClick('sign_in')} className="text-gray-400 hover:text-white transition-colors">
-                                    {t('footer.navigation.sign_in')}
+                                <Link to="/login" onClick={() => gtmTracking.trackFooterNavClick('sign_in')} className="text-gray-400 hover:text-white transition-colors flex items-center">
+                                    <span className="mr-2">›</span> {t('footer.navigation.sign_in')}
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/register" onClick={() => gtmTracking.trackFooterNavClick('get_started')} className="text-gray-400 hover:text-white transition-colors">
-                                    {t('footer.navigation.get_started')}
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h3 className="text-white font-semibold mb-4">{t('footer.utilities_title')}</h3>
-                        <ul className="space-y-2">
-                            <li>
-                                <Link to="/textcase" className="text-gray-400 hover:text-white transition-colors">
-                                    {t('footer.convert_case_tool')}
+                                <Link to="/register" onClick={() => gtmTracking.trackFooterNavClick('get_started')} className="text-gray-400 hover:text-white transition-colors flex items-center">
+                                    <span className="mr-2">›</span> {t('footer.navigation.get_started')}
                                 </Link>
                             </li>
                         </ul>
                     </div>
 
                     <div>
-                        <h3 className="text-white font-semibold mb-4">CÔNG TY TNHH GETKENKA</h3>
-                        <p className="text-sm text-gray-400 mb-2">
-                            Registered office address: Tầng 2, 81 Cách Mạng Tháng Tám, Phường Bến Thành, Thành phố Hồ Chí Minh, Việt Nam
-                        </p>
-                        <p className="text-sm text-gray-400 mb-4">Tax code: 0318304909</p>
-                        <ul className="space-y-3">
-                            <li className="flex items-center space-x-3">
-                                <Mail className="w-5 h-5 text-blue-500" aria-hidden="true"/>
-                                <a href={`mailto:${companyInfo.company_email}`} className="hover:text-white transition-colors">
+                        <h3 className="text-white font-bold text-lg mb-6 uppercase tracking-wider">{t('footer.utilities_title')}</h3>
+                        <ul className="space-y-4">
+                            <li>
+                                <Link to="/textcase" className="text-gray-400 hover:text-white transition-colors flex items-center">
+                                    <span className="mr-2">›</span> {t('footer.convert_case_tool')}
+                                </Link>
+                            </li>
+                        </ul>
+
+                        <h3 className="text-white font-bold text-lg mt-8 mb-6 uppercase tracking-wider">Contact Us</h3>
+                        <ul className="space-y-4">
+                            <li className="flex items-start space-x-3 text-gray-400">
+                                <MapPin className="w-5 h-5 text-blue-500 shrink-0 mt-1" aria-hidden="true"/>
+                                <span className="text-sm leading-relaxed">{companyInfo.company_address}</span>
+                            </li>
+                            <li className="flex items-center space-x-3 text-gray-400">
+                                <Mail className="w-5 h-5 text-blue-500 shrink-0" aria-hidden="true"/>
+                                <a href={`mailto:${companyInfo.company_email}`} className="hover:text-white transition-colors text-sm">
                                     {companyInfo.company_email}
                                 </a>
                             </li>
-                            <li className="flex items-center space-x-3">
-                                <Phone className="w-5 h-5 text-blue-500" aria-hidden="true"/>
-                                <a href={`tel:${companyInfo.company_phone}`} className="hover:text-white transition-colors">
+                            <li className="flex items-center space-x-3 text-gray-400">
+                                <Phone className="w-5 h-5 text-blue-500 shrink-0" aria-hidden="true"/>
+                                <a href={`tel:${companyInfo.company_phone}`} className="hover:text-white transition-colors text-sm">
                                     {companyInfo.company_phone}
                                 </a>
                             </li>
@@ -153,16 +255,24 @@ function Footer({ showCopyright = true }) {
                 </div>
 
                 {showCopyright && (
-                    <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-xs">
-                        <p className="mb-2">Copyright © 2024–2026 Getkenka Ltd | Last updated: January 2026</p>
-                        <p>
-                            Concept by <a href="https://www.linkedin.com/in/dieter-entrepreneur/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Dieter R.</a> | Privacy Policy | Terms of Service | Sitemap
-                        </p>
+                    <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500 text-sm">
+                        <p className="mb-4">Copyright © 2024–{currentYear} {companyInfo.company_name} | Last updated: January 2026</p>
+                        <div className="flex flex-wrap justify-center gap-4 text-xs">
+                            <span className="text-gray-600">Concept by <a href="https://www.linkedin.com/in/dieter-entrepreneur/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Dieter R.</a></span>
+                            <span className="text-gray-700">|</span>
+                            <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                            <span className="text-gray-700">|</span>
+                            <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+                            <span className="text-gray-700">|</span>
+                            <Link to="/sitemap.xml" className="hover:text-white transition-colors">Sitemap</Link>
+                        </div>
                     </div>
                 )}
             </div>
         </footer>
     );
 }
+
+export default Footer;
 
 export default Footer;
