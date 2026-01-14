@@ -97,7 +97,7 @@ class ConsentController extends Controller
         ]);
     }
 
-    public function destroy(Request $request)
+    public function destroy(Request $request): JsonResponse
     {
         $sessionId = $request->session()->getId();
 
@@ -105,7 +105,7 @@ class ConsentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'No consent record found'
-            ], 404);
+            ], Response::HTTP_NOT_FOUND);
         }
 
         $consent = UserConsent::where('session_id', $sessionId)->first();
@@ -114,7 +114,7 @@ class ConsentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'No consent record found'
-            ], 404);
+            ], Response::HTTP_NOT_FOUND);
         }
 
         $deletedInfo = [
@@ -139,7 +139,7 @@ class ConsentController extends Controller
     /**
      * Update existing consent preferences
      */
-    public function update(Request $request)
+    public function update(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'analytics_consent' => 'required|boolean',
@@ -152,7 +152,7 @@ class ConsentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'No active session found'
-            ], 400);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $consent = UserConsent::where('session_id', $sessionId)->first();
@@ -161,7 +161,7 @@ class ConsentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'No consent record found. Please provide consent first.'
-            ], 404);
+            ], Response::HTTP_NOT_FOUND);
         }
 
         // Track if consent was changed
