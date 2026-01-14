@@ -274,5 +274,3 @@ function Footer({ showCopyright = true, showAnalytics = true }) {
 }
 
 export default Footer;
-
-export default Footer;

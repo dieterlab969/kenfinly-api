@@ -39,14 +39,10 @@ class PublicAnalyticsController extends Controller
             ];
 
             // Create JSON response with caching headers (cache for 5 minutes)
-            $response = response()->json([
+            return response()->json([
                 'success' => true,
                 'data' => $data,
-            ]);
-
-            $response->header('Cache-Control', 'public, max-age=300, s-maxage=300, must-revalidate');
-
-            return $response;
+            ])->header('Cache-Control', 'public, max-age=300, s-maxage=300, must-revalidate');
         } catch (\Exception $e) {
             Log::error('Failed to retrieve combined analytics stats', [
                 'message' => $e->getMessage(),
