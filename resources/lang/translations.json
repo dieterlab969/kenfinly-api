@@ -555,6 +555,46 @@
     "en": "Try Again",
     "vi": "Thử lại"
   },
+  "analyticsFooter.loadFailed": {
+    "en": "Failed to load analytics data",
+    "vi": "Không thể tải dữ liệu phân tích"
+  },
+  "analyticsFooter.unableToLoad": {
+    "en": "Unable to load analytics data",
+    "vi": "Không thể tải dữ liệu phân tích"
+  },
+  "analyticsFooter.loading": {
+    "en": "Loading site statistics...",
+    "vi": "Đang tải số liệu thống kê trang web..."
+  },
+  "analyticsFooter.title": {
+    "en": "Site Statistics",
+    "vi": "Thống kê trang web"
+  },
+  "analyticsFooter.weeklyStats": {
+    "en": "Weekly Stats",
+    "vi": "Thống kê hàng tuần"
+  },
+  "analyticsFooter.monthlyStats": {
+    "en": "Monthly Stats",
+    "vi": "Thống kê hàng tháng"
+  },
+  "analyticsFooter.visitors": {
+    "en": "Visitors",
+    "vi": "Khách truy cập"
+  },
+  "analyticsFooter.totalSessions": {
+    "en": "Total Sessions",
+    "vi": "Tổng số phiên"
+  },
+  "analyticsFooter.lastUpdated": {
+    "en": "Last updated: {{date}}",
+    "vi": "Cập nhật lần cuối: {{date}}"
+  },
+  "analyticsFooter.disclaimer": {
+    "en": "These statistics represent aggregate, anonymized data. Your individual browsing activity is protected by our privacy policy.",
+    "vi": "Các số liệu thống kê này đại diện cho dữ liệu tổng hợp, ẩn danh. Hoạt động duyệt web cá nhân của bạn được bảo vệ bởi chính sách bảo mật của chúng tôi."
+  },
   "blogpage.search.no_results": {
     "en": "No results found for \"{{keyword}}\". Try a different search term.",
     "vi": "Không tìm thấy kết quả cho \"{{keyword}}\". Hãy thử từ khóa khác."

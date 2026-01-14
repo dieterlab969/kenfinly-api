@@ -23,10 +23,10 @@ const AnalyticsFooter = () => {
                 setStats(response.data.data);
                 setError(null);
             } else {
-                setError('Failed to load analytics data');
+                setError(t('analyticsFooter.loadFailed'));
             }
         } catch (err) {
-            setError('Unable to load analytics data');
+            setError(t('analyticsFooter.unableToLoad'));
             console.error('Analytics fetch error:', err);
         } finally {
             setLoading(false);
@@ -37,7 +37,7 @@ const AnalyticsFooter = () => {
         return (
             <div className="bg-gray-50 border-t border-gray-200 py-6">
                 <div className="container mx-auto px-4 text-center text-gray-500">
-                    Loading site statistics...
+                    {t('analyticsFooter.loading')}
                 </div>
             </div>
         );
@@ -53,21 +53,21 @@ const AnalyticsFooter = () => {
         <footer className="bg-gray-50 border-t border-gray-200 py-8">
             <div className="container mx-auto px-4">
                 <h3 className="text-lg font-semibold text-gray-700 mb-6 text-center">
-                    Site Statistics
+                    {t('analyticsFooter.title')}
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-8 gap-6">
                     {/* Weekly Stats */}
                     <div className="md:col-span-4 bg-white rounded-lg shadow-sm p-6">
-                        <h4 className="text-md font-semibold mb-4 text-blue-700">Weekly Stats</h4>
+                        <h4 className="text-md font-semibold mb-4 text-blue-700">{t('analyticsFooter.weeklyStats')}</h4>
                         <StatCard
-                            title="Visitors"
+                            title={t('analyticsFooter.visitors')}
                             value={weekly.formatted_users}
                             icon="👥"
                             color="blue"
                         />
                         <StatCard
-                            title="Total Sessions"
+                            title={t('analyticsFooter.totalSessions')}
                             value={weekly.formatted_sessions}
                             icon="🔄"
                             color="green"
@@ -77,15 +77,15 @@ const AnalyticsFooter = () => {
 
                     {/* Monthly Stats */}
                     <div className="md:col-span-4 bg-white rounded-lg shadow-sm p-6">
-                        <h4 className="text-md font-semibold mb-4 text-purple-700">Monthly Stats</h4>
+                        <h4 className="text-md font-semibold mb-4 text-purple-700">{t('analyticsFooter.monthlyStats')}</h4>
                         <StatCard
-                            title="Visitors"
+                            title={t('analyticsFooter.visitors')}
                             value={monthly.formatted_users}
                             icon="👥"
                             color="purple"
                         />
                         <StatCard
-                            title="Total Sessions"
+                            title={t('analyticsFooter.totalSessions')}
                             value={monthly.formatted_sessions}
                             icon="🔄"
                             color="orange"
@@ -96,11 +96,10 @@ const AnalyticsFooter = () => {
 
                 <div className="mt-6 text-center text-xs text-gray-500">
                     <p>
-                        Last updated: {new Date(weekly.updated_at).toLocaleString()}
+                        {t('analyticsFooter.lastUpdated', { date: new Date(weekly.updated_at).toLocaleString() })}
                     </p>
                     <p className="mt-1">
-                        These statistics represent aggregate, anonymized data. Your individual browsing activity is
-                        protected by our privacy policy.
+                        {t('analyticsFooter.disclaimer')}
                     </p>
                 </div>
             </div>
