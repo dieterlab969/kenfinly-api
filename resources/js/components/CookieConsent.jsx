@@ -19,7 +19,7 @@ const CookieConsent = () => {
    const checkConsentStatus = async () => {
      try {
        const response = await axios.get('/api/consent');
-       if (!response.data.data.has_consent) {
+       if (!response.data.data || !response.data.data.has_consent) {
            setShowBanner(true);
        } else {
             // Initialize currentConsent with saved values
@@ -30,6 +30,7 @@ const CookieConsent = () => {
        }
      } catch (error) {
        console.error('Error checking consent:', error);
+       setShowBanner(true); // Show banner on error to be safe
      }
    }
 
