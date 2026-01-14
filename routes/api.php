@@ -42,9 +42,11 @@ Route::post('/waitlist', [\App\Http\Controllers\Api\WaitlistController::class, '
 Route::get('/auth/config', [AuthController::class, 'config']);
 Route::get('/settings/company', [PublicSettingsController::class, 'getCompanyInfo']);
 Route::get('/analytics/public-stats', [PublicAnalyticsController::class, 'getPublicStats']);
-Route::post('/consent', [ConsentController::class, 'store']);
-Route::get('/consent', [ConsentController::class, 'show']);
-Route::delete('/consent',[ConsentController::class, 'destroy']);
+Route::prefix('consent')->group(function () {
+    Route::post('/', [ConsentController::class, 'store']);
+    Route::get('/', [ConsentController::class, 'show']);
+    Route::delete('/', [ConsentController::class, 'destroy']);
+});
 
 // Email verification routes (public)
 Route::post('/email/verify', [EmailVerificationController::class, 'verify']);
