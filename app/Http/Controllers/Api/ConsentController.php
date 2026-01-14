@@ -3,12 +3,24 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\UserConsent;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
 class ConsentController extends Controller
 {
-     public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
+        if (!config('wordpress.cookie_consent.enabled')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cookie consent is currently disabled.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
         $validated = $request->validate([
             'analytics_consent' => 'required|boolean',
             'marketing_consent' => 'boolean'
@@ -36,8 +48,20 @@ class ConsentController extends Controller
         ]);
     }
 
-    public function show(Request $request)
+    public function show(Request $request): JsonResponse
     {
+        if (!config('wordpress.cookie_consent.enabled')) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'has_consent' => true, // Treat as consented if disabled to hide banner
+                    'analytics_consent' => true,
+                    'marketing_consent' => true,
+                    'disabled' => true
+                ]
+            ]);
+        }
+
         $sessionId = $request->session()->getId();
         if (!$sessionId) {
             return response()->json([
@@ -73,7 +97,7 @@ class ConsentController extends Controller
         ]);
     }
 
-    public function destroy(Request $request)
+    public function destroy(Request $request): JsonResponse
     {
         $sessionId = $request->session()->getId();
 
@@ -81,7 +105,7 @@ class ConsentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'No consent record found'
-            ], 404);
+            ], Response::HTTP_NOT_FOUND);
         }
 
         $consent = UserConsent::where('session_id', $sessionId)->first();
@@ -90,7 +114,7 @@ class ConsentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'No consent record found'
-            ], 404);
+            ], Response::HTTP_NOT_FOUND);
         }
 
         $deletedInfo = [
@@ -115,7 +139,7 @@ class ConsentController extends Controller
     /**
      * Update existing consent preferences
      */
-    public function update(Request $request)
+    public function update(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'analytics_consent' => 'required|boolean',
@@ -128,7 +152,7 @@ class ConsentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'No active session found'
-            ], 400);
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $consent = UserConsent::where('session_id', $sessionId)->first();
@@ -137,7 +161,7 @@ class ConsentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'No consent record found. Please provide consent first.'
-            ], 404);
+            ], Response::HTTP_NOT_FOUND);
         }
 
         // Track if consent was changed

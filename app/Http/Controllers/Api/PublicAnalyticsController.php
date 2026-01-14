@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\GoogleAnalyticsService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,10 +26,17 @@ class PublicAnalyticsController extends Controller
      * It also sets HTTP cache headers to improve performance.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function getPublicStats(Request $request)
+    public function getPublicStats(Request $request): JsonResponse
     {
+        if (!config('wordpress.traffic_stats.enabled')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Traffic statistics are currently disabled.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
         try {
             $weeklyStats = $this->analyticsService->getWeeklyTraffic();
             $monthlyStats = $this->analyticsService->getMonthlyTraffic();

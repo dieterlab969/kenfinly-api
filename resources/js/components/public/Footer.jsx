@@ -68,6 +68,12 @@ function Footer({ showCopyright = true, showAnalytics = true }) {
                 setStatsError(t('analyticsFooter.loadFailed'));
             }
         } catch (err) {
+            // If 403, traffic stats are disabled in config
+            if (err.response && err.response.status === 403) {
+                setStats(null);
+                setStatsError(null);
+                return;
+            }
             setStatsError(t('analyticsFooter.unableToLoad'));
             console.error('Analytics fetch error:', err);
         } finally {

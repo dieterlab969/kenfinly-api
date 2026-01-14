@@ -22,4 +22,12 @@ return [
     ],
     
     'custom_post_types' => array_filter(explode(',', env('WORDPRESS_CUSTOM_POST_TYPES', '')), fn($v) => $v !== ''),
+
+    'traffic_stats' => [
+        'enabled' => env('TRAFFIC_STATS_ENABLED', false),
+    ],
+
+    'cookie_consent' => [
+        'enabled' => env('COOKIE_CONSENT_ENABLED', false),
+    ],
 ];
