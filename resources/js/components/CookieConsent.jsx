@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useTranslation } from '@assets/js/contexts/TranslationContext.jsx';
 
 const CookieConsent = () => {
+  const { t } = useTranslation();
   const [showBanner, setShowBanner] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [currentConsent, setCurrentConsent] = useState({
@@ -79,9 +81,9 @@ const CookieConsent = () => {
       <div className="container mx-auto max-w-6xl">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex-1">
-            <h3 className="text-lg font-semibold mb-2">Your Privacy Matters</h3>
+            <h3 className="text-lg font-semibold mb-2">{t('cookieConsent.privacyTitle')}</h3>
             <p className="text-sm text-gray-600">
-              We use cookies and analytics to improve your experience on our site. You can choose which types of data collection you're comfortable with.
+              {t('cookieConsent.bannerDescription')}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -89,19 +91,19 @@ const CookieConsent = () => {
               onClick={() => setShowDetails(!showDetails)}
               className="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50"
             >
-              Customize
+              {t('cookieConsent.customize')}
             </button>
             <button
               onClick={handleRejectAll}
               className="px-4 py-2 text-sm border border-gray-300 rounded hover:bg-gray-50"
             >
-              Reject All
+              {t('cookieConsent.rejectAll')}
             </button>
             <button
               onClick={handleAcceptAll}
               className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
             >
-              Accept All
+              {t('cookieConsent.acceptAll')}
             </button>
           </div>
         </div>
@@ -110,6 +112,7 @@ const CookieConsent = () => {
             analyticsInitial={currentConsent.analytics}
             marketingInitial={currentConsent.marketing}
             onSave={handleSavePreferences}
+            t={t}
           />
         )}
       </div>
@@ -117,7 +120,7 @@ const CookieConsent = () => {
   );
   };
 
-  const ConsentDetails = ({ analyticsInitial, marketingInitial, onSave }) => {
+  const ConsentDetails = ({ analyticsInitial, marketingInitial, onSave, t }) => {
   const [analytics, setAnalytics] = useState(analyticsInitial);
   const [marketing, setMarketing] = useState(marketingInitial);
 
@@ -131,9 +134,9 @@ const CookieConsent = () => {
       <div className="space-y-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h4 className="font-medium mb-1">Analytics Cookies</h4>
+            <h4 className="font-medium mb-1">{t('cookieConsent.analyticsTitle')}</h4>
             <p className="text-sm text-gray-600">
-              Help us understand how you use our site so we can improve your experience.
+              {t('cookieConsent.analyticsDescription')}
             </p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer ml-4">
@@ -150,9 +153,9 @@ const CookieConsent = () => {
         </div>
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <h4 className="font-medium mb-1">Marketing Cookies</h4>
+            <h4 className="font-medium mb-1">{t('cookieConsent.marketingTitle')}</h4>
             <p className="text-sm text-gray-600">
-              Allow us to show you relevant content and personalized experiences.
+              {t('cookieConsent.marketingDescription')}
             </p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer ml-4">
@@ -172,7 +175,7 @@ const CookieConsent = () => {
         onClick={() => onSave(analytics, marketing)}
         className="mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
       >
-        Save My Preferences
+        {t('cookieConsent.savePreferences')}
       </button>
     </div>
   );
