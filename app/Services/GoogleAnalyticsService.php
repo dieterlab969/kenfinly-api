@@ -61,7 +61,33 @@ class GoogleAnalyticsService
     public function getWeeklyTraffic(): array
     {
         return Cache::remember('analytics_weekly_traffic', 3600, function () {
-            return $this->fetchTrafficData('7daysAgo', 'today');
+            $data = $this->fetchTrafficData('7daysAgo', 'today');
+            return [
+                'users' => $data['users'],
+                'sessions' => $data['sessions'],
+                'formatted_users' => number_format($data['users']),
+                'formatted_sessions' => number_format($data['sessions']),
+                'updated_at' => $data['updated_at'],
+            ];
+        });
+    }
+
+    /**
+     * Retrieve monthly traffic data, cached for 1 hour.
+     *
+     * @return array
+     */
+    public function getMonthlyTraffic(): array
+    {
+        return Cache::remember('analytics_monthly_traffic', 3600, function () {
+            $data = $this->fetchTrafficData('30daysAgo', 'today');
+            return [
+                'users' => $data['users'],
+                'sessions' => $data['sessions'],
+                'formatted_users' => number_format($data['users']),
+                'formatted_sessions' => number_format($data['sessions']),
+                'updated_at' => $data['updated_at'],
+            ];
         });
     }
 
@@ -90,41 +116,29 @@ class GoogleAnalyticsService
                 ],
             ]);
 
-            return $this->formatTrafficData($response);
+            $totalUsers = 0;
+            $totalSessions = 0;
+
+            foreach ($response->getRows() as $row) {
+                $totalUsers += (int) $row->getMetricValues()[0]->getValue();
+                $totalSessions += (int) $row->getMetricValues()[1]->getValue();
+            }
+
+            return [
+                'users' => $totalUsers,
+                'sessions' => $totalSessions,
+                'updated_at' => now()->toIso8601String(),
+            ];
         } catch (\Throwable $e) {
             Log::error('Google Analytics API call failed: ' . $e->getMessage());
 
-            // Return default empty data to avoid breaking the app
             return [
-                'weekly_users' => '0',
-                'weekly_sessions' => '0',
+                'users' => 0,
+                'sessions' => 0,
                 'updated_at' => now()->toIso8601String(),
                 'error' => 'Failed to retrieve analytics data',
             ];
         }
-    }
-
-    /**
-     * Format the raw API response into a simple array.
-     *
-     * @param $response
-     * @return array
-     */
-    protected function formatTrafficData($response): array
-    {
-        $totalUsers = 0;
-        $totalSessions = 0;
-
-        foreach ($response->getRows() as $row) {
-            $totalUsers += (int) $row->getMetricValues()[0]->getValue();
-            $totalSessions += (int) $row->getMetricValues()[1]->getValue();
-        }
-
-        return [
-            'weekly_users' => number_format($totalUsers),
-            'weekly_sessions' => number_format($totalSessions),
-            'updated_at' => now()->toIso8601String(),
-        ];
     }
 
     /**
