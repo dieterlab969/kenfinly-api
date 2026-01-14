@@ -19,6 +19,10 @@ const CookieConsent = () => {
    const checkConsentStatus = async () => {
      try {
        const response = await axios.get('/api/consent');
+       if (response.data.data && response.data.data.disabled) {
+           setShowBanner(false);
+           return;
+       }
        if (!response.data.data || !response.data.data.has_consent) {
            setShowBanner(true);
        } else {

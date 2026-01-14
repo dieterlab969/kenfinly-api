@@ -26,4 +26,8 @@ return [
     'traffic_stats' => [
         'enabled' => env('TRAFFIC_STATS_ENABLED', false),
     ],
+
+    'cookie_consent' => [
+        'enabled' => env('COOKIE_CONSENT_ENABLED', false),
+    ],
 ];

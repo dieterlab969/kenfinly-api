@@ -3,12 +3,24 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\UserConsent;
+use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
 class ConsentController extends Controller
 {
-     public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
+        if (!config('wordpress.cookie_consent.enabled')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cookie consent is currently disabled.',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
         $validated = $request->validate([
             'analytics_consent' => 'required|boolean',
             'marketing_consent' => 'boolean'
@@ -36,8 +48,20 @@ class ConsentController extends Controller
         ]);
     }
 
-    public function show(Request $request)
+    public function show(Request $request): JsonResponse
     {
+        if (!config('wordpress.cookie_consent.enabled')) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'has_consent' => true, // Treat as consented if disabled to hide banner
+                    'analytics_consent' => true,
+                    'marketing_consent' => true,
+                    'disabled' => true
+                ]
+            ]);
+        }
+
         $sessionId = $request->session()->getId();
         if (!$sessionId) {
             return response()->json([
