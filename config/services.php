@@ -40,4 +40,9 @@ return [
         'secret_key' => env('GOOGLE_RECAPTCHA_SECRET_KEY'),
     ],
 
+     'google_analytics' => [
+        'property_id' => env('GOOGLE_ANALYTICS_PROPERTY_ID'),
+        'credentials_path' => env('GOOGLE_ANALYTICS_CREDENTIALS_PATH')
+     ]
+
 ];
