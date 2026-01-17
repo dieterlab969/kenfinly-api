@@ -46,7 +46,7 @@ export default function CheckoutForm({ plan, onPaymentSuccess }) {
                 style: 'currency', 
                 currency: 'VND',
                 maximumFractionDigits: 0
-            }).format(price).replace('₫', 'đ');
+            }).format(price);
         }
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(price);
     };
