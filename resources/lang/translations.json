@@ -1727,6 +1727,10 @@
     "en": "Select Plan",
     "vi": "Chọn gói"
   },
+  "payment.method_label": {
+    "en": "Payment Method",
+    "vi": "Phương thức thanh toán"
+  },
   "footer.utilities_title": {
     "en": "Small Utilities",
     "vi": "Tiện ích nhỏ"
