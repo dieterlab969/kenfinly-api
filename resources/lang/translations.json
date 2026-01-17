@@ -777,7 +777,19 @@
   },
   "footer.quick_links_title": {
     "en": "Quick Links",
-    "vi":  "Liên kết nhanh"
+    "vi": "Liên kết nhanh"
+  },
+  "footer.navigation.privacy_policy": {
+    "en": "Privacy Policy",
+    "vi": "Chính sách bảo mật"
+  },
+  "footer.navigation.terms_of_service": {
+    "en": "Terms of Service",
+    "vi": "Điều khoản dịch vụ"
+  },
+  "footer.all_rights_reserved": {
+    "en": "All rights reserved.",
+    "vi": "Bản quyền đã được bảo hộ."
   },
   "footer.navigation.home": {
     "en": "Home",
