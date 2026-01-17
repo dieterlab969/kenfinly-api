@@ -40,6 +40,17 @@ export default function CheckoutForm({ plan, onPaymentSuccess }) {
         }
     };
 
+    const formatPrice = (price, currency) => {
+        if (currency === 'VND' || !currency) {
+            return new Intl.NumberFormat('vi-VN', { 
+                style: 'currency', 
+                currency: 'VND',
+                maximumFractionDigits: 0
+            }).format(price);
+        }
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(price);
+    };
+
     return (
         <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden p-6 mt-10">
             <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
@@ -50,7 +61,7 @@ export default function CheckoutForm({ plan, onPaymentSuccess }) {
                 <p className="text-sm text-blue-800 font-semibold uppercase tracking-wider">{t('payment.order_summary') || 'Order Summary'}</p>
                 <div className="flex justify-between items-center mt-2">
                     <span className="text-gray-700 font-medium">{plan.name} {t('payment.plan_label') || 'Plan'}</span>
-                    <span className="text-xl font-bold text-gray-900">${plan.price}</span>
+                    <span className="text-xl font-bold text-gray-900">{formatPrice(plan.price, plan.currency)}</span>
                 </div>
                 <p className="text-xs text-blue-600 mt-1">{t('payment.billed_cycle', { cycle: plan.billing_cycle }) || `Billed ${plan.billing_cycle}`}</p>
             </div>
@@ -80,7 +91,7 @@ export default function CheckoutForm({ plan, onPaymentSuccess }) {
                         disabled={loading}
                         className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                        {loading ? (t('payment.processing') || 'Processing...') : (t('payment.pay_and_subscribe', { amount: `$${plan.price}` }) || `Pay $${plan.price} & Subscribe`)}
+                        {loading ? (t('payment.processing') || 'Processing...') : (t('payment.pay_and_subscribe', { amount: formatPrice(plan.price, plan.currency) }) || `Pay ${formatPrice(plan.price, plan.currency)} & Subscribe`)}
                     </button>
                 </div>
 

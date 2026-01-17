@@ -25,8 +25,12 @@ export default function PlanSelection({ onSelectPlan, subscriptionsEnabled = tru
     if (loading) return <div className="p-8 text-center">{t('common.loading') || 'Loading plans...'}</div>;
 
     const formatPrice = (price, currency) => {
-        if (currency === 'VND') {
-            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+        if (currency === 'VND' || !currency) {
+            return new Intl.NumberFormat('vi-VN', { 
+                style: 'currency', 
+                currency: 'VND',
+                maximumFractionDigits: 0
+            }).format(price);
         }
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency || 'USD' }).format(price);
     };
