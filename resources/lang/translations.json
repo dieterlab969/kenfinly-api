@@ -1723,6 +1723,10 @@
     "en": "Notify Me",
     "vi": "Thông báo cho tôi"
   },
+  "payment.select_plan": {
+    "en": "Select Plan",
+    "vi": "Chọn gói"
+  },
   "footer.utilities_title": {
     "en": "Small Utilities",
     "vi": "Tiện ích nhỏ"
