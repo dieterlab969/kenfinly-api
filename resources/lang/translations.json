@@ -775,6 +775,18 @@
     "en": "Take control of your spending with Kenfinly. Track every expense and transform your personal finance management effortlessly.",
     "vi": "Làm chủ chi tiêu của bạn cùng Kenfinly. Theo dõi mọi khoản chi và biến việc quản lý tài chính cá nhân trở nên dễ dàng."
   },
+  "footer.utilities_title": {
+    "en": "Utilities",
+    "vi": "Tiện ích"
+  },
+  "footer.contact_title": {
+    "en": "Contact Us",
+    "vi": "Liên hệ"
+  },
+  "footer.tax_code": {
+    "en": "Tax Code",
+    "vi": "Mã số thuế"
+  },
   "footer.quick_links_title": {
     "en": "Quick Links",
     "vi": "Liên kết nhanh"
