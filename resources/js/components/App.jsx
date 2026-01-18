@@ -61,7 +61,7 @@ function PricingPage() {
                 <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
                     <h2 className="text-2xl font-bold mb-4">{t('payment.waitlist_title') || 'Join the Waitlist'}</h2>
                     <p className="text-gray-600 mb-6">
-                        {t('payment.waitlist_desc', { plan: selectedPlan.name }) || `We're putting the finishing touches on our ${selectedPlan.name} features. Join the waitlist to be the first to know when we launch!`}
+                        {t('payment.waitlist_desc', { plan: t(`plan.${(selectedPlan.slug || selectedPlan.name).toLowerCase().replace(/\s+/g, '_')}.name`) || selectedPlan.name }) || `We're putting the finishing touches on our ${selectedPlan.name} features. Join the waitlist to be the first to know when we launch!`}
                     </p>
                     <WaitlistForm plan={selectedPlan} onComplete={() => setSuccess(true)} />
                     <button onClick={() => setSelectedPlan(null)} className="mt-6 block w-full text-center text-blue-600 hover:underline">{t('common.back_to_plans') || 'Back to plans'}</button>
