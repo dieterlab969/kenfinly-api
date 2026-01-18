@@ -119,8 +119,7 @@ export const TranslationProvider = ({ children }) => {
         // Interpolate variables into the translation string
         if (variables && typeof variables === 'object') {
             Object.keys(variables).forEach(varName => {
-                // Support both {{var}} and {var} formats
-                const regex = new RegExp(`({{\\s*${varName}\\s*}}|{\\s*${varName}\\s*})`, 'g');
+                const regex = new RegExp(`{{\\s*${varName}\\s*}}`, 'g');
                 text = text.replace(regex, variables[varName]);
             });
         }
