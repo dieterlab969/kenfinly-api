@@ -1528,8 +1528,8 @@
     "vi": "Tham gia danh sách chờ"
   },
   "payment.waitlist_desc": {
-    "en": "We're putting the finishing touches on our {{plan}} features. Join the waitlist to be the first to know when we launch!",
-    "vi": "Chúng tôi đang hoàn thiện các tính năng của gói {{plan}}. Hãy tham gia danh sách chờ để là người đầu tiên biết khi chúng tôi ra mắt!"
+    "en": "We're putting the finishing touches on our {plan} features. Join the waitlist to be the first to know when we launch!",
+    "vi": "Chúng tôi đang hoàn thiện các tính năng cho gói {plan}. Hãy tham gia danh sách chờ để là người đầu tiên biết khi chúng tôi ra mắt!"
   },
   "payment.notify_me": {
     "en": "Notify Me",
@@ -1701,7 +1701,7 @@
   },
   "payment.waitlist_desc": {
     "en": "We're putting the finishing touches on our {plan} features. Join the waitlist to be the first to know when we launch!",
-    "vi": "Chúng tôi đang hoàn thiện các tính năng {plan}. Tham gia danh sách chờ để là người đầu tiên biết khi chúng tôi ra mắt!"
+    "vi": "Chúng tôi đang hoàn thiện các tính năng cho gói {plan}. Hãy tham gia danh sách chờ để là người đầu tiên biết khi chúng tôi ra mắt!"
   },
   "common.back_to_plans": {
     "en": "Back to plans",
