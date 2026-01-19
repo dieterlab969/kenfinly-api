@@ -1854,5 +1854,13 @@
   "categories.other-income": {
     "en": "Other Income",
     "vi": "Thu nhập khác"
+  },
+  "categories.imported-income": {
+    "en": "Imported-income",
+    "vi": "Imported-income"
+  },
+  "categories.imported-expense": {
+    "en": "Imported-expense",
+    "vi": "Imported-expense"
   }
 }
