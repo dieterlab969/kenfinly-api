@@ -225,11 +225,11 @@ const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
                             {categories.map((category) => (
                                 <React.Fragment key={category.id}>
                                     <option value={category.id}>
-                                        {getCategoryIcon(category.slug)} {category.name}
+                                        {getCategoryIcon(category.slug)} {t(`categories.${category.slug}`) || category.name}
                                     </option>
                                     {category.children && category.children.map((child) => (
                                         <option key={child.id} value={child.id}>
-                                            &nbsp;&nbsp;{getCategoryIcon(child.slug)} {child.name}
+                                            &nbsp;&nbsp;{getCategoryIcon(child.slug)} {t(`categories.${child.slug}`) || child.name}
                                         </option>
                                     ))}
                                 </React.Fragment>

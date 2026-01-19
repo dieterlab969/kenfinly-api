@@ -1794,5 +1794,65 @@
   "textcase.inverse_case": {
     "en": "InVeRsE CaSe",
     "vi": "ĐảO nGượC cHữ hOa tHưỜnG"
+  },
+  "categories.food-drinks": {
+    "en": "Food/Drinks",
+    "vi": "Ăn uống"
+  },
+  "categories.food-drinks-sub": {
+    "en": "Food/Drinks (Sub)",
+    "vi": "Ăn uống (Sub"
+  },
+  "categories.eating-out": {
+    "en": "Eating Out",
+    "vi": "Ăn ngoài"
+  },
+  "categories.bar": {
+    "en": "Bar",
+    "vi": "Quán bar"
+  },
+  "categories.shopping": {
+    "en": "Shopping",
+    "vi": "Mua sắm"
+  },
+  "categories.transportation": {
+    "en": "Transportation",
+    "vi": "Giao thông"
+  },
+  "categories.entertainment": {
+    "en": "Entertainment",
+    "vi": "Giải trí"
+  },
+  "categories.home": {
+    "en": "Home",
+    "vi": "Nhà cửa"
+  },
+  "categories.family": {
+    "en": "Family",
+    "vi": "Gia đình"
+  },
+  "categories.health-sport": {
+    "en": "Health/Sport",
+    "vi": "Sức khỏe/Thể thao"
+  },
+  "categories.pets": {
+    "en": "Pets",
+    "vi": "Thú cưng"
+  },
+  "categories.other-expenses": {
+    "en": "Other Expenses",
+    "vi": "Chi phí khác"
+  },
+  "categories.salary": {
+    "en": "Salary",
+    "vi": "Lương"
+  },
+  "categories.business": {
+    "en": "Business",
+    "vi": "Kinh doanh"
+  },
+  "categories.other-income": {
+    "en": "Other Income",
+    "vi": "Thu nhập khác"
   }
 }
