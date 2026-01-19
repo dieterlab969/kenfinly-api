@@ -216,7 +216,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                             </div>
                                             <div>
                                                 <h3 className="text-xl font-bold text-gray-900">
-                                                    {transaction.category?.name}
+                                                    {t(`categories.${transaction.category?.slug}`) || transaction.category?.name}
                                                 </h3>
                                                 <p className="text-gray-500">{transaction.account?.name}</p>
                                             </div>
@@ -248,7 +248,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                                     <div>
                                                         <div className="text-sm text-gray-500">{t('transaction_detail_modal.field.category')}</div>
                                                         <div className="font-medium text-gray-900">
-                                                            {transaction.category?.name}
+                                                            {t(`categories.${transaction.category?.slug}`) || transaction.category?.name}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -302,7 +302,7 @@ const TransactionDetailModal = ({ isOpen, onClose, transactionId, onUpdate }) =>
                                                 >
                                                     {categories.map(cat => (
                                                         <option key={cat.id} value={cat.id}>
-                                                            {cat.name}
+                                                            {t(`categories.${cat.slug}`) || cat.name}
                                                         </option>
                                                     ))}
                                                 </select>

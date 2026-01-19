@@ -227,7 +227,7 @@ const Dashboard = () => {
                                         </div>
                                         <div>
                                             <div className="font-medium text-gray-900">
-                                                {transaction.category?.name}
+                                                {t(`categories.${transaction.category?.slug}`) || transaction.category?.name}
                                             </div>
                                             <div className="text-sm text-gray-500">
                                                 {format(parseISO(transaction.transaction_date), 'MMM dd, yyyy')}
