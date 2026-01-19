@@ -1801,7 +1801,7 @@
   },
   "categories.food-drinks-sub": {
     "en": "Food/Drinks (Sub)",
-    "vi": "Ăn uống (Sub"
+    "vi": "Ăn uống (Sub)"
   },
   "categories.eating-out": {
     "en": "Eating Out",
@@ -1862,5 +1862,10 @@
   "categories.imported-expense": {
     "en": "Imported-expense",
     "vi": "Imported-expense"
-  }
+  },
+  "categories.fuel": {
+    "en": "Fuel",
+    "vi": "Nhiên liệu"
+  },
+  
 }
