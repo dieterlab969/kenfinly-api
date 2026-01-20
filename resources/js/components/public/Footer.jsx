@@ -237,9 +237,9 @@ function Footer({ showCopyright = true, showAnalytics = true }) {
                                 </Link>
                             </li>
                             <li>
-                                <link to="/pomodoro" className="text-gray-400 hover:text-white transition-colors flex items-center">
+                                <Link to="/pomodoro" className="text-gray-400 hover:text-white transition-colors flex items-center">
                                     <span className="mr-2">›</span> {t('footer.pomodoro_timer')}
-                                </link>
+                                </Link>
                             </li>
                         </ul>
 
