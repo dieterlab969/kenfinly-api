@@ -1,12 +1,14 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
+import { useTranslation } from '@assets/js/contexts/TranslationContext.jsx';
 
 const PomodoroTimer = () => {
+  const { t } = useTranslation();
   const [minutes, setMinutes] = useState(25);
   const [seconds, setSeconds] = useState(0);
   const [isActive, setIsActive] = useState(false);
-  const [mode, setMode] = useState('Focus');
+  const [mode, setMode] = useState('focus');
   const [completedPomodoros, setCompletedPomodoros] = useState(0);
   const audioRef = useRef(null);
 
@@ -37,20 +39,20 @@ const PomodoroTimer = () => {
     playNotificationSound();
     setIsActive(false);
 
-    if (mode === 'Focus') {
+    if (mode === 'focus') {
       const newCount = completedPomodoros + 1;
       setCompletedPomodoros(newCount);
 
       if (newCount % 4 === 0) {
-        setMode('Long Break');
+        setMode('long_break');
         setMinutes(15);
       } else {
-        setMode('Break');
+        setMode('break');
         setMinutes(5);
       }
       setSeconds(0);
     } else {
-      setMode('Focus');
+      setMode('focus');
       setMinutes(25);
       setSeconds(0);
     }
@@ -80,7 +82,7 @@ const PomodoroTimer = () => {
 
   const resetTimer = () => {
     setIsActive(false);
-    setMode('Focus');
+    setMode('focus');
     setMinutes(25);
     setSeconds(0);
     setCompletedPomodoros(0);
@@ -91,33 +93,31 @@ const PomodoroTimer = () => {
   };
 
   const getModeColor = () => {
-    if (mode === 'Focus') return 'bg-red-500';
-    if (mode === 'Break') return 'bg-green-500';
+    if (mode === 'focus') return 'bg-red-500';
+    if (mode === 'break') return 'bg-green-500';
     return 'bg-blue-500';
   };
 
-  const getModeTextColor = () => {
-    if (mode === 'Focus') return 'text-red-500';
-    if (mode === 'Break') return 'text-green-500';
-    return 'text-blue-500';
+  const getModeLabel = () => {
+    return t(`pomodoro.mode.${mode}`);
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Pomodoro Timer</h1>
-          <p className="text-gray-500">Stay focused and productive</p>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">{t('pomodoro.title')}</h1>
+          <p className="text-gray-500">{t('pomodoro.subtitle')}</p>
         </div>
 
         <div className="mb-8">
           <div className={`${getModeColor()} rounded-2xl p-8 text-white text-center transition-all duration-300`}>
-            <div className="text-xl font-semibold mb-4">{mode}</div>
+            <div className="text-xl font-semibold mb-4">{getModeLabel()}</div>
             <div className="text-7xl font-bold tracking-tight mb-4">
               {formatTime(minutes, seconds)}
             </div>
             <div className="text-sm opacity-90">
-              Completed: {completedPomodoros} {completedPomodoros === 1 ? 'session' : 'sessions'}
+              {t('pomodoro.completed')}: {completedPomodoros} {completedPomodoros === 1 ? t('pomodoro.session') : t('pomodoro.sessions')}
             </div>
           </div>
         </div>
@@ -126,7 +126,7 @@ const PomodoroTimer = () => {
           <button
             onClick={toggleTimer}
             className={`${getModeColor()} hover:opacity-90 text-white rounded-full p-4 transition-all duration-200 shadow-lg hover:shadow-xl`}
-            aria-label={isActive ? 'Pause' : 'Start'}
+            aria-label={isActive ? t('pomodoro.action.pause') : t('pomodoro.action.start')}
           >
             {isActive ? <Pause size={32} /> : <Play size={32} />}
           </button>
@@ -134,18 +134,18 @@ const PomodoroTimer = () => {
           <button
             onClick={resetTimer}
             className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full p-4 transition-all duration-200 shadow-lg hover:shadow-xl"
-            aria-label="Reset"
+            aria-label={t('pomodoro.action.reset')}
           >
             <RotateCcw size={32} />
           </button>
         </div>
 
         <div className="bg-gray-50 rounded-xl p-4 text-center">
-          <h3 className="font-semibold text-gray-700 mb-2">How it works</h3>
+          <h3 className="font-semibold text-gray-700 mb-2">{t('pomodoro.how_it_works')}</h3>
           <ul className="text-sm text-gray-600 space-y-1">
-            <li>• Focus for 25 minutes</li>
-            <li>• Take a 5-minute break</li>
-            <li>• After 4 sessions, take a 15-minute break</li>
+            <li>• {t('pomodoro.step1')}</li>
+            <li>• {t('pomodoro.step2')}</li>
+            <li>• {t('pomodoro.step3')}</li>
           </ul>
         </div>
       </div>
