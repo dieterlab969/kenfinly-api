@@ -30,6 +30,7 @@ import BlogPage from '../pages/public/BlogPage';
 import BlogPostPage from '../pages/public/BlogPostPage';
 import AboutPage from '../pages/public/AboutPage';
 import TextCaseConverter from '../pages/public/TextCaseConverter';
+import PomodoroTimer from '../pages/public/Pomodoro';
 import PlanSelection from './subscription/PlanSelection';
 import CheckoutForm from './subscription/CheckoutForm';
 
@@ -136,6 +137,7 @@ function App({ recaptchaEnabled = false }) {
                         <Route path="/blog/:slug" element={<BlogPostPage />} />
                         <Route path="/about" element={<AboutPage />} />
                         <Route path="/textcase" element={<TextCaseConverter />} />
+                        <Route path="/pomodoro" element={<PomodoroTimer />} />   
                         <Route path="/pricing" element={<PricingPage />} />
                         
                         <Route path="/login" element={<Login />} />

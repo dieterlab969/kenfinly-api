@@ -1739,6 +1739,10 @@
     "en": "Convert Case Tool",
     "vi": "Convert Case Tool"
   },
+  "footer.pomodoro_timer": {
+    "en": "Pomodoro",
+    "vi": "Pomodoro"
+  },
   "textcase.title": {
     "en": "Convert Case",
     "vi": "Chuyển đổi chữ hoa chữ thường"
