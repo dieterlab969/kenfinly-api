@@ -236,6 +236,11 @@ function Footer({ showCopyright = true, showAnalytics = true }) {
                                     <span className="mr-2">›</span> {t('footer.convert_case_tool')}
                                 </Link>
                             </li>
+                            <li>
+                                <link to="/pomodoro" className="text-gray-400 hover:text-white transition-colors flex items-center">
+                                    <span className="mr-2">›</span> {t('footer.pomodoro_timer')}
+                                </link>
+                            </li>
                         </ul>
 
                         <h3 className="text-white font-bold text-lg mt-8 mb-6 uppercase tracking-wider">Contact Us</h3>

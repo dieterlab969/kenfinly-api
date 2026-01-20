@@ -1739,6 +1739,10 @@
     "en": "Convert Case Tool",
     "vi": "Convert Case Tool"
   },
+  "footer.pomodoro_timer": {
+    "en": "Pomodoro",
+    "vi": "Pomodoro"
+  },
   "textcase.title": {
     "en": "Convert Case",
     "vi": "Chuyển đổi chữ hoa chữ thường"
@@ -1866,5 +1870,65 @@
   "categories.fuel": {
     "en": "Fuel",
     "vi": "Nhiên liệu"
+  },
+  "pomodoro.title": {
+    "en": "Pomodoro Timer",
+    "vi": "Đồng hồ Pomodoro"
+  },
+  "pomodoro.subtitle": {
+    "en": "Stay focused and productive",
+    "vi": "Giữ tập trung và làm việc hiệu quả"
+  },
+  "pomodoro.mode.focus": {
+    "en": "Focus",
+    "vi": "Tập trung"
+  },
+  "pomodoro.mode.break": {
+    "en": "Break",
+    "vi": "Nghỉ ngơi"
+  },
+  "pomodoro.mode.long_break": {
+    "en": "Long Break",
+    "vi": "Nghỉ dài"
+  },
+  "pomodoro.completed": {
+    "en": "Completed",
+    "vi": "Đã hoàn thành"
+  },
+  "pomodoro.session": {
+    "en": "session",
+    "vi": "phiên"
+  },
+  "pomodoro.sessions": {
+    "en": "sessions",
+    "vi": "phiên"
+  },
+  "pomodoro.how_it_works": {
+    "en": "How it works",
+    "vi": "Cách hoạt động"
+  },
+  "pomodoro.step1": {
+    "en": "Focus for 25 minutes",
+    "vi": "Tập trung trong 25 phút"
+  },
+  "pomodoro.step2": {
+    "en": "Take a 5-minute break",
+    "vi": "Nghỉ giải lao 5 phút"
+  },
+  "pomodoro.step3": {
+    "en": "After 4 sessions, take a 15-minute break",
+    "vi": "Sau 4 phiên, nghỉ dài 15 phút"
+  },
+  "pomodoro.action.start": {
+    "en": "Start",
+    "vi": "Bắt đầu"
+  },
+  "pomodoro.action.pause": {
+    "en": "Pause",
+    "vi": "Tạm dừng"
+  },
+  "pomodoro.action.reset": {
+    "en": "Reset",
+    "vi": "Đặt lại"
   }
 }
