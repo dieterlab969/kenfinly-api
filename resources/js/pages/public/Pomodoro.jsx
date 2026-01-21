@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import { useTranslation } from '@assets/js/contexts/TranslationContext.jsx';
-import PublicLayout from '../../components/public/PublicLayout';
+import Layout2 from '../../components/public/Layout2';
 
 const PomodoroTimer = () => {
   const { t } = useTranslation();
@@ -104,9 +104,9 @@ const PomodoroTimer = () => {
   };
 
   return (
-    <PublicLayout>
-      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md">
+    <Layout2>
+      <div className="flex flex-col items-center justify-center py-10">
+        <div className="bg-white rounded-3xl shadow-xl p-8 w-full max-w-md border border-gray-100">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-2 font-['Montserrat']">{t('pomodoro.title')}</h1>
             <p className="text-gray-500 font-['Lora']">{t('pomodoro.subtitle')}</p>
@@ -135,7 +135,7 @@ const PomodoroTimer = () => {
 
             <button
               onClick={resetTimer}
-              className="bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full p-4 transition-all duration-200 shadow-lg hover:shadow-xl"
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full p-4 transition-all duration-200 shadow-lg hover:shadow-xl"
               aria-label={t('pomodoro.action.reset')}
             >
               <RotateCcw size={32} />
@@ -152,7 +152,7 @@ const PomodoroTimer = () => {
           </div>
         </div>
       </div>
-    </PublicLayout>
+    </Layout2>
   );
 };
 
