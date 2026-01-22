@@ -49,9 +49,9 @@ const MonthlySummaryCard = ({ monthlySummary }) => {
     return (
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
             <h3 className="text-lg font-bold text-gray-900 mb-4">{t('monthlySummary.title')}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col md:flex-row gap-6 md:items-stretch">
                 <MonthColumn data={current} label={current.month} />
-                <div className="hidden md:block w-px bg-gray-200"></div>
+                <div className="hidden md:block w-px bg-gray-200 self-stretch mx-2"></div>
                 <MonthColumn data={previous} label={previous.month} />
             </div>
         </div>
