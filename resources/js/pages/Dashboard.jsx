@@ -178,6 +178,7 @@ const Dashboard = () => {
                                 dataKey="date" 
                                 tick={{ fill: '#6b7280', fontSize: 12 }}
                                 axisLine={{ stroke: '#e5e7eb' }}
+                                interval={0}
                             />
                             <YAxis 
                                 tick={{ fill: '#6b7280', fontSize: 12 }}
