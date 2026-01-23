@@ -12,7 +12,7 @@ const BalanceTrendChart = ({ balanceHistory, totalBalance }) => {
         return null;
     }
 
-    const chartData = balanceHistory.map(item => ({
+    const chartData = balanceHistory.slice(-5).map(item => ({
         date: format(parseISO(item.date), 'MM/dd'),
         balance: parseFloat(item.balance),
         fullDate: format(parseISO(item.date), 'MMM dd, yyyy'),
