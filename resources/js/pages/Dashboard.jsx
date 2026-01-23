@@ -84,7 +84,7 @@ const Dashboard = () => {
             'Thu': 'Thứ 5',
             'Fri': 'Thứ 6',
             'Sat': 'Thứ 7',
-            'Sun': 'Chủ Nhật'
+            'Sun': 'CN'
         };
         
         for (let i = 6; i >= 0; i--) {
