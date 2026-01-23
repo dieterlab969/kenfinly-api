@@ -77,6 +77,15 @@ const Dashboard = () => {
         
         const last7Days = [];
         const today = new Date();
+        const dayTranslations = {
+            'Mon': 'Thứ 2',
+            'Tue': 'Thứ 3',
+            'Wed': 'Thứ 4',
+            'Thu': 'Thứ 5',
+            'Fri': 'Thứ 6',
+            'Sat': 'Thứ 7',
+            'Sun': 'Chủ Nhật'
+        };
         
         for (let i = 6; i >= 0; i--) {
             const date = new Date(today);
@@ -87,8 +96,9 @@ const Dashboard = () => {
                 item => item.date === dateStr
             );
             
+            const dayName = format(date, 'EEE');
             last7Days.push({
-                date: format(date, 'EEE'),
+                date: dayTranslations[dayName] || dayName,
                 amount: existingData ? parseFloat(existingData.total) : 0
             });
         }
@@ -172,6 +182,15 @@ const Dashboard = () => {
                             <YAxis 
                                 tick={{ fill: '#6b7280', fontSize: 12 }}
                                 axisLine={{ stroke: '#e5e7eb' }}
+                                tickFormatter={(value) => {
+                                    if (value >= 1000000) {
+                                        return `${(value / 1000000).toFixed(0)}M`;
+                                    }
+                                    if (value >= 1000) {
+                                        return `${(value / 1000).toFixed(0)}k`;
+                                    }
+                                    return value.toFixed(0);
+                                }}
                             />
                             <Tooltip 
                                 formatter={(value) => formatCurrency(value)}
