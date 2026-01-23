@@ -53,13 +53,15 @@ const BalanceTrendChart = ({ balanceHistory, totalBalance }) => {
                         axisLine={{ stroke: '#e5e7eb' }}
                         domain={[minBalance - padding, maxBalance + padding]}
                         tickFormatter={(value) => {
-                            if (value >= 1000000) {
-                                return `${(value / 1000000).toFixed(0)}M`;
+                            const absValue = Math.abs(value);
+                            const sign = value < 0 ? '-' : '';
+                            if (absValue >= 1000000) {
+                                return `${sign}${(absValue / 1000000).toFixed(0)}M`;
                             }
-                            if (value >= 1000) {
-                                return `${(value / 1000).toFixed(0)}k`;
+                            if (absValue >= 1000) {
+                                return `${sign}${(absValue / 1000).toFixed(0)}k`;
                             }
-                            return value.toFixed(0);
+                            return `${sign}${absValue.toFixed(0)}`;
                         }}
                     />
                     <Tooltip
