@@ -267,7 +267,9 @@ function Footer({ showCopyright = true, showAnalytics = true }) {
 
                 {showCopyright && (
                     <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500 text-sm">
-                        <p className="mb-4">Copyright © 2024–{currentYear} {companyInfo.company_name} | Last updated: January 2026</p>
+                        <p className="mb-4">
+                            {t('footer.copyright', { year: currentYear })} | {t('footer.business_id', { id: '0318304909' })}
+                        </p>
                         <div className="flex flex-wrap justify-center gap-4 text-xs">
                             <span className="text-gray-600">Concept by <a href="https://www.linkedin.com/in/dieter-entrepreneur/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Dieter R.</a></span>
                             <span className="text-gray-700">|</span>
