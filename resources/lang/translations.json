@@ -773,7 +773,7 @@
   },
   "footer.copyright": {
     "en": "© {{year}} GETKENKA. All rights reserved.",
-    "vi": "© {{year}} GETKENKA. Bản quyền đã được bảo hộ."
+    "vi": "© {{year}} GETKENKA. Đã đăng ký bản quyền."
   },
   "footer.business_id": {
     "en": "Business ID: {{id}}",
