@@ -771,6 +771,14 @@
     "en": "Untitled",
     "vi": "Chưa Có Tiêu Đề"
   },
+  "footer.copyright": {
+    "en": "© {{year}} GETKENKA. All rights reserved.",
+    "vi": "© {{year}} GETKENKA. Đã đăng ký bản quyền."
+  },
+  "footer.business_id": {
+    "en": "Business ID: {{id}}",
+    "vi": "Mã số kinh doanh: {{id}}"
+  },
   "footer.description": {
     "en": "Take control of your spending with Kenfinly. Track every expense and transform your personal finance management effortlessly.",
     "vi": "Làm chủ chi tiêu của bạn cùng Kenfinly. Theo dõi mọi khoản chi và biến việc quản lý tài chính cá nhân trở nên dễ dàng."
