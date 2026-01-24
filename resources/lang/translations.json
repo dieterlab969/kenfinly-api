@@ -772,12 +772,12 @@
     "vi": "Chưa Có Tiêu Đề"
   },
   "footer.copyright": {
-    "en": "Copyright © 2024–{{year}} GetKenka. All rights reserved.",
-    "vi": "Copyright © 2024–{{year}} GetKenka. Bảo lưu mọi quyền."
+    "en": "© {{year}} GETKENKA. All rights reserved.",
+    "vi": "© {{year}} GETKENKA. Bản quyền đã được bảo hộ."
   },
   "footer.business_id": {
     "en": "Business ID: {{id}}",
-    "vi": "Mã số doanh nghiệp: {{id}}"
+    "vi": "Mã số kinh doanh: {{id}}"
   },
   "footer.description": {
     "en": "Take control of your spending with Kenfinly. Track every expense and transform your personal finance management effortlessly.",
