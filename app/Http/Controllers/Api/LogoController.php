@@ -26,7 +26,8 @@ class LogoController extends Controller
             return response()->json([
                 'success' => true,
                 'logo_url' => $logoUrl
-            ], 200);
+            ], 200)
+            ->header('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
         } catch (Exception $e) {
             Log::error('Error fetching logo: ' . $e->getMessage());
             return response()->json([
