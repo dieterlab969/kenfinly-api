@@ -12,10 +12,10 @@ const BalanceTrendChart = ({ balanceHistory, totalBalance }) => {
         return null;
     }
 
-    const chartData = balanceHistory.map(item => ({
-        date: item.label || format(parseISO(item.date), 'MMM yy'),
+    const chartData = balanceHistory.slice(-5).map(item => ({
+        date: format(parseISO(item.date), 'MM/dd'),
         balance: parseFloat(item.balance),
-        fullDate: item.label || format(parseISO(item.date), 'MMMM yyyy'),
+        fullDate: format(parseISO(item.date), 'MMM dd, yyyy'),
     }));
 
     const minBalance = Math.min(...chartData.map(d => d.balance));
