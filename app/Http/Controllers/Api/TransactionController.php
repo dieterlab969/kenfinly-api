@@ -480,27 +480,34 @@ class TransactionController extends Controller
             ->orderBy('date')
             ->get();
 
-        $thirtyDaysAgo = $now->copy()->subDays(29);
+        $lastTransaction = Transaction::where('user_id', $user->id)
+            ->orderBy('transaction_date', 'desc')
+            ->first();
+            
+        $referenceDate = $lastTransaction ? Carbon::parse($lastTransaction->transaction_date) : now();
         $balanceHistory = [];
         $accounts = Account::where('user_id', $user->id)->get();
         $totalBalance = $accounts->sum('balance');
         
-        for ($i = 29; $i >= 0; $i--) {
-            $date = $now->copy()->subDays($i);
-            $dateStr = $date->format('Y-m-d');
+        for ($i = 4; $i >= 0; $i--) {
+            $monthDate = $referenceDate->copy()->subMonths($i)->endOfMonth();
+            $monthStr = $monthDate->format('Y-m-d');
             
-            $dayTransactions = Transaction::where('user_id', $user->id)
-                ->whereDate('transaction_date', '>', $dateStr)
+            // Calculate balance at the end of this month
+            // Balance at end of month = Current balance - net change since end of month
+            $futureTransactions = Transaction::where('user_id', $user->id)
+                ->where('transaction_date', '>', $monthDate)
                 ->select(
                     DB::raw('SUM(CASE WHEN type = "income" THEN amount ELSE -amount END) as net_change')
                 )
                 ->first();
             
-            $dayBalance = $totalBalance - ($dayTransactions->net_change ?? 0);
+            $monthBalance = $totalBalance - ($futureTransactions->net_change ?? 0);
             
             $balanceHistory[] = [
-                'date' => $dateStr,
-                'balance' => $dayBalance,
+                'date' => $monthDate->format('Y-m-01'), // Use first of month for frontend parsing
+                'balance' => $monthBalance,
+                'label' => $monthDate->format('M Y'),
             ];
         }
 
