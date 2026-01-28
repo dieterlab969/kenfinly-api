@@ -57,17 +57,17 @@ Route::get('/email/verification-status', [EmailVerificationController::class, 's
 Route::get('/languages', [LanguageController::class, 'index']);
 Route::get('/languages/{code}/translations', [LanguageController::class, 'getTranslations']);
 
-    // Protected routes (require authentication)
-    Route::middleware('auth:api')->group(function () {
-        Route::post('/auth/logout', [AuthController::class, 'logout']);
-        Route::post('/auth/refresh', [AuthController::class, 'refresh']);
-        Route::get('/auth/me', [AuthController::class, 'me']);
+// Protected routes (require authentication)
+Route::middleware('auth:api')->group(function () {
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::post('/auth/refresh', [AuthController::class, 'refresh']);
+    Route::get('/auth/me', [AuthController::class, 'me']);
 
-        // Logo management
-        Route::post('/logo/upload', [LogoController::class, 'uploadLogo']);
+    // Logo management
+    Route::post('/logo/upload', [LogoController::class, 'uploadLogo']);
 
-        // Dashboard
-        Route::get('/dashboard', [TransactionController::class, 'getDashboardData']);
+    // Dashboard
+    Route::get('/dashboard', [TransactionController::class, 'getDashboardData']);
 
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);
@@ -112,6 +112,12 @@ Route::get('/languages/{code}/translations', [LanguageController::class, 'getTra
     Route::get('/analytics/summary', [AnalyticsController::class, 'getSummary']);
     Route::get('/analytics/category-breakdown', [AnalyticsController::class, 'getCategoryBreakdown']);
     Route::get('/analytics/trends', [AnalyticsController::class, 'getTrends']);
+});
+Route::middleware('auth:api')->prefix('saving-tracker')->group(function() {
+    Route::apiResource('habits', \App\Http\Controllers\API\SavingTracker\HabitController::class);
+    Route::post('tracking/toggle', \App\Http\Controllers\API\SavingTracker\HabitTrackingController::class, 'toggle');
+    Route::get('stats/habits/{habit}', \App\Http\Controllers\API\SavingTracker\HabitController::class, 'getStats');
+    Route::get('stats/overall', \App\Http\Controllers\API\SavingTracker\HabitController::class, 'getOverallStats');
 });
 
 // Public webhook endpoint (no auth required)
