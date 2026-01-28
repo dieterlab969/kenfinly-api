@@ -114,10 +114,14 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/analytics/trends', [AnalyticsController::class, 'getTrends']);
 });
 Route::middleware('auth:api')->prefix('saving-tracker')->group(function() {
-    Route::apiResource('habits', \App\Http\Controllers\API\SavingTracker\HabitController::class);
-    Route::post('tracking/toggle', \App\Http\Controllers\API\SavingTracker\HabitTrackingController::class, 'toggle');
-    Route::get('stats/habits/{habit}', \App\Http\Controllers\API\SavingTracker\HabitController::class, 'getStats');
-    Route::get('stats/overall', \App\Http\Controllers\API\SavingTracker\HabitController::class, 'getOverallStats');
+    Route::apiResource('habits', \App\Http\Controllers\Api\SavingTracker\HabitController::class);
+    Route::post('tracking/toggle', [\App\Http\Controllers\Api\SavingTracker\HabitTrackingController::class, 'toggle']);
+    Route::get('tracking/{habitId}', [\App\Http\Controllers\Api\SavingTracker\HabitTrackingController::class, 'getTracking']);
+    Route::post('tracking/bulk', [\App\Http\Controllers\Api\SavingTracker\HabitTrackingController::class, 'bulkTrack']);
+    Route::get('stats/habits/{id}', [\App\Http\Controllers\Api\SavingTracker\HabitController::class, 'stats']);
+    Route::get('stats/overall', [\App\Http\Controllers\Api\SavingTracker\HabitController::class, 'overallStats']);
+    Route::get('achievements', [\App\Http\Controllers\Api\SavingTracker\AchievementController::class, 'index']);
+    Route::get('achievements/unlocked', [\App\Http\Controllers\Api\SavingTracker\AchievementController::class, 'unlocked']);
 });
 
 // Public webhook endpoint (no auth required)
