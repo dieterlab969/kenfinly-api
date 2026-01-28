@@ -58,9 +58,14 @@ The backend is built with Laravel 12 (PHP 8.2+) and provides a REST API. Key arc
   - Upcoming payment date and amount display
   - Current payment methods management (credit cards, PayPal)
   - Add/remove payment methods with secure forms
-  - Set default payment method
-  - View payment history with pagination
-  - Charge description note for billing transparency
+- **Saving Habit Tracker** (`/saving-habit-tracker`): Users can create, track, and manage daily saving habits with features including:
+  - Create habits with custom names, amounts saved per completion, weekly goals (1-7 days), and color coding
+  - 7-day calendar view for tracking daily completions
+  - Streak tracking (current streak displayed per habit)
+  - Total savings calculation per habit and overall
+  - Achievement system with 8 types: first habit, 3/7/30-day streaks, $100/$500/$1000 savings milestones, 5 habits created
+  - Stats dashboard showing total saved, active habits, longest streak, and weekly completions
+  - API endpoints: `/api/saving-tracker/habits`, `/api/saving-tracker/tracking/toggle`, `/api/saving-tracker/stats/overall`, `/api/saving-tracker/achievements`
 
 # WordPress Headless CMS Integration
 
