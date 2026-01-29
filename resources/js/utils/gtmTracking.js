@@ -189,6 +189,43 @@ const gtmTracking = {
      */
     trackSavingHabitTrackerView: () => {
         gtmTracking.trackPageView('saving_habit_tracker', 'Saving Habit Tracker');
+    },
+
+    /**
+     * Track Pomodoro page view
+     */
+    trackPomodoroPageView: () => {
+        gtmTracking.trackPageView('pomodoro_page', 'Pomodoro Timer');
+    },
+
+    /**
+     * Track Pomodoro timer actions (start, pause, reset)
+     * @param {string} action - Action performed
+     * @param {string} mode - Timer mode (focus, break, long_break)
+     */
+    trackPomodoroAction: (action, mode) => {
+        if (window.gtag) {
+            window.gtag('event', 'pomodoro_action', {
+                action: action,
+                mode: mode,
+                page_location: window.location.pathname
+            });
+        }
+    },
+
+    /**
+     * Track Pomodoro session completion
+     * @param {string} mode - Completed session mode
+     * @param {number} count - Total sessions completed
+     */
+    trackPomodoroComplete: (mode, count) => {
+        if (window.gtag) {
+            window.gtag('event', 'pomodoro_complete', {
+                mode: mode,
+                total_sessions: count,
+                page_location: window.location.pathname
+            });
+        }
     }
 };
 
