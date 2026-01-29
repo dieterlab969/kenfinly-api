@@ -8,8 +8,10 @@ import AchievementList from "./achievements/AchievementList";
 import { getHabits } from "../../../services/saving-tracker/habits";
 import { getAchievements } from "../../../services/saving-tracker/achievements";
 import { getOverallStats } from "../../../services/saving-tracker/stats";
+import { useTranslation } from "../../../contexts/TranslationContext";
 
 const HabitTracker = () => {
+    const { t } = useTranslation();
     const [habits, setHabits] = useState([]);
     const [achievements, setAchievements] = useState([]);
     const [stats, setStats] = useState({});
@@ -56,7 +58,7 @@ const HabitTracker = () => {
     };
 
     if (isLoading) {
-        return <div className="p-4 text-center">Loading...</div>;
+        return <div className="p-4 text-center">{t('common.loading')}</div>;
     }
 
     return (
@@ -64,7 +66,7 @@ const HabitTracker = () => {
             {/* Header */}
             <header className="bg-green-600 text-white p-4 shadow-md">
                 <div className="container mx-auto flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">Saving Habit Tracker</h1>
+                    <h1 className="text-2xl font-bold">{t('saving_tracker.title')}</h1>
                     <button
                         onClick={() => setIsFormOpen(true)}
                         className="bg-white text-green-600 p-2 rounded-full shadow hover:shadow-lg transition-all"
@@ -79,16 +81,16 @@ const HabitTracker = () => {
                 {habits.length === 0 ? (
                     <div className="text-center p-12 bg-white rounded-lg shadow-sm">
                         <h2 className="text-xl font-semibold mb-4">
-                            Start Your Saving Journey Today!
+                            {t('saving_tracker.start_journey')}
                         </h2>
                         <p className="mb-6 text-gray-600">
-                            Create your first saving habit to track your progress and see how much you can save.
+                            {t('saving_tracker.create_first_habit_desc')}
                         </p>
                         <button
                             onClick={() => setIsFormOpen(true)}
                             className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-all flex items-center justify-center mx-auto"
                             >
-                            <Plus size={20} className="mr-2" /> Create Your First Habit
+                            <Plus size={20} className="mr-2" /> {t('saving_tracker.create_first_habit_btn')}
                         </button>
                     </div>
                 ) : (
@@ -128,8 +130,8 @@ const HabitTracker = () => {
             {/* Main app promotion banner */}
             <div className="bg-blue-600 text-white p-3 text-center">
                 <p>
-                    You've saved {formatCurrency(stats.totalSaved || 0)} so far!
-                    <a href="#" className="font-bold underline ml-2">Track all your expenses with our main app!</a>
+                    {t('saving_tracker.saved_so_far', { amount: formatCurrency(stats.totalSaved || 0) })}
+                    <a href="#" className="font-bold underline ml-2">{t('saving_tracker.track_expenses_promo')}</a>
                 </p>
             </div>
 

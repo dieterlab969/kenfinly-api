@@ -263,9 +263,105 @@
     "en": "Failed to load translations. Please refresh the page.",
     "vi": "Không thể tải bản dịch. Vui lòng làm mới trang."
   },
-  "common.reload_page": {
-    "en": "Reload Page",
-    "vi": "Tải lại trang"
+  "saving_tracker.achievements.title": {
+    "en": "Achievements",
+    "vi": "Thành tựu"
+  },
+  "saving_tracker.achievements.empty": {
+    "en": "Keep going! Complete your habits consistently to earn achievements.",
+    "vi": "Hãy tiếp tục cố gắng! Hoàn thành thói quen đều đặn để đạt được thành tựu."
+  },
+  "saving_tracker.title": {
+    "en": "Saving Habit Tracker",
+    "vi": "Theo dõi thói quen tiết kiệm"
+  },
+  "saving_tracker.start_journey": {
+    "en": "Start Your Saving Journey Today!",
+    "vi": "Bắt đầu hành trình tiết kiệm ngay hôm nay!"
+  },
+  "saving_tracker.create_first_habit_desc": {
+    "en": "Create your first saving habit to track your progress and see how much you can save.",
+    "vi": "Tạo thói quen tiết kiệm đầu tiên để theo dõi tiến trình và xem bạn có thể tiết kiệm được bao nhiêu."
+  },
+  "saving_tracker.create_first_habit_btn": {
+    "en": "Create Your First Habit",
+    "vi": "Tạo thói quen đầu tiên"
+  },
+  "saving_tracker.saved_so_far": {
+    "en": "You've saved {amount} so far!",
+    "vi": "Bạn đã tiết kiệm được {amount}!"
+  },
+  "saving_tracker.track_expenses_promo": {
+    "en": "Track all your expenses with our main app!",
+    "vi": "Theo dõi tất cả chi tiêu với ứng dụng chính của chúng tôi!"
+  },
+  "footer.contact_us": {
+    "en": "Contact Us",
+    "vi": "Liên hệ với chúng tôi"
+  },
+  "footer.all_rights_reserved": {
+    "en": "All rights reserved.",
+    "vi": "Đã đăng ký bản quyền."
+  },
+  "footer.convert_case_tool": {
+    "en": "Convert Case Tool",
+    "vi": "Công cụ chuyển đổi chữ"
+  },
+  "footer.pomodoro_timer": {
+    "en": "Pomodoro Timer",
+    "vi": "Đồng hồ Pomodoro"
+  },
+  "footer.saving_habit_tracker": {
+    "en": "Saving Habit Tracker",
+    "vi": "Theo dõi thói quen tiết kiệm"
+  },
+  "footer.navigation.privacy_policy": {
+    "en": "Privacy Policy",
+    "vi": "Chính sách bảo mật"
+  },
+  "footer.navigation.terms_of_service": {
+    "en": "Terms of Service",
+    "vi": "Điều khoản dịch vụ"
+  },
+  "footer.navigation.about_us": {
+    "en": "About Us",
+    "vi": "Về chúng tôi"
+  },
+  "footer.navigation.home": {
+    "en": "Home",
+    "vi": "Trang chủ"
+  },
+  "footer.navigation.blog": {
+    "en": "Blog",
+    "vi": "Blog"
+  },
+  "footer.navigation.sign_in": {
+    "en": "Sign In",
+    "vi": "Đăng nhập"
+  },
+  "footer.navigation.get_started": {
+    "en": "Get Started",
+    "vi": "Bắt đầu"
+  },
+  "footer.quick_links_title": {
+    "en": "Quick Links",
+    "vi": "Liên kết nhanh"
+  },
+  "footer.utilities_title": {
+    "en": "Utilities",
+    "vi": "Tiện ích"
+  },
+  "footer.description": {
+    "en": "Master your money with Kenfinly. Track expenses, plan budgets, and reach your goals.",
+    "vi": "Làm chủ tài chính với Kenfinly. Theo dõi chi tiêu, lập ngân sách và đạt mục tiêu."
+  },
+  "footer.copyright": {
+    "en": "© {year} Kenfinly",
+    "vi": "© {year} Kenfinly"
+  },
+  "footer.business_id": {
+    "en": "Business ID: {id}",
+    "vi": "Mã số thuế: {id}"
   },
   "settings.title": {
     "en": "Settings",

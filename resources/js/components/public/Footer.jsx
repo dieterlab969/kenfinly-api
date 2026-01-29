@@ -248,7 +248,7 @@ function Footer({ showCopyright = true, showAnalytics = true }) {
                             </li>
                         </ul>
 
-                        <h3 className="text-white font-bold text-lg mt-8 mb-6 uppercase tracking-wider">Contact Us</h3>
+                        <h3 className="text-white font-bold text-lg mt-8 mb-6 uppercase tracking-wider">{t('footer.contact_us')}</h3>
                         <ul className="space-y-4">
                             <li className="flex items-start space-x-3 text-gray-400">
                                 <MapPin className="w-5 h-5 text-blue-500 shrink-0 mt-1" aria-hidden="true"/>
@@ -278,9 +278,9 @@ function Footer({ showCopyright = true, showAnalytics = true }) {
                         <div className="flex flex-wrap justify-center gap-4 text-xs">
                             <span className="text-gray-600">Concept by <a href="https://www.linkedin.com/in/dieter-entrepreneur/" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Dieter R.</a></span>
                             <span className="text-gray-700">|</span>
-                            <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                            <Link to="/privacy" className="hover:text-white transition-colors">{t('footer.navigation.privacy_policy')}</Link>
                             <span className="text-gray-700">|</span>
-                            <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+                            <Link to="/terms" className="hover:text-white transition-colors">{t('footer.navigation.terms_of_service')}</Link>
                             <span className="text-gray-700">|</span>
                             <Link to="/sitemap.xml" className="hover:text-white transition-colors">Sitemap</Link>
                         </div>
