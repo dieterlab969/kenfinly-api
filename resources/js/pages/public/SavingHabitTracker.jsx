@@ -260,6 +260,9 @@ export default function SavingHabitTracker() {
     const [editingHabit, setEditingHabit] = useState(null);
 
     const fetchData = useCallback(async () => {
+        // If still loading auth state, don't do anything yet
+        if (loading && user === null) return;
+
         if (!isAuthenticated) {
             setLoading(false);
             return;
@@ -280,7 +283,7 @@ export default function SavingHabitTracker() {
         } finally {
             setLoading(false);
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, loading, user]);
 
     useEffect(() => {
         fetchData();
@@ -332,6 +335,15 @@ export default function SavingHabitTracker() {
         setShowForm(true);
     };
 
+    // Global loading state (auth initialization)
+    if (loading && user === null) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            </div>
+        );
+    }
+
     if (!isAuthenticated) {
         return (
             <div className="min-h-screen bg-gray-50">
@@ -366,6 +378,7 @@ export default function SavingHabitTracker() {
         );
     }
 
+    // Feature loading state (data fetching)
     if (loading) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
