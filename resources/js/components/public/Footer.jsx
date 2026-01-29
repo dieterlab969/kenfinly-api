@@ -241,11 +241,6 @@ function Footer({ showCopyright = true, showAnalytics = true }) {
                                     <span className="mr-2">›</span> {t('footer.pomodoro_timer')}
                                 </Link>
                             </li>
-                            <li>
-                                <Link to="/saving-habit-tracker" className="text-gray-400 hover:text-white transition-colors flex items-center">
-                                    <span className="mr-2">›</span> {t('footer.saving_habit_tracker')}
-                                </Link>
-                            </li>
                         </ul>
 
                         <h3 className="text-white font-bold text-lg mt-8 mb-6 uppercase tracking-wider">{t('footer.contact_us')}</h3>

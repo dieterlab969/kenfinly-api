@@ -139,7 +139,6 @@ function App({ recaptchaEnabled = false }) {
                         <Route path="/about" element={<AboutPage />} />
                         <Route path="/textcase" element={<TextCaseConverter />} />
                         <Route path="/pomodoro" element={<PomodoroTimer />} />
-                        <Route path="/saving-habit-tracker" element={<SavingHabitTracker />} />
                         <Route path="/pricing" element={<PricingPage />} />
                         
                         <Route path="/login" element={<Login />} />
