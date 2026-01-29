@@ -9,6 +9,7 @@ import { getHabits } from "../../../services/saving-tracker/habits";
 import { getAchievements } from "../../../services/saving-tracker/achievements";
 import { getOverallStats } from "../../../services/saving-tracker/stats";
 import { useTranslation } from "../../../contexts/TranslationContext";
+import gtmTracking from "../../../utils/gtmTracking";
 
 const HabitTracker = () => {
     const { t } = useTranslation();
@@ -21,6 +22,7 @@ const HabitTracker = () => {
 
     useEffect(() => {
         loadData();
+        gtmTracking.trackSavingHabitTrackerView();
     }, []);
 
     const loadData = async () => {

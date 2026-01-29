@@ -182,6 +182,13 @@ const gtmTracking = {
      */
     trackAboutPageView: () => {
         gtmTracking.trackPageView('about_page', 'About Us');
+    },
+
+    /**
+     * Track Saving Habit Tracker page view
+     */
+    trackSavingHabitTrackerView: () => {
+        gtmTracking.trackPageView('saving_habit_tracker', 'Saving Habit Tracker');
     }
 };
 
