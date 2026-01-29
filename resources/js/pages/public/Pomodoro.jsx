@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import { useTranslation } from '@assets/js/contexts/TranslationContext.jsx';
 import Layout2 from '../../components/public/Layout2';
+import gtmTracking from '../../utils/gtmTracking';
 
 const PomodoroTimer = () => {
   const { t } = useTranslation();
@@ -12,6 +13,10 @@ const PomodoroTimer = () => {
   const [mode, setMode] = useState('focus');
   const [completedPomodoros, setCompletedPomodoros] = useState(0);
   const audioRef = useRef(null);
+
+  useEffect(() => {
+    gtmTracking.trackPomodoroPageView();
+  }, []);
 
   useEffect(() => {
     let interval = null;
@@ -39,6 +44,9 @@ const PomodoroTimer = () => {
   const handleSessionComplete = () => {
     playNotificationSound();
     setIsActive(false);
+    
+    // Track session completion
+    gtmTracking.trackPomodoroComplete(mode, completedPomodoros + 1);
 
     if (mode === 'focus') {
       const newCount = completedPomodoros + 1;
@@ -78,7 +86,9 @@ const PomodoroTimer = () => {
   };
 
   const toggleTimer = () => {
-    setIsActive(!isActive);
+    const nextActive = !isActive;
+    setIsActive(nextActive);
+    gtmTracking.trackPomodoroAction(nextActive ? 'start' : 'pause', mode);
   };
 
   const resetTimer = () => {
@@ -87,6 +97,7 @@ const PomodoroTimer = () => {
     setMinutes(25);
     setSeconds(0);
     setCompletedPomodoros(0);
+    gtmTracking.trackPomodoroAction('reset', 'focus');
   };
 
   const formatTime = (mins, secs) => {
