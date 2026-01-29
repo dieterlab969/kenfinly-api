@@ -34,7 +34,7 @@ The Saving Habit Tracker is built using a modern client-server architecture with
    - `auth:api`: JWT authentication middleware  
    - Custom authorization policies for resource access
 5. **Database**  
-   - MySQL/PostgreSQL for persistent storage  
+   - MySQL for persistent storage  
    - Migrations for database schema management
 
 ### Data Flow (Backend)
@@ -225,14 +225,14 @@ Get overall saving statistics
 ### Development Environment
 
 - Local development servers for frontend and backend
-- SQLite or MySQL for local database
+- MySQL for database
 - Environment-specific configuration via .env files
 
 ### Production Environment
 
 - Containerized deployment with Docker
 - Nginx as web server/reverse proxy
-- MySQL/PostgreSQL for database
+- MySQL for database
 - Redis for caching (optional)
 
 ```
@@ -250,7 +250,7 @@ Get overall saving statistics
              ▼
 ┌────────────┴────────────┐
 │                         │
-│     MySQL/PostgreSQL    │
+│          MySQL          │
 │                         │
 └─────────────────────────┘
 
