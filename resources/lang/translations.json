@@ -263,9 +263,105 @@
     "en": "Failed to load translations. Please refresh the page.",
     "vi": "Không thể tải bản dịch. Vui lòng làm mới trang."
   },
-  "common.reload_page": {
-    "en": "Reload Page",
-    "vi": "Tải lại trang"
+  "saving_tracker.achievements.title": {
+    "en": "Achievements",
+    "vi": "Thành tựu"
+  },
+  "saving_tracker.achievements.empty": {
+    "en": "Keep going! Complete your habits consistently to earn achievements.",
+    "vi": "Hãy tiếp tục cố gắng! Hoàn thành thói quen đều đặn để đạt được thành tựu."
+  },
+  "saving_tracker.title": {
+    "en": "Saving Habit Tracker",
+    "vi": "Theo dõi thói quen tiết kiệm"
+  },
+  "saving_tracker.start_journey": {
+    "en": "Start Your Saving Journey Today!",
+    "vi": "Bắt đầu hành trình tiết kiệm ngay hôm nay!"
+  },
+  "saving_tracker.create_first_habit_desc": {
+    "en": "Create your first saving habit to track your progress and see how much you can save.",
+    "vi": "Tạo thói quen tiết kiệm đầu tiên để theo dõi tiến trình và xem bạn có thể tiết kiệm được bao nhiêu."
+  },
+  "saving_tracker.create_first_habit_btn": {
+    "en": "Create Your First Habit",
+    "vi": "Tạo thói quen đầu tiên"
+  },
+  "saving_tracker.saved_so_far": {
+    "en": "You've saved {amount} so far!",
+    "vi": "Bạn đã tiết kiệm được {amount}!"
+  },
+  "saving_tracker.track_expenses_promo": {
+    "en": "Track all your expenses with our main app!",
+    "vi": "Theo dõi tất cả chi tiêu với ứng dụng chính của chúng tôi!"
+  },
+  "footer.contact_us": {
+    "en": "Contact Us",
+    "vi": "Liên hệ với chúng tôi"
+  },
+  "footer.all_rights_reserved": {
+    "en": "All rights reserved.",
+    "vi": "Đã đăng ký bản quyền."
+  },
+  "footer.convert_case_tool": {
+    "en": "Convert Case Tool",
+    "vi": "Công cụ chuyển đổi chữ"
+  },
+  "footer.pomodoro_timer": {
+    "en": "Pomodoro Timer",
+    "vi": "Đồng hồ Pomodoro"
+  },
+  "footer.saving_habit_tracker": {
+    "en": "Saving Habit Tracker",
+    "vi": "Theo dõi thói quen tiết kiệm"
+  },
+  "footer.navigation.privacy_policy": {
+    "en": "Privacy Policy",
+    "vi": "Chính sách bảo mật"
+  },
+  "footer.navigation.terms_of_service": {
+    "en": "Terms of Service",
+    "vi": "Điều khoản dịch vụ"
+  },
+  "footer.navigation.about_us": {
+    "en": "About Us",
+    "vi": "Về chúng tôi"
+  },
+  "footer.navigation.home": {
+    "en": "Home",
+    "vi": "Trang chủ"
+  },
+  "footer.navigation.blog": {
+    "en": "Blog",
+    "vi": "Blog"
+  },
+  "footer.navigation.sign_in": {
+    "en": "Sign In",
+    "vi": "Đăng nhập"
+  },
+  "footer.navigation.get_started": {
+    "en": "Get Started",
+    "vi": "Bắt đầu"
+  },
+  "footer.quick_links_title": {
+    "en": "Quick Links",
+    "vi": "Liên kết nhanh"
+  },
+  "footer.utilities_title": {
+    "en": "Utilities",
+    "vi": "Tiện ích"
+  },
+  "footer.description": {
+    "en": "Master your money with Kenfinly. Track expenses, plan budgets, and reach your goals.",
+    "vi": "Làm chủ tài chính với Kenfinly. Theo dõi chi tiêu, lập ngân sách và đạt mục tiêu."
+  },
+  "footer.copyright": {
+    "en": "© {year} Kenfinly",
+    "vi": "© {year} Kenfinly"
+  },
+  "footer.business_id": {
+    "en": "Business ID: {id}",
+    "vi": "Mã số thuế: {id}"
   },
   "settings.title": {
     "en": "Settings",
@@ -1938,5 +2034,129 @@
   "pomodoro.action.reset": {
     "en": "Reset",
     "vi": "Đặt lại"
+  },
+  "footer.saving_habit_tracker": {
+    "en": "Saving Habit Tracker",
+    "vi": "Theo dõi thói quen tiết kiệm"
+  },
+  "habit.title": {
+    "en": "Saving Habit Tracker",
+    "vi": "Theo dõi thói quen tiết kiệm"
+  },
+  "habit.subtitle": {
+    "en": "Build habits that help you save money",
+    "vi": "Xây dựng thói quen giúp bạn tiết kiệm tiền"
+  },
+  "habit.description": {
+    "en": "Track your daily saving habits and watch your savings grow. Create habits, mark completions, and earn achievements as you build better financial habits.",
+    "vi": "Theo dõi thói quen tiết kiệm hàng ngày và xem số tiền tiết kiệm của bạn tăng lên. Tạo thói quen, đánh dấu hoàn thành và nhận thành tích khi bạn xây dựng thói quen tài chính tốt hơn."
+  },
+  "habit.add_habit": {
+    "en": "Add Habit",
+    "vi": "Thêm thói quen"
+  },
+  "habit.create_habit": {
+    "en": "Create New Habit",
+    "vi": "Tạo thói quen mới"
+  },
+  "habit.edit_habit": {
+    "en": "Edit Habit",
+    "vi": "Sửa thói quen"
+  },
+  "habit.name": {
+    "en": "Habit Name",
+    "vi": "Tên thói quen"
+  },
+  "habit.name_placeholder": {
+    "en": "e.g., Skip coffee, Pack lunch",
+    "vi": "VD: Bỏ qua cà phê, Mang cơm trưa"
+  },
+  "habit.amount_per_completion": {
+    "en": "Amount Saved Per Completion ($)",
+    "vi": "Số tiền tiết kiệm mỗi lần hoàn thành ($)"
+  },
+  "habit.weekly_goal": {
+    "en": "Weekly Goal",
+    "vi": "Mục tiêu hàng tuần"
+  },
+  "habit.color": {
+    "en": "Color",
+    "vi": "Màu sắc"
+  },
+  "habit.day": {
+    "en": "day",
+    "vi": "ngày"
+  },
+  "habit.days": {
+    "en": "days",
+    "vi": "ngày"
+  },
+  "habit.create": {
+    "en": "Create Habit",
+    "vi": "Tạo thói quen"
+  },
+  "habit.per_completion": {
+    "en": "per completion",
+    "vi": "mỗi lần hoàn thành"
+  },
+  "habit.day_streak": {
+    "en": "day streak",
+    "vi": "ngày liên tiếp"
+  },
+  "habit.saved": {
+    "en": "saved",
+    "vi": "đã tiết kiệm"
+  },
+  "habit.completed": {
+    "en": "Completed",
+    "vi": "Hoàn thành"
+  },
+  "habit.mark_done": {
+    "en": "Mark Done",
+    "vi": "Đánh dấu xong"
+  },
+  "habit.total_saved": {
+    "en": "Total Saved",
+    "vi": "Tổng tiết kiệm"
+  },
+  "habit.active_habits": {
+    "en": "Active Habits",
+    "vi": "Thói quen đang hoạt động"
+  },
+  "habit.longest_streak": {
+    "en": "Longest Streak",
+    "vi": "Chuỗi dài nhất"
+  },
+  "habit.this_week": {
+    "en": "This Week",
+    "vi": "Tuần này"
+  },
+  "habit.your_habits": {
+    "en": "Your Habits",
+    "vi": "Thói quen của bạn"
+  },
+  "habit.no_habits": {
+    "en": "No habits yet. Create your first saving habit!",
+    "vi": "Chưa có thói quen nào. Tạo thói quen tiết kiệm đầu tiên của bạn!"
+  },
+  "habit.create_first": {
+    "en": "Create your first habit",
+    "vi": "Tạo thói quen đầu tiên"
+  },
+  "habit.achievements": {
+    "en": "Achievements",
+    "vi": "Thành tích"
+  },
+  "habit.no_achievements": {
+    "en": "Complete habits to earn achievements!",
+    "vi": "Hoàn thành thói quen để nhận thành tích!"
+  },
+  "habit.confirm_delete": {
+    "en": "Are you sure you want to delete this habit?",
+    "vi": "Bạn có chắc chắn muốn xóa thói quen này?"
+  },
+  "common.dismiss": {
+    "en": "Dismiss",
+    "vi": "Bỏ qua"
   }
 }
