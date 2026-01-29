@@ -6,6 +6,9 @@ use App\Models\Achievement;
 use App\Models\Habit;
 use App\Models\User;
 
+/**
+ * Service for checking and awarding achievements in the Saving Habit Tracker.
+ */
 class AchievementService
 {
     protected array $achievementTypes = [
@@ -66,6 +69,13 @@ class AchievementService
         ],
     ];
 
+    /**
+     * Check all achievement types for a user after a habit completion.
+     *
+     * @param  \App\Models\Habit  $habit
+     * @param  \App\Models\User  $user
+     * @return array
+     */
     public function checkAndAwardAchievements(Habit $habit, User $user): array
     {
         $awardedAchievements = [];
@@ -145,6 +155,11 @@ class AchievementService
         return Habit::where('user_id', $user->id)->count() >= $requiredCount;
     }
 
+    /**
+     * Get the current achievement type definitions.
+     *
+     * @return array
+     */
     public function getAchievementDefinitions(): array
     {
         return $this->achievementTypes;

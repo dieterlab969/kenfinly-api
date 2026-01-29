@@ -8,6 +8,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
 
+/**
+ * Model representing a saving habit.
+ * 
+ * @property int $id
+ * @property int $user_id
+ * @property string $name
+ * @property float $amount
+ * @property int $frequency
+ * @property string $color
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ * @property-read int $current_streak
+ * @property-read float $total_saved
+ */
 class Habit extends Model
 {
     use HasFactory;
@@ -29,21 +44,41 @@ class Habit extends Model
 
     protected $appends = ['current_streak', 'total_saved'];
 
+    /**
+     * Get the user that owns the habit.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Get the tracking records for the habit.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function trackings(): HasMany
     {
         return $this->hasMany(HabitTracking::class);
     }
 
+    /**
+     * Get the achievements associated with the habit.
+     * 
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function achievements(): HasMany
     {
         return $this->hasMany(Achievement::class);
     }
 
+    /**
+     * Accessor for the current streak attribute.
+     * 
+     * @return int
+     */
     public function getCurrentStreakAttribute(): int
     {
         $trackings = $this->trackings()
@@ -74,6 +109,11 @@ class Habit extends Model
         return $streak;
     }
 
+    /**
+     * Accessor for the total saved attribute.
+     * 
+     * @return float
+     */
     public function getTotalSavedAttribute(): float
     {
         $completedCount = $this->trackings()->where('completed', true)->count();

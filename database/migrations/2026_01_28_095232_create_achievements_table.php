@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations to create the achievements table.
+     *
+     * @return void
+     */
     public function up(): void
     {
         Schema::create('achievements', function (Blueprint $table) {
@@ -24,6 +29,11 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
     public function down(): void
     {
         Schema::dropIfExists('achievements');

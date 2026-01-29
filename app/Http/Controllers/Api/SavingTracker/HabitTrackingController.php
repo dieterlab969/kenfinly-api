@@ -9,6 +9,9 @@ use App\Services\SavingTracker\AchievementService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * Controller for managing habit tracking completions.
+ */
 class HabitTrackingController extends Controller
 {
     protected AchievementService $achievementService;
@@ -18,6 +21,12 @@ class HabitTrackingController extends Controller
         $this->achievementService = $achievementService;
     }
 
+    /**
+     * Toggle the completion status of a habit for a specific date.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function toggle(Request $request): JsonResponse
     {
         $validated = $request->validate([
@@ -58,6 +67,13 @@ class HabitTrackingController extends Controller
         ]);
     }
 
+    /**
+     * Get tracking data for a specific habit within a date range.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $habitId
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getTracking(Request $request, int $habitId): JsonResponse
     {
         $habit = Habit::where('user_id', $request->user()->id)->findOrFail($habitId);
@@ -76,6 +92,12 @@ class HabitTrackingController extends Controller
         ]);
     }
 
+    /**
+     * Bulk update tracking status for multiple dates.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function bulkTrack(Request $request): JsonResponse
     {
         $validated = $request->validate([

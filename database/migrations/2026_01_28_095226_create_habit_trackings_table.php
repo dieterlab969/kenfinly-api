@@ -6,6 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run the migrations to create the habit_trackings table.
+     *
+     * @return void
+     */
     public function up(): void
     {
         Schema::create('habit_trackings', function (Blueprint $table) {
@@ -20,6 +25,11 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
     public function down(): void
     {
         Schema::dropIfExists('habit_trackings');
