@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Check, X, Trash2, Edit2, Target, TrendingUp, Award, Calendar, DollarSign, Flame, Loader2 } from 'lucide-react';
 import { useTranslation } from '../../contexts/TranslationContext';
 import { useAuth } from '../../contexts/AuthContext';
-import api from '../../services/api';
+import api from '../../utils/api';
 import Navbar from '../../components/public/Navbar';
 import Footer from '../../components/public/Footer';
 
