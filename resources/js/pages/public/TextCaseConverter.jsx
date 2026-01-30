@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Copy, Download, Trash2 } from 'lucide-react';
 import Layout2 from '../../components/public/Layout2';
 import { useTranslation } from '../../contexts/TranslationContext';
+import gtmTracking from '../../utils/gtmTracking';
 
 function TextCaseConverter() {
     const [text, setText] = useState('');
     const { t } = useTranslation();
 
+    useEffect(() => {
+        gtmTracking.trackTextCasePageView();
+    }, []);
+
     const handleCopy = () => {
         navigator.clipboard.writeText(text);
+        gtmTracking.trackTextCaseAction('copy');
     };
 
     const handleDownload = () => {
@@ -18,26 +24,40 @@ function TextCaseConverter() {
         element.download = "converted-text.txt";
         document.body.appendChild(element);
         element.click();
+        gtmTracking.trackTextCaseAction('download');
     };
 
-    const handleClear = () => setText('');
+    const handleClear = () => {
+        setText('');
+        gtmTracking.trackTextCaseAction('clear');
+    };
 
     const convertToSentenceCase = () => {
         const converted = text.toLowerCase().replace(/(^\s*\w|[\.\!\?]\s*\w)/g, c => c.toUpperCase());
         setText(converted);
+        gtmTracking.trackTextCaseConversion('sentence_case');
     };
 
-    const convertToLower = () => setText(text.toLowerCase());
-    const convertToUpper = () => setText(text.toUpperCase());
+    const convertToLower = () => {
+        setText(text.toLowerCase());
+        gtmTracking.trackTextCaseConversion('lower_case');
+    };
+
+    const convertToUpper = () => {
+        setText(text.toUpperCase());
+        gtmTracking.trackTextCaseConversion('upper_case');
+    };
     
     const convertToCapitalized = () => {
         const converted = text.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
         setText(converted);
+        gtmTracking.trackTextCaseConversion('capitalized_case');
     };
 
     const convertToAlternating = () => {
         const converted = text.split('').map((char, i) => i % 2 === 0 ? char.toLowerCase() : char.toUpperCase()).join('');
         setText(converted);
+        gtmTracking.trackTextCaseConversion('alternating_case');
     };
 
     const convertToTitle = () => {
@@ -46,6 +66,7 @@ function TextCaseConverter() {
             return word.charAt(0).toUpperCase() + word.slice(1);
         }).join(' ');
         setText(converted.charAt(0).toUpperCase() + converted.slice(1));
+        gtmTracking.trackTextCaseConversion('title_case');
     };
 
     const convertToInverse = () => {
@@ -54,6 +75,7 @@ function TextCaseConverter() {
             return char.toUpperCase();
         }).join('');
         setText(converted);
+        gtmTracking.trackTextCaseConversion('inverse_case');
     };
 
     return (
