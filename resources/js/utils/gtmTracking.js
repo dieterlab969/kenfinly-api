@@ -226,6 +226,39 @@ const gtmTracking = {
                 page_location: window.location.pathname
             });
         }
+    },
+
+    /**
+     * Track Text Case Converter page view
+     */
+    trackTextCasePageView: () => {
+        gtmTracking.trackPageView('textcase_page', 'Text Case Converter');
+    },
+
+    /**
+     * Track text case conversion actions
+     * @param {string} conversionType - Type of conversion performed
+     */
+    trackTextCaseConversion: (conversionType) => {
+        if (window.gtag) {
+            window.gtag('event', 'text_conversion', {
+                conversion_type: conversionType,
+                page_location: window.location.pathname
+            });
+        }
+    },
+
+    /**
+     * Track text case utility actions (copy, download, clear)
+     * @param {string} actionName - Action performed
+     */
+    trackTextCaseAction: (actionName) => {
+        if (window.gtag) {
+            window.gtag('event', 'textcase_utility_action', {
+                action: actionName,
+                page_location: window.location.pathname
+            });
+        }
     }
 };
 
