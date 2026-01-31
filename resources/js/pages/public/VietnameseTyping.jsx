@@ -3,6 +3,7 @@ import { Copy, Trash2, Keyboard } from 'lucide-react';
 import Layout2 from '../../components/public/Layout2';
 import { useTranslation } from '../../contexts/TranslationContext';
 import gtmTracking from '../../utils/gtmTracking';
+import { convertTelex } from '../../utils/telexEngine';
 
 function VietnameseTypingTool() {
     const [text, setText] = useState('');
@@ -14,6 +15,11 @@ function VietnameseTypingTool() {
             gtmTracking.trackVietnameseTypingPageView();
         }
     }, []);
+
+    const handleChange = (e) => {
+        const val = e.target.value;
+        setText(convertTelex(val));
+    };
 
     const handleCopy = () => {
         navigator.clipboard.writeText(text);
@@ -38,7 +44,7 @@ function VietnameseTypingTool() {
                         {t('vietnamese_typing.title') || 'Gõ Tiếng Việt'}
                     </h1>
                     <p className="text-lg text-gray-600">
-                        {t('vietnamese_typing.subtitle') || 'Công cụ hỗ trợ soạn thảo văn bản Tiếng Việt có dấu trực tuyến.'}
+                        {t('vietnamese_typing.subtitle') || 'Công cụ hỗ trợ soạn thảo văn bản Tiếng Việt sử dụng kiểu gõ Telex trực tuyến.'}
                     </p>
                 </div>
 
@@ -52,8 +58,8 @@ function VietnameseTypingTool() {
                         <div className="relative">
                             <textarea
                                 value={text}
-                                onChange={(e) => setText(e.target.value)}
-                                placeholder={t('vietnamese_typing.placeholder') || 'Nhập văn bản Tiếng Việt tại đây...'}
+                                onChange={handleChange}
+                                placeholder={t('vietnamese_typing.placeholder') || 'Bắt đầu gõ theo kiểu Telex (ví dụ: \'tieengs vieetj\' -> \'tiếng việt\')...'}
                                 className="w-full h-96 p-6 text-lg border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none resize-none shadow-sm font-sans"
                                 lang="vi"
                                 spellCheck="false"
@@ -80,10 +86,10 @@ function VietnameseTypingTool() {
                         
                         <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 mt-8">
                             <h2 className="text-lg font-bold text-blue-900 mb-2">
-                                {t('vietnamese_typing.guide_title') || 'Hướng dẫn gõ dấu'}
+                                {t('vietnamese_typing.guide_title') || 'Hướng dẫn kiểu gõ Telex'}
                             </h2>
                             <p className="text-sm text-blue-800 leading-relaxed">
-                                {t('vietnamese_typing.guide_desc') || 'Trình duyệt hiện nay hầu hết đều hỗ trợ gõ Tiếng Việt mặc định. Bạn có thể sử dụng các bộ gõ như Unikey, EVKey với bảng mã Unicode để gõ trực tiếp vào ô văn bản trên.'}
+                                {t('vietnamese_typing.guide_desc') || 'Sử dụng các quy tắc Telex sau: aa=â, aw=ă, ee=ê, oo=ô, ow=ơ, uw=ư, dd=đ, s=á, f=à, r=ả, x=ã, j=ạ.'}
                             </p>
                         </div>
                     </div>

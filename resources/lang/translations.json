@@ -1852,20 +1852,20 @@
     "vi": "Gõ Tiếng Việt"
   },
   "vietnamese_typing.subtitle": {
-    "en": "Online Vietnamese text editor with diacritics support.",
-    "vi": "Công cụ hỗ trợ soạn thảo văn bản Tiếng Việt có dấu trực tuyến."
+    "en": "Online Vietnamese text editor with Telex input method support.",
+    "vi": "Công cụ hỗ trợ soạn thảo văn bản Tiếng Việt sử dụng kiểu gõ Telex trực tuyến."
   },
   "vietnamese_typing.placeholder": {
-    "en": "Type or paste Vietnamese text here...",
-    "vi": "Nhập hoặc dán văn bản Tiếng Việt tại đây..."
+    "en": "Start typing with Telex (e.g., 'tieengs vieetj' -> 'tiếng việt')...",
+    "vi": "Bắt đầu gõ theo kiểu Telex (ví dụ: 'tieengs vieetj' -> 'tiếng việt')..."
   },
   "vietnamese_typing.guide_title": {
-    "en": "Typing Guide",
-    "vi": "Hướng dẫn gõ dấu"
+    "en": "Telex Typing Guide",
+    "vi": "Hướng dẫn kiểu gõ Telex"
   },
   "vietnamese_typing.guide_desc": {
-    "en": "Most modern browsers support Vietnamese typing natively. You can use tools like Unikey or EVKey with Unicode encoding to type directly into the box above.",
-    "vi": "Trình duyệt hiện nay hầu hết đều hỗ trợ gõ Tiếng Việt mặc định. Bạn có thể sử dụng các bộ gõ như Unikey, EVKey với bảng mã Unicode để gõ trực tiếp vào ô văn bản trên."
+    "en": "Use the following Telex rules to type Vietnamese: aa=â, aw=ă, ee=ê, oo=ô, ow=ơ, uw=ư, dd=đ, s=á, f=à, r=ả, x=ã, j=ạ.",
+    "vi": "Sử dụng các quy tắc Telex sau: aa=â, aw=ă, ee=ê, oo=ô, ow=ơ, uw=ư, dd=đ, s=á, f=à, r=ả, x=ã, j=ạ."
   },
   "common.characters": {
     "en": "characters",
