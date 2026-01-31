@@ -9,9 +9,9 @@ function VietnameseTypingTool() {
     const { t } = useTranslation();
 
     useEffect(() => {
-        // Track page view if tracking exists
-        if (gtmTracking?.trackTextCasePageView) {
-            gtmTracking.trackTextCasePageView();
+        // Track page view
+        if (gtmTracking?.trackVietnameseTypingPageView) {
+            gtmTracking.trackVietnameseTypingPageView();
         }
     }, []);
 

@@ -249,6 +249,13 @@ const gtmTracking = {
     },
 
     /**
+     * Track Vietnamese Typing page view
+     */
+    trackVietnameseTypingPageView: () => {
+        gtmTracking.trackPageView('vietnamese_typing_page', 'Vietnamese Typing');
+    },
+
+    /**
      * Track text case utility actions (copy, download, clear)
      * @param {string} actionName - Action performed
      */
