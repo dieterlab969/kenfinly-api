@@ -232,11 +232,6 @@ function Footer({ showCopyright = true, showAnalytics = true }) {
                         <h3 className="text-white font-bold text-lg mb-6 uppercase tracking-wider">{t('footer.utilities_title')}</h3>
                         <ul className="space-y-4">
                             <li>
-                                <Link to="/go-tieng-viet" className="text-gray-400 hover:text-white transition-colors flex items-center">
-                                    <span className="mr-2">›</span> {t('footer.go_tieng_viet_tool') || 'Gõ Tiếng Việt'}
-                                </Link>
-                            </li>
-                            <li>
                                 <Link to="/textcase" className="text-gray-400 hover:text-white transition-colors flex items-center">
                                     <span className="mr-2">›</span> {t('footer.convert_case_tool')}
                                 </Link>
