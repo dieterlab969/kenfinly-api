@@ -1839,9 +1839,45 @@
     "en": "Small Utilities",
     "vi": "Tiện ích nhỏ"
   },
+  "footer.go_tieng_viet_tool": {
+    "en": "Vietnamese Typing",
+    "vi": "Gõ Tiếng Việt"
+  },
   "footer.convert_case_tool": {
     "en": "Convert Case Tool",
     "vi": "Convert Case Tool"
+  },
+  "vietnamese_typing.title": {
+    "en": "Vietnamese Typing",
+    "vi": "Gõ Tiếng Việt"
+  },
+  "vietnamese_typing.subtitle": {
+    "en": "Online Vietnamese text editor with diacritics support.",
+    "vi": "Công cụ hỗ trợ soạn thảo văn bản Tiếng Việt có dấu trực tuyến."
+  },
+  "vietnamese_typing.placeholder": {
+    "en": "Type or paste Vietnamese text here...",
+    "vi": "Nhập hoặc dán văn bản Tiếng Việt tại đây..."
+  },
+  "vietnamese_typing.guide_title": {
+    "en": "Typing Guide",
+    "vi": "Hướng dẫn gõ dấu"
+  },
+  "vietnamese_typing.guide_desc": {
+    "en": "Most modern browsers support Vietnamese typing natively. You can use tools like Unikey or EVKey with Unicode encoding to type directly into the box above.",
+    "vi": "Trình duyệt hiện nay hầu hết đều hỗ trợ gõ Tiếng Việt mặc định. Bạn có thể sử dụng các bộ gõ như Unikey, EVKey với bảng mã Unicode để gõ trực tiếp vào ô văn bản trên."
+  },
+  "common.characters": {
+    "en": "characters",
+    "vi": "ký tự"
+  },
+  "common.copy": {
+    "en": "Copy",
+    "vi": "Sao chép"
+  },
+  "common.clear": {
+    "en": "Clear all",
+    "vi": "Xóa tất cả"
   },
   "footer.pomodoro_timer": {
     "en": "Pomodoro",
