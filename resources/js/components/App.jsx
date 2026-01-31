@@ -30,6 +30,7 @@ import BlogPage from '../pages/public/BlogPage';
 import BlogPostPage from '../pages/public/BlogPostPage';
 import AboutPage from '../pages/public/AboutPage';
 import TextCaseConverter from '../pages/public/TextCaseConverter';
+import VietnameseTyping from '../pages/public/VietnameseTyping';
 import PomodoroTimer from '../pages/public/Pomodoro';
 import SavingHabitTracker from '../pages/public/SavingHabitTracker';
 import PlanSelection from './subscription/PlanSelection';
@@ -138,6 +139,7 @@ function App({ recaptchaEnabled = false }) {
                         <Route path="/blog/:slug" element={<BlogPostPage />} />
                         <Route path="/about" element={<AboutPage />} />
                         <Route path="/textcase" element={<TextCaseConverter />} />
+                        <Route path="/go-tieng-viet" element={<VietnameseTyping />} />
                         <Route path="/pomodoro" element={<PomodoroTimer />} />
                         <Route path="/pricing" element={<PricingPage />} />
                         
