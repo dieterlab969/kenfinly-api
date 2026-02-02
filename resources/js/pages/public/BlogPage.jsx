@@ -346,24 +346,57 @@ function BlogPage() {
                                     </button>
 
                                     <div className="flex items-center space-x-2">
-                                        {[...Array(Math.min(pagination.totalPages, 5))].map((_, i) => {
-                                            const pageNum = i + 1;
-                                            return (
-                                                <button
-                                                    key={pageNum}
-                                                    onClick={() => handlePageChange(pageNum)}
-                                                    aria-current={currentPage === pageNum ? 'page' : undefined}
-                                                    aria-label={`Go to page ${pageNum}`}
-                                                    className={`w-10 h-10 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
-                                                        currentPage === pageNum
-                                                            ? 'bg-blue-600 text-white'
-                                                            : 'text-gray-600 hover:bg-blue-50'
-                                                    }`}
-                                                >
-                                                    {pageNum}
-                                                </button>
-                                            );
-                                        })}
+                                        {(() => {
+                                            const totalPages = pagination.totalPages;
+                                            const pages = [];
+                                            const range = 2; // How many pages to show around current page
+
+                                            // Always show first page
+                                            pages.push(1);
+
+                                            if (currentPage > range + 2) {
+                                                pages.push('...');
+                                            }
+
+                                            // Range around current page
+                                            for (let i = Math.max(2, currentPage - range); i <= Math.min(totalPages - 1, currentPage + range); i++) {
+                                                pages.push(i);
+                                            }
+
+                                            if (currentPage < totalPages - range - 1) {
+                                                pages.push('...');
+                                            }
+
+                                            // Always show last page if more than 1 page
+                                            if (totalPages > 1) {
+                                                pages.push(totalPages);
+                                            }
+
+                                            return pages.map((pageNum, index) => {
+                                                if (pageNum === '...') {
+                                                    return (
+                                                        <span key={`ellipsis-${index}`} className="w-10 h-10 flex items-center justify-center text-gray-400">
+                                                            ...
+                                                        </span>
+                                                    );
+                                                }
+                                                return (
+                                                    <button
+                                                        key={pageNum}
+                                                        onClick={() => handlePageChange(pageNum)}
+                                                        aria-current={currentPage === pageNum ? 'page' : undefined}
+                                                        aria-label={`Go to page ${pageNum}`}
+                                                        className={`w-10 h-10 rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 ${
+                                                            currentPage === pageNum
+                                                                ? 'bg-blue-600 text-white'
+                                                                : 'text-gray-600 hover:bg-blue-50'
+                                                        }`}
+                                                    >
+                                                        {pageNum}
+                                                    </button>
+                                                );
+                                            });
+                                        })()}
                                     </div>
 
                                     <button
