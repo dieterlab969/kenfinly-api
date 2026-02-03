@@ -23,6 +23,11 @@ warning() {
 
 # Check if running as root or with sudo
 check_privileges() {
+    # Skip privilege check in Replit environment
+    if [ -n "$REPL_ID" ] || [ -n "$REPLIT_ENVIRONMENT" ]; then
+        return
+    fi
+
     if [ "$(id -u)" -ne 0 ]; then
         warning "This script should ideally be run with sudo for proper permission setting."
         read -p "Continue anyway? (y/n): " answer
@@ -35,6 +40,12 @@ check_privileges() {
 
 # Detect web server user if not provided
 detect_webserver_user() {
+   # In Replit, we typically run as the current user
+   if [ -n "$REPLIT_USER" ]; then
+       echo "$USER"
+       return
+   fi
+
    if [ -f "/etc/apache2/envvars" ]; then
        echo "www-data"
    elif [ -f "/etc/nginx/nginx.conf" ]; then
@@ -64,7 +75,8 @@ fix_permissions() {
     # Fix storage directory if it exists
     if [ -d "$path/storage" ]; then
         echo "Setting permissions for $path/storage..."
-        chown -R "$user:$group" "$path/storage" || error "Failed to change ownership of $path/storage"
+        # Ownership might fail in Replit, so we continue
+        chown -R "$user:$group" "$path/storage" 2>/dev/null || warning "Could not change ownership of $path/storage (expected in Replit)"
         find "$path/storage" -type d -exec chmod 775 {} \; || error "Failed to set directory permissions"
         find "$path/storage" -type f -exec chmod 664 {} \; || error "Failed to set file permissions"
     fi
@@ -72,7 +84,7 @@ fix_permissions() {
     # Fix bootstrap/cache directory if it exists
     if [ -d "$path/bootstrap/cache" ]; then
         echo "Setting permissions for $path/bootstrap/cache..."
-        chown -R "$user:$group" "$path/bootstrap/cache" || error "Failed to change ownership"
+        chown -R "$user:$group" "$path/bootstrap/cache" 2>/dev/null || warning "Could not change ownership (expected in Replit)"
         find "$path/bootstrap/cache" -type d -exec chmod 775 {} \; || error "Failed to set directory permissions"
         find "$path/bootstrap/cache" -type f -exec chmod 664 {} \; || error "Failed to set file permissions"
     fi
@@ -80,7 +92,7 @@ fix_permissions() {
     # Fix public directory if it exists
     if [ -d "$path/public" ]; then
         echo "Setting permissions for $path/public..."
-        chown -R "$user:$group" "$path/public" || error "Failed to change ownership"
+        chown -R "$user:$group" "$path/public" 2>/dev/null || warning "Could not change ownership (expected in Replit)"
         find "$path/public" -type d -exec chmod 775 {} \; || error "Failed to set directory permissions"
         find "$path/public" -type f -exec chmod 664 {} \; || error "Failed to set file permissions"
     fi
