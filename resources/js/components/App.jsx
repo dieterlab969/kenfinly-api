@@ -143,6 +143,7 @@ function App({ recaptchaEnabled = false }) {
                         <Route path="/pricing" element={<PricingPage />} />
                         <Route path="/go-tieng-viet" element={<VietnameseTyping />} />
                         <Route path="/login" element={<Login />} />
+                        <Route path="/go-tieng-viet" element={<VietnameseTyping />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/verify-email" element={<VerifyEmail />} />
                         <Route path="/verification-pending" element={<VerificationPending />} />
