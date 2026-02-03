@@ -3,7 +3,7 @@ import { Copy, Trash2, Keyboard } from 'lucide-react';
 import Layout2 from '../../components/public/Layout2';
 import { useTranslation } from '../../contexts/TranslationContext';
 import gtmTracking from '../../utils/gtmTracking';
-import { convertTelex } from '../../utils/telexEngine';
+import VNTYPING from '../../utils/vietnameseTyping';
 
 function VietnameseTypingTool() {
     const [text, setText] = useState('');
@@ -14,11 +14,28 @@ function VietnameseTypingTool() {
         if (gtmTracking?.trackVietnameseTypingPageView) {
             gtmTracking.trackVietnameseTypingPageView();
         }
+        // Initialize VNTYPING buffer and speller state
+        VNTYPING.ClearBuffer();
+        VNTYPING.Speller.Activate();
     }, []);
 
-    const handleChange = (e) => {
-        const val = e.target.value;
-        setText(convertTelex(val));
+    const handleKeyDown = (e) => {
+        // Handle Backspace
+        if (e.key === 'Backspace') {
+            VNTYPING.BackSpace();
+            setText(VNTYPING.GetBufferString());
+            e.preventDefault();
+            return;
+        }
+
+        // Handle single character keys
+        if (e.key.length === 1) {
+            const pos = VNTYPING.AddKey(e.key);
+            if (pos >= 0) {
+                setText(VNTYPING.GetBufferString());
+                e.preventDefault();
+            }
+        }
     };
 
     const handleCopy = () => {
@@ -30,6 +47,7 @@ function VietnameseTypingTool() {
 
     const handleClear = () => {
         setText('');
+        VNTYPING.ClearBuffer();
         if (gtmTracking?.trackTextCaseAction) {
             gtmTracking.trackTextCaseAction('clear');
         }
@@ -58,7 +76,8 @@ function VietnameseTypingTool() {
                         <div className="relative">
                             <textarea
                                 value={text}
-                                onChange={handleChange}
+                                onKeyDown={handleKeyDown}
+                                onChange={() => {}} // Controlled component, input handled by keyDown
                                 placeholder={t('vietnamese_typing.placeholder') || 'Bắt đầu gõ theo kiểu Telex (ví dụ: \'tieengs vieetj\' -> \'tiếng việt\')...'}
                                 className="w-full h-96 p-6 text-lg border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none resize-none shadow-sm font-sans"
                                 lang="vi"
@@ -70,20 +89,20 @@ function VietnameseTypingTool() {
                         </div>
 
                         <div className="flex flex-wrap gap-4 pt-4 border-t border-gray-100">
-                            <button 
-                                onClick={handleCopy} 
+                            <button
+                                onClick={handleCopy}
                                 className="flex items-center gap-2 px-8 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all shadow-md hover:shadow-lg active:scale-95"
                             >
                                 <Copy size={18} /> {t('common.copy') || 'Sao chép'}
                             </button>
-                            <button 
-                                onClick={handleClear} 
+                            <button
+                                onClick={handleClear}
                                 className="flex items-center gap-2 px-8 py-3 bg-white border-2 border-red-100 text-red-600 rounded-xl font-semibold hover:bg-red-50 transition-all active:scale-95"
                             >
                                 <Trash2 size={18} /> {t('common.clear') || 'Xóa tất cả'}
                             </button>
                         </div>
-                        
+
                         <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 mt-8">
                             <h2 className="text-lg font-bold text-blue-900 mb-2">
                                 {t('vietnamese_typing.guide_title') || 'Hướng dẫn kiểu gõ Telex'}
