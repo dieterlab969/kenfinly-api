@@ -225,11 +225,6 @@ function Footer({ showCopyright = true, showAnalytics = true }) {
                                     <span className="mr-2">›</span> {t('footer.navigation.get_started')}
                                 </Link>
                             </li>
-                            <li>
-                                <Link to="/go-tieng-viet" className="text-gray-400 hover:text-white transition-colors flex items-center">
-                                    <span className="mr-2">›</span> {t('footer.go_tieng_viet_tool') || 'Gõ Tiếng Việt'}
-                                </Link>
-                            </li>
                         </ul>
                     </div>
 
@@ -244,6 +239,11 @@ function Footer({ showCopyright = true, showAnalytics = true }) {
                             <li>
                                 <Link to="/pomodoro" className="text-gray-400 hover:text-white transition-colors flex items-center">
                                     <span className="mr-2">›</span> {t('footer.pomodoro_timer')}
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/go-tieng-viet" className="text-gray-400 hover:text-white transition-colors flex items-center">
+                                    <span className="mr-2">›</span> {t('footer.go_tieng_viet_tool') || 'Gõ Tiếng Việt'}
                                 </Link>
                             </li>
                         </ul>

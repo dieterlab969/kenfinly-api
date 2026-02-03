@@ -307,6 +307,10 @@
     "en": "Start typing in Telex (e.g., 'tieengs vieetj' -> 'tiếng việt')...",
     "vi": "Bắt đầu gõ theo kiểu Telex (ví dụ: 'tieengs vieetj' -> 'tiếng việt')..."
   },
+  "footer.go_tieng_viet_tool": {
+    "en": "Vietnamese Typing",
+    "vi": "Đánh tiếng Việt"
+  },
   "vietnamese_typing.guide_title": {
     "en": "Telex Typing Guide",
     "vi": "Hướng dẫn kiểu gõ Telex"
