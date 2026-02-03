@@ -28,13 +28,19 @@ function VietnameseTypingTool() {
             return;
         }
 
-        // Handle single character keys
-        if (e.key.length === 1) {
-            const pos = VNTYPING.AddKey(e.key);
-            if (pos >= 0) {
-                setText(VNTYPING.GetBufferString());
-                e.preventDefault();
-            }
+        // Handle space
+        if (e.key === ' ') {
+            VNTYPING.AddKey(' ');
+            setText(VNTYPING.GetBufferString());
+            e.preventDefault();
+            return;
+        }
+
+        // Handle single character keys (A-Z, a-z)
+        if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+            VNTYPING.AddKey(e.key);
+            setText(VNTYPING.GetBufferString());
+            e.preventDefault();
         }
     };
 
