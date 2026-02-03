@@ -142,126 +142,126 @@ function App({ recaptchaEnabled = false }) {
                         <Route path="/go-tieng-viet" element={<VietnameseTyping />} />
                         <Route path="/pomodoro" element={<PomodoroTimer />} />
                         <Route path="/pricing" element={<PricingPage />} />
-                        
+                        <Route path="/go-tieng-viet" element={<VietnameseTyping />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
                         <Route path="/verify-email" element={<VerifyEmail />} />
                         <Route path="/verification-pending" element={<VerificationPending />} />
-                        <Route 
-                            path="/dashboard" 
+                        <Route
+                            path="/dashboard"
                             element={
                                 <ProtectedRoute>
                                     <Dashboard />
                                 </ProtectedRoute>
-                            } 
+                            }
                         />
-                        
+
                         <Route path="/admin/login" element={<AdminLogin />} />
-                        <Route 
-                            path="/admin/dashboard" 
+                        <Route
+                            path="/admin/dashboard"
                             element={
                                 <SuperAdminRoute>
                                     <AdminDashboard />
                                 </SuperAdminRoute>
-                            } 
+                            }
                         />
-                        <Route 
-                            path="/admin/accounts" 
+                        <Route
+                            path="/admin/accounts"
                             element={
                                 <SuperAdminRoute>
                                     <AccountManagement />
                                 </SuperAdminRoute>
-                            } 
+                            }
                         />
-                        <Route 
-                            path="/admin/users" 
+                        <Route
+                            path="/admin/users"
                             element={
                                 <SuperAdminRoute>
                                     <UserManagement />
                                 </SuperAdminRoute>
-                            } 
+                            }
                         />
-                        <Route 
-                            path="/admin/roles" 
+                        <Route
+                            path="/admin/roles"
                             element={
                                 <SuperAdminRoute>
                                     <RoleManagement />
                                 </SuperAdminRoute>
-                            } 
+                            }
                         />
-                        <Route 
-                            path="/admin/categories" 
+                        <Route
+                            path="/admin/categories"
                             element={
                                 <SuperAdminRoute>
                                     <CategoryManagement />
                                 </SuperAdminRoute>
-                            } 
+                            }
                         />
-                        <Route 
-                            path="/admin/languages" 
+                        <Route
+                            path="/admin/languages"
                             element={
                                 <SuperAdminRoute>
                                     <LanguageManagement />
                                 </SuperAdminRoute>
-                            } 
+                            }
                         />
-                        <Route 
-                            path="/admin/licenses" 
+                        <Route
+                            path="/admin/licenses"
                             element={
                                 <SuperAdminRoute>
                                     <LicenseManagement />
                                 </SuperAdminRoute>
-                            } 
+                            }
                         />
-                        <Route 
-                            path="/admin/settings" 
+                        <Route
+                            path="/admin/settings"
                             element={
                                 <SuperAdminRoute>
                                     <SettingsManagement />
                                 </SuperAdminRoute>
-                            } 
+                            }
                         />
-                        <Route 
-                            path="/admin/cache" 
+                        <Route
+                            path="/admin/cache"
                             element={
                                 <SuperAdminRoute>
                                     <CacheManagement />
                                 </SuperAdminRoute>
-                            } 
+                            }
                         />
-                        <Route 
-                            path="/admin/translations" 
+                        <Route
+                            path="/admin/translations"
                             element={
                                 <SuperAdminRoute>
                                     <TranslationManagement />
                                 </SuperAdminRoute>
-                            } 
+                            }
                         />
-                        <Route 
-                            path="/admin/transactions" 
+                        <Route
+                            path="/admin/transactions"
                             element={
                                 <SuperAdminRoute>
                                     <TransactionManagement />
                                 </SuperAdminRoute>
-                            } 
+                            }
                         />
-                        <Route 
-                            path="/admin/logos" 
+                        <Route
+                            path="/admin/logos"
                             element={
                                 <SuperAdminRoute>
                                     <LogoManagement />
                                 </SuperAdminRoute>
-                            } 
+                            }
                         />
-                        <Route 
-                            path="/admin/favicon" 
+                        <Route
+                            path="/admin/favicon"
                             element={
                                 <SuperAdminRoute>
                                     <FaviconManagement />
                                 </SuperAdminRoute>
-                            } 
+                            }
                         />
-                        
+
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </AuthProvider>
