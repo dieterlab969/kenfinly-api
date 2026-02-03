@@ -1839,45 +1839,9 @@
     "en": "Small Utilities",
     "vi": "Tiện ích nhỏ"
   },
-  "footer.go_tieng_viet_tool": {
-    "en": "Vietnamese Typing",
-    "vi": "Gõ Tiếng Việt"
-  },
   "footer.convert_case_tool": {
     "en": "Convert Case Tool",
     "vi": "Convert Case Tool"
-  },
-  "vietnamese_typing.title": {
-    "en": "Vietnamese Typing",
-    "vi": "Gõ Tiếng Việt"
-  },
-  "vietnamese_typing.subtitle": {
-    "en": "Online Vietnamese text editor with Telex input method support.",
-    "vi": "Công cụ hỗ trợ soạn thảo văn bản Tiếng Việt sử dụng kiểu gõ Telex trực tuyến."
-  },
-  "vietnamese_typing.placeholder": {
-    "en": "Start typing with Telex (e.g., 'tieengs vieetj' -> 'tiếng việt')...",
-    "vi": "Bắt đầu gõ theo kiểu Telex (ví dụ: 'tieengs vieetj' -> 'tiếng việt')..."
-  },
-  "vietnamese_typing.guide_title": {
-    "en": "Telex Typing Guide",
-    "vi": "Hướng dẫn kiểu gõ Telex"
-  },
-  "vietnamese_typing.guide_desc": {
-    "en": "Use the following Telex rules to type Vietnamese: aa=â, aw=ă, ee=ê, oo=ô, ow=ơ, uw=ư, dd=đ, s=á, f=à, r=ả, x=ã, j=ạ.",
-    "vi": "Sử dụng các quy tắc Telex sau: aa=â, aw=ă, ee=ê, oo=ô, ow=ơ, uw=ư, dd=đ, s=á, f=à, r=ả, x=ã, j=ạ."
-  },
-  "common.characters": {
-    "en": "characters",
-    "vi": "ký tự"
-  },
-  "common.copy": {
-    "en": "Copy",
-    "vi": "Sao chép"
-  },
-  "common.clear": {
-    "en": "Clear all",
-    "vi": "Xóa tất cả"
   },
   "footer.pomodoro_timer": {
     "en": "Pomodoro",
