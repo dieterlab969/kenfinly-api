@@ -34,6 +34,7 @@ import PomodoroTimer from '../pages/public/Pomodoro';
 import SavingHabitTracker from '../pages/public/SavingHabitTracker';
 import PlanSelection from './subscription/PlanSelection';
 import CheckoutForm from './subscription/CheckoutForm';
+import VietnameseTyping from "../pages/public/VietnameseTyping";
 
 const RecaptchaConfigContext = createContext({ enabled: false });
 
