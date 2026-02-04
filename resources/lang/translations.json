@@ -295,6 +295,46 @@
     "en": "Track all your expenses with our main app!",
     "vi": "Theo dõi tất cả chi tiêu với ứng dụng chính của chúng tôi!"
   },
+  "vietnamese_typing.title": {
+    "en": "Vietnamese Online Typing",
+    "vi": "Gõ Tiếng Việt Trực Tuyến"
+  },
+  "vietnamese_typing.subtitle": {
+    "en": "Vietnamese text editing tool supporting the Telex input method online.",
+    "vi": "Công cụ hỗ trợ soạn thảo văn bản Tiếng Việt sử dụng kiểu gõ Telex trực tuyến."
+  },
+  "vietnamese_typing.placeholder": {
+    "en": "Start typing in Telex (e.g., 'tieengs vieetj' -> 'tiếng việt')...",
+    "vi": "Bắt đầu gõ theo kiểu Telex (ví dụ: 'tieengs vieetj' -> 'tiếng việt')..."
+  },
+  "footer.go_tieng_viet_tool": {
+    "en": "Vietnamese Typing",
+    "vi": "Đánh tiếng Việt"
+  },
+  "vietnamese_typing.guide_title": {
+    "en": "Telex Typing Guide",
+    "vi": "Hướng dẫn kiểu gõ Telex"
+  },
+  "vietnamese_typing.guide_desc": {
+    "en": "Use the following rules: Telex (aa=â, s=á), VNI (a6=â, a1=á), VIQR (a^=â, a'=á).",
+    "vi": "Sử dụng các quy tắc: Telex (aa=â, s=á), VNI (a6=â, a1=á), VIQR (a^=â, a'=á)."
+  },
+  "common.characters": {
+    "en": "characters",
+    "vi": "ký tự"
+  },
+  "common.copy": {
+    "en": "Copy",
+    "vi": "Sao chép"
+  },
+  "common.clear": {
+    "en": "Clear All",
+    "vi": "Xóa tất cả"
+  },
+  "textcase.ad_inquiry": {
+    "en": "Your Ad Here - Contact us at purchasevn@getkenka.com",
+    "vi": "Quảng cáo tại đây - Liên hệ purchasevn@getkenka.com"
+  },
   "footer.contact_us": {
     "en": "Contact Us",
     "vi": "Liên hệ với chúng tôi"

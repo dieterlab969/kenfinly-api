@@ -86,6 +86,19 @@ const gtmTracking = {
     },
 
     /**
+     * Track footer utility link clicks
+     * @param {string} utilityName - Utility tool clicked (textcase, pomodoro, go_tieng_viet)
+     */
+    trackFooterUtilityClick: (utilityName) => {
+        if (window.gtag) {
+            window.gtag('event', 'click_footer_utility', {
+                utility_name: utilityName,
+                page_location: window.location.pathname
+            });
+        }
+    },
+
+    /**
      * Track blog category filter selection
      * @param {string} categoryName - Name of selected category
      */
@@ -259,6 +272,13 @@ const gtmTracking = {
                 page_location: window.location.pathname
             });
         }
+    },
+
+    /**
+     * Track Vietnamese Typing page view
+     */
+    trackVietnameseTypingPageView: () => {
+        gtmTracking.trackPageView('vietnamese_typing_page', 'Vietnamese Typing');
     }
 };
 
