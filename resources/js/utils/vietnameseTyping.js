@@ -81,10 +81,21 @@ const VNTYPING = (() => {
         'y': { s: 'ý', f: 'ỳ', r: 'ỷ', x: 'ỹ', j: 'ỵ', '1': 'ý', '2': 'ỳ', '3': 'ỷ', '4': 'ỹ', '5': 'ỵ', "'": 'ý', "`": 'ỳ', "?": 'ỷ', "~": 'ỹ', ".": 'y.' }
     };
 
+    /**
+     * Gets the base character (without diacritics) for a given Vietnamese character
+     * @param {string} char - A single character to get the base form of
+     * @returns {string} The base character (e.g., 'â' -> 'a', 'ế' -> 'ê', 'đ' -> 'd')
+     */
     function getBase(char) {
         return REVERSE_MAP[char.toLowerCase()] || char.toLowerCase();
     }
 
+    /**
+     * Finds the index of the vowel in a word that should receive the tone mark
+     * Uses Vietnamese orthographic rules to determine correct tone placement
+     * @param {string} word - The word to analyze
+     * @returns {number} The index of the vowel that should receive the tone mark, or -1 if no vowel found
+     */
     function findToneVowel(word) {
         const lower = word.toLowerCase();
         const vowelsFound = [];
@@ -107,11 +118,18 @@ const VNTYPING = (() => {
         return vowelsFound[vowelsFound.length - 1];
     }
 
+    /**
+     * Processes a word with a key press to apply Vietnamese typing transformations
+     * Handles both character modifiers (e.g., 'a' + 'a' -> 'â') and tone marks
+     * @param {string} word - The current word being typed
+     * @param {string} key - The key that was pressed
+     * @returns {string} The transformed word, or the word with key appended if no transformation applies
+     */
     function processWord(word, key) {
         if (currentMode === MODES.OFF) return word + key;
         const rule = RULES[currentMode];
         const lastChar = word[word.length - 1];
-        
+
         // Handle modifiers
         if (lastChar && rule.modifiers[lastChar.toLowerCase()] && rule.modifiers[lastChar.toLowerCase()][key.toLowerCase()]) {
             const isUpper = lastChar === lastChar.toUpperCase();
@@ -127,7 +145,7 @@ const VNTYPING = (() => {
                 const targetLower = target.toLowerCase();
                 const isUpper = target === target.toUpperCase();
                 let newChar = null;
-                
+
                 if (COMBINED_MAP[targetLower]) {
                     newChar = COMBINED_MAP[targetLower][key.toLowerCase()];
                 } else {
@@ -147,14 +165,31 @@ const VNTYPING = (() => {
     }
 
     return {
+        /**
+         * Sets the Vietnamese typing input mode
+         * @param {string} mode - The input mode to use ('telex', 'vni', 'viqr', or 'off')
+         */
         setMode: (mode) => { if (Object.values(MODES).includes(mode)) currentMode = mode; },
+
+        /**
+         * Gets the current Vietnamese typing input mode
+         * @returns {string} The current mode ('telex', 'vni', 'viqr', or 'off')
+         */
         getMode: () => currentMode,
+
+        /**
+         * Processes keyboard input to apply Vietnamese typing transformations
+         * @param {string} currentText - The full text content of the input field
+         * @param {string} key - The key that was pressed
+         * @param {number} selectionStart - The cursor position in the text
+         * @returns {string|null} The transformed text, or null if no transformation was applied
+         */
         process: (currentText, key, selectionStart) => {
             if (currentMode === MODES.OFF) return null;
-            
+
             const before = currentText.slice(0, selectionStart);
             const after = currentText.slice(selectionStart);
-            
+
             // Find last word boundary
             const match = before.match(/(\S+)$/);
             if (!match) return before + key + after;
@@ -162,7 +197,7 @@ const VNTYPING = (() => {
             const word = match[1];
             const prefix = before.slice(0, -word.length);
             const newWord = processWord(word, key);
-            
+
             if (newWord === word + key) return null; // No change made by IME
             return prefix + newWord + after;
         }
