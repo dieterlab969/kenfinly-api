@@ -5,6 +5,13 @@ import { useTranslation } from '../../contexts/TranslationContext';
 import gtmTracking from '../../utils/gtmTracking';
 import VNTYPING from '../../utils/vietnameseTyping';
 
+/**
+ * Vietnamese Typing Tool component that provides an interface for typing Vietnamese characters
+ * using different input methods (Telex, VNI, VIQR).
+ *
+ * @component
+ * @returns {React.ReactElement} The Vietnamese typing tool interface
+ */
 function VietnameseTypingTool() {
     const [text, setText] = useState('');
     const [imeMode, setImeMode] = useState('telex');
@@ -18,6 +25,13 @@ function VietnameseTypingTool() {
         VNTYPING.setMode('telex');
     }, []);
 
+    /**
+     * Handles keyboard input events for Vietnamese character conversion.
+     * Processes character input through the Vietnamese typing engine and updates the text
+     * while maintaining cursor position. Allows functional keys and shortcuts to pass through.
+     *
+     * @param {KeyboardEvent} e - The keyboard event object
+     */
     const handleKeyDown = (e) => {
         // Allow functional keys and shortcuts
         if (e.ctrlKey || e.altKey || e.metaKey) return;
@@ -49,11 +63,21 @@ function VietnameseTypingTool() {
         }
     };
 
+    /**
+     * Changes the Vietnamese input method editor (IME) mode.
+     * Updates both the component state and the global Vietnamese typing mode.
+     *
+     * @param {string} mode - The IME mode to set ('telex', 'vni', 'viqr', or 'off')
+     */
     const handleImeChange = (mode) => {
         setImeMode(mode);
         VNTYPING.setMode(mode);
     };
 
+    /**
+     * Copies the current text to the clipboard.
+     * Also tracks the copy action via Google Tag Manager if available.
+     */
     const handleCopy = () => {
         navigator.clipboard.writeText(text);
         if (gtmTracking?.trackTextCaseAction) {
@@ -61,6 +85,10 @@ function VietnameseTypingTool() {
         }
     };
 
+    /**
+     * Clears all text from the textarea.
+     * Also tracks the clear action via Google Tag Manager if available.
+     */
     const handleClear = () => {
         setText('');
         if (gtmTracking?.trackTextCaseAction) {
