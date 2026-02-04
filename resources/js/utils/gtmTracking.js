@@ -272,6 +272,13 @@ const gtmTracking = {
                 page_location: window.location.pathname
             });
         }
+    },
+
+    /**
+     * Track Vietnamese Typing page view
+     */
+    trackVietnameseTypingPageView: () => {
+        gtmTracking.trackPageView('vietnamese_typing_page', 'Vietnamese Typing');
     }
 };
 
