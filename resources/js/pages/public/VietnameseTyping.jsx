@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Copy, Trash2, Keyboard } from 'lucide-react';
 import Layout2 from '../../components/public/Layout2';
 import { useTranslation } from '../../contexts/TranslationContext';
@@ -7,41 +7,51 @@ import VNTYPING from '../../utils/vietnameseTyping';
 
 function VietnameseTypingTool() {
     const [text, setText] = useState('');
+    const [imeMode, setImeMode] = useState('telex');
     const { t } = useTranslation();
+    const textareaRef = useRef(null);
 
     useEffect(() => {
-        // Track page view
         if (gtmTracking?.trackVietnameseTypingPageView) {
             gtmTracking.trackVietnameseTypingPageView();
         }
-        // Initialize VNTYPING buffer and speller state
-        VNTYPING.ClearBuffer();
-        VNTYPING.Speller.Activate();
+        VNTYPING.setMode('telex');
     }, []);
 
     const handleKeyDown = (e) => {
-        // Handle Backspace
-        if (e.key === 'Backspace') {
-            VNTYPING.BackSpace();
-            setText(VNTYPING.GetBufferString());
-            e.preventDefault();
-            return;
-        }
+        // Allow functional keys and shortcuts
+        if (e.ctrlKey || e.altKey || e.metaKey) return;
+        
+        const functionalKeys = [
+            'Backspace', 'Delete', 'Enter', 'Tab', 'Escape', 
+            'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 
+            'Home', 'End', 'PageUp', 'PageDown', 'CapsLock', 'Shift', 'Control', 'Alt', 'Meta'
+        ];
+        
+        if (functionalKeys.includes(e.key)) return;
 
-        // Handle space
-        if (e.key === ' ') {
-            VNTYPING.AddKey(' ');
-            setText(VNTYPING.GetBufferString());
-            e.preventDefault();
-            return;
+        if (e.key.length === 1) {
+            const selectionStart = e.target.selectionStart;
+            const newContent = VNTYPING.process(text, e.key, selectionStart);
+            
+            if (newContent !== null) {
+                e.preventDefault();
+                setText(newContent);
+                
+                // Use requestAnimationFrame for smoother cursor handling
+                requestAnimationFrame(() => {
+                    if (textareaRef.current) {
+                        const newPos = selectionStart + (newContent.length - text.length);
+                        textareaRef.current.setSelectionRange(newPos, newPos);
+                    }
+                });
+            }
         }
+    };
 
-        // Handle single character keys (A-Z, a-z)
-        if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
-            VNTYPING.AddKey(e.key);
-            setText(VNTYPING.GetBufferString());
-            e.preventDefault();
-        }
+    const handleImeChange = (mode) => {
+        setImeMode(mode);
+        VNTYPING.setMode(mode);
     };
 
     const handleCopy = () => {
@@ -53,7 +63,6 @@ function VietnameseTypingTool() {
 
     const handleClear = () => {
         setText('');
-        VNTYPING.ClearBuffer();
         if (gtmTracking?.trackTextCaseAction) {
             gtmTracking.trackTextCaseAction('clear');
         }
@@ -67,9 +76,26 @@ function VietnameseTypingTool() {
                         <Keyboard className="w-10 h-10 text-blue-600" />
                         {t('vietnamese_typing.title')}
                     </h1>
-                    <p className="text-lg text-gray-600">
+                    <p className="text-lg text-gray-600 mb-8">
                         {t('vietnamese_typing.subtitle')}
                     </p>
+
+                    {/* Input Method Selector */}
+                    <div className="flex justify-center gap-2 mb-8 bg-white p-2 rounded-2xl shadow-sm border-2 border-gray-100 max-w-md mx-auto">
+                        {['telex', 'vni', 'viqr', 'off'].map((mode) => (
+                            <button
+                                key={mode}
+                                onClick={() => handleImeChange(mode)}
+                                className={`flex-1 py-2 px-4 rounded-xl font-bold transition-all ${
+                                    imeMode === mode 
+                                    ? 'bg-blue-600 text-white shadow-md scale-105' 
+                                    : 'text-gray-500 hover:bg-gray-50'
+                                }`}
+                            >
+                                {mode.toUpperCase()}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -81,9 +107,10 @@ function VietnameseTypingTool() {
                     <div className="lg:col-span-2 space-y-6">
                         <div className="relative">
                             <textarea
+                                ref={textareaRef}
                                 value={text}
                                 onKeyDown={handleKeyDown}
-                                onChange={() => {}} // Controlled component, input handled by keyDown
+                                onChange={(e) => setText(e.target.value)}
                                 placeholder={t('vietnamese_typing.placeholder')}
                                 className="w-full h-96 p-6 text-lg border-2 border-gray-200 rounded-2xl focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all outline-none resize-none shadow-sm font-sans"
                                 lang="vi"
@@ -114,7 +141,7 @@ function VietnameseTypingTool() {
                                 {t('vietnamese_typing.guide_title')}
                             </h2>
                             <p className="text-sm text-blue-800 leading-relaxed">
-                                {t('vietnamese_typing.guide_desc')}
+                                {t('vietnamese_typing.guide_desc') || "Telex (aa=â, s=á), VNI (a6=â, a1=á), VIQR (a^=â, a'=á)."}
                             </p>
                         </div>
                     </div>

@@ -316,8 +316,8 @@
     "vi": "Hướng dẫn kiểu gõ Telex"
   },
   "vietnamese_typing.guide_desc": {
-    "en": "Use the following Telex rules: aa=â, aw=ă, ee=ê, oo=ô, ow=ơ, uw=ư, dd=đ, s=á, f=à, r=ả, x=ã, j=ạ.",
-    "vi": "Sử dụng các quy tắc Telex sau: aa=â, aw=ă, ee=ê, oo=ô, ow=ơ, uw=ư, dd=đ, s=á, f=à, r=ả, x=ã, j=ạ."
+    "en": "Use the following rules: Telex (aa=â, s=á), VNI (a6=â, a1=á), VIQR (a^=â, a'=á).",
+    "vi": "Sử dụng các quy tắc: Telex (aa=â, s=á), VNI (a6=â, a1=á), VIQR (a^=â, a'=á)."
   },
   "common.characters": {
     "en": "characters",
