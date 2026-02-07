@@ -480,27 +480,28 @@ class TransactionController extends Controller
             ->orderBy('date')
             ->get();
 
-        $thirtyDaysAgo = $now->copy()->subDays(29);
+        // Monthly balance history for balance trend chart (last 5 months)
         $balanceHistory = [];
         $accounts = Account::where('user_id', $user->id)->get();
         $totalBalance = $accounts->sum('balance');
-        
-        for ($i = 29; $i >= 0; $i--) {
-            $date = $now->copy()->subDays($i);
-            $dateStr = $date->format('Y-m-d');
-            
-            $dayTransactions = Transaction::where('user_id', $user->id)
+
+        for ($i = 4; $i >= 0; $i--) {
+            $monthDate = $now->copy()->subMonths($i)->endOfMonth();
+            $dateStr = $monthDate->format('Y-m-d');
+
+            // Calculate balance at end of this month by subtracting all transactions after this date
+            $futureTransactions = Transaction::where('user_id', $user->id)
                 ->whereDate('transaction_date', '>', $dateStr)
                 ->select(
                     DB::raw('SUM(CASE WHEN type = "income" THEN amount ELSE -amount END) as net_change')
                 )
                 ->first();
-            
-            $dayBalance = $totalBalance - ($dayTransactions->net_change ?? 0);
-            
+
+            $monthBalance = $totalBalance - ($futureTransactions->net_change ?? 0);
+
             $balanceHistory[] = [
                 'date' => $dateStr,
-                'balance' => $dayBalance,
+                'balance' => $monthBalance,
             ];
         }
 
