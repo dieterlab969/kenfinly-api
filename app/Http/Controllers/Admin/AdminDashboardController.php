@@ -9,8 +9,22 @@ use App\Models\Transaction;
 use App\Models\Category;
 use App\Models\Language;
 
+/**
+ * Controller for the admin dashboard.
+ *
+ * Provides statistical data and overview information for the admin interface,
+ * including user counts, account statistics, and transaction metrics.
+ */
 class AdminDashboardController extends Controller
 {
+    /**
+     * Get dashboard statistics.
+     *
+     * Retrieves key metrics including user counts, account totals, transaction counts,
+     * and category/language statistics for the admin dashboard.
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with success status and statistics data.
+     */
     public function index()
     {
         $stats = [

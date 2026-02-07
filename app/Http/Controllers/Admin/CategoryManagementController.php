@@ -5,8 +5,20 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
+/**
+ * Controller for managing categories in the admin interface.
+ *
+ * Provides CRUD operations for categories including listing, creating,
+ * viewing, updating, and deleting categories. Supports pagination and search functionality.
+ */
 class CategoryManagementController extends Controller
 {
+    /**
+     * Get a paginated list of categories with optional search filtering.
+     *
+     * @param Request $request HTTP request containing optional search and pagination parameters.
+     * @return \Illuminate\Http\JsonResponse JSON response with success status and paginated category data.
+     */
     public function index(Request $request)
     {
         $query = \App\Models\Category::query();
@@ -25,6 +37,14 @@ class CategoryManagementController extends Controller
         ]);
     }
 
+    /**
+     * Create a new category.
+     *
+     * Validates the request data and creates a new category record.
+     *
+     * @param Request $request HTTP request containing category data (name, icon, color).
+     * @return \Illuminate\Http\JsonResponse JSON response with success status, message, and created category data, or validation errors.
+     */
     public function store(Request $request)
     {
         $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
@@ -50,6 +70,12 @@ class CategoryManagementController extends Controller
         ], 201);
     }
 
+    /**
+     * Get details of a specific category.
+     *
+     * @param string $id The ID of the category to retrieve.
+     * @return \Illuminate\Http\JsonResponse JSON response with success status and category data.
+     */
     public function show(string $id)
     {
         $category = \App\Models\Category::findOrFail($id);
@@ -60,6 +86,15 @@ class CategoryManagementController extends Controller
         ]);
     }
 
+    /**
+     * Update an existing category.
+     *
+     * Validates the request data and updates the specified category.
+     *
+     * @param Request $request HTTP request containing updated category data.
+     * @param string $id The ID of the category to update.
+     * @return \Illuminate\Http\JsonResponse JSON response with success status, message, and updated category data, or validation errors.
+     */
     public function update(Request $request, string $id)
     {
         $category = \App\Models\Category::findOrFail($id);
@@ -87,6 +122,12 @@ class CategoryManagementController extends Controller
         ]);
     }
 
+    /**
+     * Delete a category.
+     *
+     * @param string $id The ID of the category to delete.
+     * @return \Illuminate\Http\JsonResponse JSON response with success status and deletion confirmation message.
+     */
     public function destroy(string $id)
     {
         $category = \App\Models\Category::findOrFail($id);
