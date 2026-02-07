@@ -13,11 +13,39 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Controller for managing financial transactions via API.
+ *
+ * Provides CRUD operations for transactions including creation, retrieval,
+ * updating, and deletion. Also handles transaction photo management and
+ * provides dashboard data with financial summaries and trends.
+ *
+ * Uses authorization policies to control access to transaction resources.
+ */
 class TransactionController extends Controller
 {
+    /**
+     * Transaction photo service instance.
+     *
+     * @var TransactionPhotoService
+     */
     protected $photoService;
+
+    /**
+     * Transaction change log service instance.
+     *
+     * @var TransactionChangeLogService
+     */
     protected $changeLogService;
 
+    /**
+     * TransactionController constructor.
+     *
+     * Initializes services and sets up authorization policies for transaction resources.
+     *
+     * @param TransactionPhotoService $photoService Service for handling transaction photos.
+     * @param TransactionChangeLogService $changeLogService Service for logging transaction changes.
+     */
     public function __construct(
         TransactionPhotoService $photoService,
         TransactionChangeLogService $changeLogService
@@ -26,10 +54,24 @@ class TransactionController extends Controller
         $this->changeLogService = $changeLogService;
         $this->authorizeResource(Transaction::class, 'transaction');
     }
+    /**
+     * Get a paginated list of transactions for the authenticated user.
+     *
+     * Retrieves transactions with optional filtering by account, type, and date range.
+     * Supports pagination and includes related category and account data.
+     *
+     * @param Request $request HTTP request containing optional filter parameters:
+     *                         - account_id: Filter by specific account
+     *                         - type: Filter by transaction type (income/expense)
+     *                         - start_date: Start date for date range filter
+     *                         - end_date: End date for date range filter
+     *                         - per_page: Number of items per page
+     * @return \Illuminate\Http\JsonResponse JSON response with success status and paginated transaction data.
+     */
     public function index(Request $request)
     {
         $user = auth('api')->user();
-        
+
         $query = Transaction::where('user_id', $user->id)
             ->with(['category', 'account']);
 
@@ -85,13 +127,13 @@ class TransactionController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-        
+
         $account = Account::where('id', $request->account_id)
             ->where('user_id', $user->id)
             ->firstOrFail();
 
         $uploadedPhotoPath = null;
-        
+
         DB::beginTransaction();
         try {
             $transaction = Transaction::create([
@@ -106,7 +148,7 @@ class TransactionController extends Controller
 
             if ($request->hasFile('receipt')) {
                 $file = $request->file('receipt');
-                
+
                 Log::info('Receipt upload during transaction creation', [
                     'transaction_id' => $transaction->id,
                     'user_id' => $user->id,
@@ -114,26 +156,26 @@ class TransactionController extends Controller
                     'mime_type' => $file->getMimeType(),
                     'size_kb' => round($file->getSize() / 1024, 2),
                 ]);
-                
+
                 $photo = $this->photoService->uploadPhoto($transaction, $file, $user);
                 $uploadedPhotoPath = $photo->file_path;
-                
+
                 $this->changeLogService->logPhotoAdded(
                     $transaction,
                     $user,
                     $photo->original_filename
                 );
-                
+
                 Log::info('Receipt saved successfully', [
                     'transaction_id' => $transaction->id,
                     'photo_id' => $photo->id,
                 ]);
             }
 
-            $balanceChange = $request->type === 'income' 
-                ? $request->amount 
+            $balanceChange = $request->type === 'income'
+                ? $request->amount
                 : -$request->amount;
-            
+
             $account->increment('balance', $balanceChange);
 
             $this->changeLogService->logCreate($transaction, $user);
@@ -149,14 +191,14 @@ class TransactionController extends Controller
             ], 201);
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             if ($uploadedPhotoPath) {
                 Storage::disk('public')->delete($uploadedPhotoPath);
                 Log::info('Cleaned up orphaned photo after transaction creation failure', [
                     'file_path' => $uploadedPhotoPath,
                 ]);
             }
-            
+
             Log::error('Failed to create transaction', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
@@ -169,6 +211,16 @@ class TransactionController extends Controller
         }
     }
 
+    /**
+     * Get details of a specific transaction.
+     *
+     * Retrieves a transaction with all related data including category, account,
+     * photos with uploader info, and change logs. Also determines user permissions
+     * for editing and photo management.
+     *
+     * @param Transaction $transaction The transaction model instance to show.
+     * @return \Illuminate\Http\JsonResponse JSON response with success status, transaction data, and permissions.
+     */
     public function show(Transaction $transaction)
     {
         $transaction->load([
@@ -252,8 +304,8 @@ class TransactionController extends Controller
             $newAccount = Account::where('id', $transaction->account_id)
                 ->where('user_id', $user->id)
                 ->firstOrFail();
-            $newBalanceChange = $transaction->type === 'income' 
-                ? $transaction->amount 
+            $newBalanceChange = $transaction->type === 'income'
+                ? $transaction->amount
                 : -$transaction->amount;
             $newAccount->increment('balance', $newBalanceChange);
 
@@ -285,8 +337,8 @@ class TransactionController extends Controller
         DB::beginTransaction();
         try {
             $account = Account::findOrFail($transaction->account_id);
-            $balanceChange = $transaction->type === 'income' 
-                ? -$transaction->amount 
+            $balanceChange = $transaction->type === 'income'
+                ? -$transaction->amount
                 : $transaction->amount;
             $account->increment('balance', $balanceChange);
 
@@ -333,7 +385,7 @@ class TransactionController extends Controller
                 'content_type' => $request->header('Content-Type'),
                 'has_file' => $request->hasFile('photo'),
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors()
@@ -343,7 +395,7 @@ class TransactionController extends Controller
         try {
             $user = auth('api')->user();
             $file = $request->file('photo');
-            
+
             Log::info('Photo upload started', [
                 'transaction_id' => $transaction->id,
                 'user_id' => $user->id,
@@ -351,7 +403,7 @@ class TransactionController extends Controller
                 'mime_type' => $file->getMimeType(),
                 'size_kb' => round($file->getSize() / 1024, 2),
             ]);
-            
+
             $photo = $this->photoService->uploadPhoto(
                 $transaction,
                 $file,
@@ -383,7 +435,7 @@ class TransactionController extends Controller
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
@@ -394,7 +446,7 @@ class TransactionController extends Controller
     public function deletePhoto(Request $request, $photoId)
     {
         $user = auth('api')->user();
-        
+
         $photo = \App\Models\TransactionPhoto::findOrFail($photoId);
         $transaction = $photo->transaction;
 
@@ -425,12 +477,12 @@ class TransactionController extends Controller
     public function getDashboardData(Request $request)
     {
         $user = auth('api')->user();
-        
+
         $now = now();
         $startOfMonth = $now->copy()->startOfMonth();
         $endOfMonth = $now->copy()->endOfMonth();
         $sevenDaysAgo = $now->copy()->subDays(6);
-        
+
         $startOfPreviousMonth = $now->copy()->subMonth()->startOfMonth();
         $endOfPreviousMonth = $now->copy()->subMonth()->endOfMonth();
 
@@ -438,7 +490,7 @@ class TransactionController extends Controller
             ->where('type', 'income')
             ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
             ->sum('amount');
-        
+
         $currentExpense = Transaction::where('user_id', $user->id)
             ->where('type', 'expense')
             ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
@@ -448,7 +500,7 @@ class TransactionController extends Controller
             ->where('type', 'income')
             ->whereBetween('transaction_date', [$startOfPreviousMonth, $endOfPreviousMonth])
             ->sum('amount');
-        
+
         $previousExpense = Transaction::where('user_id', $user->id)
             ->where('type', 'expense')
             ->whereBetween('transaction_date', [$startOfPreviousMonth, $endOfPreviousMonth])
@@ -480,27 +532,28 @@ class TransactionController extends Controller
             ->orderBy('date')
             ->get();
 
-        $thirtyDaysAgo = $now->copy()->subDays(29);
+        // Monthly balance history for balance trend chart (last 7 months)
         $balanceHistory = [];
         $accounts = Account::where('user_id', $user->id)->get();
         $totalBalance = $accounts->sum('balance');
-        
-        for ($i = 29; $i >= 0; $i--) {
-            $date = $now->copy()->subDays($i);
-            $dateStr = $date->format('Y-m-d');
-            
-            $dayTransactions = Transaction::where('user_id', $user->id)
+
+        for ($i = 6; $i >= 0; $i--) {
+            $monthDate = $now->copy()->subMonths($i)->endOfMonth();
+            $dateStr = $monthDate->format('Y-m-d');
+
+            // Calculate balance at end of this month by subtracting all transactions after this date
+            $futureTransactions = Transaction::where('user_id', $user->id)
                 ->whereDate('transaction_date', '>', $dateStr)
                 ->select(
                     DB::raw('SUM(CASE WHEN type = "income" THEN amount ELSE -amount END) as net_change')
                 )
                 ->first();
-            
-            $dayBalance = $totalBalance - ($dayTransactions->net_change ?? 0);
-            
+
+            $monthBalance = $totalBalance - ($futureTransactions->net_change ?? 0);
+
             $balanceHistory[] = [
                 'date' => $dateStr,
-                'balance' => $dayBalance,
+                'balance' => $monthBalance,
             ];
         }
 

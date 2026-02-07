@@ -2,6 +2,12 @@
 
 namespace App\Services;
 
+/**
+ * Service for currency conversion and formatting.
+ *
+ * Provides methods for converting between supported currencies and formatting
+ * currency values for display. Currently supports USD and VND conversions.
+ */
 class CurrencyService
 {
     // Exchange rate: 1 USD = ~25,000 VND (approximate rate)

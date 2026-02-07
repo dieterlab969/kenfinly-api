@@ -4,6 +4,12 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Crypt;
 
+/**
+ * Service for encrypting and decrypting sensitive data.
+ *
+ * Provides secure encryption/decryption using Laravel's Crypt facade and
+ * additional methods for credential hashing and verification using SHA-256.
+ */
 class EncryptionService
 {
     private const ALGORITHM = 'AES-256-CBC';
