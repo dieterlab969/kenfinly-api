@@ -1,21 +1,39 @@
 import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
-import { format, parseISO } from 'date-fns';
+import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
+import { parseISO } from 'date-fns';
 import { formatCurrency } from '../../constants/categories';
-import {useTranslation} from "@assets/js/contexts/TranslationContext.jsx";
+import { useTranslation } from '../../contexts/TranslationContext';
 
 const BalanceTrendChart = ({ balanceHistory, totalBalance }) => {
-
-    const { t } = useTranslation();
+    const { t, currentLanguage } = useTranslation();
 
     if (!balanceHistory || balanceHistory.length === 0) {
         return null;
     }
 
+    const formatLabel = (dateStr, isFull = false) => {
+        const date = parseISO(dateStr);
+        const monthIndex = date.getMonth(); // 0-11
+        const year = date.getFullYear();
+        
+        const monthKeys = [
+            'jan', 'feb', 'mar', 'apr', 'may', 'jun', 
+            'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
+        ];
+        
+        const key = isFull ? `balanceChart.month_full_${monthKeys[monthIndex]}` : `balanceChart.month_${monthKeys[monthIndex]}`;
+        const translatedMonth = t(key);
+
+        if (currentLanguage === 'vi') {
+            return isFull ? `${translatedMonth}, ${year}` : `${translatedMonth} ${year}`;
+        }
+        return `${translatedMonth} ${year}`;
+    };
+
     const chartData = balanceHistory.map(item => ({
-        date: format(parseISO(item.date), 'MMM yyyy'),
+        date: formatLabel(item.date),
         balance: parseFloat(item.balance),
-        fullDate: format(parseISO(item.date), 'MMMM yyyy'),
+        fullDate: formatLabel(item.date, true),
     }));
 
     const minBalance = Math.min(...chartData.map(d => d.balance));
