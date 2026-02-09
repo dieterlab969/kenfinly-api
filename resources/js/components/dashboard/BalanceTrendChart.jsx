@@ -99,6 +99,7 @@ const BalanceTrendChart = ({ balanceHistory, totalBalance }) => {
                     <Area
                         type="monotone"
                         dataKey="balance"
+                        name={t('balanceChart.title')}
                         stroke="#3b82f6"
                         strokeWidth={2}
                         fill="url(#balanceGradient)"
