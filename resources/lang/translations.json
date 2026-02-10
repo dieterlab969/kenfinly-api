@@ -189,7 +189,7 @@
   },
   "transaction.amount": {
     "en": "Amount",
-    "vi": "Số tiền"
+    "vi": "Tổng số"
   },
   "transaction.category": {
     "en": "Category",
