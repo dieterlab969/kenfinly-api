@@ -135,6 +135,10 @@
     "en": "Expenses - Last 7 Days",
     "vi": "Chi tiêu - 7 ngày qua"
   },
+  "dashboard.chart_amount": {
+    "en": "amount",
+    "vi": "Tổng số"
+  },
   "dashboard.balance": {
     "en": "Balance",
     "vi": "Số dư"

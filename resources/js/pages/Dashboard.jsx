@@ -203,6 +203,7 @@ const Dashboard = () => {
                             />
                             <Bar 
                                 dataKey="amount" 
+                                name={t('dashboard.chart_amount')}
                                 fill="#ef4444"
                                 radius={[8, 8, 0, 0]}
                             />
