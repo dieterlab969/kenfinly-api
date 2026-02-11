@@ -24,10 +24,6 @@ const MonthlySummaryCard = ({ monthlySummary }) => {
 
             const translatedMonth = t(`balanceChart.month_full_${monthKeys[monthIndex]}`);
 
-            if (currentLanguage === 'vi') {
-                // Ensure no double spaces and force the comma
-                return `${translatedMonth.trim()}, ${year}`;
-            }
             return `${translatedMonth} ${year}`;
         } catch (e) {
             return label;
