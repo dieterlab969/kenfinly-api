@@ -1,19 +1,45 @@
 import React from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { formatCurrency } from '../../constants/categories';
-import {useTranslation} from "@assets/js/contexts/TranslationContext.jsx";
+import { useTranslation } from '../../contexts/TranslationContext';
+import { parse, format as dateFnsFormat } from 'date-fns';
 
 const MonthlySummaryCard = ({ monthlySummary }) => {
     if (!monthlySummary) return null;
-    const { t } = useTranslation();
+    const { t, currentLanguage } = useTranslation();
 
     const { current, previous } = monthlySummary;
 
+    const formatMonthLabel = (label) => {
+        try {
+            // Assume label is in format "Month YYYY" (e.g., "February 2026")
+            const date = parse(label, 'MMMM yyyy', new Date());
+            const monthIndex = date.getMonth(); // 0-11
+            const year = date.getFullYear();
+
+            const monthKeys = [
+                'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+                'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
+            ];
+
+            const translatedMonth = t(`balanceChart.month_full_${monthKeys[monthIndex]}`);
+
+            if (currentLanguage === 'vi') {
+                return `${translatedMonth}, ${year}`;
+            }
+            return `${translatedMonth} ${year}`;
+        } catch (e) {
+            return label;
+        }
+    };
+
     const MonthColumn = ({ data, label }) => {
         const isNegative = data.net < 0;
+        const localizedLabel = formatMonthLabel(label);
+
         return (
             <div className="flex-1">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3">{label}</h4>
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">{localizedLabel}</h4>
                 <div className="space-y-2">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
