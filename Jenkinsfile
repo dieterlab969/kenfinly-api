@@ -30,7 +30,7 @@ pipeline {
                 branch 'staging'
             }
             steps {
-                sh 'bash deploy/staging-deploy.sh'
+                sh 'sudo -u sysuser /var/www/kenfinly/deploy/staging-deploy.sh'
             }
         }
 
