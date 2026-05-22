@@ -10,6 +10,11 @@ use App\Http\Controllers\Api\CsvController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Api\CommitmentController;
+use App\Http\Controllers\Api\HaloSessionController;
+use App\Http\Controllers\Api\HaloTransactionController;
+use App\Http\Controllers\Api\HourlyRateController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AccountManagementController;
@@ -69,6 +74,30 @@ Route::middleware('auth:api')->group(function () {
     // Dashboard
     Route::get('/dashboard', [TransactionController::class, 'getDashboardData']);
 
+    // Halo Attendance
+    Route::get('/attendance/status', [AttendanceController::class, 'status']);
+    Route::post('/attendance/start', [AttendanceController::class, 'start']);
+    Route::post('/attendance/complete', [AttendanceController::class, 'complete']);
+    Route::post('/attendance/kill', [AttendanceController::class, 'kill']);
+
+    // Halo Session (Standard 9 — persistent countdown state)
+    Route::get('/halo/current-session', [HaloSessionController::class, 'current']);
+
+    // Halo-aware transactions (Standards 2, 4, 5, 7, 8, 11) — POST + GET only.
+    Route::get('/halo/transactions', [HaloTransactionController::class, 'index']);
+    Route::post('/halo/transactions', [HaloTransactionController::class, 'store']);
+
+    // Hourly rate (Standard 3 — 6-month governance)
+    Route::post('/user/hourly-rate', [HourlyRateController::class, 'update']);
+    Route::get('/user/hourly-rate/history', [HourlyRateController::class, 'history']);
+
+    // Commitments (Standard 10 — secure asset uploads)
+    Route::get('/commitments', [CommitmentController::class, 'index']);
+    Route::get('/commitments/{commitment}', [CommitmentController::class, 'show']);
+    Route::post('/commitments', [CommitmentController::class, 'store']);
+    Route::post('/commitments/{commitment}/complete', [CommitmentController::class, 'complete']);
+    Route::post('/commitments/{commitment}/kill', [CommitmentController::class, 'kill']);
+
     // Categories
     Route::get('/categories', [CategoryController::class, 'index']);
 
@@ -120,7 +149,9 @@ Route::middleware('auth:api')->prefix('saving-tracker')->group(function() {
     Route::post('tracking/bulk', [\App\Http\Controllers\Api\SavingTracker\HabitTrackingController::class, 'bulkTrack']);
     Route::get('stats/habits/{id}', [\App\Http\Controllers\Api\SavingTracker\HabitController::class, 'stats']);
     Route::get('stats/overall', [\App\Http\Controllers\Api\SavingTracker\HabitController::class, 'overallStats']);
-    Route::get('achievements', [\App\Http\Controllers\Api\SavingTracker\AchievementController::class, 'index']);
+    Route::get('achievemenAI Pro
+￼
+ts', [\App\Http\Controllers\Api\SavingTracker\AchievementController::class, 'index']);
     Route::get('achievements/unlocked', [\App\Http\Controllers\Api\SavingTracker\AchievementController::class, 'unlocked']);
 });
 
