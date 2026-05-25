@@ -12,3 +12,4 @@
 - **Strict Access Control (ALC):** Every data-modifying or data-viewing API must be protected by Laravel Sanctum. Implement Laravel Policies (`view`, `create`, `update`) for Attendances, Transactions, and Commitments to strictly enforce that a user can ONLY access or mutate their own data (`$user->id === $resource->user_id`). Block Admin-only routes using a custom Role middleware.
 
 ## 🧠 LESSONS LEARNED & PAST MISTAKES (MEMORIAL)
+- TBD
