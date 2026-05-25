@@ -15,6 +15,7 @@ import PaymentHistoryModal from '../components/PaymentHistoryModal';
 import TransactionDetailModal from '../components/TransactionDetailModal';
 import MonthlySummaryCard from '../components/dashboard/MonthlySummaryCard';
 import BalanceTrendChart from '../components/dashboard/BalanceTrendChart';
+import AttendanceWidget from '../components/dashboard/AttendanceWidget';
 import { getCategoryIcon, formatCurrency } from '../constants/categories';
 
 const Dashboard = () => {
@@ -167,6 +168,8 @@ const Dashboard = () => {
             </nav>
 
             <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <AttendanceWidget onRewardCreated={() => fetchDashboardData(false)} />
+
                 <MonthlySummaryCard monthlySummary={dashboardData?.monthly_summary} />
 
                 <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">

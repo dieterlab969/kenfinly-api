@@ -34,6 +34,13 @@ class User extends Authenticatable implements JWTSubject
         'language_id',
         'status',
         'email_verified_at',
+        'timezone',
+        'hourly_rate',
+        'rate_updated_at',
+        'hourly_rate_locked_until',
+        'current_streak',
+        'longest_streak',
+        'last_halo_date',
     ];
 
     /**
@@ -57,6 +64,12 @@ class User extends Authenticatable implements JWTSubject
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'status' => 'string',
+            'rate_updated_at' => 'datetime',
+            'hourly_rate_locked_until' => 'datetime',
+            'last_halo_date' => 'date',
+            'hourly_rate' => 'integer',
+            'current_streak' => 'integer',
+            'longest_streak' => 'integer',
         ];
     }
 
@@ -86,6 +99,26 @@ class User extends Authenticatable implements JWTSubject
     public function accounts(): HasMany
     {
         return $this->hasMany(Account::class);
+    }
+
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    public function hourlyRateChanges(): HasMany
+    {
+        return $this->hasMany(UserHourlyRateChange::class);
+    }
+
+    public function commitments(): HasMany
+    {
+        return $this->hasMany(Commitment::class);
+    }
+
+    public function ledgerDailySummaries(): HasMany
+    {
+        return $this->hasMany(LedgerDailySummary::class);
     }
 
     /**
