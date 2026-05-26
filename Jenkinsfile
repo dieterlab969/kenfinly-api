@@ -13,6 +13,7 @@ pipeline {
     environment {
         APP_DIR = '/var/www/kenfinly'
         DEPLOY_BRANCH = 'staging'
+        HEALTHCHECK_URL = 'https://staging.kenfinly.com/up'
         SYS_USER = 'sysuser'
     }
 
@@ -57,7 +58,7 @@ pipeline {
 
         stage('Health Check') {
             steps {
-                sh 'curl --fail --silent --show-error --max-time 10 http://127.0.0.1/up'
+                sh "curl --fail --silent --show-error --max-time 10 ${HEALTHCHECK_URL}"
             }
         }
     }
