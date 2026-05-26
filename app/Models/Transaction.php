@@ -18,10 +18,16 @@ class Transaction extends Model
         'account_id',
         'category_id',
         'type',
+        'ledger_type',
         'amount',
+        'amount_minor',
         'notes',
         'receipt_path',
         'transaction_date',
+        'currency',
+        'source_type',
+        'source_id',
+        'idempotency_key',
     ];
 
     /**
@@ -31,9 +37,17 @@ class Transaction extends Model
      */
     protected $casts = [
         'amount' => 'decimal:2',
+        'amount_minor' => 'integer',
         'transaction_date' => 'date',
         'type' => 'string',
+        'ledger_type' => 'string',
+        'notes' => 'encrypted',
     ];
+
+    public function isImmutable(): bool
+    {
+        return $this->ledger_type === 'halo' || $this->source_type !== 'manual';
+    }
 
     /**
      * Defines the relationship to the user who owns this transaction.
