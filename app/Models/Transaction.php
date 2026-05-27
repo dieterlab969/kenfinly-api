@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -41,8 +43,26 @@ class Transaction extends Model
         'transaction_date' => 'date',
         'type' => 'string',
         'ledger_type' => 'string',
-        'notes' => 'encrypted',
     ];
+
+    protected function notes(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+                try {
+                    return decrypt($value);
+                } catch (DecryptException) {
+                    return $value;
+                }
+            },
+            set: function (?string $value): ?string {
+                return $value !== null ? encrypt($value) : null;
+            },
+        );
+    }
 
     public function isImmutable(): bool
     {

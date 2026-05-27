@@ -582,7 +582,7 @@ class TransactionController extends Controller
             $futureTransactions = Transaction::where('user_id', $user->id)
                 ->whereDate('transaction_date', '>', $dateStr)
                 ->select(
-                    DB::raw('SUM(CASE WHEN type = "income" THEN amount ELSE -amount END) as net_change')
+                    DB::raw("SUM(CASE WHEN type = 'income' THEN amount ELSE -amount END) as net_change")
                 )
                 ->first();
 
