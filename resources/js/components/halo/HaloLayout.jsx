@@ -1,116 +1,136 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, TrendingUp, Heart, Settings, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, Heart, Settings, User, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '../../../css/halo.css';
 
-const navItems = [
+const NAV_ITEMS = [
     { to: '/halo-dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/finance', icon: TrendingUp, label: 'Finance' },
-    { to: '/commitments', icon: Heart, label: 'Promises' },
+    { to: '/finance',        icon: TrendingUp,      label: 'Finance'   },
+    { to: '/commitments',    icon: Heart,           label: 'Promises'  },
 ];
 
 export default function HaloLayout({ children }) {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    const closeSidebar = () => setSidebarOpen(false);
 
     const handleLogout = async () => {
         await logout();
         navigate('/login');
     };
 
+    const SidebarContent = () => (
+        <>
+            <div className="halo-sidebar-logo">
+                <img
+                    src="/images/konfinly-logo.png"
+                    alt="Kenfinly"
+                    onError={e => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.classList.add('visible');
+                    }}
+                />
+                <div className="halo-sidebar-logo-text">
+                    <span style={{ color: 'var(--halo-accent)' }}>K</span>
+                    <span style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid var(--halo-accent)', display: 'inline-block' }} />
+                    <span>NFINLY</span>
+                </div>
+            </div>
+
+            <nav className="halo-sidebar-nav">
+                {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
+                    <NavLink
+                        key={to}
+                        to={to}
+                        className={({ isActive }) => `halo-nav-link${isActive ? ' active' : ''}`}
+                        onClick={closeSidebar}
+                    >
+                        {({ isActive }) => (
+                            <>
+                                <Icon size={16} style={{ color: isActive ? 'var(--halo-accent-light)' : undefined }} />
+                                {label}
+                            </>
+                        )}
+                    </NavLink>
+                ))}
+            </nav>
+
+            <div className="halo-sidebar-bottom">
+                <button
+                    className="halo-nav-link w-100"
+                    style={{ background: 'none', border: 'none', textAlign: 'left', cursor: 'default', opacity: 0.5 }}
+                >
+                    <Settings size={16} />
+                    Settings
+                </button>
+                <button
+                    className="halo-nav-link w-100"
+                    style={{ background: 'none', border: 'none', textAlign: 'left', cursor: 'default', opacity: 0.5 }}
+                >
+                    <User size={16} />
+                    Profile
+                </button>
+
+                <div className="halo-user-row">
+                    <div className="halo-avatar">
+                        {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                    <span style={{ fontSize: '0.8125rem', color: '#D1D5DB', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {user?.name || 'User'}
+                    </span>
+                    <button
+                        onClick={handleLogout}
+                        title="Logout"
+                        style={{ background: 'none', border: 'none', padding: '0.2rem', cursor: 'pointer' }}
+                    >
+                        <LogOut size={14} style={{ color: '#9CA3AF' }} />
+                    </button>
+                </div>
+            </div>
+        </>
+    );
+
     return (
-        <div className="flex min-h-screen" style={{ background: '#0B1810', fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
-            {/* Sidebar */}
-            <aside className="flex flex-col w-52 shrink-0 border-r" style={{ background: '#0D1C12', borderColor: '#1A3020' }}>
-                {/* Logo */}
-                <div className="px-5 py-6 border-b" style={{ borderColor: '#1A3020' }}>
-                    <img
-                        src="/images/konfinly-logo.png"
-                        alt="Konfinly"
-                        className="h-7 w-auto object-contain"
-                        onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                        }}
-                    />
-                    <div
-                        className="items-center gap-2 text-white font-bold text-lg"
-                        style={{ display: 'none' }}
-                    >
-                        <span className="text-green-400">K</span>
-                        <span className="w-5 h-5 rounded-full border-2 border-green-400 inline-block" />
-                        <span>NFINLY</span>
-                    </div>
-                </div>
+        <div className="halo-layout">
+            {/* ── Mobile overlay ── */}
+            <div
+                className={`halo-sidebar-overlay${sidebarOpen ? ' open' : ''}`}
+                onClick={closeSidebar}
+                aria-hidden="true"
+            />
 
-                {/* Nav Items */}
-                <nav className="flex-1 px-3 py-5 space-y-1">
-                    {navItems.map(({ to, icon: Icon, label }) => (
-                        <NavLink
-                            key={to}
-                            to={to}
-                            className={({ isActive }) =>
-                                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                                    isActive
-                                        ? 'text-white'
-                                        : 'text-gray-400 hover:text-gray-200 hover:bg-white/5'
-                                }`
-                            }
-                            style={({ isActive }) =>
-                                isActive ? { background: 'rgba(34,197,94,0.15)', color: '#4ADE80' } : {}
-                            }
-                        >
-                            {({ isActive }) => (
-                                <>
-                                    <Icon size={16} style={{ color: isActive ? '#4ADE80' : undefined }} />
-                                    {label}
-                                </>
-                            )}
-                        </NavLink>
-                    ))}
-                </nav>
-
-                {/* Bottom nav */}
-                <div className="px-3 pb-5 space-y-1 border-t pt-4" style={{ borderColor: '#1A3020' }}>
-                    <NavLink
-                        to="/halo-dashboard"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-white/5"
-                        onClick={(e) => e.preventDefault()}
-                    >
-                        <Settings size={16} />
-                        Settings
-                    </NavLink>
-                    <NavLink
-                        to="/halo-dashboard"
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:text-gray-200 hover:bg-white/5"
-                        onClick={(e) => e.preventDefault()}
-                    >
-                        <User size={16} />
-                        Profile
-                    </NavLink>
-
-                    {/* User avatar row */}
-                    <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg mt-2 cursor-pointer hover:bg-white/5 group">
-                        <div
-                            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                            style={{ background: 'linear-gradient(135deg, #22c55e, #16a34a)' }}
-                        >
-                            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                        </div>
-                        <span className="text-sm text-gray-300 truncate flex-1">{user?.name || 'User'}</span>
-                        <button
-                            onClick={handleLogout}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity"
-                            title="Logout"
-                        >
-                            <LogOut size={14} className="text-gray-400 hover:text-red-400" />
-                        </button>
-                    </div>
-                </div>
+            {/* ── Desktop sidebar ── */}
+            <aside className={`halo-sidebar${sidebarOpen ? ' open' : ''}`}>
+                <SidebarContent />
             </aside>
 
-            {/* Main content */}
-            <main className="flex-1 overflow-y-auto">
+            {/* ── Main content area ── */}
+            <main className="halo-main">
+                {/* Mobile top bar */}
+                <header className="halo-topbar">
+                    <button
+                        className="halo-hamburger"
+                        onClick={() => setSidebarOpen(v => !v)}
+                        aria-label="Toggle menu"
+                    >
+                        {sidebarOpen ? <X size={22} style={{ color: 'var(--halo-accent-light)' }} /> : (
+                            <>
+                                <span /><span /><span />
+                            </>
+                        )}
+                    </button>
+                    <span style={{ fontWeight: 700, color: 'var(--halo-accent-light)', fontSize: '0.9375rem', letterSpacing: '0.05em' }}>
+                        KENFINLY
+                    </span>
+                    <div className="halo-avatar" style={{ width: 28, height: 28, fontSize: '0.6875rem' }}>
+                        {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                </header>
+
                 {children}
             </main>
         </div>

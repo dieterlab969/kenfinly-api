@@ -1,0 +1,795 @@
+/* ============================================================
+   HALO UI — Semantic CSS (Bootstrap foundation + dark theme)
+   ============================================================ */
+
+:root {
+  --halo-bg:            #0B1810;
+  --halo-sidebar-bg:    #0D1C12;
+  --halo-card-bg:       #132218;
+  --halo-border:        #1E3529;
+  --halo-border-mid:    #2A3D30;
+  --halo-accent:        #22C55E;
+  --halo-accent-light:  #4ADE80;
+  --halo-accent-pale:   #86EFAC;
+  --halo-accent-glow:   rgba(34,197,94,0.15);
+  --halo-text:          #ffffff;
+  --halo-text-muted:    #6B7280;
+  --halo-income:        #4ADE80;
+  --halo-expense:       #F87171;
+  --halo-sidebar-width: 220px;
+}
+
+/* ── Base Layout ── */
+.halo-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--halo-bg);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  color: var(--halo-text);
+}
+
+/* ── Sidebar ── */
+.halo-sidebar {
+  width: var(--halo-sidebar-width);
+  min-height: 100vh;
+  background: var(--halo-sidebar-bg);
+  border-right: 1px solid var(--halo-border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+  z-index: 1000;
+}
+
+.halo-sidebar-logo {
+  padding: 1.25rem 1.25rem;
+  border-bottom: 1px solid var(--halo-border);
+}
+
+.halo-sidebar-logo img {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+
+.halo-sidebar-logo-text {
+  display: none;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--halo-text);
+}
+
+.halo-sidebar-logo-text.visible {
+  display: flex;
+}
+
+.halo-sidebar-nav {
+  flex: 1;
+  padding: 1.25rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.halo-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #9CA3AF;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.halo-nav-link:hover {
+  background: rgba(255,255,255,0.05);
+  color: #E5E7EB;
+  text-decoration: none;
+}
+
+.halo-nav-link.active {
+  background: var(--halo-accent-glow);
+  color: var(--halo-accent-light);
+}
+
+.halo-sidebar-bottom {
+  padding: 1rem 0.75rem;
+  border-top: 1px solid var(--halo-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.halo-user-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.halo-user-row:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.halo-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+/* ── Mobile top bar ── */
+.halo-topbar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1rem;
+  background: var(--halo-sidebar-bg);
+  border-bottom: 1px solid var(--halo-border);
+  position: sticky;
+  top: 0;
+  z-index: 900;
+}
+
+.halo-hamburger {
+  background: none;
+  border: none;
+  color: var(--halo-accent-light);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.halo-hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--halo-accent-light);
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+.halo-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 999;
+}
+
+/* ── Main Content ── */
+.halo-main {
+  flex: 1;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+.halo-page {
+  padding: 2rem;
+}
+
+.halo-page-header {
+  margin-bottom: 1.5rem;
+}
+
+.halo-page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--halo-text);
+  margin: 0 0 0.25rem 0;
+}
+
+.halo-page-subtitle {
+  font-size: 0.8125rem;
+  color: var(--halo-accent-light);
+  margin: 0;
+}
+
+/* ── Cards ── */
+.halo-card {
+  background: var(--halo-card-bg);
+  border: 1px solid var(--halo-border);
+  border-radius: 16px;
+  padding: 1.25rem;
+  height: 100%;
+}
+
+.halo-card-accent {
+  background: var(--halo-accent-glow);
+  border: 1px solid rgba(34,197,94,0.4);
+  border-radius: 16px;
+  padding: 1.25rem;
+}
+
+/* ── Stat Cards ── */
+.halo-stat-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--halo-accent-light);
+  margin: 0 0 0.5rem 0;
+}
+
+.halo-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--halo-text);
+  line-height: 1;
+  margin: 0;
+}
+
+/* ── Monthly Summary Widget ── */
+.monthly-summary-card {
+  background: var(--halo-card-bg);
+  border: 1px solid var(--halo-border);
+  border-radius: 16px;
+  padding: 1.25rem;
+  height: 100%;
+}
+
+.monthly-summary-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--halo-text);
+  margin: 0 0 1rem 0;
+}
+
+.monthly-panel {
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+}
+
+.monthly-panel-month {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--halo-text);
+  margin: 0 0 0.625rem 0;
+}
+
+.monthly-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.375rem;
+  font-size: 0.8125rem;
+}
+
+.monthly-row-label {
+  color: #9CA3AF;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.monthly-row-value.income  { color: var(--halo-income); font-weight: 600; }
+.monthly-row-value.expense { color: #E5E7EB; font-weight: 500; }
+.monthly-row-value.total-positive { color: var(--halo-income); font-weight: 700; }
+.monthly-row-value.total-negative { color: var(--halo-expense); font-weight: 700; }
+
+.monthly-divider {
+  border: none;
+  border-top: 1px solid var(--halo-border);
+  margin: 0.5rem 0;
+}
+
+/* ── Section Labels ── */
+.halo-section-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--halo-accent-light);
+  margin: 0 0 0.875rem 0;
+}
+
+.halo-card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--halo-text);
+  margin: 0 0 1rem 0;
+}
+
+/* ── Halo Ring Container ── */
+.halo-ring-card {
+  background: var(--halo-card-bg);
+  border: 1px solid var(--halo-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.halo-streak-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.halo-streak-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--halo-accent-pale);
+}
+
+/* ── Buttons ── */
+.halo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.halo-btn:active { transform: scale(0.97); }
+.halo-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.halo-btn-primary {
+  background: var(--halo-accent);
+  color: #0B1810;
+}
+
+.halo-btn-primary:hover:not(:disabled) { opacity: 0.88; }
+
+.halo-btn-income {
+  background: rgba(34,197,94,0.2);
+  color: var(--halo-accent-light);
+  border: 1px solid rgba(34,197,94,0.5);
+}
+
+.halo-btn-income:hover:not(:disabled) {
+  background: rgba(34,197,94,0.3);
+}
+
+.halo-btn-expense {
+  background: rgba(248,113,113,0.15);
+  color: #FCA5A5;
+  border: 1px solid rgba(248,113,113,0.4);
+}
+
+.halo-btn-expense:hover:not(:disabled) {
+  background: rgba(248,113,113,0.25);
+}
+
+.halo-btn-outline {
+  background: transparent;
+  color: #9CA3AF;
+  border: 1px solid var(--halo-border-mid);
+}
+
+.halo-btn-outline:hover:not(:disabled) {
+  background: rgba(255,255,255,0.05);
+  color: #E5E7EB;
+}
+
+.halo-btn-full {
+  width: 100%;
+}
+
+.halo-btn-sm {
+  padding: 0.375rem 0.875rem;
+  font-size: 0.75rem;
+  border-radius: 8px;
+}
+
+/* ── Status badges ── */
+.halo-session-in-progress {
+  background: rgba(34,197,94,0.12);
+  color: var(--halo-accent-light);
+  border: 1px solid var(--halo-accent);
+  border-radius: 10px;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.halo-session-done {
+  background: rgba(34,197,94,0.08);
+  color: var(--halo-accent-light);
+  border: 1px solid rgba(34,197,94,0.25);
+  border-radius: 10px;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ── Commitment Cards ── */
+.halo-commitment-card {
+  background: var(--halo-card-bg);
+  border: 1px solid var(--halo-border);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.halo-commitment-image {
+  height: 120px;
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(135deg, #1A3020 0%, #0F2018 100%);
+}
+
+.halo-commitment-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.halo-commitment-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 40%, rgba(10,24,15,0.9));
+}
+
+.halo-commitment-body {
+  padding: 0.875rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.halo-commitment-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--halo-text);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.halo-progress-track {
+  height: 5px;
+  background: var(--halo-border);
+  border-radius: 99px;
+  overflow: hidden;
+  margin: 0.25rem 0;
+}
+
+.halo-progress-fill {
+  height: 100%;
+  background: var(--halo-accent);
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+/* ── Mini Commitment for Dashboard ── */
+.halo-mini-commitment {
+  background: var(--halo-card-bg);
+  border: 1px solid var(--halo-border);
+  border-radius: 12px;
+  padding: 0.875rem;
+  height: 100%;
+}
+
+/* ── Transaction rows ── */
+.halo-tx-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.halo-tx-row:last-child {
+  border-bottom: none;
+}
+
+.halo-tx-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.halo-tx-icon.income  { background: rgba(34,197,94,0.2); }
+.halo-tx-icon.expense { background: rgba(99,102,241,0.2); }
+
+/* ── Form Controls (dark theme) ── */
+.halo-form-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--halo-accent-light);
+  margin-bottom: 0.375rem;
+  display: block;
+}
+
+.halo-input,
+.halo-select,
+.halo-textarea {
+  width: 100%;
+  background: var(--halo-bg);
+  border: 1px solid var(--halo-border-mid);
+  border-radius: 10px;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.875rem;
+  color: var(--halo-text);
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.halo-input::placeholder,
+.halo-textarea::placeholder { color: #4B5563; }
+
+.halo-input:focus,
+.halo-select:focus,
+.halo-textarea:focus {
+  border-color: var(--halo-accent);
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
+}
+
+.halo-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234ADE80' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.875rem center;
+  padding-right: 2.25rem;
+  cursor: pointer;
+}
+
+.halo-textarea { resize: vertical; min-height: 80px; }
+
+.halo-form-group { margin-bottom: 1rem; }
+
+.halo-form-error {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  color: #FCA5A5;
+  margin-bottom: 1rem;
+}
+
+/* ── Modals ── */
+.halo-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.72);
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.halo-modal {
+  background: var(--halo-card-bg);
+  border: 1px solid var(--halo-border);
+  border-radius: 18px;
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.halo-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.halo-modal-title {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--halo-text);
+  margin: 0;
+}
+
+.halo-modal-close {
+  background: none;
+  border: none;
+  color: #6B7280;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 6px;
+  transition: color 0.15s;
+  display: flex;
+  align-items: center;
+}
+
+.halo-modal-close:hover { color: #E5E7EB; }
+
+/* ── Today's Outcome box ── */
+.halo-outcome-box {
+  background: var(--halo-card-bg);
+  border: 1px solid var(--halo-border);
+  border-radius: 16px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.halo-outcome-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Spinner ── */
+.halo-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+.halo-spinner-ring {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--halo-border);
+  border-top-color: var(--halo-accent);
+  border-radius: 50%;
+  animation: halo-spin 0.75s linear infinite;
+}
+
+@keyframes halo-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Empty State ── */
+.halo-empty {
+  background: var(--halo-card-bg);
+  border: 1px solid var(--halo-border);
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+}
+
+.halo-empty-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+.halo-empty-title { font-size: 1rem; font-weight: 600; color: var(--halo-text); margin: 0 0 0.375rem 0; }
+.halo-empty-text { font-size: 0.875rem; color: var(--halo-accent-pale); margin: 0 0 1rem 0; }
+
+/* ── Today's Promise Banner ── */
+.halo-promise-banner {
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.3);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* ── Tooltip ── */
+.halo-tooltip-box {
+  background: #1A2E1E;
+  border: 1px solid var(--halo-border-mid);
+  border-radius: 10px;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  color: white;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+/* ── Loading overlay in page ── */
+.halo-loading-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+/* ── Badge ── */
+.halo-badge {
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.halo-badge-danger  { background: rgba(239,68,68,0.85); color: white; }
+.halo-badge-success { background: rgba(34,197,94,0.85); color: #0B1810; }
+
+/* ============================================================
+   RESPONSIVE — MOBILE
+   ============================================================ */
+
+@media (max-width: 767.98px) {
+  /* Show top bar, hide sidebar by default */
+  .halo-topbar {
+    display: flex;
+  }
+
+  .halo-layout {
+    flex-direction: column;
+  }
+
+  /* Sidebar becomes a fixed drawer */
+  .halo-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+    z-index: 1100;
+  }
+
+  .halo-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .halo-sidebar-overlay.open {
+    display: block;
+  }
+
+  .halo-main {
+    width: 100%;
+  }
+
+  .halo-page {
+    padding: 1rem;
+  }
+
+  .halo-page-title {
+    font-size: 1.25rem;
+  }
+
+  .halo-modal {
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE — TABLET
+   ============================================================ */
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  :root { --halo-sidebar-width: 200px; }
+
+  .halo-page {
+    padding: 1.5rem;
+  }
+}

@@ -5,9 +5,7 @@ import api from '../../utils/api';
 
 function fmtVND(val) {
     const n = Math.abs(Number(val || 0));
-    if (n >= 1_000_000) return `VND ${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
-    if (n >= 1_000) return `VND ${(n / 1_000).toFixed(0)}K`;
-    return `VND ${n.toLocaleString()}`;
+    return new Intl.NumberFormat('vi-VN').format(Math.round(n)) + ' đ';
 }
 
 function getDaysLeft(deadline) {
@@ -16,139 +14,117 @@ function getDaysLeft(deadline) {
     return diff > 0 ? diff : 0;
 }
 
-function getDeadlineLabel(deadline) {
-    if (!deadline) return '';
+function getTimeLabel(deadline) {
     const days = getDaysLeft(deadline);
     if (days === null) return '';
-    const totalMonths = Math.round(days / 30);
-    if (totalMonths >= 12) return `${Math.round(totalMonths / 12)} years`;
-    if (totalMonths > 1) return `${totalMonths} months`;
+    const months = Math.round(days / 30);
+    if (months >= 12) return `${Math.round(months / 12)} years`;
+    if (months > 1)   return `${months} months`;
     return `${days} days`;
 }
 
+/* ── Commitment Card ── */
 function CommitmentCard({ commitment, onUpdateProgress, onViewDetail }) {
     const daysLeft = getDaysLeft(commitment.deadline);
-    const label = getDeadlineLabel(commitment.deadline);
+    const label    = getTimeLabel(commitment.deadline);
     const progress = commitment.progress_percent || 0;
     const hasImage = !!commitment.image_url;
 
-    const statusColors = {
-        active: '#22C55E',
+    const progressColor = {
+        active:    '#22C55E',
         completed: '#4ADE80',
-        killed: '#EF4444',
-    };
+        killed:    '#EF4444',
+    }[commitment.status] || '#22C55E';
 
     return (
-        <div
-            className="rounded-2xl overflow-hidden relative flex flex-col"
-            style={{ background: '#132218', border: '1px solid #1E3529', minHeight: 200 }}
-        >
-            {/* Image or gradient */}
-            <div className="relative h-32 overflow-hidden">
-                {hasImage ? (
-                    <img
-                        src={commitment.image_url}
-                        alt={commitment.title}
-                        className="w-full h-full object-cover"
-                    />
-                ) : (
-                    <div
-                        className="w-full h-full"
-                        style={{
-                            background: 'linear-gradient(135deg, #1A3020 0%, #0F2018 100%)',
-                        }}
-                    />
+        <article className="halo-commitment-card">
+            <div className="halo-commitment-image">
+                {hasImage && (
+                    <img src={commitment.image_url} alt={commitment.title} />
                 )}
-                {/* Overlay gradient */}
-                <div
-                    className="absolute inset-0"
-                    style={{ background: 'linear-gradient(to bottom, transparent 40%, rgba(10,24,15,0.9))' }}
-                />
-                {/* Days left badge */}
+                <div className="halo-commitment-overlay" />
+
                 {daysLeft !== null && daysLeft <= 30 && commitment.status === 'active' && (
-                    <div
-                        className="absolute top-3 left-3 px-2 py-1 rounded-lg text-xs font-bold"
-                        style={{ background: 'rgba(239,68,68,0.85)', color: 'white' }}
+                    <span
+                        className="halo-badge halo-badge-danger"
+                        style={{ position: 'absolute', top: 10, left: 10 }}
                     >
                         {daysLeft} DAYS LEFT
-                    </div>
+                    </span>
                 )}
                 {commitment.status === 'completed' && (
-                    <div
-                        className="absolute top-3 right-3 px-2 py-1 rounded-lg text-xs font-bold"
-                        style={{ background: 'rgba(34,197,94,0.85)', color: '#0B1810' }}
+                    <span
+                        className="halo-badge halo-badge-success"
+                        style={{ position: 'absolute', top: 10, right: 10 }}
                     >
                         ✓ DONE
-                    </div>
+                    </span>
                 )}
                 {commitment.status === 'killed' && (
-                    <div
-                        className="absolute top-3 right-3 px-2 py-1 rounded-lg text-xs font-bold"
-                        style={{ background: 'rgba(239,68,68,0.85)', color: 'white' }}
+                    <span
+                        className="halo-badge halo-badge-danger"
+                        style={{ position: 'absolute', top: 10, right: 10 }}
                     >
                         KILLED
-                    </div>
+                    </span>
                 )}
             </div>
 
-            {/* Content */}
-            <div className="p-4 flex flex-col gap-2 flex-1">
-                <p className="text-sm font-bold text-white leading-snug">{commitment.title}</p>
+            <div className="halo-commitment-body">
+                <p className="halo-commitment-title">{commitment.title}</p>
 
-                <div className="flex items-center justify-between text-xs" style={{ color: '#86EFAC' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#86EFAC' }}>
                     <span>GOAL: {fmtVND(commitment.goal_amount_minor)}</span>
                     {label && <span>{label}</span>}
                 </div>
 
-                {/* Progress bar */}
-                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: '#1E3529' }}>
-                    <div
-                        className="h-full rounded-full transition-all"
-                        style={{ width: `${progress}%`, background: statusColors[commitment.status] || '#22C55E' }}
-                    />
+                <div className="halo-progress-track">
+                    <div className="halo-progress-fill" style={{ width: `${progress}%`, background: progressColor }} />
                 </div>
 
-                {/* Buttons */}
-                <div className="flex gap-2 mt-1">
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: 'auto' }}>
                     <button
+                        className="halo-btn halo-btn-outline halo-btn-sm"
+                        style={{ flex: 1 }}
                         onClick={() => onViewDetail(commitment)}
-                        className="flex-1 py-1.5 rounded-lg text-xs font-semibold text-white transition-all hover:bg-white/10"
-                        style={{ border: '1px solid #2A3D30' }}
                     >
                         VIEW DETAIL
                     </button>
                     {commitment.status === 'active' && (
                         <button
+                            className="halo-btn halo-btn-primary halo-btn-sm"
+                            style={{ flex: 1 }}
                             onClick={() => onUpdateProgress(commitment)}
-                            className="flex-1 py-1.5 rounded-lg text-xs font-bold transition-all"
-                            style={{ background: '#22C55E', color: '#0B1810' }}
                         >
-                            UPDATE PROGRESS
+                            UPDATE
                         </button>
                     )}
                 </div>
             </div>
-        </div>
+        </article>
     );
 }
 
+/* ── Add Commitment Modal ── */
 function AddCommitmentModal({ onClose, onCreated }) {
-    const [form, setForm] = useState({ title: '', goal_amount: '', deadline: '' });
-    const [image, setImage] = useState(null);
+    const [form, setForm]     = useState({ title: '', goal_amount: '', deadline: '' });
+    const [image, setImage]   = useState(null);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const fileRef = useRef();
+    const [error, setError]   = useState('');
+    const fileRef             = useRef();
 
-    const handleSubmit = async (e) => {
+    const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
+
+    const handleSubmit = async e => {
         e.preventDefault();
         setLoading(true);
         setError('');
         try {
             const fd = new FormData();
-            fd.append('title', form.title);
+            fd.append('title',       form.title);
             fd.append('goal_amount', form.goal_amount);
             if (form.deadline) fd.append('deadline', form.deadline);
-            if (image) fd.append('image', image);
+            if (image)         fd.append('image',    image);
 
             const res = await api.post('/commitments', fd, {
                 headers: { 'Content-Type': 'multipart/form-data' },
@@ -157,136 +133,162 @@ function AddCommitmentModal({ onClose, onCreated }) {
             onClose();
         } catch (err) {
             const msgs = err.response?.data?.errors;
-            setError(msgs ? Object.values(msgs).flat().join(', ') : 'Failed to create commitment');
+            setError(msgs ? Object.values(msgs).flat().join(', ') : 'Failed to create commitment.');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
-            <div
-                className="w-full max-w-md rounded-2xl p-6"
-                style={{ background: '#132218', border: '1px solid #1E3529' }}
-            >
-                <div className="flex items-center justify-between mb-5">
-                    <h2 className="text-lg font-bold text-white">Add New Promise</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white">
-                        <X size={20} />
-                    </button>
+        <div className="halo-modal-backdrop" role="dialog" aria-modal="true" aria-label="Add Commitment">
+            <div className="halo-modal">
+                <div className="halo-modal-header">
+                    <h2 className="halo-modal-title">Add New Promise</h2>
+                    <button className="halo-modal-close" onClick={onClose} aria-label="Close"><X size={20} /></button>
                 </div>
 
-                {error && (
-                    <div className="mb-4 p-3 rounded-lg text-sm text-red-400" style={{ background: 'rgba(239,68,68,0.1)' }}>
-                        {error}
-                    </div>
-                )}
+                {error && <div className="halo-form-error">{error}</div>}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-xs font-semibold mb-1.5" style={{ color: '#4ADE80' }}>Title *</label>
+                <form onSubmit={handleSubmit} noValidate>
+                    <div className="halo-form-group">
+                        <label className="halo-form-label" htmlFor="com-title">Title *</label>
                         <input
+                            id="com-title"
+                            name="title"
                             type="text"
-                            required
+                            className="halo-input"
                             value={form.title}
-                            onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
-                            className="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-green-500"
-                            style={{ background: '#0B1810', border: '1px solid #2A3D30' }}
-                            placeholder="e.g. Laptop Purchase"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-semibold mb-1.5" style={{ color: '#4ADE80' }}>Goal Amount (VND) *</label>
-                        <input
-                            type="number"
+                            onChange={handleChange}
+                            placeholder="e.g. New Laptop"
                             required
-                            min="1"
-                            value={form.goal_amount}
-                            onChange={e => setForm(f => ({ ...f, goal_amount: e.target.value }))}
-                            className="w-full px-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-500 outline-none focus:ring-2 focus:ring-green-500"
-                            style={{ background: '#0B1810', border: '1px solid #2A3D30' }}
-                            placeholder="35000000"
                         />
                     </div>
-                    <div>
-                        <label className="block text-xs font-semibold mb-1.5" style={{ color: '#4ADE80' }}>Deadline</label>
+
+                    <div className="halo-form-group">
+                        <label className="halo-form-label" htmlFor="com-amount">Goal Amount (VND) *</label>
                         <input
-                            type="date"
-                            value={form.deadline}
-                            onChange={e => setForm(f => ({ ...f, deadline: e.target.value }))}
-                            className="w-full px-4 py-2.5 rounded-xl text-sm text-white outline-none focus:ring-2 focus:ring-green-500"
-                            style={{ background: '#0B1810', border: '1px solid #2A3D30', colorScheme: 'dark' }}
+                            id="com-amount"
+                            name="goal_amount"
+                            type="number"
+                            className="halo-input"
+                            value={form.goal_amount}
+                            onChange={handleChange}
+                            placeholder="35000000"
+                            min="1"
+                            required
                         />
                     </div>
-                    <div>
-                        <label className="block text-xs font-semibold mb-1.5" style={{ color: '#4ADE80' }}>Cover Image</label>
+
+                    <div className="halo-form-group">
+                        <label className="halo-form-label" htmlFor="com-deadline">Deadline</label>
+                        <input
+                            id="com-deadline"
+                            name="deadline"
+                            type="date"
+                            className="halo-input"
+                            value={form.deadline}
+                            onChange={handleChange}
+                            style={{ colorScheme: 'dark' }}
+                        />
+                    </div>
+
+                    <div className="halo-form-group">
+                        <label className="halo-form-label">Cover Image</label>
                         <div
-                            className="border-2 border-dashed rounded-xl p-4 text-center cursor-pointer hover:border-green-500 transition-colors"
-                            style={{ borderColor: '#2A3D30' }}
+                            style={{
+                                border: '2px dashed #2A3D30',
+                                borderRadius: 10,
+                                padding: '1rem',
+                                textAlign: 'center',
+                                cursor: 'pointer',
+                                transition: 'border-color 0.15s',
+                            }}
                             onClick={() => fileRef.current?.click()}
+                            onMouseEnter={e => e.currentTarget.style.borderColor = '#22C55E'}
+                            onMouseLeave={e => e.currentTarget.style.borderColor = '#2A3D30'}
                         >
-                            {image ? (
-                                <p className="text-sm text-green-400">{image.name}</p>
-                            ) : (
-                                <p className="text-sm text-gray-500">Click to upload image</p>
-                            )}
+                            {image
+                                ? <span style={{ fontSize: '0.875rem', color: '#4ADE80' }}>{image.name}</span>
+                                : <span style={{ fontSize: '0.875rem', color: '#6B7280' }}>Click to upload image</span>
+                            }
                             <input
                                 ref={fileRef}
                                 type="file"
                                 accept="image/*"
-                                className="hidden"
+                                style={{ display: 'none' }}
                                 onChange={e => setImage(e.target.files?.[0] || null)}
                             />
                         </div>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-60 active:scale-95"
-                        style={{ background: '#22C55E', color: '#0B1810' }}
-                    >
-                        {loading ? 'Creating...' : 'CREATE PROMISE'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.625rem' }}>
+                        <button type="button" className="halo-btn halo-btn-outline" style={{ flex: 1 }} onClick={onClose}>
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            className="halo-btn halo-btn-primary"
+                            style={{ flex: 1 }}
+                            disabled={loading}
+                        >
+                            {loading ? 'Creating…' : 'CREATE PROMISE'}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
     );
 }
 
+/* ── Detail Modal ── */
 function DetailModal({ commitment, onClose }) {
     const daysLeft = getDaysLeft(commitment.deadline);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
-            <div
-                className="w-full max-w-sm rounded-2xl overflow-hidden"
-                style={{ background: '#132218', border: '1px solid #1E3529' }}
-            >
+        <div className="halo-modal-backdrop" role="dialog" aria-modal="true">
+            <div className="halo-modal" style={{ padding: 0, overflow: 'hidden' }}>
                 {commitment.image_url && (
-                    <img src={commitment.image_url} alt={commitment.title} className="w-full h-48 object-cover" />
+                    <img
+                        src={commitment.image_url}
+                        alt={commitment.title}
+                        style={{ width: '100%', height: 180, objectFit: 'cover' }}
+                    />
                 )}
-                <div className="p-6 space-y-3">
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-bold text-white">{commitment.title}</h2>
-                        <button onClick={onClose} className="text-gray-400 hover:text-white"><X size={20} /></button>
+                <div style={{ padding: '1.5rem' }}>
+                    <div className="halo-modal-header">
+                        <h2 className="halo-modal-title">{commitment.title}</h2>
+                        <button className="halo-modal-close" onClick={onClose}><X size={20} /></button>
                     </div>
-                    <div className="space-y-2 text-sm" style={{ color: '#86EFAC' }}>
-                        <p>Goal: {fmtVND(commitment.goal_amount_minor)}</p>
-                        <p>Current: {fmtVND(commitment.current_amount_minor)} ({commitment.progress_percent}%)</p>
-                        {daysLeft !== null && <p>Days left: {daysLeft}</p>}
-                        <p>Status: <span className="capitalize">{commitment.status}</span></p>
+
+                    <dl style={{ fontSize: '0.875rem', color: '#86EFAC' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.375rem' }}>
+                            <dt>Goal:</dt>
+                            <dd style={{ margin: 0 }}>{fmtVND(commitment.goal_amount_minor)}</dd>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.375rem' }}>
+                            <dt>Current:</dt>
+                            <dd style={{ margin: 0 }}>{fmtVND(commitment.current_amount_minor)} ({commitment.progress_percent}%)</dd>
+                        </div>
+                        {daysLeft !== null && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.375rem' }}>
+                                <dt>Days left:</dt>
+                                <dd style={{ margin: 0 }}>{daysLeft}</dd>
+                            </div>
+                        )}
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <dt>Status:</dt>
+                            <dd style={{ margin: 0, textTransform: 'capitalize' }}>{commitment.status}</dd>
+                        </div>
+                    </dl>
+
+                    <div className="halo-progress-track" style={{ marginTop: '0.875rem', height: 8 }}>
+                        <div className="halo-progress-fill" style={{ width: `${commitment.progress_percent}%` }} />
                     </div>
-                    <div className="h-2 rounded-full overflow-hidden mt-2" style={{ background: '#1E3529' }}>
-                        <div
-                            className="h-full rounded-full"
-                            style={{ width: `${commitment.progress_percent}%`, background: '#22C55E' }}
-                        />
-                    </div>
+
                     <button
+                        className="halo-btn halo-btn-outline halo-btn-full"
+                        style={{ marginTop: '1rem', width: '100%' }}
                         onClick={onClose}
-                        className="w-full mt-2 py-2.5 rounded-xl text-sm font-semibold text-white hover:bg-white/10 transition-all"
-                        style={{ border: '1px solid #2A3D30' }}
                     >
                         CLOSE
                     </button>
@@ -296,13 +298,13 @@ function DetailModal({ commitment, onClose }) {
     );
 }
 
+/* ── Main Component ── */
 export default function CommitmentsPage() {
-    const [commitments, setCommitments] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [showAdd, setShowAdd] = useState(false);
-    const [detailItem, setDetailItem] = useState(null);
-    const [updateItem, setUpdateItem] = useState(null);
-    const [updateAmount, setUpdateAmount] = useState('');
+    const [commitments,   setCommitments]   = useState([]);
+    const [loading,       setLoading]       = useState(true);
+    const [showAdd,       setShowAdd]       = useState(false);
+    const [detailItem,    setDetailItem]    = useState(null);
+    const [updateItem,    setUpdateItem]    = useState(null);
     const [updateLoading, setUpdateLoading] = useState(false);
 
     const fetchCommitments = useCallback(async () => {
@@ -319,11 +321,9 @@ export default function CommitmentsPage() {
 
     useEffect(() => { fetchCommitments(); }, [fetchCommitments]);
 
-    const handleCreated = (newItem) => {
-        setCommitments(prev => [newItem, ...prev]);
-    };
+    const handleCreated = newItem => setCommitments(prev => [newItem, ...prev]);
 
-    const handleUpdateProgress = async (e) => {
+    const handleConfirmComplete = async e => {
         e.preventDefault();
         if (!updateItem) return;
         setUpdateLoading(true);
@@ -331,7 +331,6 @@ export default function CommitmentsPage() {
             await api.post(`/commitments/${updateItem.id}/complete`);
             await fetchCommitments();
             setUpdateItem(null);
-            setUpdateAmount('');
         } catch (err) {
             console.error(err);
         } finally {
@@ -340,124 +339,116 @@ export default function CommitmentsPage() {
     };
 
     const activeCommitments = commitments.filter(c => c.status === 'active');
-    const todayCommitment = activeCommitments[0] || null;
+    const todayCommitment   = activeCommitments[0] || null;
 
     return (
         <HaloLayout>
-            <div className="p-8">
+            <div className="halo-page">
                 {/* Header */}
-                <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-2xl font-bold text-white">Promises - My Commitments</h1>
+                <header className="halo-page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <h1 className="halo-page-title">Promises — My Commitments</h1>
                     <button
+                        className="halo-btn halo-btn-primary"
                         onClick={() => setShowAdd(true)}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95"
-                        style={{ background: '#22C55E', color: '#0B1810' }}
                     >
                         <Plus size={16} />
                         ADD NEW PROMISE
                     </button>
-                </div>
+                </header>
 
                 {loading ? (
-                    <div className="flex items-center justify-center h-64">
-                        <div className="w-10 h-10 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
-                    </div>
+                    <div className="halo-loading-page"><div className="halo-spinner-ring" /></div>
                 ) : (
                     <>
-                        {/* Commitment Grid */}
+                        {/* Today's Promise Banner */}
+                        {todayCommitment && (
+                            <div className="halo-promise-banner mb-4">
+                                <Flame size={22} style={{ color: '#FB923C', flexShrink: 0 }} />
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <p className="halo-section-label" style={{ margin: '0 0 0.25rem 0' }}>LỜI HỨA CỦA HÔM NAY</p>
+                                    <p style={{ fontSize: '0.9375rem', fontWeight: 600, color: 'white', margin: '0 0 0.25rem 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {todayCommitment.title}
+                                    </p>
+                                    <p style={{ fontSize: '0.75rem', color: '#86EFAC', margin: 0 }}>
+                                        {todayCommitment.progress_percent}% completed · {fmtVND(todayCommitment.goal_amount_minor)} goal
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Commitments Grid */}
                         {commitments.length === 0 ? (
-                            <div
-                                className="rounded-2xl p-12 text-center"
-                                style={{ background: '#132218', border: '1px solid #1E3529' }}
-                            >
-                                <p className="text-3xl mb-3">🎯</p>
-                                <p className="text-white font-semibold mb-1">No commitments yet</p>
-                                <p className="text-sm mb-4" style={{ color: '#86EFAC' }}>
-                                    Create your first promise to get started
-                                </p>
+                            <div className="halo-empty">
+                                <div className="halo-empty-icon">🎯</div>
+                                <p className="halo-empty-title">No commitments yet</p>
+                                <p className="halo-empty-text">Create your first promise to get started</p>
                                 <button
+                                    className="halo-btn halo-btn-primary"
                                     onClick={() => setShowAdd(true)}
-                                    className="px-6 py-2.5 rounded-xl text-sm font-bold"
-                                    style={{ background: '#22C55E', color: '#0B1810' }}
                                 >
                                     ADD NEW PROMISE
                                 </button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 gap-4">
-                                {commitments.map((c) => (
-                                    <CommitmentCard
-                                        key={c.id}
-                                        commitment={c}
-                                        onViewDetail={setDetailItem}
-                                        onUpdateProgress={setUpdateItem}
-                                    />
+                            <div className="row g-4">
+                                {commitments.map(c => (
+                                    <div key={c.id} className="col-sm-6 col-xl-4">
+                                        <CommitmentCard
+                                            commitment={c}
+                                            onViewDetail={setDetailItem}
+                                            onUpdateProgress={setUpdateItem}
+                                        />
+                                    </div>
                                 ))}
-                            </div>
-                        )}
-
-                        {/* Today's Promise section */}
-                        {todayCommitment && (
-                            <div
-                                className="mt-6 rounded-2xl p-5 flex items-center gap-4"
-                                style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)' }}
-                            >
-                                <Flame size={24} className="text-orange-400 shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-bold tracking-widest mb-1" style={{ color: '#4ADE80' }}>
-                                        LỜI HỨA CỦA HÔM NAY
-                                    </p>
-                                    <p className="text-sm font-semibold text-white truncate">{todayCommitment.title}</p>
-                                    <p className="text-xs mt-0.5" style={{ color: '#86EFAC' }}>
-                                        {todayCommitment.progress_percent}% completed · {fmtVND(todayCommitment.goal_amount_minor)} goal
-                                    </p>
-                                </div>
                             </div>
                         )}
                     </>
                 )}
             </div>
 
-            {/* Modals */}
+            {/* ── Modals ── */}
             {showAdd && (
-                <AddCommitmentModal onClose={() => setShowAdd(false)} onCreated={handleCreated} />
+                <AddCommitmentModal
+                    onClose={() => setShowAdd(false)}
+                    onCreated={handleCreated}
+                />
             )}
 
             {detailItem && (
-                <DetailModal commitment={detailItem} onClose={() => setDetailItem(null)} />
+                <DetailModal
+                    commitment={detailItem}
+                    onClose={() => setDetailItem(null)}
+                />
             )}
 
             {updateItem && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.7)' }}>
-                    <div
-                        className="w-full max-w-sm rounded-2xl p-6"
-                        style={{ background: '#132218', border: '1px solid #1E3529' }}
-                    >
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-base font-bold text-white">Mark as Completed</h2>
-                            <button onClick={() => setUpdateItem(null)} className="text-gray-400 hover:text-white">
-                                <X size={18} />
-                            </button>
+                <div className="halo-modal-backdrop" role="dialog" aria-modal="true">
+                    <div className="halo-modal" style={{ maxWidth: 380 }}>
+                        <div className="halo-modal-header">
+                            <h2 className="halo-modal-title">Mark as Completed</h2>
+                            <button className="halo-modal-close" onClick={() => setUpdateItem(null)}><X size={18} /></button>
                         </div>
-                        <p className="text-sm mb-4" style={{ color: '#86EFAC' }}>
-                            Are you sure you want to mark "<strong className="text-white">{updateItem.title}</strong>" as completed?
+                        <p style={{ fontSize: '0.875rem', color: '#86EFAC', marginBottom: '1.25rem' }}>
+                            Are you sure you want to mark{' '}
+                            <strong style={{ color: 'white' }}>"{updateItem.title}"</strong>{' '}
+                            as completed?
                         </p>
-                        <form onSubmit={handleUpdateProgress} className="flex gap-3">
+                        <form onSubmit={handleConfirmComplete} style={{ display: 'flex', gap: '0.625rem' }}>
                             <button
                                 type="button"
+                                className="halo-btn halo-btn-outline"
+                                style={{ flex: 1 }}
                                 onClick={() => setUpdateItem(null)}
-                                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white hover:bg-white/10 transition-all"
-                                style={{ border: '1px solid #2A3D30' }}
                             >
                                 Cancel
                             </button>
                             <button
                                 type="submit"
+                                className="halo-btn halo-btn-primary"
+                                style={{ flex: 1 }}
                                 disabled={updateLoading}
-                                className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-60"
-                                style={{ background: '#22C55E', color: '#0B1810' }}
                             >
-                                {updateLoading ? 'Saving...' : 'CONFIRM'}
+                                {updateLoading ? 'Saving…' : 'CONFIRM'}
                             </button>
                         </form>
                     </div>
