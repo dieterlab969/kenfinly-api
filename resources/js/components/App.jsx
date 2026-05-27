@@ -55,7 +55,7 @@ function PricingPage() {
                 <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
                     <h1 className="text-3xl font-bold text-green-600">{t('payment.success_title') || 'Subscription Successful!'}</h1>
                     <p className="mt-4 text-gray-600">{t('payment.success_message') || 'Thank you for upgrading. Your premium features are now active.'}</p>
-                    <button onClick={() => window.location.href = '/dashboard'} className="mt-8 w-full bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700">{t('nav.dashboard') || 'Go to Dashboard'}</button>
+                    <button onClick={() => window.location.href = '/halo-dashboard'} className="mt-8 w-full bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700">{t('nav.dashboard') || 'Go to Dashboard'}</button>
                 </div>
             </div>
         );
@@ -151,11 +151,7 @@ function App({ recaptchaEnabled = false }) {
                         <Route path="/verification-pending" element={<VerificationPending />} />
                         <Route
                             path="/dashboard"
-                            element={
-                                <ProtectedRoute>
-                                    <Dashboard />
-                                </ProtectedRoute>
-                            }
+                            element={<Navigate to="/halo-dashboard" replace />}
                         />
                         <Route
                             path="/halo-dashboard"
