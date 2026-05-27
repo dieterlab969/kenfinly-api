@@ -25,21 +25,12 @@ export default function HaloLayout({ children }) {
 
     const SidebarContent = () => (
         <>
-            <div className="halo-sidebar-logo">
-                <img
-                    src="/images/konfinly-logo.png"
-                    alt="Kenfinly"
-                    onError={e => {
-                        e.target.style.display = 'none';
-                        e.target.nextSibling.classList.add('visible');
-                    }}
-                />
-                <div className="halo-sidebar-logo-text">
-                    <span style={{ color: 'var(--halo-accent)' }}>K</span>
-                    <span style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid var(--halo-accent)', display: 'inline-block' }} />
-                    <span>NFINLY</span>
-                </div>
-            </div>
+        <div className="halo-sidebar-logo">
+        <img
+            src="/images/logo-white-text.png"
+            alt="Kenfinly"
+        />
+        </div>
 
             <nav className="halo-sidebar-nav">
                 {NAV_ITEMS.map(({ to, icon: Icon, label }) => (

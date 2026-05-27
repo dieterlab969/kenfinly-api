@@ -47,9 +47,8 @@
 }
 
 .halo-sidebar-logo img {
-  height: 28px;
-  width: auto;
-  object-fit: contain;
+    max-width: 200px;
+    height: auto;
 }
 
 .halo-sidebar-logo-text {
