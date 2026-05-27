@@ -35,6 +35,9 @@ import SavingHabitTracker from '../pages/public/SavingHabitTracker';
 import PlanSelection from './subscription/PlanSelection';
 import CheckoutForm from './subscription/CheckoutForm';
 import VietnameseTyping from "../pages/public/VietnameseTyping";
+import HaloDashboard from '../pages/halo/HaloDashboard';
+import FinanceOverview from '../pages/halo/FinanceOverview';
+import CommitmentsPage from '../pages/halo/CommitmentsPage';
 
 const RecaptchaConfigContext = createContext({ enabled: false });
 
@@ -151,6 +154,30 @@ function App({ recaptchaEnabled = false }) {
                             element={
                                 <ProtectedRoute>
                                     <Dashboard />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/halo-dashboard"
+                            element={
+                                <ProtectedRoute>
+                                    <HaloDashboard />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/finance"
+                            element={
+                                <ProtectedRoute>
+                                    <FinanceOverview />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/commitments"
+                            element={
+                                <ProtectedRoute>
+                                    <CommitmentsPage />
                                 </ProtectedRoute>
                             }
                         />
