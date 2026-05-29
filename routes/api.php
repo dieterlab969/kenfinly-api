@@ -137,10 +137,13 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/accounts/{accountId}/participants', [ParticipantController::class, 'listParticipants']);
     Route::delete('/accounts/{accountId}/participants/{userId}', [ParticipantController::class, 'removeParticipant']);
 
-    // Analytics
+    // Analytics (legacy endpoints)
     Route::get('/analytics/summary', [AnalyticsController::class, 'getSummary']);
     Route::get('/analytics/category-breakdown', [AnalyticsController::class, 'getCategoryBreakdown']);
     Route::get('/analytics/trends', [AnalyticsController::class, 'getTrends']);
+
+    // Advanced Report Analytics — reads from ledger_category_daily_summaries (< 5 ms)
+    Route::get('/reports/analytics', [\App\Http\Controllers\Api\ReportAnalyticsController::class, 'index']);
 });
 Route::middleware('auth:api')->prefix('saving-tracker')->group(function() {
     Route::apiResource('habits', \App\Http\Controllers\Api\SavingTracker\HabitController::class);
