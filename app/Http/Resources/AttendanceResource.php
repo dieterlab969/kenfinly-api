@@ -28,9 +28,11 @@ class AttendanceResource extends JsonResource
             'quote_vote' => $this->quote_vote,
             'earned_amount_minor' => (int) $this->earned_amount,
             'reward_transaction_id' => $this->reward_transaction_id,
-            'kill_reason' => $this->kill_reason,
-            'seconds_left' => (int) $secondsLeft,
-            'can_complete' => $this->status === 'initiated' && $secondsLeft === 0,
+            'kill_reason'    => $this->kill_reason,
+            'check_in_type'  => $this->check_in_type,
+            'reminder_count' => (int) ($this->reminder_count ?? 0),
+            'seconds_left'   => (int) $secondsLeft,
+            'can_complete'   => $this->status === 'initiated' && $secondsLeft === 0,
         ];
     }
 }

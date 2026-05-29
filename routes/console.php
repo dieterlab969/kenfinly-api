@@ -14,3 +14,11 @@ Schedule::command('app:generate-sitemap')
     ->timezone('Asia/Ho_Chi_Minh')
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/sitemap.log'));
+
+// Halo: send checkout reminder emails and auto-kill overdue sessions.
+// Fires every 15 minutes — each individual session is guarded by reminder_count
+// so no duplicate emails are ever sent regardless of how often this runs.
+Schedule::command('halo:process-reminders')
+    ->everyFifteenMinutes()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/halo_reminders.log'));

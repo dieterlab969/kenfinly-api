@@ -108,10 +108,13 @@ const AttendanceWidget = ({ onRewardCreated }) => {
         }
     };
 
+    const maxProgress = status?.max_progress ?? 100;
+
     const progress = useMemo(() => {
         const sessionSeconds = 8 * 60 * 60;
-        return Math.min(100, Math.max(0, ((sessionSeconds - secondsLeft) / sessionSeconds) * 100));
-    }, [secondsLeft]);
+        const raw = Math.min(100, Math.max(0, ((sessionSeconds - secondsLeft) / sessionSeconds) * 100));
+        return Math.min(maxProgress, raw);
+    }, [secondsLeft, maxProgress]);
 
     const state = status?.state || 'idle';
     const attendance = status?.attendance;
@@ -146,16 +149,34 @@ const AttendanceWidget = ({ onRewardCreated }) => {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                    {state === 'idle' && (
-                        <button
-                            onClick={startSession}
-                            disabled={actionLoading}
-                            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                            <Play className="h-4 w-4" />
-                            Hello
-                        </button>
-                    )}
+                    {state === 'idle' && (() => {
+                        const win = status?.window;
+                        const canCheckIn = win?.can_check_in !== false;
+                        const isTooEarly = win?.status === 'too_early';
+                        const isLate     = win?.status === 'open_late';
+                        return (
+                            <div className="flex flex-col items-end gap-1">
+                                {isTooEarly && (
+                                    <span className="text-xs font-semibold text-blue-500">
+                                        ◷ Opens at {win.open_at}
+                                    </span>
+                                )}
+                                {isLate && (
+                                    <span className="text-xs font-semibold text-amber-500">
+                                        ⚠ Late entry — half-day only
+                                    </span>
+                                )}
+                                <button
+                                    onClick={startSession}
+                                    disabled={actionLoading || !canCheckIn}
+                                    className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+                                >
+                                    <Play className="h-4 w-4" />
+                                    Hello
+                                </button>
+                            </div>
+                        );
+                    })()}
 
                     {state === 'in_progress' && (
                         <>

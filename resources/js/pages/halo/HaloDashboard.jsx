@@ -35,18 +35,46 @@ function formatTime(seconds) {
     return [h, m, sec].map(v => String(v).padStart(2, '0')).join(':');
 }
 
+/* ── Window Status Badge ── */
+function WindowBadge({ window: win }) {
+    if (!win || win.status === 'open_on_time') {
+        return (
+            <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#4ADE80', letterSpacing: '0.08em', marginBottom: 8 }}>
+                ● ON TIME WINDOW OPEN · {win?.open_at ?? '06:00'} – {win?.late_from ?? '08:30'}
+            </div>
+        );
+    }
+    if (win.status === 'too_early') {
+        return (
+            <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#60A5FA', letterSpacing: '0.08em', marginBottom: 8 }}>
+                ◷ CHECK-IN OPENS AT {win.open_at} · TOO EARLY
+            </div>
+        );
+    }
+    if (win.status === 'open_late') {
+        return (
+            <div style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#FBBF24', letterSpacing: '0.08em', marginBottom: 8 }}>
+                ⚠ LATE ENTRY · HALF-DAY ONLY · MAX 50% RING
+            </div>
+        );
+    }
+    return null;
+}
+
 /* ── Halo Ring SVG ── */
-function HaloRing({ secondsLeft, state }) {
+function HaloRing({ secondsLeft, state, maxProgress }) {
     const size        = 220;
     const strokeWidth = 12;
     const radius      = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
+    const cap = maxProgress ?? 100;
 
     const progress = useMemo(() => {
         if (state === 'idle')      return 0;
-        if (state === 'completed') return 100;
-        return Math.min(100, Math.max(0, ((SESSION_SECONDS - secondsLeft) / SESSION_SECONDS) * 100));
-    }, [secondsLeft, state]);
+        if (state === 'completed') return cap;
+        const raw = Math.min(100, Math.max(0, ((SESSION_SECONDS - secondsLeft) / SESSION_SECONDS) * 100));
+        return Math.min(cap, raw);
+    }, [secondsLeft, state, cap]);
 
     const offset = circumference - (progress / 100) * circumference;
 
@@ -246,8 +274,11 @@ export default function HaloDashboard() {
     };
 
     /* ── Derived data ── */
-    const state  = status?.state || 'idle';
-    const streak = status?.current_streak || 0;
+    const state       = status?.state || 'idle';
+    const streak      = status?.current_streak || 0;
+    const maxProgress = status?.max_progress ?? 100;
+    const window_     = status?.window ?? null;
+    const canCheckIn  = window_?.can_check_in !== false;
 
     const sevenDayData = useMemo(() => {
         const days = [];
@@ -295,7 +326,7 @@ export default function HaloDashboard() {
                             {loading ? (
                                 <div className="halo-spinner"><div className="halo-spinner-ring" /></div>
                             ) : (
-                                <HaloRing secondsLeft={secondsLeft} state={state} />
+                                <HaloRing secondsLeft={secondsLeft} state={state} maxProgress={maxProgress} />
                             )}
 
                             {/* Streak */}
@@ -307,11 +338,16 @@ export default function HaloDashboard() {
 
                             {/* Action buttons */}
                             <div style={{ marginTop: '1.25rem', width: '100%', maxWidth: 280, display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
+                                {/* Window status badge — shown whenever user has no session yet */}
+                                {state === 'idle' && !loading && (
+                                    <WindowBadge window={window_} />
+                                )}
+
                                 {state === 'idle' && (
                                     <button
                                         className="halo-btn halo-btn-primary halo-btn-full"
                                         onClick={startSession}
-                                        disabled={actionLoading}
+                                        disabled={actionLoading || !canCheckIn}
                                         style={{ letterSpacing: '0.05em', fontSize: '0.8125rem' }}
                                     >
                                         BẮT ĐẦU NGHI THỨC (HELLO)

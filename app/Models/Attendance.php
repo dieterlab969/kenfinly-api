@@ -11,6 +11,7 @@ class Attendance extends Model
         'user_id',
         'halo_date',
         'status',
+        'check_in_type',
         'started_at',
         'expected_end_at',
         'ended_at',
@@ -21,17 +22,19 @@ class Attendance extends Model
         'reward_transaction_id',
         'reminder_due_at',
         'reminder_sent_at',
+        'reminder_count',
         'kill_reason',
     ];
 
     protected $casts = [
-        'halo_date' => 'date',
-        'started_at' => 'datetime',
+        'halo_date'       => 'date',
+        'started_at'      => 'datetime',
         'expected_end_at' => 'datetime',
-        'ended_at' => 'datetime',
+        'ended_at'        => 'datetime',
         'reminder_due_at' => 'datetime',
-        'reminder_sent_at' => 'datetime',
-        'earned_amount' => 'integer',
+        'reminder_sent_at'=> 'datetime',
+        'earned_amount'   => 'integer',
+        'reminder_count'  => 'integer',
     ];
 
     public function user(): BelongsTo

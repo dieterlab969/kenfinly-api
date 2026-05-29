@@ -117,6 +117,25 @@ class SendGridService
     }
 
     /**
+     * Send a Halo checkout reminder email (reminder 1 or 2 of max 2).
+     */
+    public function sendCheckoutReminder(string $to, string $userName, int $reminderNumber): void
+    {
+        $subject = $reminderNumber >= 2
+            ? '⚠️ Final Reminder: Complete Your Halo Session Before 10:00 PM'
+            : '⏰ Reminder: Don\'t Forget to Check Out of Your Halo Session';
+
+        $htmlContent = view('emails.checkout_reminder', [
+            'userName'       => $userName,
+            'reminderNumber' => $reminderNumber,
+            'appName'        => config('app.name', 'Kenfinly'),
+            'appUrl'         => config('app.url'),
+        ])->render();
+
+        $this->sendEmail($to, $subject, $htmlContent);
+    }
+
+    /**
      * @param string $to
      * @param string $subject
      * @param string $htmlContent
