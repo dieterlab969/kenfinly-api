@@ -46,35 +46,36 @@
     },
     "scripts": {
         "setup": [
-            "composer install",
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-            "@php artisan key:generate",
-            "@php artisan migrate --force",
+            "bash ./scripts/composer.sh install",
+            "bash ./scripts/php.sh -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+            "bash ./scripts/php.sh artisan key:generate",
+            "bash ./scripts/php.sh artisan migrate --force",
+            "bash ./scripts/ensure-storage-link.sh",
             "npm install",
             "npm run build"
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
+            "sh -c 'REQUESTED_APP_PORT=${APP_PORT:-5000}; APP_HOST=${APP_HOST:-0.0.0.0}; APP_PORT=$(bash ./scripts/find-open-port.sh \"$REQUESTED_APP_PORT\" \"$APP_HOST\"); if [ \"$APP_PORT\" != \"$REQUESTED_APP_PORT\" ]; then echo \"Port $REQUESTED_APP_PORT is already in use. Falling back to $APP_PORT for Laravel.\"; fi; bash ./scripts/ensure-storage-link.sh && npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"env PHP_CLI_SERVER_WORKERS=1 bash ./scripts/php.sh artisan serve --host=$APP_HOST --port=$APP_PORT\" \"bash ./scripts/php.sh artisan queue:listen --tries=1\" \"bash ./scripts/php.sh artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others'"
         ],
         "test": [
-            "@php artisan config:clear --ansi",
-            "@php artisan test"
+            "bash ./scripts/php.sh artisan config:clear --ansi",
+            "bash ./scripts/php.sh artisan test"
         ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "bash ./scripts/php.sh artisan package:discover --ansi"
         ],
         "post-update-cmd": [
-            "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+            "bash ./scripts/php.sh artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
         "post-root-package-install": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+            "bash ./scripts/php.sh -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ],
         "post-create-project-cmd": [
-            "@php artisan key:generate --ansi",
-            "@php -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
-            "@php artisan migrate --graceful --ansi"
+            "bash ./scripts/php.sh artisan key:generate --ansi",
+            "bash ./scripts/php.sh -r \"file_exists('database/database.sqlite') || touch('database/database.sqlite');\"",
+            "bash ./scripts/php.sh artisan migrate --graceful --ansi"
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"

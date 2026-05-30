@@ -29,11 +29,11 @@ function Footer({ showCopyright = true, showAnalytics = true }) {
     const { t } = useTranslation();
     const currentYear = useMemo(() => new Date().getFullYear(), []);
     const [companyInfo, setCompanyInfo] = useState({
-        company_name: import.meta.env.COMPANY_NAME || process.env.COMPANY_NAME,
-        company_tax_code: import.meta.env.COMPANY_TAX_CODE || process.env.COMPANY_TAX_CODE,
-        company_email: import.meta.env.COMPANY_EMAIL || process.env.COMPANY_EMAIL,
-        company_phone: import.meta.env.COMPANY_PHONE || process.env.COMPANY_PHONE,
-        company_address: import.meta.env.COMPANY_ADDRESS || process.env.COMPANY_ADDRESS,
+    company_name: import.meta?.env?.COMPANY_NAME || '',
+    company_tax_code: import.meta?.env?.COMPANY_TAX_CODE || '',
+    company_email: import.meta?.env?.COMPANY_EMAIL || '',
+    company_phone: import.meta?.env?.COMPANY_PHONE || '',
+    company_address: import.meta?.env?.COMPANY_ADDRESS || '',
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);

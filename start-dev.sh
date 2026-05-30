@@ -1,19 +1,36 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Replace ${REPLIT_DEV_DOMAIN} in .env with the actual value
-sed -i "s/\${REPLIT_DEV_DOMAIN}/$REPLIT_DEV_DOMAIN/g" .env
+repo_root="$(cd "$(dirname "$0")" && pwd)"
+cd "$repo_root"
 
-# For development, remove APP_URL and ASSET_URL to use relative paths
-sed -i '/^APP_URL=https/d' .env
-sed -i '/^ASSET_URL=/d' .env
+requested_app_port="${APP_PORT:-5000}"
+app_host="${APP_HOST:-0.0.0.0}"
+app_port="$(bash "$repo_root/scripts/find-open-port.sh" "$requested_app_port" "$app_host")"
 
-# Clear Laravel cache
-php artisan config:clear
-rm -rf bootstrap/cache/*.php
+if [[ "$app_port" != "$requested_app_port" ]]; then
+  echo "Port $requested_app_port is already in use. Falling back to $app_port for Laravel."
+fi
 
-# Start the development servers
+if [[ -n "${REPLIT_DEV_DOMAIN:-}" ]] && [[ -f .env ]]; then
+  REPLIT_DEV_DOMAIN="$REPLIT_DEV_DOMAIN" bash "$repo_root/scripts/php.sh" -r '
+    $envFile = ".env";
+    $contents = file_get_contents($envFile);
+    $replitDomain = getenv("REPLIT_DEV_DOMAIN") ?: "";
+    $contents = str_replace("\${REPLIT_DEV_DOMAIN}", $replitDomain, $contents);
+    $contents = preg_replace("/^APP_URL=https.*\R/m", "", $contents);
+    $contents = preg_replace("/^ASSET_URL=.*\R/m", "", $contents);
+    file_put_contents($envFile, $contents);
+  '
+fi
+
+bash "$repo_root/scripts/php.sh" artisan config:clear
+rm -f bootstrap/cache/*.php
+
+bash "$repo_root/scripts/ensure-storage-link.sh"
+
 npx concurrently -c "#93c5fd,#c4b5fd,#fb7185" \
-  "php artisan serve --host=0.0.0.0 --port=5000" \
-  "php artisan queue:listen --tries=1" \
-  "php artisan pail --timeout=0" \
+  "env PHP_CLI_SERVER_WORKERS=1 bash \"$repo_root/scripts/php.sh\" artisan serve --host=$app_host --port=$app_port" \
+  "bash \"$repo_root/scripts/php.sh\" artisan queue:listen --tries=1" \
+  "bash \"$repo_root/scripts/php.sh\" artisan pail --timeout=0" \
   --names=server,queue,logs --kill-others

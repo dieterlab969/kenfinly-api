@@ -8,6 +8,13 @@ const replitDomain = process.env.REPLIT_DOMAINS ||
     (process.env.REPL_SLUG && process.env.REPL_OWNER 
         ? `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co` 
         : 'localhost');
+const isReplit = Boolean(
+    process.env.REPLIT_DOMAINS || (process.env.REPL_SLUG && process.env.REPL_OWNER)
+);
+const serverPort = Number(process.env.VITE_PORT || 5173);
+const hmrHost = process.env.VITE_HMR_HOST || (isReplit ? replitDomain : 'localhost');
+const hmrClientPort = Number(process.env.VITE_HMR_CLIENT_PORT || (isReplit ? 443 : serverPort));
+const hmrProtocol = process.env.VITE_HMR_PROTOCOL || (isReplit ? 'wss' : 'ws');
 
 export default defineConfig({
     plugins: [
@@ -25,7 +32,7 @@ export default defineConfig({
     },
     server: {
         host: '0.0.0.0',
-        port: 5173,
+        port: serverPort,
         cors: {
             origin: '*',
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -34,9 +41,9 @@ export default defineConfig({
         },
         strictPort: true,
         hmr: {
-            host: replitDomain,
-            clientPort: 443,
-            protocol: replitDomain === 'localhost' ? 'ws' : 'wss',
+            host: hmrHost,
+            clientPort: hmrClientPort,
+            protocol: hmrProtocol,
         },
     },
 });

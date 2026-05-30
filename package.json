@@ -3,9 +3,10 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "prebuild": "node -e \"const fs = require('fs'); fs.rmSync('public/hot', { force: true });\"",
         "build": "vite build",
         "dev": "vite",
-        "php:dev": "php -S 0.0.0.0:5000 server.php",
+        "php:dev": "sh -c 'APP_PORT=${APP_PORT:-5000}; bash ./scripts/ensure-storage-link.sh && bash ./scripts/php.sh -S 0.0.0.0:${APP_PORT} server.php'",
         "serve": "concurrently \"npm run php:dev\" \"npm run dev\""
     },
     "devDependencies": {
@@ -22,6 +23,7 @@
         "date-fns": "^4.1.0",
         "dompurify": "^3.3.1",
         "lucide-react": "^0.552.0",
+        "openai": "^6.39.1",
         "react": "^19.2.0",
         "react-dom": "^19.2.0",
         "react-google-recaptcha-v3": "^1.11.0",
