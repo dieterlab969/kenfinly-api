@@ -38,7 +38,7 @@ Install the repository helper packages first:
 
 ```bash
 sudo apt update
-sudo apt install -y software-properties-common ca-certificates curl unzip git composer
+sudo apt install -y software-properties-common ca-certificates curl unzip git
 ```
 
 Add **Ondřej Surý’s PHP PPA** so Ubuntu 22.04 and 24.04 both get native PHP 8.2 packages:
@@ -67,7 +67,8 @@ sudo apt install -y \
   php8.2-curl \
   php8.2-zip \
   php8.2-opcache \
-  php8.2-gd
+  php8.2-gd \
+  composer
 ```
 
 > **Why `php8.2-gd` is included:** the project uses image-processing packages, so this keeps local upload/image flows working.
@@ -85,9 +86,14 @@ sudo update-alternatives --set php /usr/bin/php8.2
 Verify the version and required extensions:
 
 ```bash
+which php
+which composer
 php -v
+composer --version
 php -m | egrep 'mbstring|xml|bcmath|pdo_mysql|curl|zip|Zend OPcache|gd'
 ```
+
+> **Why Composer is installed after PHP 8.2:** Composer is a PHP script, so installing PHP 8.2 first and then setting `update-alternatives` helps ensure `composer install` runs on the correct PHP version.
 
 ---
 
@@ -179,7 +185,7 @@ DB_PASSWORD=kenfinly123
 Run the project initialization commands:
 
 ```bash
-composer install
+composer install --no-interaction --prefer-dist
 php artisan key:generate
 php artisan jwt:secret
 php artisan migrate --seed
@@ -199,11 +205,18 @@ php artisan config:clear
 
 ### Optional: import a team-provided SQL snapshot
 
-If the team hands you a `.sql` dump for a special dataset, import it like this:
+If the team hands you a `.sql` dump for a special dataset, import it into a **fresh** `kenfinly` database **instead of** running `php artisan migrate --seed`:
 
 ```bash
 mysql -u kenfinly -p kenfinly < /absolute/path/to/kenfinly.sql
 ```
+
+> **Important:** Choose **one schema path**:
+>
+> - **Normal onboarding:** `php artisan migrate --seed`
+> - **Snapshot onboarding:** import the provided `.sql` file
+>
+> Do **not** do both on the same database unless you intentionally want to merge data.
 
 ---
 
@@ -345,12 +358,14 @@ php artisan about
 
 ### Seeded local login accounts
 
-After `php artisan migrate --seed`, these accounts should exist:
+If you used `php artisan migrate --seed`, these accounts should exist:
 
 - **Super Admin:** `admin@kenfinly.com` / `Admin@123`
 - **Owner:** `owner@example.com` / `password123`
 - **Editor:** `editor@example.com` / `password123`
 - **Viewer:** `viewer@example.com` / `password123`
+
+> If you imported a team-provided SQL snapshot instead, the available users and passwords depend on that dump.
 
 Open the app in your browser:
 

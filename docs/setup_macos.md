@@ -69,14 +69,27 @@ brew install php@8.2 nginx mysql composer
 brew link php@8.2 --force --overwrite
 ```
 
+**Make sure your shell resolves the Homebrew PHP 8.2 and Composer binaries first:**
+
+```bash
+echo 'export PATH="$(brew --prefix php@8.2)/bin:$(brew --prefix php@8.2)/sbin:$(brew --prefix composer)/bin:$PATH"' >> ~/.zprofile
+export PATH="$(brew --prefix php@8.2)/bin:$(brew --prefix php@8.2)/sbin:$(brew --prefix composer)/bin:$PATH"
+hash -r
+```
+
 **Verify the required PHP 8.2 extensions are available:**
 
 ```bash
+which php
+which composer
 php -v
+composer --version
 php -m | egrep 'mbstring|xml|bcmath|pdo_mysql|curl|zip|Zend OPcache'
 ```
 
 > **Important:** On Homebrew, **PHP-FPM is included with `php@8.2`**. You do not install `php-fpm` separately.
+>
+> If `which php` or `which composer` points to an older XAMPP, MAMP, or system binary, close and reopen Terminal after updating `~/.zprofile`, then run the verification block again.
 
 ---
 
@@ -176,7 +189,7 @@ DB_PASSWORD=kenfinly123
 Run the core project initialization commands:
 
 ```bash
-composer install
+composer install --no-interaction --prefer-dist
 php artisan key:generate
 php artisan jwt:secret
 php artisan migrate --seed
@@ -197,11 +210,18 @@ php artisan config:clear
 
 ### Optional: import a team-provided SQL snapshot
 
-If the team gives you a `.sql` dump for a specific environment snapshot, import it like this:
+If the team gives you a `.sql` dump for a specific environment snapshot, import it into a **fresh** `kenfinly` database **instead of** running `php artisan migrate --seed`:
 
 ```bash
 mysql -u kenfinly -p kenfinly < /absolute/path/to/kenfinly.sql
 ```
+
+> **Important:** Choose **one schema path**:
+>
+> - **Normal onboarding:** `php artisan migrate --seed`
+> - **Snapshot onboarding:** import the provided `.sql` file
+>
+> Do **not** do both on the same database unless you intentionally want to merge data.
 
 ---
 
@@ -212,6 +232,9 @@ Homebrew Nginx loads site files from:
 ```text
 $(brew --prefix nginx)/etc/nginx/servers/*
 ```
+
+> **Important Homebrew note:** A fresh Homebrew `nginx.conf` usually still contains a sample server on **port 8080**.  
+> That does **not** block this setup. The `kenfinly.conf` file below adds a **separate server on port 80** so you can use `http://kenfinly.test` without a port suffix.
 
 Generate a local site config from the current repo path:
 
@@ -272,6 +295,12 @@ EOF_NGINX
 
 If you prefer to create the file manually, this is the exact structure to use:
 
+First, check the real PHP-FPM `listen` value on your machine:
+
+```bash
+grep '^listen = ' "$(brew --prefix php@8.2)/etc/php-fpm.d/www.conf"
+```
+
 ```nginx
 server {
     listen 80;
@@ -286,7 +315,7 @@ server {
 
     location ~ \.php$ {
         include /opt/homebrew/etc/nginx/fastcgi_params;
-        fastcgi_pass unix:/opt/homebrew/var/run/php-fpm-alpha-8.2.sock;
+        fastcgi_pass 127.0.0.1:9000;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
         fastcgi_param DOCUMENT_ROOT $realpath_root;
@@ -294,7 +323,7 @@ server {
 }
 ```
 
-> **Important:** On macOS/Homebrew, the exact PHP-FPM socket can vary.  
+> **Important:** If your `listen` value is a Unix socket instead of `127.0.0.1:9000`, use that exact value in `fastcgi_pass`.  
 > That is why the generated config above reads the real `listen` value directly from `php@8.2`.
 >
 > **Path note:** `/opt/homebrew` is the standard Homebrew prefix on Apple Silicon.  
@@ -306,6 +335,16 @@ Test and reload Nginx:
 nginx -t
 brew services restart nginx
 ```
+
+If `nginx -t` reports that port **80** is unavailable on your machine, change the site block to **8080** instead:
+
+```bash
+sed -i '' 's/listen 80;/listen 8080;/' "$(brew --prefix nginx)/etc/nginx/servers/kenfinly.conf"
+nginx -t
+brew services restart nginx
+```
+
+If you use this fallback, open the app at **`http://kenfinly.test:8080`**.
 
 ---
 
@@ -328,6 +367,13 @@ curl -I http://localhost
 
 You want to see an HTTP response such as `200 OK` or `302 Found`.
 
+If you switched your site block to **8080** in the previous step, verify with:
+
+```bash
+curl -I http://kenfinly.test:8080
+curl -I http://localhost:8080
+```
+
 > **Recommendation:** Use **`http://kenfinly.test`** as your canonical local URL.  
 > `http://localhost` is included as a convenience alias and only works for Kenfinly if this server block is the active/default local site in Nginx.
 
@@ -345,17 +391,25 @@ php artisan about
 
 ### Seeded local login accounts
 
-After `php artisan migrate --seed`, these accounts should exist:
+If you used `php artisan migrate --seed`, these accounts should exist:
 
 - **Super Admin:** `admin@kenfinly.com` / `Admin@123`
 - **Owner:** `owner@example.com` / `password123`
 - **Editor:** `editor@example.com` / `password123`
 - **Viewer:** `viewer@example.com` / `password123`
 
+> If you imported a team-provided SQL snapshot instead, the available users and passwords depend on that dump.
+
 Open the app in your browser:
 
 ```text
 http://kenfinly.test
+```
+
+If you switched Nginx to **8080**, use:
+
+```text
+http://kenfinly.test:8080
 ```
 
 ---
@@ -390,6 +444,12 @@ Check the generated config file and test Nginx again:
 cat "$(brew --prefix nginx)/etc/nginx/servers/kenfinly.conf"
 nginx -t
 brew services restart nginx
+```
+
+Also confirm whether Homebrew's base config still includes its sample **8080** server:
+
+```bash
+grep -nE 'listen\s+[0-9]+' /opt/homebrew/etc/nginx/nginx.conf 2>/dev/null || true
 ```
 
 ### PHP pages return `502 Bad Gateway`

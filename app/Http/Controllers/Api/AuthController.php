@@ -16,6 +16,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 use App\Models\SubscriptionPlan;
 use App\Models\Subscription;
+use Illuminate\Http\JsonResponse;
 
 /**
  * Controller handling user authentication and registration via API.
@@ -52,7 +53,7 @@ class AuthController extends Controller
      * @param \Illuminate\Http\Request $request Incoming registration request
      * @return \Illuminate\Http\JsonResponse JSON response with registration result and verification info
      */
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
         $rules = [
             'name' => 'required|string|max:100',
@@ -108,22 +109,28 @@ class AuthController extends Controller
             ]);
         }
 
+        if (AppSetting::isRegistrationEmailDisabled()) {
+            Log::info('Registration email dispatch bypassed', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+            ]);
+
+            return $this->buildRegistrationResponse(
+                $user,
+                'Registration successful! Email verification dispatch is disabled for this environment.',
+                false,
+            );
+        }
+
         try {
             $verification = $this->emailVerificationService->sendVerificationEmail($user);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Registration successful! Please check your email to verify your account.',
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'status' => $user->status,
-                    'email_verified' => false,
-                ],
-                'verification_sent' => true,
-                'verification_expires_at' => $verification->expires_at,
-            ], 201);
+            return $this->buildRegistrationResponse(
+                $user,
+                'Registration successful! Please check your email to verify your account.',
+                true,
+                $verification->expires_at,
+            );
 
         } catch (\Exception $e) {
             Log::error('Failed to send verification email during registration', [
@@ -131,19 +138,33 @@ class AuthController extends Controller
                 'error' => $e->getMessage(),
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Registration successful, but we could not send a verification email. Please contact support.',
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'status' => $user->status,
-                    'email_verified' => false,
-                ],
-                'verification_sent' => false,
-            ], 201);
+            return $this->buildRegistrationResponse(
+                $user,
+                'Registration successful, but we could not send a verification email. Please contact support.',
+                false,
+            );
         }
+    }
+
+    private function buildRegistrationResponse(
+        User $user,
+        string $message,
+        bool $verificationSent,
+        $verificationExpiresAt = null,
+    ): JsonResponse {
+        return response()->json([
+            'success' => true,
+            'message' => $message,
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'status' => $user->status,
+                'email_verified' => false,
+            ],
+            'verification_sent' => $verificationSent,
+            'verification_expires_at' => $verificationExpiresAt,
+        ], 201);
     }
 
     /**

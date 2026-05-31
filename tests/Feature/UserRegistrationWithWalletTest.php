@@ -5,42 +5,84 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class UserRegistrationWithWalletTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->setRegistrationEmailBypass('1');
+    }
+
+    private function setRegistrationEmailBypass(string $value): void
+    {
+        putenv("DISABLE_REGISTRATION_EMAIL={$value}");
+        $_ENV['DISABLE_REGISTRATION_EMAIL'] = $value;
+        $_SERVER['DISABLE_REGISTRATION_EMAIL'] = $value;
+    }
+
+    private function registerUser(array $overrides = []): TestResponse
+    {
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        return $this->postJson('/api/auth/register', array_merge([
+            'name' => 'New User',
+            'email' => 'newuser@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ], $overrides));
+    }
+
+    private function createOwnerUser(): User
+    {
+        $user = User::factory()->create();
+        $user->assignRole('owner');
+
+        return $user;
+    }
+
     /**
      * Test that wallet is created when user registers via API.
      */
     public function test_wallet_is_created_when_user_registers_via_api(): void
     {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-
-        $response = $this->postJson('/api/auth/register', [
-            'name' => 'New User',
-            'email' => 'newuser@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
-        ]);
+        $response = $this->registerUser();
 
         $response->assertStatus(201)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('verification_sent', false)
             ->assertJsonStructure([
                 'success',
                 'message',
-                'user',
-                'access_token',
+                'user' => [
+                    'id',
+                    'name',
+                    'email',
+                    'status',
+                    'email_verified',
+                ],
+                'verification_sent',
+                'verification_expires_at',
             ]);
 
-        $user = User::where('email', 'newuser@example.com')->first();
+        $user = User::where('email', 'newuser@example.com')->firstOrFail();
         
-        $this->assertNotNull($user);
         $this->assertEquals(1, $user->accounts()->count());
         
         $wallet = $user->accounts()->first();
+        $this->assertNotNull($wallet);
         $this->assertEquals('My Wallet', $wallet->name);
         $this->assertEquals('0.00', $wallet->balance);
+
+        $this->assertDatabaseHas('accounts', [
+            'user_id' => $user->id,
+            'name' => 'My Wallet',
+        ]);
     }
 
     /**
@@ -51,7 +93,7 @@ class UserRegistrationWithWalletTest extends TestCase
         $this->seed(\Database\Seeders\RoleSeeder::class);
         $this->seed(\Database\Seeders\CategorySeeder::class);
 
-        $user = User::factory()->create();
+        $user = $this->createOwnerUser();
         $this->assertGreaterThan(0, $user->accounts()->count());
 
         $wallet = $user->accounts()->first();
@@ -89,7 +131,7 @@ class UserRegistrationWithWalletTest extends TestCase
         $this->seed(\Database\Seeders\RoleSeeder::class);
         $this->seed(\Database\Seeders\CategorySeeder::class);
 
-        $user = User::factory()->create();
+        $user = $this->createOwnerUser();
         $user->accounts()->delete();
 
         $this->assertEquals(0, $user->accounts()->count());
@@ -118,26 +160,21 @@ class UserRegistrationWithWalletTest extends TestCase
      */
     public function test_newly_registered_user_can_immediately_create_transaction(): void
     {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
         $this->seed(\Database\Seeders\CategorySeeder::class);
 
-        $registerResponse = $this->postJson('/api/auth/register', [
-            'name' => 'New User',
-            'email' => 'newuser@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
-        ]);
+        $registerResponse = $this->registerUser();
 
-        $registerResponse->assertStatus(201);
-        $token = $registerResponse->json('access_token');
+        $registerResponse->assertStatus(201)
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('verification_sent', false);
 
-        $user = User::where('email', 'newuser@example.com')->first();
+        $user = User::where('email', 'newuser@example.com')->firstOrFail();
         $wallet = $user->accounts()->first();
         $category = Category::where('type', 'income')->first();
 
-        $transactionResponse = $this->withHeaders([
-            'Authorization' => 'Bearer ' . $token,
-        ])->postJson('/api/transactions', [
+        $this->assertNotNull($wallet);
+
+        $transactionResponse = $this->actingAs($user, 'api')->postJson('/api/transactions', [
             'account_id' => $wallet->id,
             'category_id' => $category->id,
             'type' => 'income',

@@ -11,6 +11,7 @@ use App\Models\Role;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class TransactionPhotoUploadTest extends TestCase
 {
@@ -57,7 +58,7 @@ class TransactionPhotoUploadTest extends TestCase
             'transaction_date' => now(),
         ]);
         
-        $this->token = auth('api')->login($this->user);
+        $this->token = JWTAuth::fromUser($this->user);
     }
 
     public function test_user_can_upload_jpeg_photo()
@@ -136,7 +137,9 @@ class TransactionPhotoUploadTest extends TestCase
     {
         $file = UploadedFile::fake()->image('receipt.jpg', 800, 600)->size(500);
         
-        $response = $this->post("/api/transactions/{$this->transaction->id}/photos", [
+        $response = $this->withHeaders([
+            'Accept' => 'application/json',
+        ])->post("/api/transactions/{$this->transaction->id}/photos", [
             'photo' => $file,
         ]);
         

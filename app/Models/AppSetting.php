@@ -44,6 +44,12 @@ class AppSetting extends Model
         return self::get('recaptcha_enabled', false);
     }
 
+    public static function isRegistrationEmailDisabled(): bool
+    {
+        return filter_var(env('DISABLE_REGISTRATION_EMAIL', false), FILTER_VALIDATE_BOOLEAN)
+            || filter_var(self::get('disable_registration_email', false), FILTER_VALIDATE_BOOLEAN);
+    }
+
     public static function getGoogleTagManagerId(): ?string
     {
         return self::get('google_tag_manager_id');
