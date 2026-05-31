@@ -106,6 +106,103 @@ function HaloRing({ secondsLeft, state, maxProgress }) {
     );
 }
 
+/* ── Halo Semi-Circle Gauge ── */
+const HALO_CX = 100, HALO_CY = 88, HALO_R = 68, HALO_SW = 13;
+const HALO_ARC_LEN = Math.PI * HALO_R;
+const HALO_LX = HALO_CX - HALO_R, HALO_RX = HALO_CX + HALO_R;
+const HALO_PATH = `M ${HALO_LX} ${HALO_CY} A ${HALO_R} ${HALO_R} 0 0 1 ${HALO_RX} ${HALO_CY}`;
+const GAP = 3;
+
+function HaloGauge({ p }) {
+    const income  = parseFloat(p.income  || 0);
+    const expense = parseFloat(p.expense || 0);
+    const net     = parseFloat(p.net     || 0);
+    const total   = income + expense;
+    const isPos   = net >= 0;
+
+    let incomeDash = 0, expenseDash = 0, expOff = 0;
+    if (total > 0) {
+        const both = income > 0 && expense > 0;
+        const rawI = (income  / total) * HALO_ARC_LEN;
+        const rawE = (expense / total) * HALO_ARC_LEN;
+        incomeDash  = both ? Math.max(0, rawI - GAP / 2) : rawI;
+        expenseDash = both ? Math.max(0, rawE - GAP / 2) : rawE;
+        expOff = -(rawI + (both ? GAP / 2 : 0));
+    }
+
+    const netStr = fmtVND(Math.abs(net));
+    const fs = netStr.length > 12 ? 7.5 : netStr.length > 9 ? 8.5 : 9.5;
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+            <p style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#86EFAC', letterSpacing: '0.06em', marginBottom: 2, textAlign: 'center' }}>
+                {p.month}
+            </p>
+
+            <svg viewBox="0 0 200 92" style={{ width: '100%', maxHeight: 130 }} aria-label={p.month}>
+                {/* track */}
+                <path d={HALO_PATH} fill="none" stroke="#1E3529" strokeWidth={HALO_SW} strokeLinecap="round" />
+
+                {/* income arc — green */}
+                {incomeDash > 0 && (
+                    <path
+                        d={HALO_PATH} fill="none" stroke="#22C55E" strokeWidth={HALO_SW}
+                        strokeLinecap="round"
+                        strokeDasharray={`${incomeDash} ${HALO_ARC_LEN}`}
+                        style={{ filter: 'drop-shadow(0 0 4px #22C55E88)' }}
+                    />
+                )}
+
+                {/* expense arc — red */}
+                {expenseDash > 0 && (
+                    <path
+                        d={HALO_PATH} fill="none" stroke="#EF4444" strokeWidth={HALO_SW}
+                        strokeLinecap="round"
+                        strokeDasharray={`${expenseDash} ${HALO_ARC_LEN}`}
+                        strokeDashoffset={expOff}
+                        style={{ filter: 'drop-shadow(0 0 4px #EF444488)' }}
+                    />
+                )}
+
+                {/* % labels at caps */}
+                {total > 0 && (
+                    <>
+                        <text x={HALO_LX - 1} y={HALO_CY + 10} textAnchor="end"   fill="#4ADE80" fontSize="7" fontWeight="700">{Math.round((income / total) * 100)}%</text>
+                        <text x={HALO_RX + 1} y={HALO_CY + 10} textAnchor="start" fill="#F87171" fontSize="7" fontWeight="700">{Math.round((expense / total) * 100)}%</text>
+                    </>
+                )}
+
+                {/* center net */}
+                <text x={HALO_CX} y={HALO_CY - 22} textAnchor="middle"
+                      fill={isPos ? '#4ADE80' : '#F87171'} fontSize={fs} fontWeight="800" letterSpacing="-0.3">
+                    {isPos ? '+' : '-'}{netStr}
+                </text>
+                <text x={HALO_CX} y={HALO_CY - 10} textAnchor="middle" fill="#6B7280" fontSize="7">
+                    Net {isPos ? '▲' : '▼'}
+                </text>
+            </svg>
+
+            {/* legend */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0 8px', marginTop: 2 }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+                        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22C55E', flexShrink: 0 }} />
+                        <span style={{ fontSize: '0.625rem', color: '#9CA3AF' }}>Income</span>
+                    </div>
+                    <span style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#4ADE80', paddingLeft: 11 }}>{fmtVND(income)}</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+                        <span style={{ fontSize: '0.625rem', color: '#9CA3AF' }}>Expense</span>
+                        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#EF4444', flexShrink: 0 }} />
+                    </div>
+                    <span style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#F87171', paddingRight: 11 }}>{fmtVND(expense)}</span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 /* ── Monthly Summary Widget ── */
 function MonthlySummary({ monthly }) {
     if (!monthly) {
@@ -117,47 +214,13 @@ function MonthlySummary({ monthly }) {
         );
     }
 
-    const panels = [monthly.current, monthly.previous];
-
     return (
         <div className="monthly-summary-card">
             <p className="monthly-summary-title">Monthly Summary</p>
-            <div className="row g-3">
-                {panels.map((p, i) => {
-                    const net = parseFloat(p.net || 0);
-                    return (
-                        <div key={i} className="col-6">
-                            <div className="monthly-panel">
-                                <p className="monthly-panel-month">{p.month}</p>
-
-                                <div className="monthly-row">
-                                    <span className="monthly-row-label">
-                                        <TrendingUp size={12} style={{ color: '#4ADE80' }} />
-                                        Income:
-                                    </span>
-                                    <span className="monthly-row-value income">{fmtVND(p.income)}</span>
-                                </div>
-
-                                <div className="monthly-row">
-                                    <span className="monthly-row-label">
-                                        <TrendingDown size={12} style={{ color: '#F87171' }} />
-                                        Expense:
-                                    </span>
-                                    <span className="monthly-row-value expense">{fmtVND(p.expense)}</span>
-                                </div>
-
-                                <hr className="monthly-divider" />
-
-                                <div className="monthly-row" style={{ marginBottom: 0 }}>
-                                    <span className="monthly-row-label" style={{ fontWeight: 600, color: '#E5E7EB' }}>Total:</span>
-                                    <span className={`monthly-row-value ${net >= 0 ? 'total-positive' : 'total-negative'}`}>
-                                        {fmtVND(net)}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
+            <div style={{ display: 'flex', gap: 12 }}>
+                <HaloGauge p={monthly.current} />
+                <div style={{ width: 1, background: '#1E3529', alignSelf: 'stretch', margin: '24px 0 0' }} />
+                <HaloGauge p={monthly.previous} />
             </div>
         </div>
     );

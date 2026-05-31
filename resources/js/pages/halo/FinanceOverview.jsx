@@ -35,6 +35,85 @@ const DarkTooltip = ({ active, payload, label }) => {
     );
 };
 
+/* ── Finance Overview Gauge (dark theme) ── */
+const FIN_CX = 100, FIN_CY = 88, FIN_R = 68, FIN_SW = 13;
+const FIN_ARC_LEN = Math.PI * FIN_R;
+const FIN_LX = FIN_CX - FIN_R, FIN_RX = FIN_CX + FIN_R;
+const FIN_PATH = `M ${FIN_LX} ${FIN_CY} A ${FIN_R} ${FIN_R} 0 0 1 ${FIN_RX} ${FIN_CY}`;
+const FIN_GAP = 3;
+
+function FinHaloGauge({ p }) {
+    const income  = parseFloat(p.income  || 0);
+    const expense = parseFloat(p.expense || 0);
+    const net     = parseFloat(p.net     || 0);
+    const total   = income + expense;
+    const isPos   = net >= 0;
+
+    let incomeDash = 0, expenseDash = 0, expOff = 0;
+    if (total > 0) {
+        const both = income > 0 && expense > 0;
+        const rawI = (income  / total) * FIN_ARC_LEN;
+        const rawE = (expense / total) * FIN_ARC_LEN;
+        incomeDash  = both ? Math.max(0, rawI - FIN_GAP / 2) : rawI;
+        expenseDash = both ? Math.max(0, rawE - FIN_GAP / 2) : rawE;
+        expOff = -(rawI + (both ? FIN_GAP / 2 : 0));
+    }
+
+    const netStr = fmtVND(Math.abs(net));
+    const fs = netStr.length > 12 ? 7.5 : netStr.length > 9 ? 8.5 : 9.5;
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+            <p style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#86EFAC', letterSpacing: '0.06em', marginBottom: 2, textAlign: 'center' }}>
+                {p.month}
+            </p>
+            <svg viewBox="0 0 200 92" style={{ width: '100%', maxHeight: 130 }} aria-label={p.month}>
+                <path d={FIN_PATH} fill="none" stroke="#1E3529" strokeWidth={FIN_SW} strokeLinecap="round" />
+                {incomeDash > 0 && (
+                    <path d={FIN_PATH} fill="none" stroke="#22C55E" strokeWidth={FIN_SW}
+                        strokeLinecap="round" strokeDasharray={`${incomeDash} ${FIN_ARC_LEN}`}
+                        style={{ filter: 'drop-shadow(0 0 4px #22C55E88)' }} />
+                )}
+                {expenseDash > 0 && (
+                    <path d={FIN_PATH} fill="none" stroke="#EF4444" strokeWidth={FIN_SW}
+                        strokeLinecap="round" strokeDasharray={`${expenseDash} ${FIN_ARC_LEN}`}
+                        strokeDashoffset={expOff}
+                        style={{ filter: 'drop-shadow(0 0 4px #EF444488)' }} />
+                )}
+                {total > 0 && (
+                    <>
+                        <text x={FIN_LX - 1} y={FIN_CY + 10} textAnchor="end"   fill="#4ADE80" fontSize="7" fontWeight="700">{Math.round((income / total) * 100)}%</text>
+                        <text x={FIN_RX + 1} y={FIN_CY + 10} textAnchor="start" fill="#F87171" fontSize="7" fontWeight="700">{Math.round((expense / total) * 100)}%</text>
+                    </>
+                )}
+                <text x={FIN_CX} y={FIN_CY - 22} textAnchor="middle"
+                      fill={isPos ? '#4ADE80' : '#F87171'} fontSize={fs} fontWeight="800" letterSpacing="-0.3">
+                    {isPos ? '+' : '-'}{netStr}
+                </text>
+                <text x={FIN_CX} y={FIN_CY - 10} textAnchor="middle" fill="#6B7280" fontSize="7">
+                    Net {isPos ? '▲' : '▼'}
+                </text>
+            </svg>
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', padding: '0 8px', marginTop: 2 }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+                        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22C55E', flexShrink: 0 }} />
+                        <span style={{ fontSize: '0.625rem', color: '#9CA3AF' }}>Income</span>
+                    </div>
+                    <span style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#4ADE80', paddingLeft: 11 }}>{fmtVND(income)}</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+                        <span style={{ fontSize: '0.625rem', color: '#9CA3AF' }}>Expense</span>
+                        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#EF4444', flexShrink: 0 }} />
+                    </div>
+                    <span style={{ fontSize: '0.6875rem', fontWeight: 700, color: '#F87171', paddingRight: 11 }}>{fmtVND(expense)}</span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 /* ══════════════════════════════════════════════════
    ADD INCOME MODAL
 ══════════════════════════════════════════════════ */
@@ -484,42 +563,24 @@ export default function FinanceOverview() {
                             </div>
                         </div>
 
-                        {/* ── Monthly Summary inline ── */}
-                        <div className="row g-3 mb-4">
-                            {[dashboardData?.monthly_summary?.current, dashboardData?.monthly_summary?.previous]
-                                .filter(Boolean)
-                                .map((p, i) => {
-                                    const net = parseFloat(p.net || 0);
-                                    return (
-                                        <div key={i} className="col-md-6">
-                                            <div className="halo-card">
-                                                <p style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'white', marginBottom: '0.625rem' }}>
-                                                    {p.month}
-                                                </p>
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem' }}>
-                                                        <span style={{ color: '#9CA3AF', display: 'flex', alignItems: 'center', gap: 4 }}>
-                                                            <TrendingUp size={12} style={{ color: '#4ADE80' }} /> Income:
-                                                        </span>
-                                                        <span style={{ color: '#4ADE80', fontWeight: 600 }}>{fmtVND(p.income)}</span>
-                                                    </div>
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem' }}>
-                                                        <span style={{ color: '#9CA3AF', display: 'flex', alignItems: 'center', gap: 4 }}>
-                                                            <TrendingDown size={12} style={{ color: '#F87171' }} /> Expense:
-                                                        </span>
-                                                        <span style={{ color: '#E5E7EB', fontWeight: 500 }}>{fmtVND(p.expense)}</span>
-                                                    </div>
-                                                    <hr style={{ borderColor: '#1E3529', margin: '0.375rem 0' }} />
-                                                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8125rem' }}>
-                                                        <span style={{ color: '#E5E7EB', fontWeight: 600 }}>Total:</span>
-                                                        <span style={{ color: net >= 0 ? '#4ADE80' : '#F87171', fontWeight: 700 }}>{fmtVND(net)}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                        </div>
+                        {/* ── Monthly Summary Gauges ── */}
+                        {dashboardData?.monthly_summary && (
+                            <div className="halo-card mb-4">
+                                <p className="halo-card-title" style={{ marginBottom: '0.5rem' }}>Monthly Summary</p>
+                                <div style={{ display: 'flex', gap: 12 }}>
+                                    {[dashboardData.monthly_summary.current, dashboardData.monthly_summary.previous]
+                                        .filter(Boolean)
+                                        .map((p, i, arr) => (
+                                            <React.Fragment key={i}>
+                                                <FinHaloGauge p={p} />
+                                                {i < arr.length - 1 && (
+                                                    <div style={{ width: 1, background: '#1E3529', alignSelf: 'stretch', margin: '20px 0 0' }} />
+                                                )}
+                                            </React.Fragment>
+                                        ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* ── Charts ── */}
                         <div className="row g-4 mb-4">
