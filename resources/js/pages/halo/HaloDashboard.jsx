@@ -432,7 +432,7 @@ export default function HaloDashboard() {
                                     <div className="halo-session-done">✓ HOÀN THÀNH HÔM NAY</div>
                                 )}
 
-                                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <div className="halo-actions-secondary">
                                     <button className="halo-btn halo-btn-outline" style={{ flex: 1, fontSize: '0.75rem' }}>
                                         VIEW INSPIRATION
                                     </button>

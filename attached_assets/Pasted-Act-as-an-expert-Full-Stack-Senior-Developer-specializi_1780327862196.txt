@@ -1,0 +1,59 @@
+Act as an expert Full-Stack Senior Developer specializing in responsive web design using Bootstrap (v5), clean Semantic CSS, and TDD (Test-Driven Development) with Laravel PHPUnit/Pest. We need to refactor our existing application dashboard layout to support an upgraded, high-fidelity Mobile-First view while perfectly preserving our current desktop system.
+
+Please review the desktop codebase and implement the mobile viewport according to the following strict technical specification:
+
+---
+
+### 1. STYLING ARCHITECTURE (Bootstrap & Semantic CSS)
+- **Framework:** Do NOT use Tailwind CSS. Use Bootstrap classes ONLY for layout grid control, basic spacing adjustments, and core flexbox structures (e.g., `row`, `col-12`, `d-flex`, `justify-content-between`).
+- **Semantic CSS:** Use clean, descriptive semantic class names for custom component styling (e.g., `.halo-ritual-card`, `.summary-arc-container`, `.floating-action-btn`, `.transaction-modal`). Keep custom styles encapsulated in a dedicated CSS block or file, utilizing clean CSS variables for our core dark-theme color palette (true dark backgrounds, glowing greens, and alert reds).
+
+---
+
+### 2. SCROLL HIERARCHY & SCREEN FLOW (Mobile View)
+On mobile devices (below Bootstrap `md` breakpoint), stack the components vertically using this exact order:
+
+1. **Header Area:** App branding (KENFINLY), Global Search icon, Profile Avatar, and a clean **Language Switcher Toggle** (EN / VN) that dynamically updates UI locales.
+2. **The Halo Ring Ritual (Top Content):** - Based on our signature "Time Attendance / Check-In" concept.
+   - Clean central countdown timer (`00:00:00`) nested inside a minimalist glowing circle gauge.
+   - Simplify actions to **ONLY 2 primary buttons**: `Bắt đầu nghi thức (Halo)` [Check-In] and `Done` [Check-Out]. Keep it raw, clear, and uncluttered.
+3. **Monthly Summary Arcs:**
+   - Positioned right below the Halo card.
+   - Display June 2026 and May 2026 side-by-side or cleanly stacked using native lightweight SVGs.
+   - Maintain the precise visual logic: The green stroke indicates income/base gauge, and the inner dynamic stroke updates to represent expense progress (turning Alert Red on over-budget overflow thresholds).
+4. **Insights Section:**
+   - Remove any duplicated blocks. Ensure there is ONLY ONE `Expenses - Last 7 Days` vertical bar chart.
+   - Below it, render the `Balance` net asset trend graph.
+
+---
+
+### 3. FLOATING ACTION BUTTON (FAB) & TRANSACTION MODAL
+Implement a responsive Floating Action Button (FAB) at the bottom right corner of the screen, layered precisely above the fixed bottom navigation bar (`z-index` control).
+
+- **FAB Interface:** A minimalist circular button with a plus sign (`+`) using a dedicated semantic class `.floating-action-btn`.
+- **Trigger Behavior:** Clicking the `+` button triggers a clean native Bootstrap bottom sheet or modal pop-over offering exactly **2 distinct options**: 
+  1. *Add Expense*
+  2. *Add Income*
+- **Form Navigation:** Selecting either option must instantly load the corresponding transaction form sub-view with its correct input fields. This flow must safely pull from the existing form fields and logic already built on the Desktop codebase (including the asynchronous photo/receipt upload logic and validation wrappers).
+
+---
+
+### 4. TECHNICAL CONSTRAINTS & CLEANUP
+- **No Desktop Breakage:** Do not disrupt or modify the current layout metrics for desktop view (`col-md-*` blocks). Ensure the responsive transition is flawless.
+- **Zero Duplication:** Thoroughly inspect layout files and clear out the duplicated `Expenses - Last 7 Days` component artifact.
+
+---
+
+### 5. AUTOMATED TESTING SPECIFICATION (TDD)
+Generate robust, production-ready backend and feature test cases to safeguard these new mobile features. Create or update the necessary test files to verify:
+
+1. **Language Switcher Test:** - Verify that an authenticated user can toggle between `en` and `vi` locales via a POST/GET endpoint.
+   - Assert that the session updates successfully and the correct language translations are rendered on the dashboard view.
+2. **Mobile FAB Form Submission Test:**
+   - Write a feature test ensuring that an authenticated mobile request targeting the new transaction fields returns a `200` or `201` status code upon successful validation.
+   - Incorporate the asynchronous photo/receipt upload mock within this test block.
+3. **Unauthenticated Guard Check:**
+   - Ensure that unauthenticated requests to the transaction endpoints are safely rejected. 
+   - **Crucial Fix:** Remember to chain `withHeaders(['Accept' => 'application/json'])` to any unauthenticated test assertions to completely bypass the `Route [login] not defined` exception, ensuring a pure JSON API response validation.
+
+Let's begin refactoring. Run `php artisan test` after implementation and provide clean, 100% green-compliant, well-commented code blocks.
