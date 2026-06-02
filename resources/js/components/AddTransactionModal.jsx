@@ -5,9 +5,13 @@ import { getCategoryIcon } from '../constants/categories';
 import { useTranslation } from "@assets/js/contexts/TranslationContext.jsx";
 import { processImageForUpload, validateImageFile, formatFileSize } from '../utils/imageCompression';
 
-const AddTransactionModal = ({ isOpen, onClose, onSuccess }) => {
+const AddTransactionModal = ({ isOpen, onClose, onSuccess, defaultType = 'expense' }) => {
     const { t } = useTranslation();
-    const [type, setType] = useState('expense');
+    const [type, setType] = useState(defaultType);
+
+    useEffect(() => {
+        if (isOpen) setType(defaultType);
+    }, [isOpen, defaultType]);
     const [formData, setFormData] = useState({
         amount: '',
         category_id: '',

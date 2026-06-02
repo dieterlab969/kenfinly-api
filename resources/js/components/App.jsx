@@ -25,6 +25,7 @@ import TranslationManagement from '../pages/admin/TranslationManagement';
 import TransactionManagement from '../pages/admin/TransactionManagement';
 import LogoManagement from '../pages/admin/LogoManagement';
 import FaviconManagement from '../pages/admin/FaviconManagement';
+import HaloDashboard from '../pages/halo/HaloDashboard';
 import LandingPage from '../pages/public/LandingPage';
 import BlogPage from '../pages/public/BlogPage';
 import BlogPostPage from '../pages/public/BlogPostPage';
@@ -151,6 +152,14 @@ function App({ recaptchaEnabled = false }) {
                             element={
                                 <ProtectedRoute>
                                     <Dashboard />
+                                </ProtectedRoute>
+                            }
+                        />
+                        <Route
+                            path="/halo"
+                            element={
+                                <ProtectedRoute>
+                                    <HaloDashboard />
                                 </ProtectedRoute>
                             }
                         />
