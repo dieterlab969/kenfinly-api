@@ -594,12 +594,62 @@ class TransactionController extends Controller
             ];
         }
 
+        // Keep dashboard serialization cast-safe. The dashboard does not render
+        // transaction notes, and some historical rows may contain plaintext or
+        // otherwise non-Laravel-encrypted `notes` values. Selecting/mapping only
+        // the fields required by the dashboard prevents Eloquent from attempting
+        // to decrypt `notes` while JSON-encoding the response.
         $recentTransactions = Transaction::where('user_id', $user->id)
-            ->with(['category', 'account'])
+            ->select([
+                'id',
+                'account_id',
+                'category_id',
+                'type',
+                'ledger_type',
+                'amount',
+                'amount_minor',
+                'currency',
+                'transaction_date',
+                'created_at',
+            ])
+            ->with([
+                'category:id,name,slug,icon,color,type',
+                'account:id,name,currency,icon,color',
+            ])
             ->orderBy('transaction_date', 'desc')
             ->orderBy('created_at', 'desc')
             ->limit(6)
-            ->get();
+            ->get()
+            ->map(function (Transaction $transaction) {
+                return [
+                    'id' => $transaction->id,
+                    'account_id' => $transaction->account_id,
+                    'category_id' => $transaction->category_id,
+                    'type' => $transaction->type,
+                    'ledger_type' => $transaction->ledger_type,
+                    'amount' => $transaction->amount,
+                    'amount_minor' => $transaction->amount_minor,
+                    'currency' => $transaction->currency,
+                    'transaction_date' => optional($transaction->transaction_date)->toDateString(),
+                    'created_at' => optional($transaction->created_at)->toIso8601String(),
+                    'category' => $transaction->category ? [
+                        'id' => $transaction->category->id,
+                        'name' => $transaction->category->name,
+                        'slug' => $transaction->category->slug,
+                        'icon' => $transaction->category->icon,
+                        'color' => $transaction->category->color,
+                        'type' => $transaction->category->type,
+                    ] : null,
+                    'account' => $transaction->account ? [
+                        'id' => $transaction->account->id,
+                        'name' => $transaction->account->name,
+                        'currency' => $transaction->account->currency,
+                        'icon' => $transaction->account->icon,
+                        'color' => $transaction->account->color,
+                    ] : null,
+                ];
+            })
+            ->values();
 
         return response()->json([
             'success' => true,
