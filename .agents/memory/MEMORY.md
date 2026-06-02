@@ -1,0 +1,5 @@
+- [Halo dashboard architecture](halo-dashboard.md) — /halo is a separate protected route; HaloLayout wraps HaloDashboard; CSS lives in resources/css/halo.css (imported via app.css)
+- [JWT soft auth mode](jwt-soft-auth.md) — auth:api middleware never returns 401 for missing tokens; user resolves to null; tests must assert 401 OR 422, not hard 401
+- [Photo upload field name](photo-upload.md) — POST /api/transactions/{id}/photos uses field `photo` (singular, not `photos`); intervention/image must be installed for this route to work
+- [Language model required field](language-model.md) — Language::create() requires `native_name` (NOT NULL); always include name, native_name, code, is_active, is_default
+- [AddTransactionModal defaultType](add-transaction-modal.md) — accepts optional `defaultType` prop; useEffect resets type on open; added to support FAB income/expense pre-selection

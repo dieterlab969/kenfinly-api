@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class UserRegistrationWithWalletTest extends TestCase
@@ -16,6 +17,7 @@ class UserRegistrationWithWalletTest extends TestCase
      */
     public function test_wallet_is_created_when_user_registers_via_api(): void
     {
+        Http::fake();
         $this->seed(\Database\Seeders\RoleSeeder::class);
 
         $response = $this->postJson('/api/auth/register', [
@@ -29,14 +31,34 @@ class UserRegistrationWithWalletTest extends TestCase
             ->assertJsonStructure([
                 'success',
                 'message',
-                'user',
-                'access_token',
+                'user' => [
+                    'id',
+                    'name',
+                    'email',
+                    'status',
+                    'email_verified',
+                ],
+                'verification_sent',
+                'verification_expires_at',
+            ])
+            ->assertJson([
+                'success' => true,
+                'user' => [
+                    'email' => 'newuser@example.com',
+                    'status' => 'pending',
+                    'email_verified' => false,
+                ],
+                'verification_sent' => true,
             ]);
 
         $user = User::where('email', 'newuser@example.com')->first();
         
         $this->assertNotNull($user);
         $this->assertEquals(1, $user->accounts()->count());
+        $this->assertDatabaseHas('email_verifications', [
+            'user_id' => $user->id,
+            'email' => 'newuser@example.com',
+        ]);
         
         $wallet = $user->accounts()->first();
         $this->assertEquals('My Wallet', $wallet->name);
@@ -52,6 +74,8 @@ class UserRegistrationWithWalletTest extends TestCase
         $this->seed(\Database\Seeders\CategorySeeder::class);
 
         $user = User::factory()->create();
+        $user->assignRole('owner');
+
         $this->assertGreaterThan(0, $user->accounts()->count());
 
         $wallet = $user->accounts()->first();
@@ -90,6 +114,7 @@ class UserRegistrationWithWalletTest extends TestCase
         $this->seed(\Database\Seeders\CategorySeeder::class);
 
         $user = User::factory()->create();
+        $user->assignRole('owner');
         $user->accounts()->delete();
 
         $this->assertEquals(0, $user->accounts()->count());
@@ -114,10 +139,11 @@ class UserRegistrationWithWalletTest extends TestCase
     }
 
     /**
-     * Test that newly registered user can immediately create transaction.
+     * Test that newly registered user can create transaction after verifying email.
      */
-    public function test_newly_registered_user_can_immediately_create_transaction(): void
+    public function test_newly_registered_user_can_create_transaction_after_email_verification(): void
     {
+        Http::fake();
         $this->seed(\Database\Seeders\RoleSeeder::class);
         $this->seed(\Database\Seeders\CategorySeeder::class);
 
@@ -129,9 +155,36 @@ class UserRegistrationWithWalletTest extends TestCase
         ]);
 
         $registerResponse->assertStatus(201);
-        $token = $registerResponse->json('access_token');
 
         $user = User::where('email', 'newuser@example.com')->first();
+        $this->assertNotNull($user);
+
+        $verification = $user->emailVerifications()->latest()->first();
+        $this->assertNotNull($verification);
+
+        $this->postJson('/api/email/verify', [
+            'token' => $verification->token,
+        ])->assertOk()
+            ->assertJson([
+                'success' => true,
+                'message' => 'Email verified successfully! You can now log in.',
+            ]);
+
+        $loginResponse = $this->postJson('/api/auth/login', [
+            'email' => 'newuser@example.com',
+            'password' => 'password123',
+        ]);
+
+        $loginResponse->assertOk()
+            ->assertJsonStructure([
+                'success',
+                'access_token',
+                'token_type',
+                'expires_in',
+                'user',
+            ]);
+
+        $token = $loginResponse->json('access_token');
         $wallet = $user->accounts()->first();
         $category = Category::where('type', 'income')->first();
 
