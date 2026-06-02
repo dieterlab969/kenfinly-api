@@ -20,7 +20,7 @@ const Login = () => {
 
     useEffect(() => {
         if (user) {
-            navigate('/dashboard');
+            navigate('/halo');
         }
     }, [user, navigate]);
 
@@ -43,7 +43,7 @@ const Login = () => {
 
             const result = await login(email, password, recaptchaToken);
             if (result.success) {
-                navigate('/dashboard');
+                navigate('/halo');
             } else if (result.action === 'verify_email') {
                 navigate('/verification-pending', {
                     state: {
