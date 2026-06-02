@@ -19,7 +19,7 @@ You will install and configure:
 - Kenfinly database, environment file, and Laravel schema
 
 > **Frontend note:** If `public/build/manifest.json` already exists in your checkout, you can boot the app without Node.js on first setup.  
-> Install Node.js later only if you need to rebuild the React/Vite frontend assets.
+> Install Node.js 20+ later only if you need to rebuild the React/Vite frontend assets.
 
 ---
 
@@ -41,7 +41,7 @@ sudo apt update
 sudo apt install -y software-properties-common ca-certificates curl unzip git
 ```
 
-Add **Ondřej Surý’s PHP PPA** so Ubuntu 22.04 and 24.04 both get native PHP 8.2 packages:
+Add **Ondřej Surý's PHP PPA** so Ubuntu 22.04 and 24.04 both get native PHP 8.2 packages:
 
 ```bash
 sudo add-apt-repository ppa:ondrej/php -y
@@ -68,10 +68,12 @@ sudo apt install -y \
   php8.2-zip \
   php8.2-opcache \
   php8.2-gd \
+  php8.2-intl \
   composer
 ```
 
-> **Why `php8.2-gd` is included:** the project uses image-processing packages, so this keeps local upload/image flows working.
+> **Why `php8.2-gd`:** required by `intervention/image` for receipt/photo upload features.  
+> **Why `php8.2-intl`:** required by Laravel for locale-aware date and number formatting.
 
 ---
 
@@ -90,10 +92,17 @@ which php
 which composer
 php -v
 composer --version
-php -m | egrep 'mbstring|xml|bcmath|pdo_mysql|curl|zip|Zend OPcache|gd'
+php -m | egrep 'mbstring|xml|bcmath|pdo_mysql|curl|zip|gd|intl|Zend OPcache'
 ```
 
 > **Why Composer is installed after PHP 8.2:** Composer is a PHP script, so installing PHP 8.2 first and then setting `update-alternatives` helps ensure `composer install` runs on the correct PHP version.
+>
+> **Note:** The `composer` package from Ubuntu's default APT repos may be outdated. If `composer --version` reports a version older than 2.x, install the official Composer binary instead:
+> ```bash
+> php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+> sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+> php -r "unlink('composer-setup.php');"
+> ```
 
 ---
 
@@ -179,10 +188,9 @@ DB_PASSWORD=kenfinly123
 ## 8) Install dependencies and bootstrap Laravel
 
 > **Why not `composer setup`?**  
-> This repository includes a broader Composer setup script that also installs Node packages and builds frontend assets.  
-> For the fastest **PHP 8.2 + Nginx + MySQL** onboarding path, use the commands below first.
-
-Run the project initialization commands:
+> This repository includes a `composer setup` script that also installs Node packages and builds frontend assets. However, it requires your `.env` to already have the correct `DB_*` values (step 7) so that `migrate --seed` can connect to MySQL. Complete steps 6 and 7 first, then you can use either approach:
+>
+> **Option A — manual (recommended for first-time setup):**
 
 ```bash
 composer install --no-interaction --prefer-dist
@@ -193,15 +201,22 @@ php artisan storage:link
 php artisan config:clear
 ```
 
-### What these commands do
+> **Option B — all-in-one script (after `.env` is already configured):**
+
+```bash
+composer setup
+```
+
+### What the bootstrap commands do
 
 - **`composer install`** — installs Laravel/PHP dependencies
 - **`php artisan key:generate`** — creates `APP_KEY`
-- **`php artisan jwt:secret`** — creates `JWT_SECRET` for auth
-- **`php artisan migrate --seed`** — **imports the application schema** from Laravel migrations and loads baseline data
-- **`php artisan storage:link`** — creates the public storage symlink
+- **`php artisan jwt:secret`** — creates `JWT_SECRET` for token-based auth (required — app will not authenticate without it)
+- **`php artisan migrate --seed`** — creates all database tables and loads baseline data (roles, categories, languages, test users)
+- **`php artisan storage:link`** — creates the `public/storage` symlink for uploaded files
+- **`php artisan config:clear`** — flushes the config cache so fresh `.env` values take effect
 
-> **Important:** This repository’s source of truth for the schema is the Laravel migration set under `database/migrations`.
+> **Important:** This repository's source of truth for the schema is the Laravel migration set under `database/migrations`.
 
 ### Optional: import a team-provided SQL snapshot
 
@@ -222,7 +237,7 @@ mysql -u kenfinly -p kenfinly < /absolute/path/to/kenfinly.sql
 
 ## 9) Fix Laravel write permissions
 
-Give the web stack write access to Laravel’s runtime directories:
+Give the web stack write access to Laravel's runtime directories:
 
 ```bash
 sudo chown -R "$USER":www-data storage bootstrap/cache
@@ -358,12 +373,14 @@ php artisan about
 
 ### Seeded local login accounts
 
-If you used `php artisan migrate --seed`, these accounts should exist:
+If you used `php artisan migrate --seed`, these accounts exist:
 
-- **Super Admin:** `admin@kenfinly.com` / `Admin@123`
-- **Owner:** `owner@example.com` / `password123`
-- **Editor:** `editor@example.com` / `password123`
-- **Viewer:** `viewer@example.com` / `password123`
+| Email | Password | Role |
+|-------|----------|------|
+| `admin@kenfinly.com` | `Admin@123` | Super Admin |
+| `owner@example.com` | `password123` | Owner |
+| `editor@example.com` | `password123` | Editor |
+| `viewer@example.com` | `password123` | Viewer |
 
 > If you imported a team-provided SQL snapshot instead, the available users and passwords depend on that dump.
 
@@ -375,16 +392,42 @@ http://kenfinly.test
 
 ---
 
-## Optional: install Node.js for frontend work
+## Optional: install Node.js 20 for frontend work
 
-Only do this if you need to rebuild assets or work on the React/Vite frontend.
+Only do this if you need to rebuild assets or work on the React/Vite frontend.  
+Kenfinly requires **Node.js 20 or newer** (React 19 + Vite 7).
 
 ```bash
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
+node --version   # must print v20.x.x or higher
 npm install
 npm run build
 ```
+
+> **`npm run build` vs `npm run dev`:**
+>
+> - **`npm run build`** — compiles assets to `public/build/` (used once, or after code changes). Required for production and for Nginx to serve the frontend.
+> - **`npm run dev`** — starts the Vite hot-reload dev server on port 5173. Use this when actively editing React/Vite files; changes appear in the browser instantly without rebuilding.
+
+---
+
+## Quick start with the built-in PHP server (no Nginx required)
+
+If you want to skip the Nginx setup and start hacking immediately, use the built-in PHP development server with Vite side-by-side:
+
+```bash
+# Terminal 1 — Laravel backend (port 8000)
+php artisan serve
+
+# Terminal 2 — Vite frontend hot-reload (port 5173)
+npm run dev
+```
+
+Then open **`http://localhost:8000`** in your browser.
+
+> This is faster to set up but not a substitute for the Nginx + MySQL stack for production-parity testing.  
+> `php artisan serve` does not support concurrent connections well — use Nginx for load/performance testing.
 
 ---
 
@@ -397,6 +440,20 @@ Check that PHP-FPM is running:
 ```bash
 systemctl --no-pager status php8.2-fpm
 ls -l /var/run/php/php8.2-fpm.sock
+```
+
+### JWT authentication fails / "JWT Secret not set"
+
+Make sure you ran `php artisan jwt:secret`. Check that `JWT_SECRET=` is populated in your `.env`:
+
+```bash
+grep JWT_SECRET .env
+```
+
+If it is empty, run:
+
+```bash
+php artisan jwt:secret
 ```
 
 ### Permission error in `storage` or `bootstrap/cache`
