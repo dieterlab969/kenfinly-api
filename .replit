@@ -5,7 +5,7 @@ integrations = ["sendgrid:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["openssh", "unzip", "php82Packages.composer"]
+packages = ["openssh", "unzip", "php82Packages.composer", "vim-full", "nano"]
 
 [workflows]
 runButton = "Project"
@@ -45,4 +45,8 @@ externalPort = 5173
 
 [userenv.shared]
 GA4_ENABLED = "false"
-DB_CONNECTION = "pgsql"
+DB_CONNECTION = "mysql"
+DB_HOST = "210.245.84.76"
+DB_PORT = "3307"
+DB_DATABASE = "personal_finance_db"
+DB_USERNAME = "replit_user"

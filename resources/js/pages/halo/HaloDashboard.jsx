@@ -4,7 +4,6 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recha
 import {
     AreaChart, Area, CartesianGrid,
 } from 'recharts';
-import { CheckCircle2, Play, Skull, Timer, Zap, XCircle } from 'lucide-react';
 
 import api from '../../utils/api';
 import { useAuth } from '../../contexts/AuthContext';
@@ -113,90 +112,98 @@ const HaloGauge = ({ income = 0, expense = 0 }) => {
 };
 
 /* ──────────────────────────────────────────────────────────────
-   HALO RITUAL CARD  (Attendance widget reimagined)
+   HALO RITUAL CARD  — Invisible Design (single circular button)
 ────────────────────────────────────────────────────────────── */
 const HaloRitualCard = ({ onRewardCreated }) => {
     const { currentLanguage } = useTranslation();
     const isVi = currentLanguage?.code === 'vi';
 
-    const [status,        setStatus]        = useState(null);
-    const [secondsLeft,   setSecondsLeft]   = useState(0);
+    // startTime: unix timestamp (seconds) returned by the server on session start/status
+    // duration:  total seconds allocated for this session (28800 pre-noon / ≤14400 post-noon)
+    const [startTime,     setStartTime]     = useState(null);
+    const [duration,      setDuration]      = useState(8 * 3600);
+    const [secondsLeft,   setSecondsLeft]   = useState(8 * 3600);
+    const [isActive,      setIsActive]      = useState(false);
+    const [isDone,        setIsDone]        = useState(false);
     const [loading,       setLoading]       = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
-    const [error,         setError]         = useState('');
 
-    const SESSION_SECS = 8 * 60 * 60;
+    // Apply server response to local state — single source of truth.
+    const applySession = useCallback((d) => {
+        if (d.state === 'in_progress') {
+            const elapsed = Math.floor(Date.now() / 1000) - d.start_time;
+            const left    = Math.max(0, d.duration - elapsed);
+            setStartTime(d.start_time);
+            setDuration(d.duration);
+            setSecondsLeft(left);
+            setIsActive(true);
+            setIsDone(false);
+        } else if (d.state === 'completed' || d.state === 'ready') {
+            setIsActive(false);
+            setIsDone(true);
+            setSecondsLeft(0);
+            if (d.state === 'completed') onRewardCreated?.();
+        } else {
+            // idle or killed — reset to default display
+            const def = d.duration || 8 * 3600;
+            setIsActive(false);
+            setIsDone(false);
+            setDuration(def);
+            setSecondsLeft(def);
+        }
+    }, [onRewardCreated]);
 
-    const fetchStatus = useCallback(async (showLoader = false) => {
+    const fetchStatus = useCallback(async () => {
         try {
-            if (showLoader) setLoading(true);
+            setLoading(true);
             const r = await api.get('/attendance/status');
-            setStatus(r.data.data);
-            setSecondsLeft(r.data.data.seconds_left || 0);
-            setError('');
+            applySession(r.data.data);
         } catch (err) {
-            setError(err.response?.data?.message || 'Unable to load Halo status.');
+            console.error('Halo status error', err);
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [applySession]);
 
-    useEffect(() => { fetchStatus(true); }, [fetchStatus]);
+    useEffect(() => { fetchStatus(); }, [fetchStatus]);
 
+    // Independent client-side countdown — zero API calls per tick.
     useEffect(() => {
-        if (!status || !['in_progress', 'ready'].includes(status.state)) return;
-        const t = setInterval(() => {
-            setSecondsLeft(s => {
-                if (s <= 1) { fetchStatus(false); return 0; }
-                return s - 1;
-            });
-        }, 1000);
-        return () => clearInterval(t);
-    }, [status, fetchStatus]);
+        if (!isActive || startTime === null) return;
 
-    const startSession = async () => {
+        const tick = () => {
+            const elapsed = Math.floor(Date.now() / 1000) - startTime;
+            const left    = Math.max(0, duration - elapsed);
+            setSecondsLeft(left);
+            if (left === 0) {
+                setIsActive(false);
+                setIsDone(true);
+            }
+        };
+
+        tick();
+        const id = setInterval(tick, 1000);
+        return () => clearInterval(id);
+    }, [isActive, startTime, duration]);
+
+    const handlePress = async () => {
+        if (isActive || isDone || actionLoading) return;
         setActionLoading(true);
         try {
             const r = await api.post('/attendance/start');
-            setStatus(r.data.data);
-            setSecondsLeft(r.data.data.seconds_left || 0);
-            setError('');
+            applySession(r.data.data);
         } catch (err) {
-            setError(err.response?.data?.message || 'Unable to start Halo.');
-        } finally { setActionLoading(false); }
-    };
-
-    const completeSession = async () => {
-        setActionLoading(true);
-        try {
-            const r = await api.post('/attendance/complete', { user_rating: 'normal' });
-            setStatus(r.data.data);
-            setSecondsLeft(r.data.data.seconds_left || 0);
-            setError('');
-            onRewardCreated?.();
-        } catch (err) {
-            setError(err.response?.data?.message || 'Unable to complete Halo.');
-        } finally { setActionLoading(false); }
-    };
-
-    const killSession = async () => {
-        setActionLoading(true);
-        try {
-            const r = await api.post('/attendance/kill');
-            setStatus(r.data.data);
-            setSecondsLeft(r.data.data.seconds_left || 0);
-            setError('');
-        } catch (err) {
-            setError(err.response?.data?.message || 'Unable to kill Halo.');
-        } finally { setActionLoading(false); }
+            console.error('Halo start error', err);
+        } finally {
+            setActionLoading(false);
+        }
     };
 
     const progressPct = useMemo(() => {
-        return Math.min(100, Math.max(0, ((SESSION_SECS - secondsLeft) / SESSION_SECS) * 100));
-    }, [secondsLeft]);
-
-    const state    = status?.state || 'idle';
-    const isActive = ['in_progress', 'ready'].includes(state);
+        if (isDone)    return 100;
+        if (!isActive) return 0;
+        return Math.min(100, Math.max(0, ((duration - secondsLeft) / duration) * 100));
+    }, [isActive, isDone, secondsLeft, duration]);
 
     const todayStr = new Date().toLocaleDateString(isVi ? 'vi-VN' : 'en-US', {
         weekday: 'short', day: 'numeric', month: 'long',
@@ -205,137 +212,40 @@ const HaloRitualCard = ({ onRewardCreated }) => {
     if (loading) {
         return (
             <div className="halo-ritual-card">
-                <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ width: 32, height: 32, border: '3px solid #22c55e', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                <div className="halo-ritual-card__loading">
+                    <div className="halo-ritual-card__spinner" />
                 </div>
             </div>
         );
     }
+
+    const btnClass = [
+        'halo-btn',
+        isActive ? 'halo-btn--active' : '',
+        isDone   ? 'halo-btn--done'   : '',
+    ].filter(Boolean).join(' ');
 
     return (
         <div className="halo-ritual-card">
             <div className="halo-ritual-card__date">{todayStr}</div>
 
             <div className="halo-ritual-card__ring-wrap">
-                <RingGauge progressPct={progressPct} isActive={isActive} />
+                <RingGauge progressPct={progressPct} isActive={isActive || isDone} />
                 <div className="halo-ritual-card__ring-center">
-                    <div className="halo-ritual-card__timer">
-                        {state === 'idle' ? '00:00:00' : formatDuration(secondsLeft)}
-                    </div>
-                    <div className="halo-ritual-card__subtitle">
-                        {isVi ? 'Thời Gian Làm Việc Hôm Nay' : 'Work Time Today'}
-                    </div>
-                    {state !== 'idle' && (
-                        <div className="halo-ritual-card__status">
-                            <CheckCircle2 size={11} />
-                            {isVi ? 'Đã Chấm Công (Halo)' : 'Halo Check-in Active'}
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Action buttons */}
-            <div className="halo-ritual-card__actions">
-                {state === 'idle' && (
                     <button
-                        className="halo-ritual-card__btn halo-ritual-card__btn--primary"
-                        onClick={startSession}
-                        disabled={actionLoading}
+                        className={btnClass}
+                        onClick={handlePress}
+                        disabled={isActive || isDone || actionLoading}
+                        aria-label={isVi ? 'Bắt đầu Halo' : 'Start Halo'}
                     >
-                        <Play size={14} style={{ display: 'inline', marginRight: 5 }} />
-                        {isVi ? 'Bắt đầu nghi thức (Halo)' : 'Start Halo Ritual'}
+                        {actionLoading ? '…' : 'Halo'}
                     </button>
-                )}
-
-                {state === 'in_progress' && (
-                    <>
-                        <button className="halo-ritual-card__btn halo-ritual-card__btn--secondary" disabled>
-                            <Timer size={14} style={{ display: 'inline', marginRight: 5 }} />
-                            {isVi ? 'Đang làm việc...' : 'In progress...'}
-                        </button>
-                        <button
-                            className="halo-ritual-card__btn halo-ritual-card__btn--secondary"
-                            onClick={killSession}
-                            disabled={actionLoading}
-                            style={{ borderColor: 'var(--color-danger)', color: 'var(--color-danger)' }}
-                        >
-                            <Skull size={14} style={{ display: 'inline', marginRight: 5 }} />
-                            {isVi ? 'Tan Làm / Check-out' : 'Kill session'}
-                        </button>
-                    </>
-                )}
-
-                {state === 'ready' && (
-                    <>
-                        <button
-                            className="halo-ritual-card__btn halo-ritual-card__btn--primary"
-                            onClick={completeSession}
-                            disabled={actionLoading}
-                        >
-                            <CheckCircle2 size={14} style={{ display: 'inline', marginRight: 5 }} />
-                            {isVi ? 'Hoàn Thành (Done)' : 'Done'}
-                        </button>
-                        <button
-                            className="halo-ritual-card__btn halo-ritual-card__btn--secondary"
-                            onClick={killSession}
-                            disabled={actionLoading}
-                        >
-                            {isVi ? 'Tan Làm / Check-out' : 'Check-out'}
-                        </button>
-                    </>
-                )}
-
-                {state === 'completed' && (
-                    <div className="halo-ritual-card__btn halo-ritual-card__btn--secondary"
-                        style={{ background: '#14532d', color: '#22c55e', border: '1px solid #166534' }}>
-                        <Zap size={14} style={{ display: 'inline', marginRight: 5 }} />
-                        +{formatCurrency(status?.attendance?.earned_amount || 0)}
-                    </div>
-                )}
-
-                {state === 'killed' && (
-                    <div className="halo-ritual-card__btn halo-ritual-card__btn--secondary"
-                        style={{ background: '#450a0a', color: 'var(--color-danger)', border: '1px solid #7f1d1d' }}>
-                        <XCircle size={14} style={{ display: 'inline', marginRight: 5 }} />
-                        {isVi ? 'Đã dừng' : 'Session killed'}
-                    </div>
-                )}
+                </div>
             </div>
 
-            {/* Progress bar */}
-            {state !== 'idle' && (
-                <div className="halo-ritual-card__progress-track">
-                    <div className="halo-ritual-card__progress-fill" style={{ width: `${progressPct}%` }} />
-                </div>
-            )}
-
-            {/* Check-in time */}
-            {status?.attendance?.started_at && (
-                <div className="halo-ritual-card__checkin-time">
-                    {isVi ? 'Vào giờ:' : 'Check-in:'}{' '}
-                    {new Date(status.attendance.started_at).toLocaleTimeString(
-                        isVi ? 'vi-VN' : 'en-US',
-                        { hour: '2-digit', minute: '2-digit' }
-                    )}
-                </div>
-            )}
-
-            {/* Streak info */}
-            {(status?.current_streak > 0 || status?.longest_streak > 0) && (
-                <div style={{ fontSize: 10, color: 'var(--color-text-muted)', marginTop: 6 }}>
-                    {isVi ? 'Chuỗi' : 'Streak'}: {status.current_streak || 0} &nbsp;/&nbsp;
-                    {isVi ? 'Kỷ lục' : 'Best'}: {status.longest_streak || 0}
-                </div>
-            )}
-
-            {error && (
-                <div style={{
-                    marginTop: 10, padding: '6px 10px', borderRadius: 8,
-                    background: '#450a0a', color: '#f87171', fontSize: 11,
-                }}>
-                    {error}
-                </div>
-            )}
+            <div className="halo-ritual-card__timer">
+                {formatDuration(secondsLeft)}
+            </div>
         </div>
     );
 };
