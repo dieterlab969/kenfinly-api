@@ -156,13 +156,13 @@
 }
 
 /* ────────────────────────────────────────────────────
-   HALO RITUAL CARD  (attendance / check-in ring)
+   HALO RITUAL CARD  — Invisible Design (single button)
 ──────────────────────────────────────────────────── */
 .halo-ritual-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 20px;
-  padding: 20px 16px;
+  padding: 20px 16px 24px;
   margin-bottom: 14px;
   text-align: center;
 }
@@ -177,7 +177,7 @@
   position: relative;
   width: 200px;
   height: 200px;
-  margin: 0 auto 16px;
+  margin: 0 auto 0;
 }
 
 .halo-ritual-card__ring-svg {
@@ -190,96 +190,93 @@
   position: absolute;
   inset: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-.halo-ritual-card__timer {
-  font-size: 28px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--color-text);
-  letter-spacing: 1px;
-  line-height: 1.1;
-}
-
-.halo-ritual-card__subtitle {
-  font-size: 10px;
-  color: var(--color-text-muted);
-  margin-top: 4px;
-}
-
-.halo-ritual-card__status {
-  font-size: 11px;
-  color: var(--color-success);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  margin-top: 4px;
-}
-
-.halo-ritual-card__actions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 4px;
-}
-
-.halo-ritual-card__btn {
-  flex: 1;
-  max-width: 160px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 600;
+/* ── Single circular Halo button ── */
+.halo-btn {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
   border: none;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
-  line-height: 1.3;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--color-text-muted);
+  background: var(--color-surface-2);
+  border: 2px solid var(--color-border);
+  transition: background 0.35s ease, color 0.35s ease, box-shadow 0.35s ease, transform 0.12s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
 
-.halo-ritual-card__btn:active {
-  transform: scale(0.96);
+.halo-btn:not(:disabled):not(.halo-btn--active):hover {
+  background: var(--color-border);
+  color: var(--color-text);
 }
 
-.halo-ritual-card__btn--primary {
+.halo-btn:not(:disabled):not(.halo-btn--active):active {
+  transform: scale(0.94);
+}
+
+/* Active state — glowing green circle (matches screenshot) */
+.halo-btn--active {
   background: var(--color-success);
   color: #fff;
+  border-color: var(--color-success);
+  box-shadow:
+    0 0 28px rgba(34, 197, 94, 0.50),
+    0 0 60px rgba(34, 197, 94, 0.20);
+  cursor: default;
 }
 
-.halo-ritual-card__btn--secondary {
-  background: var(--color-surface-2);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
+/* Done state — ring 100%, muted green */
+.halo-btn--done {
+  background: #166534;
+  color: #bbf7d0;
+  border-color: #166534;
+  cursor: default;
+  box-shadow: none;
 }
 
-.halo-ritual-card__btn:disabled {
-  opacity: 0.5;
+.halo-btn:disabled:not(.halo-btn--active):not(.halo-btn--done) {
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
-.halo-ritual-card__checkin-time {
-  font-size: 11px;
-  color: var(--color-text-muted);
-  margin-top: 12px;
+/* Timer displayed below the ring */
+.halo-ritual-card__timer {
+  font-size: 30px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  letter-spacing: 2px;
+  line-height: 1;
+  margin-top: 18px;
 }
 
-/* Progress bar (under ring) */
-.halo-ritual-card__progress-track {
-  height: 4px;
-  background: var(--color-surface-2);
-  border-radius: 2px;
-  margin-top: 16px;
-  overflow: hidden;
+/* Loading state */
+.halo-ritual-card__loading {
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.halo-ritual-card__progress-fill {
-  height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #3b82f6, var(--color-success));
-  transition: width 0.5s ease;
+.halo-ritual-card__spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid var(--color-success);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: halo-spin 0.8s linear infinite;
+}
+
+@keyframes halo-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ────────────────────────────────────────────────────

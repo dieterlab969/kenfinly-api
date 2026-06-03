@@ -13,32 +13,54 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Halo attendance lifecycle: HELLO → 8-hour session → DONE/KILL.
+ * Halo attendance lifecycle — Invisible Design (single-button, auto-close).
  *
  * Implements:
- *  - Standard 1 (UTC normalization; halo_date computed in user's local tz, stored as date).
- *  - Standard 4 (write-time ledger rollup via LedgerSummaryService on reward).
- *  - Standard 6 (race-safe HELLO via UNIQUE(user_id, halo_date) + QueryException catch).
- *  - Standard 9 (status reads expected_end_at from DB, never client state).
+ *  - Standard 1  (UTC normalization; halo_date computed in user's local tz).
+ *  - Standard 4  (write-time ledger rollup via LedgerSummaryService on reward).
+ *  - Standard 6  (race-safe HELLO via UNIQUE(user_id, halo_date) + QueryException catch).
+ *  - Standard 9  (status reads expected_end_at from DB; frontend timers are display-only).
+ *
+ * Duration logic (per spec):
+ *  - At/before 12:00 PM local  →  8 h  (28 800 s)  — full ring
+ *  - After     12:00 PM local  →  min(4 h, seconds until local midnight)
+ *
+ * Auto-close: status() lazily seals any 'initiated' session whose expected_end_at
+ * has passed and writes one idempotent row to halo_histories.
  */
 class AttendanceService
 {
-    private const SESSION_HOURS = 8;
+    private const SECS_FULL = 28_800; // 8 h — pre-noon allocation
+    private const SECS_HALF = 14_400; // 4 h — post-noon cap
 
     public function __construct(private readonly LedgerSummaryService $ledgerSummary)
     {
     }
 
+    /* ─────────────────────────────────────────────────────────
+       PUBLIC API
+    ───────────────────────────────────────────────────────── */
+
     public function status(User $user): array
     {
-        $haloDate = $this->todayFor($user);
+        $haloDate   = $this->todayFor($user);
         $attendance = Attendance::where('user_id', $user->id)
             ->whereDate('halo_date', $haloDate)
             ->with('rewardTransaction')
             ->first();
 
+        // Lazy auto-close: seal expired initiated sessions without a background job.
+        if ($attendance && $attendance->status === 'initiated') {
+            $now         = CarbonImmutable::now('UTC');
+            $expectedEnd = CarbonImmutable::parse($attendance->expected_end_at)->utc();
+            if ($now->gte($expectedEnd)) {
+                $this->autoClose($attendance, $user);
+                $attendance = $attendance->fresh(['rewardTransaction']);
+            }
+        }
+
         return [
-            'user' => $user->fresh(),
+            'user'       => $user->fresh(),
             'attendance' => $attendance,
         ];
     }
@@ -55,25 +77,25 @@ class AttendanceService
                     ->first();
 
                 if ($existing) {
-                    return;
+                    return; // Already started today — return existing state.
                 }
 
-                $startedAt = CarbonImmutable::now('UTC');
-                $expectedEndAt = $startedAt->addHours(self::SESSION_HOURS);
+                $startedAt     = CarbonImmutable::now('UTC');
+                $duration      = $this->calculateDuration($user, $startedAt);
+                $expectedEndAt = $startedAt->addSeconds($duration);
 
                 Attendance::create([
-                    'user_id' => $user->id,
-                    'halo_date' => $haloDate,
-                    'status' => 'initiated',
-                    'started_at' => $startedAt,
+                    'user_id'         => $user->id,
+                    'halo_date'       => $haloDate,
+                    'status'          => 'initiated',
+                    'started_at'      => $startedAt,
                     'expected_end_at' => $expectedEndAt,
-                    'quote_text' => $this->dailyQuote($haloDate),
+                    'quote_text'      => $this->dailyQuote($haloDate),
                     'reminder_due_at' => $this->reminderDueAt($user, $haloDate),
                 ]);
             });
         } catch (QueryException $e) {
-            // Standard 6 — duplicate session attempt under racing HELLO requests.
-            // The UNIQUE(user_id, halo_date) constraint rejects the duplicate; return existing state.
+            // Standard 6 — race-condition duplicate; UNIQUE constraint already rejected it.
             if (!$this->isDuplicateKeyError($e)) {
                 throw $e;
             }
@@ -93,27 +115,28 @@ class AttendanceService
                 ]);
             }
 
-            $now = CarbonImmutable::now('UTC');
+            $now         = CarbonImmutable::now('UTC');
             $expectedEnd = CarbonImmutable::parse($attendance->expected_end_at)->utc();
 
             if ($now->lt($expectedEnd)) {
                 throw ValidationException::withMessages([
-                    'attendance' => 'The Halo session can only be completed after the 8-hour timer has finished.',
+                    'attendance' => 'The Halo session can only be completed after the timer has finished.',
                 ]);
             }
 
             $rewardAmountMinor = $this->calculateRewardAmountMinor($user, $attendance, $now);
-            $rewardTransaction = $this->createRewardTransaction($user, $attendance, $rewardAmountMinor);
+            $rewardTransaction  = $this->createRewardTransaction($user, $attendance, $rewardAmountMinor);
 
             $attendance->forceFill([
-                'status' => 'completed',
-                'ended_at' => $now,
-                'user_rating' => $rating,
-                'quote_vote' => $quoteVote,
-                'earned_amount' => $rewardAmountMinor,
+                'status'                => 'completed',
+                'ended_at'              => $now,
+                'user_rating'           => $rating,
+                'quote_vote'            => $quoteVote,
+                'earned_amount'         => $rewardAmountMinor,
                 'reward_transaction_id' => $rewardTransaction->id,
             ])->save();
 
+            $this->writeHaloHistory($attendance, $user, $now);
             $this->updateStreak($user, $attendance);
             $this->ledgerSummary->applyTransaction($rewardTransaction);
         });
@@ -133,14 +156,89 @@ class AttendanceService
             }
 
             $attendance->forceFill([
-                'status' => 'killed',
-                'ended_at' => CarbonImmutable::now('UTC'),
+                'status'      => 'killed',
+                'ended_at'    => CarbonImmutable::now('UTC'),
                 'kill_reason' => $reason,
             ])->save();
         });
 
         return $this->status($user);
     }
+
+    /* ─────────────────────────────────────────────────────────
+       DURATION CALCULATION  (12:00 PM threshold)
+    ───────────────────────────────────────────────────────── */
+
+    /**
+     * Returns seconds the session should run, based on the user's local time.
+     *
+     *  - At/before 12:00 PM  →  28 800 s (8 h, full ring)
+     *  - After     12:00 PM  →  min(14 400 s, seconds remaining until local midnight)
+     */
+    private function calculateDuration(User $user, CarbonImmutable $startedAtUtc): int
+    {
+        $tz       = $user->timezone ?: config('app.timezone', 'UTC');
+        $localNow = $startedAtUtc->setTimezone($tz);
+        $noon     = $localNow->setTime(12, 0, 0);
+
+        if ($localNow->lte($noon)) {
+            return self::SECS_FULL;
+        }
+
+        // After noon: capped at 4 h, also capped at time remaining until midnight.
+        $midnight          = $localNow->addDay()->setTime(0, 0, 0);
+        $secsUntilMidnight = (int) $startedAtUtc->diffInSeconds($midnight->utc(), false);
+
+        return min(self::SECS_HALF, max(0, $secsUntilMidnight));
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       AUTO-CLOSE  (lazy midnight expiry, no background job needed)
+    ───────────────────────────────────────────────────────── */
+
+    private function autoClose(Attendance $attendance, User $user): void
+    {
+        DB::transaction(function () use ($attendance, $user) {
+            $locked = Attendance::where('id', $attendance->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$locked || $locked->status !== 'initiated') {
+                return; // Another process already closed it.
+            }
+
+            $endedAt = CarbonImmutable::now('UTC');
+
+            $locked->forceFill([
+                'status'   => 'completed',
+                'ended_at' => $endedAt,
+            ])->save();
+
+            $this->writeHaloHistory($locked, $user, $endedAt);
+            $this->updateStreak($user, $locked);
+        });
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       HALO HISTORIES  (persistent layer — upsert, idempotent)
+    ───────────────────────────────────────────────────────── */
+
+    private function writeHaloHistory(Attendance $attendance, User $user, CarbonImmutable $endedAt): void
+    {
+        $startedAt     = CarbonImmutable::parse($attendance->started_at)->utc();
+        $expectedEnd   = CarbonImmutable::parse($attendance->expected_end_at)->utc();
+        $maxSeconds    = (int) $startedAt->diffInSeconds($expectedEnd);
+        $actualSeconds = min($maxSeconds, (int) $startedAt->diffInSeconds($endedAt));
+
+        DB::table('halo_histories')->updateOrInsert(
+            ['user_id' => $user->id, 'date' => $attendance->halo_date->toDateString()],
+            ['actual_seconds' => $actualSeconds, 'max_seconds' => $maxSeconds, 'created_at' => now()]
+        );
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       PRIVATE HELPERS
+    ───────────────────────────────────────────────────────── */
 
     private function lockTodayAttendance(User $user): ?Attendance
     {
@@ -164,9 +262,11 @@ class AttendanceService
 
     private function calculateRewardAmountMinor(User $user, Attendance $attendance, CarbonImmutable $endedAt): int
     {
-        $startedAt = CarbonImmutable::parse($attendance->started_at)->utc();
-        $minutesWorked = max(self::SESSION_HOURS * 60, $startedAt->diffInMinutes($endedAt, false));
-        $hourlyRateMinor = (int) ($user->hourly_rate ?? 100000);
+        $startedAt       = CarbonImmutable::parse($attendance->started_at)->utc();
+        $expectedEnd     = CarbonImmutable::parse($attendance->expected_end_at)->utc();
+        $sessionMinutes  = (int) $startedAt->diffInMinutes($expectedEnd);
+        $minutesWorked   = max($sessionMinutes, (int) $startedAt->diffInMinutes($endedAt, false));
+        $hourlyRateMinor = (int) ($user->hourly_rate ?? 100_000);
 
         return intdiv($minutesWorked * $hourlyRateMinor, 60);
     }
@@ -174,43 +274,40 @@ class AttendanceService
     private function createRewardTransaction(User $user, Attendance $attendance, int $amountMinor): Transaction
     {
         $account = $user->accounts()->first() ?: Account::create([
-            'user_id' => $user->id,
-            'name' => 'My Wallet',
-            'balance' => 0,
+            'user_id'  => $user->id,
+            'name'     => 'My Wallet',
+            'balance'  => 0,
             'currency' => 'VND',
-            'icon' => '💰',
-            'color' => '#3b82f6',
+            'icon'     => '💰',
+            'color'    => '#3b82f6',
         ]);
 
         $category = Category::firstOrCreate(
             ['slug' => 'halo-reward'],
             [
-                'name' => 'Halo Reward',
-                'icon' => '⚡',
+                'name'  => 'Halo Reward',
+                'icon'  => '⚡',
                 'color' => '#7C3AED',
-                'type' => 'income',
+                'type'  => 'income',
             ]
         );
 
         $idempotencyKey = hash('sha256', 'halo_reward:' . $attendance->id);
 
         $transaction = Transaction::firstOrCreate(
+            ['user_id' => $user->id, 'idempotency_key' => $idempotencyKey],
             [
-                'user_id' => $user->id,
-                'idempotency_key' => $idempotencyKey,
-            ],
-            [
-                'account_id' => $account->id,
-                'category_id' => $category->id,
-                'type' => 'income',
-                'ledger_type' => 'halo',
-                'amount' => $amountMinor,
-                'amount_minor' => $amountMinor,
-                'notes' => 'Halo 8-hour completion reward',
+                'account_id'       => $account->id,
+                'category_id'      => $category->id,
+                'type'             => 'income',
+                'ledger_type'      => 'halo',
+                'amount'           => $amountMinor,
+                'amount_minor'     => $amountMinor,
+                'notes'            => 'Halo completion reward',
                 'transaction_date' => $attendance->halo_date,
-                'currency' => $account->currency ?: 'VND',
-                'source_type' => 'halo_reward',
-                'source_id' => $attendance->id,
+                'currency'         => $account->currency ?: 'VND',
+                'source_type'      => 'halo_reward',
+                'source_id'        => $attendance->id,
             ]
         );
 
@@ -223,8 +320,10 @@ class AttendanceService
 
     private function updateStreak(User $user, Attendance $attendance): void
     {
-        $haloDate = CarbonImmutable::parse($attendance->halo_date)->toDateString();
-        $lastHaloDate = $user->last_halo_date ? CarbonImmutable::parse($user->last_halo_date)->toDateString() : null;
+        $haloDate     = CarbonImmutable::parse($attendance->halo_date)->toDateString();
+        $lastHaloDate = $user->last_halo_date
+            ? CarbonImmutable::parse($user->last_halo_date)->toDateString()
+            : null;
         $yesterday = CarbonImmutable::parse($haloDate)->subDay()->toDateString();
 
         if ($lastHaloDate === $haloDate) {
@@ -251,14 +350,12 @@ class AttendanceService
             "Your future ledger is written by today's discipline.",
             'Keep the promise small, visible, and complete.',
         ];
-
         return $quotes[crc32($haloDate) % count($quotes)];
     }
 
     private function isDuplicateKeyError(QueryException $e): bool
     {
-        // MySQL: 23000 + 1062 / Postgres: 23505 / SQLite: UNIQUE constraint failed
-        $code = (string) $e->getCode();
+        $code    = (string) $e->getCode();
         $message = $e->getMessage();
         return $code === '23000'
             || $code === '23505'
