@@ -1,0 +1,191 @@
+@media(max-width:1199px){
+	.tax-plus-btn{
+		margin-bottom: 150px;
+	}
+	#invoice-main .tax-plus-btn {
+		bottom: 0%;
+		right: 0%;
+	}
+}
+@media(max-width:500px){
+	.gol3{
+		width: 56px;
+		height: 56px;
+		top: 14px;
+	}
+	.chart-container {
+		width: 100%;
+		height: auto;
+	}
+}
+@media(max-width:400px){
+	.slider-img img{
+		width: 100%;
+	}
+	.new-invoice-modal{
+		width: auto;
+	}
+	.navigation {
+		max-width: 600px;
+	}
+}
+@media(max-width:320px){
+	.icons_main {
+		column-gap: 16px;
+	}
+	.send-money-contact-tab{
+		column-gap: 12px;
+	}
+	.icons_main a {
+		padding: 8px;
+	}
+	.mt-32 {
+		margin-top: 26px;
+	}
+	.verify-number-img img{
+		width: 100%;
+	}
+	.pay-bill-sec {
+		grid-template-columns: repeat(3, 1fr);
+	}
+	.about-us-icon-wrapper {
+		grid-template-columns: repeat(2, 1fr);
+	}
+	.payfast-txt{
+		font-size: 50px;
+	}
+	.payfast-img_main{
+		width: 100px;
+		height: 100px;
+	}
+	.payfast-img_main img{
+		width: 100%;
+	}
+	.lets_you_in_box{
+		padding: 16px;
+	}
+	#sign-in-main{
+		margin-bottom: 180px;
+	}
+	#let-you-main{
+		margin-bottom: 130px;
+	}
+	#bank-and-card-main .bank-card{
+		display: grid;
+	}
+	#bank-and-card-main .transfer-first{
+		column-gap: 12px;
+	}
+	.transfer-first{
+		padding: 16px 0;
+	}
+	.search-text{
+		font-size: 13px;
+	}
+	.custom-tab-invoice button{
+		font-size: 14px;
+		padding: 10px;
+	}
+	.order-txt1{
+		font-size: 12px;
+		line-height: 16px;
+	}
+	.social-media-content {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+	}
+	.split7-screen-content-top img{
+		width: 100%;
+	}
+	.middle{
+		width: 190px;
+		height: 190px;
+	}
+	.concentric-circles{
+		width: 250px;
+		height: 250px;
+	}
+	.gol3 {
+		width: 45px;
+		height: 45px;
+		top: 25px;
+	}
+	.home-top-content{
+		column-gap: 12px;
+		margin-top: 16px;
+	}
+	.homepage-first{
+		padding: 8px 0;
+	}
+	.contact-icon{
+		width: 60px;
+		height: 60px;
+	}
+	.contact-icon img{
+		width: 40px;
+	}
+	.delete-account-trapping {
+		margin-top: 20px;
+	}
+	.friend-name{
+		font-size: 15px;
+	}
+	#notification-setting .notification-option-wrapper{
+		column-gap: 8px;
+	}
+	#ui-datepicker-div{
+		padding: 8px;
+		margin: 10px 12px;
+	}
+	.contact-searchbar{
+		padding: 12px !important;
+	}
+	.slider-txt {
+		margin-top: 30px;
+	}
+	.slider-txt h2{
+		font-size: 28px;
+	}
+	.scan1{
+		width: 280px;
+		height: 280px;
+	}
+	.scan1 .fingerprint1{
+		width: 250px;
+		height: 250px;
+	}
+}
+@media(max-width:280px){
+	.payfast-txt{
+		font-size: 54px;
+		line-height: 54px;
+	}
+	.mt-32 {
+		margin-top: 26px;
+	}
+	.slider-txt h2{
+		font-size: 24px;
+		line-height: 36px;
+	}
+	.form-sign-in-password-btn a{
+		padding: 12px 0;
+	}
+	.payfast-img_main{
+		width: 100px;
+		height: 100px;
+	}
+	.payfast-img_main img{
+		width: 100%;
+	}
+	#mobile_code {
+		margin-left: 6px;
+		padding-left: 40px !important;
+	}
+	.iti__arrow:before {
+		margin-left: 0 !important;
+	}
+	.otp-section input{
+		width: 50px;
+		height: 50px;
+	}
+}

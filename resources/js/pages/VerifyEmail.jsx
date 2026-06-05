@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Loader, Mail } from 'lucide-react';
 import axios from 'axios';
+import { useTranslation } from '../contexts/TranslationContext';
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [status, setStatus] = useState('verifying');
   const [message, setMessage] = useState('');
   const token = searchParams.get('token');
@@ -32,7 +34,7 @@ export default function VerifyEmail() {
           navigate('/login', {
             state: { message: t('verifyEmail.email_verified_redirect_message') },
           });
-        }, 3000);
+        }, 2500);
       } else {
         setStatus('error');
         setMessage(response.data.message || t('verifyEmail.verification_failed'));
@@ -48,57 +50,75 @@ export default function VerifyEmail() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-        <div className="text-center">
-          {status === 'verifying' && (
-            <>
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-                <Loader className="w-8 h-8 text-blue-600 animate-spin" />
+    <div className="auth-page bg-light min-vh-100 py-5">
+      <div className="container">
+        <div className="row gx-5 align-items-center justify-content-center">
+          <div className="col-lg-6 mb-4">
+            <div className="card shadow-sm border-0 h-100">
+              <div className="card-body py-5 px-4">
+                <span className="badge bg-primary bg-opacity-10 text-primary mb-3">Email verification</span>
+                <h1 className="h2 fw-semibold">Confirm your Kenfinly account</h1>
+                <p className="text-muted mb-4">
+                  A verification code is being checked by the backend. Once confirmed, you will be redirected to sign in.
+                </p>
+                <div className="card border-light bg-white shadow-sm">
+                  <div className="card-body text-muted">
+                    <p className="fw-semibold text-dark mb-2">Why this step matters</p>
+                    <ul className="mb-0 ps-3">
+                      <li>Confirms your email address and protects your account.</li>
+                      <li>Ensures secure JWT session access to protected Kenfinly routes.</li>
+                      <li>Preserves existing API-based verification behavior.</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {t('verifyEmail.verifying_email')}
-              </h2>
-              <p className="text-gray-600">{t('verifyEmail.please_wait')}</p>
-            </>
-          )}
-          {status === 'success' && (
-            <>
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                <CheckCircle className="w-8 h-8 text-green-600" />
+            </div>
+          </div>
+
+          <div className="col-lg-4">
+            <div className="card shadow-sm border-0">
+              <div className="card-body p-4">
+                {status === 'verifying' && (
+                  <div className="text-center">
+                    <div className="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 mb-4" style={{ width: '80px', height: '80px' }}>
+                      <Loader className="text-primary" size={32} />
+                    </div>
+                    <h2 className="h5 fw-semibold">{t('verifyEmail.verifying_email')}</h2>
+                    <p className="text-muted mb-0">{t('verifyEmail.please_wait')}</p>
+                  </div>
+                )}
+
+                {status === 'success' && (
+                  <div className="text-center">
+                    <div className="d-inline-flex align-items-center justify-content-center rounded-circle bg-success bg-opacity-10 mb-4" style={{ width: '80px', height: '80px' }}>
+                      <CheckCircle className="text-success" size={32} />
+                    </div>
+                    <h2 className="h5 fw-semibold">{t('verifyEmail.email_verified')}</h2>
+                    <p className="text-muted mb-2">{message}</p>
+                    <p className="text-muted small">{t('verifyEmail.redirecting_login')}</p>
+                  </div>
+                )}
+
+                {status === 'error' && (
+                  <div className="text-center">
+                    <div className="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-10 mb-4" style={{ width: '80px', height: '80px' }}>
+                      <XCircle className="text-danger" size={32} />
+                    </div>
+                    <h2 className="h5 fw-semibold">{t('verifyEmail.verification_failed')}</h2>
+                    <p className="text-muted mb-4">{message}</p>
+                    <div className="d-grid gap-2">
+                      <button onClick={() => navigate('/login')} className="btn btn-primary">
+                        {t('verifyEmail.go_to_login')}
+                      </button>
+                      <button onClick={() => navigate('/register')} className="btn btn-outline-secondary">
+                        {t('verifyEmail.register_again')}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {t('verifyEmail.email_verified')}
-              </h2>
-              <p className="text-gray-600 mb-6">{message}</p>
-              <p className="text-sm text-gray-500">{t('verifyEmail.redirecting_login')}</p>
-            </>
-          )}
-          {status === 'error' && (
-            <>
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
-                <XCircle className="w-8 h-8 text-red-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {t('verifyEmail.verification_failed')}
-              </h2>
-              <p className="text-gray-600 mb-6">{message}</p>
-              <div className="space-y-3">
-                <button
-                  onClick={() => navigate('/login')}
-                  className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors"
-                >
-                  {t('verifyEmail.go_to_login')}
-                </button>
-                <button
-                  onClick={() => navigate('/register')}
-                  className="w-full border border-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                  {t('verifyEmail.register_again')}
-                </button>
-              </div>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
