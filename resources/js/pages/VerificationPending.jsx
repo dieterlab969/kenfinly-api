@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Loader, CheckCircle } from 'lucide-react';
+import { Mail, Loader } from 'lucide-react';
 import axios from 'axios';
 import { useTranslation } from '../contexts/TranslationContext';
 
@@ -57,95 +57,87 @@ export default function VerificationPending() {
   };
 
   return (
-    <div className="auth-page bg-light min-vh-100 py-5">
-      <div className="container">
-        <div className="row gx-5 align-items-center justify-content-center">
-          <div className="col-lg-6 mb-4">
-            <div className="card shadow-sm border-0 h-100">
-              <div className="card-body py-5 px-4">
-                <span className="badge bg-warning bg-opacity-10 text-warning mb-3">Email verification required</span>
-                <h1 className="h2 fw-semibold">Verify your email</h1>
-                <p className="text-muted mb-4">
-                  Kenfinly is sending a one-time verification link so you can continue using your account securely.
-                </p>
-                <div className="card border-light bg-white shadow-sm">
-                  <div className="card-body">
-                    <p className="fw-semibold mb-2">Why verification matters</p>
-                    <ul className="mb-0 ps-3 text-muted">
-                      <li>Confirm your email to complete registration.</li>
-                      <li>Protect access to transaction and account data.</li>
-                      <li>Enable secure JWT session access in Kenfinly.</li>
-                    </ul>
-                  </div>
-                </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-stretch">
+          {/* Left Panel - Info */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl shadow-lg p-8 h-full flex flex-col">
+              <div className="inline-block bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-medium mb-4 w-fit">
+                Email verification required
+              </div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                Verify your email
+              </h1>
+              <p className="text-gray-600 mb-8">
+                Kenfinly is sending a one-time verification link so you can continue using your account securely.
+              </p>
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 flex-1">
+                <p className="font-semibold text-gray-900 mb-2">Why verification matters</p>
+                <ul className="space-y-2 text-gray-600 text-sm">
+                  <li>✓ Confirm your email to complete registration.</li>
+                  <li>✓ Protect access to transaction and account data.</li>
+                  <li>✓ Enable secure JWT session access in Kenfinly.</li>
+                </ul>
               </div>
             </div>
           </div>
 
-          <div className="col-lg-4">
-            <div className="card shadow-sm border-0">
-              <div className="card-body p-4">
-                <div className="text-center mb-4">
-                  <div className="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10" style={{ width: '64px', height: '64px' }}>
-                    <Mail className="text-primary" size={28} />
-                  </div>
-                  <h2 className="h4 fw-semibold mt-3">{t('verification.verify_your_email')}</h2>
-                  {customMessage && <p className="text-muted mb-0">{customMessage}</p>}
+          {/* Right Panel - Verification */}
+          <div className="lg:col-span-3">
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <div className="text-center mb-8">
+                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Mail className="text-blue-600" size={28} />
                 </div>
+                <h2 className="text-2xl font-bold text-gray-900">{t('verification.verify_your_email')}</h2>
+                {customMessage && <p className="text-gray-600 text-sm mt-2">{customMessage}</p>}
+              </div>
 
-                <div className="card border-light bg-white mb-4">
-                  <div className="card-body">
-                    <p className="fw-semibold mb-2">{t('verification.email_sent_to')}</p>
-                    <p className="mb-2"><span className="fw-medium">{userEmail}</span></p>
-                    <p className="text-muted mb-0">
-                      {source === 'login'
-                        ? t('verification.login_prompt') + ' ' + t('verification.login_continue')
-                        : t('verification.activate_account')}
-                    </p>
-                  </div>
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-6">
+                <p className="font-semibold text-gray-900 mb-1">{t('verification.email_sent_to')}</p>
+                <p className="text-gray-900 font-medium">{userEmail}</p>
+                <p className="text-gray-600 text-sm mt-2">
+                  {source === 'login'
+                    ? t('verification.login_prompt') + ' ' + t('verification.login_continue')
+                    : t('verification.activate_account')}
+                </p>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="font-semibold text-blue-900 mb-2">{t('verification.did_not_receive')}</p>
+                <ul className="space-y-1 text-blue-900 text-sm">
+                  <li>• {t('verification.check_spam')}</li>
+                  <li>• {t('verification.check_email_correct')}</li>
+                  <li>• {t('verification.wait_and_resend')}</li>
+                </ul>
+              </div>
+
+              {resendStatus === 'success' && (
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm mb-4">
+                  {resendMessage}
                 </div>
+              )}
 
-                <div className="card border-light bg-info bg-opacity-10 mb-4">
-                  <div className="card-body">
-                    <p className="fw-semibold mb-2">{t('verification.did_not_receive')}</p>
-                    <ul className="mb-0 ps-3 text-info">
-                      <li>{t('verification.check_spam')}</li>
-                      <li>{t('verification.check_email_correct')}</li>
-                      <li>{t('verification.wait_and_resend')}</li>
-                    </ul>
-                  </div>
+              {resendStatus === 'error' && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
+                  {resendMessage}
                 </div>
+              )}
 
-                {resendStatus === 'success' && (
-                  <div className="alert alert-success" role="alert">
-                    {resendMessage}
-                  </div>
-                )}
-
-                {resendStatus === 'error' && (
-                  <div className="alert alert-danger" role="alert">
-                    {resendMessage}
-                  </div>
-                )}
-
+              <div className="space-y-3">
                 <button
                   onClick={handleResendEmail}
                   disabled={isResending}
-                  className="btn btn-primary w-100 mb-3"
+                  className="w-full py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
                 >
-                  {isResending ? (
-                    <>
-                      <Loader className="me-2" size={18} />
-                      {t('verification.sending')}
-                    </>
-                  ) : (
-                    t('verification.resend_email')
-                  )}
+                  {isResending && <Loader size={18} className="animate-spin" />}
+                  {isResending ? t('verification.sending') : t('verification.resend_email')}
                 </button>
 
                 <button
                   onClick={handleBackToLogin}
-                  className="btn btn-outline-secondary w-100"
+                  className="w-full py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all duration-200"
                 >
                   {t('verification.back_to_login')}
                 </button>

@@ -21,7 +21,9 @@ class LogoController extends Controller
     {
         try {
             $logoPath = AppSetting::get('site_logo');
-            $logoUrl = $logoPath ? Storage::url($logoPath) : null;
+            $logoUrl = ($logoPath && Storage::disk('public')->exists($logoPath))
+                ? Storage::url($logoPath)
+                : null;
 
             return response()->json([
                 'success' => true,

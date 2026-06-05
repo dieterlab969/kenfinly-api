@@ -90,132 +90,147 @@ const Register = () => {
     };
 
     return (
-        <div className="auth-page bg-light min-vh-100 py-5">
-            <div className="container">
-                <div className="row gx-5 align-items-center justify-content-center">
-                    <aside className="col-lg-6 order-2 order-lg-1 mb-4">
-                        <div className="card shadow-sm border-0 h-100">
-                            <div className="card-body py-5 px-4">
-                                <span className="badge bg-secondary bg-opacity-10 text-secondary mb-3">PayFast-inspired registration</span>
-                                <h1 className="display-6 fw-semibold text-dark">Create your Kenfinly account</h1>
-                                <p className="text-muted mb-4">
-                                    Register now to keep your existing Kenfinly data and complete email verification with the same secure backend flows.
-                                </p>
-                                <div className="row g-3 text-muted">
-                                    <div className="col-12 col-md-6">
-                                        <div className="card border-light shadow-sm h-100">
-                                            <div className="card-body">
-                                                <h2 className="h6 fw-semibold">Secure signup</h2>
-                                                <p className="mb-0">Your password and verification flow remain handled by Kenfinly’s backend.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="col-12 col-md-6">
-                                        <div className="card border-light shadow-sm h-100">
-                                            <div className="card-body">
-                                                <h2 className="h6 fw-semibold">Identity protection</h2>
-                                                <p className="mb-0">The same API endpoints and email verification step are preserved.</p>
-                                            </div>
-                                        </div>
-                                    </div>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-6xl mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-stretch">
+                    {/* Left Panel - Features */}
+                    <div className="lg:col-span-2 order-2 lg:order-1">
+                        <div className="bg-white rounded-2xl shadow-lg p-8 h-full flex flex-col">
+                            <div className="inline-block bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-medium mb-4 w-fit">
+                                PayFast-inspired registration
+                            </div>
+                            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                                Create your Kenfinly account
+                            </h1>
+                            <p className="text-gray-600 mb-8">
+                                Register now to keep your existing Kenfinly data and complete email verification with the same secure backend flows.
+                            </p>
+
+                            <div className="space-y-4 flex-1">
+                                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                    <h3 className="text-sm font-semibold text-gray-900 mb-1">Secure signup</h3>
+                                    <p className="text-sm text-gray-600">Your password and verification flow remain handled by Kenfinly's backend.</p>
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                    <h3 className="text-sm font-semibold text-gray-900 mb-1">Identity protection</h3>
+                                    <p className="text-sm text-gray-600">The same API endpoints and email verification step are preserved.</p>
                                 </div>
                             </div>
                         </div>
-                    </aside>
+                    </div>
 
-                    <main className="col-lg-4 order-1 order-lg-2">
-                        <div className="card shadow-sm border-0">
-                            <div className="card-body p-4">
-                                <div className="text-center mb-4">
-                                    <DynamicLogo className="mb-3" iconClassName="me-2" textClassName="h4 fw-bold text-dark" />
-                                    <h2 className="h3 fw-semibold">{t('auth.register')}</h2>
-                                    <p className="text-muted mb-0">{t('auth.register_subtitle') || 'Complete your account setup and verify your email to unlock Kenfinly features.'}</p>
+                    {/* Right Panel - Register Form */}
+                    <div className="lg:col-span-3 order-1 lg:order-2">
+                        <div className="bg-white rounded-2xl shadow-lg p-8">
+                            <div className="text-center mb-8">
+                                <div className="flex justify-center mb-4">
+                                    <DynamicLogo className="w-12 h-12" iconClassName="w-8 h-8" textClassName="text-2xl font-bold" />
+                                </div>
+                                <h2 className="text-2xl font-bold text-gray-900">{t('auth.register')}</h2>
+                                <p className="text-gray-600 text-sm mt-2">{t('auth.register_subtitle') || 'Complete your account setup and verify your email to unlock Kenfinly features.'}</p>
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                {successMessage && (
+                                    <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
+                                        {successMessage}
+                                    </div>
+                                )}
+
+                                {errors.general && (
+                                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                                        {errors.general[0]}
+                                    </div>
+                                )}
+
+                                <div>
+                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t('auth.name')}
+                                    </label>
+                                    <input
+                                        id="name"
+                                        name="name"
+                                        type="text"
+                                        autoComplete="name"
+                                        required
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        placeholder={t('auth.name')}
+                                    />
+                                    {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name[0]}</p>}
                                 </div>
 
-                                <form onSubmit={handleSubmit}>
-                                    {successMessage && (
-                                        <div className="alert alert-success" role="alert">
-                                            {successMessage}
-                                        </div>
-                                    )}
+                                <div>
+                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t('auth.email')}
+                                    </label>
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        autoComplete="email"
+                                        required
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        placeholder={t('auth.email')}
+                                    />
+                                    {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email[0]}</p>}
+                                </div>
 
-                                    {errors.general && (
-                                        <div className="alert alert-danger" role="alert">
-                                            {errors.general[0]}
-                                        </div>
-                                    )}
+                                <div>
+                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t('auth.password')}
+                                    </label>
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        autoComplete="new-password"
+                                        required
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        placeholder={t('auth.password')}
+                                    />
+                                    {errors.password && <p className="text-red-600 text-sm mt-1">{errors.password[0]}</p>}
+                                </div>
 
-                                    <div className="mb-3">
-                                        <label htmlFor="name" className="form-label">{t('auth.name')}</label>
-                                        <input
-                                            id="name"
-                                            name="name"
-                                            type="text"
-                                            autoComplete="name"
-                                            required
-                                            value={formData.name}
-                                            onChange={handleChange}
-                                            className="form-control"
-                                        />
-                                        {errors.name && <div className="form-text text-danger">{errors.name[0]}</div>}
-                                    </div>
+                                <div>
+                                    <label htmlFor="passwordConfirmation" className="block text-sm font-medium text-gray-700 mb-1">
+                                        {t('auth.confirm_password')}
+                                    </label>
+                                    <input
+                                        id="passwordConfirmation"
+                                        name="passwordConfirmation"
+                                        type="password"
+                                        autoComplete="new-password"
+                                        required
+                                        value={formData.passwordConfirmation}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                                        placeholder={t('auth.confirm_password')}
+                                    />
+                                </div>
 
-                                    <div className="mb-3">
-                                        <label htmlFor="email" className="form-label">{t('auth.email')}</label>
-                                        <input
-                                            id="email"
-                                            name="email"
-                                            type="email"
-                                            autoComplete="email"
-                                            required
-                                            value={formData.email}
-                                            onChange={handleChange}
-                                            className="form-control"
-                                        />
-                                        {errors.email && <div className="form-text text-danger">{errors.email[0]}</div>}
-                                    </div>
+                                <button 
+                                    type="submit" 
+                                    disabled={loading}
+                                    className="w-full py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                                >
+                                    {loading ? `${t('auth.sign_up')}...` : t('auth.sign_up')}
+                                </button>
+                            </form>
 
-                                    <div className="mb-3">
-                                        <label htmlFor="password" className="form-label">{t('auth.password')}</label>
-                                        <input
-                                            id="password"
-                                            name="password"
-                                            type="password"
-                                            autoComplete="new-password"
-                                            required
-                                            value={formData.password}
-                                            onChange={handleChange}
-                                            className="form-control"
-                                        />
-                                        {errors.password && <div className="form-text text-danger">{errors.password[0]}</div>}
-                                    </div>
-
-                                    <div className="mb-4">
-                                        <label htmlFor="passwordConfirmation" className="form-label">{t('auth.confirm_password')}</label>
-                                        <input
-                                            id="passwordConfirmation"
-                                            name="passwordConfirmation"
-                                            type="password"
-                                            autoComplete="new-password"
-                                            required
-                                            value={formData.passwordConfirmation}
-                                            onChange={handleChange}
-                                            className="form-control"
-                                        />
-                                    </div>
-
-                                    <button type="submit" disabled={loading} className="btn btn-primary w-100">
-                                        {loading ? `${t('auth.sign_up')}...` : t('auth.sign_up')}
-                                    </button>
-                                </form>
-
-                                <p className="text-center text-muted mt-4 mb-0">
-                                    {t('auth.have_account')}{' '}
-                                    <Link to="/login" className="fw-semibold text-decoration-none">{t('auth.login_here')}</Link>
-                                </p>
-                            </div>
+                            <p className="text-center text-gray-600 text-sm mt-6">
+                                {t('auth.have_account')}{' '}
+                                <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                                    {t('auth.login_here')}
+                                </Link>
+                            </p>
                         </div>
-                    </main>
+                    </div>
                 </div>
             </div>
         </div>
