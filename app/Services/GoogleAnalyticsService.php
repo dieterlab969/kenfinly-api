@@ -28,6 +28,15 @@ class GoogleAnalyticsService
         $this->propertyId = $propertyId ?? config('services.google_analytics.property_id');
         $this->credentialsPath = $credentialsPath ?? config('services.google_analytics.credentials_path');
 
+        if ($this->enabled && (!$this->propertyId || !$this->credentialsPath || !file_exists($this->credentialsPath))) {
+            Log::warning('Google Analytics disabled because local credentials are not available.', [
+                'property_id_configured' => (bool) $this->propertyId,
+                'credentials_path' => $this->credentialsPath,
+            ]);
+
+            $this->enabled = false;
+        }
+
         if ($this->enabled) {
             $this->initializeClient();
         }
@@ -52,8 +61,8 @@ class GoogleAnalyticsService
             ]);
         } catch (\Throwable $e) {
             Log::error('Failed to initialize Google Analytics client: ' . $e->getMessage());
-            // Re-throw to prevent silent failure
-            throw $e;
+            $this->enabled = false;
+            $this->client = null;
         }
     }
 
