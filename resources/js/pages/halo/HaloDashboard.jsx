@@ -154,12 +154,14 @@ const HaloRitualCard = ({ onRewardCreated }) => {
     }, [onRewardCreated]);
 
     const fetchStatus = useCallback(async () => {
+        console.debug('HaloRitualCard: fetching /attendance/status');
         try {
             setLoading(true);
             const r = await api.get('/attendance/status');
+            console.debug('HaloRitualCard: /attendance/status response', r.data);
             applySession(r.data.data);
         } catch (err) {
-            console.error('Halo status error', err);
+            console.error('HaloRitualCard: Halo status error', err);
         } finally {
             setLoading(false);
         }
@@ -187,13 +189,19 @@ const HaloRitualCard = ({ onRewardCreated }) => {
     }, [isActive, startTime, duration]);
 
     const handlePress = async () => {
-        if (isActive || isDone || actionLoading) return;
+        console.debug('HaloRitualCard: handlePress clicked', { isActive, isDone, actionLoading });
+        if (isActive || isDone || actionLoading) {
+            console.debug('HaloRitualCard: handlePress ignored, inactive or already loading');
+            return;
+        }
         setActionLoading(true);
         try {
+            console.debug('HaloRitualCard: dispatching POST /attendance/start');
             const r = await api.post('/attendance/start');
+            console.debug('HaloRitualCard: /attendance/start response', r.data);
             applySession(r.data.data);
         } catch (err) {
-            console.error('Halo start error', err);
+            console.error('HaloRitualCard: Halo start error', err);
         } finally {
             setActionLoading(false);
         }
@@ -503,12 +511,14 @@ const HaloDashboard = () => {
     const [modalType,  setModalType]  = useState('expense');
 
     const fetchDash = useCallback(async (showLoad = true) => {
+        console.debug('HaloDashboard: fetchDash called', { showLoad });
         try {
             if (showLoad) setLoading(true);
             const r = await api.get('/dashboard');
+            console.debug('HaloDashboard: /dashboard response', r.data);
             setDashData(r.data.data);
         } catch (err) {
-            console.error('Failed to fetch dashboard data:', err);
+            console.error('HaloDashboard: Failed to fetch dashboard data:', err);
         } finally {
             setLoading(false);
         }
@@ -517,7 +527,10 @@ const HaloDashboard = () => {
     useEffect(() => { fetchDash(); }, [fetchDash]);
 
     const openModal = (type) => { setModalType(type); setShowModal(true); };
-    const handleRewardCreated = useCallback(() => fetchDash(false), [fetchDash]);
+    const handleRewardCreated = useCallback(() => {
+        console.debug('HaloDashboard: reward created, refreshing dashboard');
+        fetchDash(false);
+    }, [fetchDash]);
 
     const totalBalance = useMemo(() =>
         dashData?.accounts?.reduce((s, a) => s + parseFloat(a.balance), 0) || 0,

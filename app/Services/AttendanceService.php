@@ -77,6 +77,10 @@ class AttendanceService
                     ->first();
 
                 if ($existing) {
+                    logger()->info('AttendanceService.start existing session detected', [
+                        'user_id' => $user->id,
+                        'attendance_id' => $existing->id,
+                    ]);
                     return; // Already started today — return existing state.
                 }
 
@@ -84,7 +88,7 @@ class AttendanceService
                 $duration      = $this->calculateDuration($user, $startedAt);
                 $expectedEndAt = $startedAt->addSeconds($duration);
 
-                Attendance::create([
+                $attendance = Attendance::create([
                     'user_id'         => $user->id,
                     'halo_date'       => $haloDate,
                     'status'          => 'initiated',
@@ -92,6 +96,13 @@ class AttendanceService
                     'expected_end_at' => $expectedEndAt,
                     'quote_text'      => $this->dailyQuote($haloDate),
                     'reminder_due_at' => $this->reminderDueAt($user, $haloDate),
+                ]);
+
+                logger()->info('AttendanceService.start created session', [
+                    'user_id' => $user->id,
+                    'attendance_id' => $attendance->id,
+                    'started_at' => $startedAt->toIso8601String(),
+                    'expected_end_at' => $expectedEndAt->toIso8601String(),
                 ]);
             });
         } catch (QueryException $e) {
@@ -126,6 +137,13 @@ class AttendanceService
 
             $rewardAmountMinor = $this->calculateRewardAmountMinor($user, $attendance, $now);
             $rewardTransaction  = $this->createRewardTransaction($user, $attendance, $rewardAmountMinor);
+
+            logger()->info('AttendanceService.complete reward transaction created', [
+                'user_id' => $user->id,
+                'attendance_id' => $attendance->id,
+                'transaction_id' => $rewardTransaction->id,
+                'reward_amount_minor' => $rewardAmountMinor,
+            ]);
 
             $attendance->forceFill([
                 'status'                => 'completed',

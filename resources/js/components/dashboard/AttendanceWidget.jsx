@@ -23,15 +23,18 @@ const AttendanceWidget = ({ onRewardCreated }) => {
     const [selectedRating, setSelectedRating] = useState('normal');
 
     const fetchStatus = useCallback(async (showLoading = false) => {
+        console.debug('AttendanceWidget: fetchStatus called', { showLoading });
         try {
             if (showLoading) {
                 setLoading(true);
             }
             const response = await api.get('/attendance/status');
+            console.debug('AttendanceWidget: /attendance/status response', response.data);
             setStatus(response.data.data);
             setSecondsLeft(response.data.data.seconds_left || 0);
             setError('');
         } catch (err) {
+            console.error('AttendanceWidget: /attendance/status error', err);
             setError(err.response?.data?.message || 'Unable to load Halo status.');
         } finally {
             setLoading(false);
@@ -62,13 +65,27 @@ const AttendanceWidget = ({ onRewardCreated }) => {
     }, [fetchStatus, status]);
 
     const startSession = async () => {
+        const currentState = status?.state || 'idle';
+        if (actionLoading) {
+            console.debug('AttendanceWidget: startSession blocked, already loading');
+            return;
+        }
+        if (currentState !== 'idle') {
+            console.debug('AttendanceWidget: startSession blocked, current state is not idle', { currentState });
+            return;
+        }
+
+        console.debug('AttendanceWidget: Halo button click triggered', { currentState, actionLoading });
         setActionLoading(true);
         try {
+            console.debug('AttendanceWidget: dispatching POST /attendance/start');
             const response = await api.post('/attendance/start');
+            console.debug('AttendanceWidget: /attendance/start response', response.data);
             setStatus(response.data.data);
             setSecondsLeft(response.data.data.seconds_left || 0);
             setError('');
         } catch (err) {
+            console.error('AttendanceWidget: /attendance/start error', err);
             setError(err.response?.data?.message || 'Unable to start Halo.');
         } finally {
             setActionLoading(false);
@@ -76,16 +93,25 @@ const AttendanceWidget = ({ onRewardCreated }) => {
     };
 
     const completeSession = async () => {
+        if (actionLoading) {
+            console.debug('AttendanceWidget: completeSession blocked, already loading');
+            return;
+        }
+
+        console.debug('AttendanceWidget: completeSession clicked', { selectedRating, currentState: status?.state });
         setActionLoading(true);
         try {
+            console.debug('AttendanceWidget: dispatching POST /attendance/complete');
             const response = await api.post('/attendance/complete', {
                 user_rating: selectedRating,
             });
+            console.debug('AttendanceWidget: /attendance/complete response', response.data);
             setStatus(response.data.data);
             setSecondsLeft(response.data.data.seconds_left || 0);
             setError('');
             onRewardCreated?.();
         } catch (err) {
+            console.error('AttendanceWidget: /attendance/complete error', err);
             const validationMessage = err.response?.data?.errors?.attendance?.[0];
             setError(validationMessage || err.response?.data?.message || 'Unable to complete Halo.');
         } finally {
@@ -94,13 +120,22 @@ const AttendanceWidget = ({ onRewardCreated }) => {
     };
 
     const killSession = async () => {
+        if (actionLoading) {
+            console.debug('AttendanceWidget: killSession blocked, already loading');
+            return;
+        }
+
+        console.debug('AttendanceWidget: killSession clicked', { currentState: status?.state });
         setActionLoading(true);
         try {
+            console.debug('AttendanceWidget: dispatching POST /attendance/kill');
             const response = await api.post('/attendance/kill');
+            console.debug('AttendanceWidget: /attendance/kill response', response.data);
             setStatus(response.data.data);
             setSecondsLeft(response.data.data.seconds_left || 0);
             setError('');
         } catch (err) {
+            console.error('AttendanceWidget: /attendance/kill error', err);
             const validationMessage = err.response?.data?.errors?.attendance?.[0];
             setError(validationMessage || err.response?.data?.message || 'Unable to kill Halo.');
         } finally {
