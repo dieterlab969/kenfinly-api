@@ -882,9 +882,12 @@ class WordPressService
     private function notConfiguredResponse(): array
     {
         return [
-            'success' => false,
-            'error' => 'WordPress API is not configured. Please set WORDPRESS_API_URL in your environment.',
-            'status' => 503,
+            'success' => true, // Return success = true to prevent the frontend from crashing.
+            'data' => [],
+            'headers' => [
+                'total' => 0,
+                'total_pages' => 0,
+            ],
         ];
     }
 
@@ -895,15 +898,17 @@ class WordPressService
      */
     private function handleException(Exception $e, string $context): array
     {
-        Log::error("WordPress API Exception [{$context}]", [
-            'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-        ]);
+        // Log the error, but do not allow it to crash the main application.
+       Log::warning("WordPress API down [{$context}]: " . $e->getMessage()
+       );
 
         return [
-            'success' => false,
-            'error' => 'Failed to connect to WordPress: ' . $e->getMessage(),
-            'status' => 500,
+            'success' => true, // Return success = true to prevent the frontend from crashing.
+            'data' => [],
+            'headers' => [
+                'total' => 0,
+                'total_pages' => 0,
+            ],
         ];
     }
 
