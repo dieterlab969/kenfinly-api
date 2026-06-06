@@ -44,8 +44,10 @@ class AttendanceService
     public function status(User $user): array
     {
         $haloDate   = $this->todayFor($user);
+        // Use direct equality on the date column to avoid driver-specific DATE() behavior
+        // and ensure we're matching the stored Y-m-d value produced by todayFor().
         $attendance = Attendance::where('user_id', $user->id)
-            ->whereDate('halo_date', $haloDate)
+            ->where('halo_date', $haloDate)
             ->with('rewardTransaction')
             ->first();
 
@@ -72,7 +74,7 @@ class AttendanceService
         try {
             DB::transaction(function () use ($user, $haloDate) {
                 $existing = Attendance::where('user_id', $user->id)
-                    ->whereDate('halo_date', $haloDate)
+                    ->where('halo_date', $haloDate)
                     ->lockForUpdate()
                     ->first();
 
@@ -260,8 +262,9 @@ class AttendanceService
 
     private function lockTodayAttendance(User $user): ?Attendance
     {
+        $haloDate = $this->todayFor($user);
         return Attendance::where('user_id', $user->id)
-            ->whereDate('halo_date', $this->todayFor($user))
+            ->where('halo_date', $haloDate)
             ->lockForUpdate()
             ->first();
     }
