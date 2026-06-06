@@ -517,6 +517,7 @@ const HaloDashboard = () => {
     useEffect(() => { fetchDash(); }, [fetchDash]);
 
     const openModal = (type) => { setModalType(type); setShowModal(true); };
+    const handleRewardCreated = useCallback(() => fetchDash(false), [fetchDash]);
 
     const totalBalance = useMemo(() =>
         dashData?.accounts?.reduce((s, a) => s + parseFloat(a.balance), 0) || 0,
@@ -543,7 +544,7 @@ const HaloDashboard = () => {
         <HaloLayout onFabExpense={() => openModal('expense')} onFabIncome={() => openModal('income')}>
 
             {/* 1. Halo Ritual Card */}
-            <HaloRitualCard onRewardCreated={() => fetchDash(false)} />
+            <HaloRitualCard onRewardCreated={handleRewardCreated} />
 
             {/* 2. Monthly Summary Arcs */}
             <HaloMonthlySummary monthlySummary={dashData?.monthly_summary} />
