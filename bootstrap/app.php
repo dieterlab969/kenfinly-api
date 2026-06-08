@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
+            'beta-access' => \App\Http\Middleware\CheckBetaAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
