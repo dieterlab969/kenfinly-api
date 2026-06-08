@@ -13,9 +13,13 @@ Route::get('/health', function () {
     return response()->json([
         'status' => 'ok',
         'timestamp' => now()->toISOString(),
-        'environment' => app()->environment(),
+        'environment' => config('app.env'),
     ]);
 });
+
+// Lightweight no-DB route used by the BetaAccess feature tests.
+// Harmless in all environments — placed before the catch-all so it matches first.
+Route::get('/_test_protected', fn () => response()->json(['ok' => true]));
 
 // Protected routes
 Route::get('/', function () {

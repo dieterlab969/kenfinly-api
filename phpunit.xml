@@ -23,15 +23,17 @@
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
         <env name="CACHE_STORE" value="array"/>
-        <env name="DB_CONNECTION" value="mysql"/>
-        <env name="DB_DATABASE" value="kenfinly_test"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="APP_KEY" value="base64:Uhfx1HT0VP1BHXUwMzt7DpmHQVSFApuVkq7NdCFd3OE="/>
         <env name="JWT_SECRET" value="s6uC7pMClmNfygCw3n0aEkocxAj0rqZ5I0seBI3kzB5vPOmq9fXy2JBg8lfbtqF8"/>
         <env name="DISABLE_REGISTRATION_EMAIL" value="1"/>
+        <env name="STAGING_ACCESS_CODE" value=""/>
     </php>
 </phpunit>
