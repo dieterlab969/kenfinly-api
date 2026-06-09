@@ -12,8 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Register alias
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
+            'beta.access' => \App\Http\Middleware\CheckBetaAccess::class,
+        ]);
+        // Apply middleware to ALL web routes
+        $middleware->web(append: [
+            \App\Http\Middleware\CheckBetaAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

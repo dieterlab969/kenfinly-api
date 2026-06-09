@@ -31,7 +31,9 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="APP_KEY" value="base64:Uhfx1HT0VP1BHXUwMzt7DpmHQVSFApuVkq7NdCFd3OE="/>
         <env name="JWT_SECRET" value="s6uC7pMClmNfygCw3n0aEkocxAj0rqZ5I0seBI3kzB5vPOmq9fXy2JBg8lfbtqF8"/>
         <env name="DISABLE_REGISTRATION_EMAIL" value="1"/>
+        <env name="STAGING_ACCESS_CODE" value=""/>
     </php>
 </phpunit>

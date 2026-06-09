@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Staging Access Code
+    |--------------------------------------------------------------------------
+    |
+    | When APP_ENV=staging this code gates access to the application via
+    | the CheckBetaAccess middleware. Leave empty to disable the gate.
+    |
+    */
+
+    'staging_access_code' => env('STAGING_ACCESS_CODE', ''),
+
 ];

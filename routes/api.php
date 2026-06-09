@@ -37,6 +37,15 @@ use App\Http\Controllers\Api\PublicAnalyticsController;
 use App\Http\Controllers\Api\ConsentController;
 use App\Http\Controllers\Api\LogoController;
 
+// Status / health endpoint (bypassed by CheckBetaAccess whitelist)
+Route::get('/status', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toISOString(),
+        'environment' => config('app.env'),
+    ]);
+});
+
 // Public routes
 Route::get('/logo', [LogoController::class, 'getLogo']);
 Route::get('/subscription-plans', [\App\Http\Controllers\Api\SubscriptionPlanController::class, 'index']);
