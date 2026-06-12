@@ -33,6 +33,8 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'language_id',
         'status',
+        'is_suspended',
+        'halo_points_balance',
         'email_verified_at',
         'timezone',
         'hourly_rate',
@@ -64,6 +66,8 @@ class User extends Authenticatable implements JWTSubject
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'status' => 'string',
+            'is_suspended' => 'boolean',
+            'halo_points_balance' => 'integer',
             'rate_updated_at' => 'datetime',
             'hourly_rate_locked_until' => 'datetime',
             'last_halo_date' => 'date',
@@ -119,6 +123,11 @@ class User extends Authenticatable implements JWTSubject
     public function ledgerDailySummaries(): HasMany
     {
         return $this->hasMany(LedgerDailySummary::class);
+    }
+
+    public function haloPointLedgerEntries(): HasMany
+    {
+        return $this->hasMany(HaloPointLedger::class);
     }
 
     /**
@@ -318,7 +327,7 @@ class User extends Authenticatable implements JWTSubject
      */
     public function isSuspended(): bool
     {
-        return $this->status === 'suspended';
+        return $this->status === 'suspended' || (bool) $this->is_suspended;
     }
 
     /**
