@@ -12,10 +12,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Controller responsible for handling payment-related API requests.
+ * Payment processing, history, and payment method management.
  *
- * This includes processing payments, retrieving payment history and details,
- * and retrying failed payments. Access is restricted to authenticated users.
+ * @tags Payments
  */
 class PaymentController extends Controller
 {

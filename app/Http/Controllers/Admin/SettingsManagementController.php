@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @tags Admin — Settings
+ */
 class SettingsManagementController extends Controller
 {
     public function index()

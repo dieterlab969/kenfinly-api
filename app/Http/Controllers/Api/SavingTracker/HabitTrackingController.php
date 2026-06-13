@@ -10,7 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Controller for managing habit tracking completions.
+ * Daily habit tracking — toggle completions and bulk updates.
+ *
+ * @tags Saving Tracker — Tracking
  */
 class HabitTrackingController extends Controller
 {

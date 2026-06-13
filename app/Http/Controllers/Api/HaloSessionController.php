@@ -8,11 +8,13 @@ use App\Services\AttendanceService;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Standard 9 — Persistent Halo Countdown State.
+ * Current Halo session state.
  *
  * GET /api/halo/current-session always returns accurate remaining time using
  * `expected_end_at` from the database; frontend timers are presentation-only.
  * Frontend state may reset on refresh/restart/device switch; the backend is authoritative.
+ *
+ * @tags Halo — Sessions
  */
 class HaloSessionController extends Controller
 {

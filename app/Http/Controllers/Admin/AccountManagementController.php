@@ -7,6 +7,9 @@ use App\Models\Account;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @tags Admin — Accounts
+ */
 class AccountManagementController extends Controller
 {
     public function index(Request $request)

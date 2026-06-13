@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * @tags Admin — Cache
+ */
 class CacheManagementController extends Controller
 {
     public function clearApplicationCache()

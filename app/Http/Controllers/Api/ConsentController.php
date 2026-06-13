@@ -10,8 +10,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * GDPR / privacy consent management.
+ *
+ * Cookie-identified consent records that do not require authentication.
+ *
+ * @tags Consent
+ */
 class ConsentController extends Controller
 {
+    /**
+     * Record the user's consent decision.
+     *
+     * @bodyParam consent_given boolean required Whether consent is granted. Example: true
+     * @bodyParam consent_types array required Array of consent type identifiers. Example: ["analytics","marketing"]
+     */
     public function store(Request $request): JsonResponse
     {
         if (!config('wordpress.cookie_consent.enabled')) {

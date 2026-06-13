@@ -7,8 +7,18 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Financial analytics and reporting for the authenticated user.
+ *
+ * @tags Analytics
+ */
 class AnalyticsController extends Controller
 {
+    /**
+     * Get a financial summary (total income, expenses, net balance).
+     *
+     * @queryParam account_id int Filter by a specific account ID. Example: 1
+     */
     public function getSummary(Request $request)
     {
         $userId = auth()->id();

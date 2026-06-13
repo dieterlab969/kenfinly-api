@@ -6,8 +6,18 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * Authenticated user profile management.
+ *
+ * @tags Profile
+ */
 class ProfileController extends Controller
 {
+    /**
+     * Get the authenticated user's profile.
+     *
+     * Returns the full profile including roles and preferred language.
+     */
     public function show()
     {
         $user = auth('api')->user();

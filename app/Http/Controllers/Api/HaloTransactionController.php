@@ -15,18 +15,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Halo-aware transactions API.
+ * Halo-aware ledger transactions (rewards, deductions, and point events).
  *
- * Adheres to:
- *  - Standard 1: timestamps normalized to UTC.
- *  - Standard 2: integer-only money via `amount_minor`.
- *  - Standard 4: write-time rollup into `ledger_daily_summaries`.
- *  - Standard 5: immutable — only POST and GET are exposed (no PUT/DELETE).
- *  - Standard 6: duplicate prevention via UNIQUE(user_id, idempotency_key) + QueryException catch.
- *  - Standard 7: encrypted `notes` via Eloquent cast on the model.
- *  - Standard 8: cursorPaginate() for transaction history.
- *  - Standard 11: API Resource for response shape.
- *  - Standard 12: only the two queries needed (cursor scan + relation eager-load), no N+1.
+ * Immutable ledger — only POST and GET are exposed (no PUT/DELETE).
+ * Duplicate prevention via UNIQUE(user_id, idempotency_key).
+ * Money is represented as integer minor units (`amount_minor`).
+ *
+ * @tags Halo — Transactions
  */
 class HaloTransactionController extends Controller
 {

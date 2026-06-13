@@ -15,13 +15,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Controller for managing financial transactions via API.
+ * Financial transactions — CRUD, photo attachments, and dashboard data.
  *
- * Provides CRUD operations for transactions including creation, retrieval,
- * updating, and deletion. Also handles transaction photo management and
- * provides dashboard data with financial summaries and trends.
+ * All write operations update the account balance and ledger summaries
+ * atomically. Halo-sourced transactions are immutable (Standard 5).
  *
- * Uses authorization policies to control access to transaction resources.
+ * @tags Transactions
  */
 class TransactionController extends Controller
 {
