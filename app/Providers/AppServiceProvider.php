@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Observers\UserObserver;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
+use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 
@@ -32,10 +33,14 @@ class AppServiceProvider extends ServiceProvider
             $openApi->info->license = [
                 'name' => 'Proprietary',
             ];
+
+            $openApi->secure(
+                SecurityScheme::http('bearer')
+            );
         });
-	User::observe(UserObserver::class);
-	// Always generate secure asset URLs, fully resolving the Mixed Content issue.
-	if (config('app.env') === 'staging' || config('app.env') === 'production') {
+        User::observe(UserObserver::class);
+        // Always generate secure asset URLs, fully resolving the Mixed Content issue.
+        if (config('app.env') === 'staging' || config('app.env') === 'production') {
             URL::forceScheme('https');
         }
     }
