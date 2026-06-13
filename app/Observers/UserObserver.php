@@ -4,6 +4,8 @@ namespace App\Observers;
 
 use App\Models\Account;
 use App\Models\User;
+use App\Services\HaloPointLedgerService;
+use Illuminate\Support\Facades\DB;
 
 class UserObserver
 {
@@ -13,14 +15,19 @@ class UserObserver
      */
     public function created(User $user): void
     {
-        Account::create([
-            'user_id' => $user->id,
-            'name' => 'My Wallet',
-            'balance' => 0.00,
-            'currency' => 'USD',
-            'icon' => '💰',
-            'color' => '#3b82f6',
-        ]);
+        DB::transaction(function () use ($user) {
+            Account::firstOrCreate(
+                ['user_id' => $user->id, 'name' => 'My Wallet'],
+                [
+                    'balance' => 0.00,
+                    'currency' => 'USD',
+                    'icon' => '💰',
+                    'color' => '#3b82f6',
+                ]
+            );
+
+            app(HaloPointLedgerService::class)->createGenesisBlock($user);
+        });
     }
 
     /**

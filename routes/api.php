@@ -75,83 +75,86 @@ Route::get('/languages/{code}/translations', [LanguageController::class, 'getTra
 Route::middleware('auth:api')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::post('/auth/refresh', [AuthController::class, 'refresh']);
-    Route::get('/auth/me', [AuthController::class, 'me']);
 
-    // Logo management
-    Route::post('/logo/upload', [LogoController::class, 'uploadLogo']);
+    Route::middleware('halo.integrity')->group(function () {
+        Route::get('/auth/me', [AuthController::class, 'me']);
 
-    // Dashboard
-    Route::get('/dashboard', [TransactionController::class, 'getDashboardData']);
+        // Logo management
+        Route::post('/logo/upload', [LogoController::class, 'uploadLogo']);
 
-    // Halo Attendance
-    Route::get('/attendance/status', [AttendanceController::class, 'status']);
-    Route::post('/attendance/start', [AttendanceController::class, 'start']);
-    Route::post('/attendance/complete', [AttendanceController::class, 'complete']);
-    Route::post('/attendance/kill', [AttendanceController::class, 'kill']);
+        // Dashboard
+        Route::get('/dashboard', [TransactionController::class, 'getDashboardData']);
 
-    // Halo Session (Standard 9 — persistent countdown state)
-    Route::get('/halo/current-session', [HaloSessionController::class, 'current']);
+        // Halo Attendance
+        Route::get('/attendance/status', [AttendanceController::class, 'status']);
+        Route::post('/attendance/start', [AttendanceController::class, 'start']);
+        Route::post('/attendance/complete', [AttendanceController::class, 'complete']);
+        Route::post('/attendance/kill', [AttendanceController::class, 'kill']);
 
-    // Halo-aware transactions (Standards 2, 4, 5, 7, 8, 11) — POST + GET only.
-    Route::get('/halo/transactions', [HaloTransactionController::class, 'index']);
-    Route::post('/halo/transactions', [HaloTransactionController::class, 'store']);
+        // Halo Session (Standard 9 — persistent countdown state)
+        Route::get('/halo/current-session', [HaloSessionController::class, 'current']);
 
-    // Hourly rate (Standard 3 — 6-month governance)
-    Route::post('/user/hourly-rate', [HourlyRateController::class, 'update']);
-    Route::get('/user/hourly-rate/history', [HourlyRateController::class, 'history']);
+        // Halo-aware transactions (Standards 2, 4, 5, 7, 8, 11) — POST + GET only.
+        Route::get('/halo/transactions', [HaloTransactionController::class, 'index']);
+        Route::post('/halo/transactions', [HaloTransactionController::class, 'store']);
 
-    // Commitments (Standard 10 — secure asset uploads)
-    Route::get('/commitments', [CommitmentController::class, 'index']);
-    Route::get('/commitments/{commitment}', [CommitmentController::class, 'show']);
-    Route::post('/commitments', [CommitmentController::class, 'store']);
-    Route::post('/commitments/{commitment}/complete', [CommitmentController::class, 'complete']);
-    Route::post('/commitments/{commitment}/kill', [CommitmentController::class, 'kill']);
+        // Hourly rate (Standard 3 — 6-month governance)
+        Route::post('/user/hourly-rate', [HourlyRateController::class, 'update']);
+        Route::get('/user/hourly-rate/history', [HourlyRateController::class, 'history']);
 
-    // Categories
-    Route::get('/categories', [CategoryController::class, 'index']);
+        // Commitments (Standard 10 — secure asset uploads)
+        Route::get('/commitments', [CommitmentController::class, 'index']);
+        Route::get('/commitments/{commitment}', [CommitmentController::class, 'show']);
+        Route::post('/commitments', [CommitmentController::class, 'store']);
+        Route::post('/commitments/{commitment}/complete', [CommitmentController::class, 'complete']);
+        Route::post('/commitments/{commitment}/kill', [CommitmentController::class, 'kill']);
 
-    // Accounts
-    Route::apiResource('accounts', AccountController::class);
+        // Categories
+        Route::get('/categories', [CategoryController::class, 'index']);
 
-    // Transactions
-    Route::apiResource('transactions', TransactionController::class);
-    Route::post('/transactions/{transaction}/photos', [TransactionController::class, 'addPhoto']);
-    Route::delete('/photos/{photoId}', [TransactionController::class, 'deletePhoto']);
+        // Accounts
+        Route::apiResource('accounts', AccountController::class);
 
-    // Language preference
-    Route::post('/user/language', [LanguageController::class, 'updateUserLanguage']);
+        // Transactions
+        Route::apiResource('transactions', TransactionController::class);
+        Route::post('/transactions/{transaction}/photos', [TransactionController::class, 'addPhoto']);
+        Route::delete('/photos/{photoId}', [TransactionController::class, 'deletePhoto']);
 
-    // User Profile
-    Route::get('/profile', [ProfileController::class, 'show']);
-    Route::put('/profile', [ProfileController::class, 'update']);
+        // Language preference
+        Route::post('/user/language', [LanguageController::class, 'updateUserLanguage']);
 
-    // CSV Import & Export
-    Route::post('/csv/import', [CsvController::class, 'import']);
-    Route::get('/csv/export', [CsvController::class, 'export']);
+        // User Profile
+        Route::get('/profile', [ProfileController::class, 'show']);
+        Route::put('/profile', [ProfileController::class, 'update']);
 
-    // Payments & Licenses
-    Route::post('/payments/create-intent', [PaymentController::class, 'createPaymentIntent']);
-    Route::get('/payments/info', [PaymentController::class, 'getPaymentInfo']);
-    Route::get('/payments/history', [PaymentController::class, 'getPaymentHistory']);
-    Route::get('/payments/methods', [PaymentController::class, 'getPaymentMethods']);
-    Route::post('/payments/methods', [PaymentController::class, 'addPaymentMethod']);
-    Route::put('/payments/methods/{id}', [PaymentController::class, 'updatePaymentMethod']);
-    Route::delete('/payments/methods/{id}', [PaymentController::class, 'deletePaymentMethod']);
-    Route::post('/payments/methods/{id}/default', [PaymentController::class, 'setDefaultPaymentMethod']);
-    Route::get('/licenses/my-licenses', [PaymentController::class, 'myLicenses']);
+        // CSV Import & Export
+        Route::post('/csv/import', [CsvController::class, 'import']);
+        Route::get('/csv/export', [CsvController::class, 'export']);
 
-    // Participants & Invitations
-    Route::post('/participants/invite', [ParticipantController::class, 'invite']);
-    Route::post('/invitations/{token}/accept', [ParticipantController::class, 'acceptInvitation']);
-    Route::get('/accounts/{accountId}/participants', [ParticipantController::class, 'listParticipants']);
-    Route::delete('/accounts/{accountId}/participants/{userId}', [ParticipantController::class, 'removeParticipant']);
+        // Payments & Licenses
+        Route::post('/payments/create-intent', [PaymentController::class, 'createPaymentIntent']);
+        Route::get('/payments/info', [PaymentController::class, 'getPaymentInfo']);
+        Route::get('/payments/history', [PaymentController::class, 'getPaymentHistory']);
+        Route::get('/payments/methods', [PaymentController::class, 'getPaymentMethods']);
+        Route::post('/payments/methods', [PaymentController::class, 'addPaymentMethod']);
+        Route::put('/payments/methods/{id}', [PaymentController::class, 'updatePaymentMethod']);
+        Route::delete('/payments/methods/{id}', [PaymentController::class, 'deletePaymentMethod']);
+        Route::post('/payments/methods/{id}/default', [PaymentController::class, 'setDefaultPaymentMethod']);
+        Route::get('/licenses/my-licenses', [PaymentController::class, 'myLicenses']);
 
-    // Analytics
-    Route::get('/analytics/summary', [AnalyticsController::class, 'getSummary']);
-    Route::get('/analytics/category-breakdown', [AnalyticsController::class, 'getCategoryBreakdown']);
-    Route::get('/analytics/trends', [AnalyticsController::class, 'getTrends']);
+        // Participants & Invitations
+        Route::post('/participants/invite', [ParticipantController::class, 'invite']);
+        Route::post('/invitations/{token}/accept', [ParticipantController::class, 'acceptInvitation']);
+        Route::get('/accounts/{accountId}/participants', [ParticipantController::class, 'listParticipants']);
+        Route::delete('/accounts/{accountId}/participants/{userId}', [ParticipantController::class, 'removeParticipant']);
+
+        // Analytics
+        Route::get('/analytics/summary', [AnalyticsController::class, 'getSummary']);
+        Route::get('/analytics/category-breakdown', [AnalyticsController::class, 'getCategoryBreakdown']);
+        Route::get('/analytics/trends', [AnalyticsController::class, 'getTrends']);
+    });
 });
-Route::middleware('auth:api')->prefix('saving-tracker')->group(function() {
+Route::middleware(['auth:api', 'halo.integrity'])->prefix('saving-tracker')->group(function() {
     Route::apiResource('habits', \App\Http\Controllers\Api\SavingTracker\HabitController::class);
     Route::post('tracking/toggle', [\App\Http\Controllers\Api\SavingTracker\HabitTrackingController::class, 'toggle']);
     Route::get('tracking/{habitId}', [\App\Http\Controllers\Api\SavingTracker\HabitTrackingController::class, 'getTracking']);
