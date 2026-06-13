@@ -100,7 +100,6 @@ MD,
         MiddlewareAuthSecurityStrategy::class,
         [
             'middleware' => ['auth', 'auth:*'],
-            'scheme' => SecurityScheme::http('bearer'),
         ],
     ],
 ];
