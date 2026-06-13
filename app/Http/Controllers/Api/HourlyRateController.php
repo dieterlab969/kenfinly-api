@@ -17,12 +17,12 @@ class HourlyRateController extends Controller
     public function update(UpdateHourlyRateRequest $request): JsonResponse
     {
         $user = auth('api')->user();
-        $change = $this->service->update($user, (int) $request->validated('hourly_rate'));
+        $updatedUser = $this->service->update($user, (int) $request->validated('hourly_rate'));
 
         return response()->json([
             'success' => true,
-            'data' => new HourlyRateChangeResource($change),
-        ], 201);
+            'user' => $updatedUser,
+        ]);
     }
 
     public function history(): JsonResponse

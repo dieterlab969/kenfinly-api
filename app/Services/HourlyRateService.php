@@ -3,22 +3,19 @@
 namespace App\Services;
 
 use App\Models\User;
-use App\Models\UserHourlyRateChange;
+use App\Models\UserRateLog;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Standard 3 — Strict 6-Month Hourly Rate Governance.
- *
- * Enforces an immutable, append-only audit trail of rate changes.
- * No bypass; the most recent change must be ≥ 180 days old before another is allowed.
- */
 class HourlyRateService
 {
-    public const LOCK_DAYS = 180;
+    private const REVIEW_WINDOW_H1 = 'H1';
 
-    public function update(User $user, int $newRateMinor): UserHourlyRateChange
+    private const REVIEW_WINDOW_H2 = 'H2';
+
+    public function update(User $user, int $newRateMinor): User
     {
         if ($newRateMinor < 1) {
             throw ValidationException::withMessages([
@@ -28,48 +25,62 @@ class HourlyRateService
 
         return DB::transaction(function () use ($user, $newRateMinor) {
             $lockedUser = User::whereKey($user->id)->lockForUpdate()->firstOrFail();
+            $currentDate = $this->currentReviewDate($lockedUser);
+            $allowanceYear = (int) $currentDate->year;
+            $reviewWindow = $this->resolveReviewWindow($currentDate);
 
-            $latestChange = UserHourlyRateChange::where('user_id', $lockedUser->id)
-                ->orderByDesc('changed_at')
-                ->first();
+            $existingWindowLog = UserRateLog::where('user_id', $lockedUser->id)
+                ->where('allowance_year', $allowanceYear)
+                ->where('review_window', $reviewWindow)
+                ->exists();
 
-            $now = CarbonImmutable::now('UTC');
-
-            if ($latestChange) {
-                $nextAllowed = CarbonImmutable::parse($latestChange->next_allowed_at)->utc();
-                if ($now->lt($nextAllowed)) {
-                    throw ValidationException::withMessages([
-                        'hourly_rate' => 'You can change your hourly rate again on ' . $nextAllowed->toIso8601String() . '.',
-                    ])->status(422);
-                }
+            if ($existingWindowLog) {
+                throw new HttpResponseException(response()->json([
+                    'status' => 'error',
+                    'code' => 'RATE_UPDATE_WINDOW_LOCKED',
+                    'message' => 'Bạn đã cập nhật Mức định giá bản thân trong kỳ review này. Lần cập nhật tiếp theo sẽ được mở vào kỳ review tiếp theo.',
+                ], 403));
             }
 
             $oldRate = (int) $lockedUser->hourly_rate;
-            $nextAllowed = $now->addDays(self::LOCK_DAYS);
 
-            $change = UserHourlyRateChange::create([
+            UserRateLog::create([
                 'user_id' => $lockedUser->id,
-                'old_hourly_rate' => $oldRate,
-                'new_hourly_rate' => $newRateMinor,
-                'changed_at' => $now,
-                'next_allowed_at' => $nextAllowed,
+                'old_rate' => $oldRate,
+                'new_rate' => $newRateMinor,
+                'allowance_year' => $allowanceYear,
+                'review_window' => $reviewWindow,
             ]);
 
             $lockedUser->forceFill([
                 'hourly_rate' => $newRateMinor,
-                'rate_updated_at' => $now,
-                'hourly_rate_locked_until' => $nextAllowed,
+                'rate_updated_at' => $currentDate,
+                'hourly_rate_locked_until' => null,
             ])->save();
 
-            return $change;
+            return $lockedUser->fresh();
         });
     }
 
     public function history(User $user, int $limit = 25): \Illuminate\Support\Collection
     {
-        return UserHourlyRateChange::where('user_id', $user->id)
-            ->orderByDesc('changed_at')
+        return UserRateLog::where('user_id', $user->id)
+            ->orderByDesc('id')
             ->limit($limit)
             ->get();
+    }
+
+    private function currentReviewDate(User $user): CarbonImmutable
+    {
+        $timezone = $user->timezone ?: config('app.timezone', 'UTC');
+
+        return CarbonImmutable::now($timezone);
+    }
+
+    private function resolveReviewWindow(CarbonImmutable $currentDate): string
+    {
+        return $currentDate->month <= 6
+            ? self::REVIEW_WINDOW_H1
+            : self::REVIEW_WINDOW_H2;
     }
 }

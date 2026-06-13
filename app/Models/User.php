@@ -112,12 +112,22 @@ class User extends Authenticatable implements JWTSubject
 
     public function hourlyRateChanges(): HasMany
     {
-        return $this->hasMany(UserHourlyRateChange::class);
+        return $this->hasMany(UserRateLog::class);
     }
 
     public function commitments(): HasMany
     {
         return $this->hasMany(Commitment::class);
+    }
+
+    public function pomodoroSessions(): HasMany
+    {
+        return $this->hasMany(PomodoroSession::class);
+    }
+
+    public function pomodoroActiveState(): HasMany
+    {
+        return $this->hasMany(PomodoroActiveState::class);
     }
 
     public function ledgerDailySummaries(): HasMany
