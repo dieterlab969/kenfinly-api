@@ -3,5 +3,5 @@
 - [Photo upload field name](photo-upload.md) — POST /api/transactions/{id}/photos uses field `photo` (singular, not `photos`); intervention/image must be installed for this route to work
 - [Language model required field](language-model.md) — Language::create() requires `native_name` (NOT NULL); always include name, native_name, code, is_active, is_default
 - [AddTransactionModal defaultType](add-transaction-modal.md) — accepts optional `defaultType` prop; useEffect resets type on open; added to support FAB income/expense pre-selection
----
 - [Halo Invisible Design](halo-invisible-design.md) — 12 PM threshold logic, auto-close, halo_histories table, frontend start_time+duration pattern.
+- [Scramble docs routing](scramble-docs-routing.md) — /docs/* must be excluded from SPA catch-all in web.php; use where('any', '^(?!docs).*') on the catch-all route

@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Controller for managing user achievements in the Saving Habit Tracker.
+ * Saving habit achievements — catalogue and unlocked milestones.
+ *
+ * @tags Saving Tracker — Achievements
  */
 class AchievementController extends Controller
 {

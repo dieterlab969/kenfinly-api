@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
+/**
+ * Site logo management (authenticated upload, public retrieval).
+ *
+ * @tags Branding
+ */
 class LogoController extends Controller
 {
     /**

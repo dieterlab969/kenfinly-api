@@ -8,7 +8,12 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Class WordPressController
+ * Headless WordPress CMS proxy.
+ *
+ * Forwards requests to the configured WordPress REST API and returns
+ * the results as JSON. No authentication required.
+ *
+ * @tags WordPress CMS
  */
 class WordPressController extends Controller
 {

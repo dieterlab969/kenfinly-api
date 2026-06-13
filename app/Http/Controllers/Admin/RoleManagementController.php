@@ -7,6 +7,9 @@ use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @tags Admin — Roles
+ */
 class RoleManagementController extends Controller
 {
     public function index(Request $request)

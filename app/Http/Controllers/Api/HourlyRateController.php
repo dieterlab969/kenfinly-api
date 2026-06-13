@@ -9,11 +9,11 @@ use App\Services\HourlyRateService;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Expose hourly rate governance endpoints for authenticated users.
+ * User hourly rate management (Halo engine valuation).
  *
- * The controller delegates all semi-annual review-window enforcement to the
- * hourly rate service and returns normalized success payloads for updates and
- * history retrieval.
+ * Updates are subject to semi-annual review-window enforcement.
+ *
+ * @tags Halo — Hourly Rate
  */
 class HourlyRateController extends Controller
 {

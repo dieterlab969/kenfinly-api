@@ -10,12 +10,23 @@ use App\Services\CommitmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Manage Halo Commitments — time-boxed financial goals tracked by the Halo engine.
+ *
+ * @tags Halo — Commitments
+ */
 class CommitmentController extends Controller
 {
     public function __construct(private readonly CommitmentService $service)
     {
     }
 
+    /**
+     * List commitments for the authenticated user.
+     *
+     * @queryParam status string Filter by status (active|completed|failed). Example: active
+     * @queryParam per_page int Results per page (1–100, default 20). Example: 20
+     */
     public function index(Request $request): JsonResponse
     {
         $user = auth('api')->user();

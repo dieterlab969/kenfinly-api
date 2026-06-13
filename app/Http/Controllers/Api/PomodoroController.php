@@ -8,11 +8,13 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Handle Pomodoro timer lifecycle endpoints for guest and registered users.
+ * Pomodoro timer lifecycle for guest and registered users.
  *
- * This controller delegates all timer state decisions to the Pomodoro sync service
- * and returns JSON payloads that the frontend can use to start, restore, or
- * finalize a Pomodoro session across devices.
+ * Delegates all timer-state decisions to the Pomodoro sync service
+ * and returns JSON payloads that the frontend uses to start, restore, or
+ * finalize a session across devices.
+ *
+ * @tags Pomodoro Timer
  */
 class PomodoroController extends Controller
 {
