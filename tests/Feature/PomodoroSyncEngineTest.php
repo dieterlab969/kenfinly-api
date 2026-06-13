@@ -6,10 +6,18 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * Verify Pomodoro timer sync behavior for guests and registered users.
+ */
 class PomodoroSyncEngineTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Ensure a registered user's running timer restores with the expected remaining time.
+     *
+     * @return void
+     */
     public function test_registered_user_restores_running_timer_with_900_seconds_remaining_after_10_minutes(): void
     {
         $user = User::factory()->create([
@@ -40,6 +48,11 @@ class PomodoroSyncEngineTest extends TestCase
             ]);
     }
 
+    /**
+     * Confirm that guests receive a local-storage-only payload and trigger no database writes.
+     *
+     * @return void
+     */
     public function test_guest_requests_bypass_database_writes_and_return_local_storage_flag(): void
     {
         $this->postJson('/api/v1/pomodoro/start')

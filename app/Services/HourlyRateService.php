@@ -9,12 +9,40 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Enforce semi-annual hourly rate review governance.
+ *
+ * The service applies the UC004 rule that each user may update the native
+ * hourly_rate field at most once per fixed review window (H1 or H2) in the
+ * user's own timezone, while recording an append-only audit log.
+ */
 class HourlyRateService
 {
+    /**
+     * Fixed review window for January through June.
+     */
     private const REVIEW_WINDOW_H1 = 'H1';
 
+    /**
+     * Fixed review window for July through December.
+     */
     private const REVIEW_WINDOW_H2 = 'H2';
 
+    /**
+     * Update the user's hourly rate within the current review window.
+     *
+     * The method locks the user row, determines the active semi-annual window in
+     * the user's timezone, rejects duplicate changes within that window, writes a
+     * rate log entry, and persists the updated native hourly_rate value.
+     *
+     * @param User $user User whose hourly rate is being updated.
+     * @param int $newRateMinor New hourly rate in minor units.
+     *
+     * @return User Refreshed user model containing the persisted rate.
+     *
+     * @throws HttpResponseException When the current review window has already been used.
+     * @throws ValidationException When the provided rate is not a positive integer.
+     */
     public function update(User $user, int $newRateMinor): User
     {
         if ($newRateMinor < 1) {
@@ -62,6 +90,14 @@ class HourlyRateService
         });
     }
 
+    /**
+     * Return recent hourly rate change history for a user.
+     *
+     * @param User $user User whose governance log should be retrieved.
+     * @param int $limit Maximum number of most recent log rows to return.
+     *
+     * @return \Illuminate\Support\Collection<int, UserRateLog> Ordered audit log entries.
+     */
     public function history(User $user, int $limit = 25): \Illuminate\Support\Collection
     {
         return UserRateLog::where('user_id', $user->id)
@@ -70,6 +106,13 @@ class HourlyRateService
             ->get();
     }
 
+    /**
+     * Resolve the current date in the user's configured timezone.
+     *
+     * @param User $user User whose timezone determines governance windows.
+     *
+     * @return CarbonImmutable Current time in the user's effective timezone.
+     */
     private function currentReviewDate(User $user): CarbonImmutable
     {
         $timezone = $user->timezone ?: config('app.timezone', 'UTC');
@@ -77,6 +120,13 @@ class HourlyRateService
         return CarbonImmutable::now($timezone);
     }
 
+    /**
+     * Map a date to its fixed semi-annual review window.
+     *
+     * @param CarbonImmutable $currentDate Current user-local date.
+     *
+     * @return string One of the REVIEW_WINDOW_* constants.
+     */
     private function resolveReviewWindow(CarbonImmutable $currentDate): string
     {
         return $currentDate->month <= 6

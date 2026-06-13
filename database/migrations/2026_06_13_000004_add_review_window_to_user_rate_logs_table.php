@@ -8,6 +8,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Add fixed semi-annual review windows to existing hourly rate logs.
+     *
+     * Existing rows are backfilled by interpreting their creation timestamps in
+     * the user's timezone so historical governance data remains meaningful.
+     *
+     * @return void
+     */
     public function up(): void
     {
         Schema::table('user_rate_logs', function (Blueprint $table) {
@@ -38,6 +46,11 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Remove the fixed semi-annual review window column and index.
+     *
+     * @return void
+     */
     public function down(): void
     {
         Schema::table('user_rate_logs', function (Blueprint $table) {

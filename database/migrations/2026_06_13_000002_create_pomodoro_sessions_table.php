@@ -6,6 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Create the historical Pomodoro sessions table.
+     *
+     * Completed and interrupted focus blocks are stored here so the application
+     * can rebuild analytics independently from the single active timer state.
+     *
+     * @return void
+     */
     public function up(): void
     {
         Schema::create('pomodoro_sessions', function (Blueprint $table) {
@@ -20,6 +28,11 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Drop the historical Pomodoro sessions table.
+     *
+     * @return void
+     */
     public function down(): void
     {
         Schema::dropIfExists('pomodoro_sessions');

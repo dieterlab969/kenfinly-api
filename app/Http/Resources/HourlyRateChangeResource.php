@@ -5,8 +5,22 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * Transform hourly rate governance logs into API-friendly payloads.
+ *
+ * This resource supports both the legacy hourly-rate change model and the new
+ * semi-annual review-window log format so history endpoints can evolve without
+ * breaking response structure.
+ */
 class HourlyRateChangeResource extends JsonResource
 {
+    /**
+     * Convert the resource into an array.
+     *
+     * @param Request $request Current HTTP request instance.
+     *
+     * @return array<string, int|string|null> Normalized hourly rate change data.
+     */
     public function toArray(Request $request): array
     {
         $oldRate = $this->old_rate ?? $this->old_hourly_rate;

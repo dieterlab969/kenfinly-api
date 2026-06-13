@@ -8,12 +8,31 @@ use App\Http\Resources\HourlyRateChangeResource;
 use App\Services\HourlyRateService;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * Expose hourly rate governance endpoints for authenticated users.
+ *
+ * The controller delegates all semi-annual review-window enforcement to the
+ * hourly rate service and returns normalized success payloads for updates and
+ * history retrieval.
+ */
 class HourlyRateController extends Controller
 {
+    /**
+     * Create a new controller instance.
+     *
+     * @param HourlyRateService $service Service responsible for governance enforcement.
+     */
     public function __construct(private readonly HourlyRateService $service)
     {
     }
 
+    /**
+     * Update the authenticated user's hourly rate.
+     *
+     * @param UpdateHourlyRateRequest $request Validated hourly rate update request.
+     *
+     * @return JsonResponse JSON response containing the refreshed user payload.
+     */
     public function update(UpdateHourlyRateRequest $request): JsonResponse
     {
         $user = auth('api')->user();
@@ -25,6 +44,11 @@ class HourlyRateController extends Controller
         ]);
     }
 
+    /**
+     * Return hourly rate change history for the authenticated user.
+     *
+     * @return JsonResponse JSON response containing normalized change-log entries.
+     */
     public function history(): JsonResponse
     {
         $user = auth('api')->user();

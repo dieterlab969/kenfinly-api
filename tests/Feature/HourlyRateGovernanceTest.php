@@ -8,10 +8,18 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
+/**
+ * Verify semi-annual hourly rate governance behavior.
+ */
 class HourlyRateGovernanceTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Confirm that a user may update the hourly rate once in H1 and once in H2.
+     *
+     * @return void
+     */
     public function test_user_can_update_hourly_rate_once_in_each_review_window(): void
     {
         $user = User::factory()->create([
@@ -61,6 +69,11 @@ class HourlyRateGovernanceTest extends TestCase
         ]);
     }
 
+    /**
+     * Ensure that the second update attempt inside the same review window is rejected.
+     *
+     * @return void
+     */
     public function test_second_update_in_same_review_window_is_blocked_with_correct_error(): void
     {
         $user = User::factory()->create([
@@ -97,6 +110,11 @@ class HourlyRateGovernanceTest extends TestCase
         $this->assertSame(1, DB::table('user_rate_logs')->where('user_id', $user->id)->count());
     }
 
+    /**
+     * Verify that the review window boundary is computed using the user's timezone.
+     *
+     * @return void
+     */
     public function test_review_window_is_determined_from_user_timezone(): void
     {
         $user = User::factory()->create([

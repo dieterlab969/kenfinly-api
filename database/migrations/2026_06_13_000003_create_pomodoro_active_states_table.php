@@ -6,6 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Create the active Pomodoro state table.
+     *
+     * Each user may own at most one active state row, which enables the server
+     * to restore a running timer accurately across devices.
+     *
+     * @return void
+     */
     public function up(): void
     {
         Schema::create('pomodoro_active_states', function (Blueprint $table) {
@@ -18,6 +26,11 @@ return new class extends Migration
         });
     }
 
+    /**
+     * Drop the active Pomodoro state table.
+     *
+     * @return void
+     */
     public function down(): void
     {
         Schema::dropIfExists('pomodoro_active_states');

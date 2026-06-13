@@ -14,7 +14,8 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * User model representing an application user.
  *
  * Represents a user account with authentication, authorization, and relationships
- * to various application entities including accounts, subscriptions, payments, and more.
+ * to various application entities including accounts, subscriptions, payments,
+ * Halo ledger entries, hourly rate governance logs, and Pomodoro state.
  * Implements JWT authentication for API access.
  */
 class User extends Authenticatable implements JWTSubject
@@ -90,7 +91,7 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Return a key value array, containing any custom claims to be added to the JWT.
      *
-     * @return array
+     * @return array<string, mixed>
      */
     public function getJWTCustomClaims()
     {
@@ -99,42 +100,82 @@ class User extends Authenticatable implements JWTSubject
 
     /**
      * Get the user's accounts.
+     *
+     * @return HasMany Relationship to the user's accounts.
      */
     public function accounts(): HasMany
     {
         return $this->hasMany(Account::class);
     }
 
+    /**
+     * Get the user's attendance records.
+     *
+     * @return HasMany Relationship to the user's attendances.
+     */
     public function attendances(): HasMany
     {
         return $this->hasMany(Attendance::class);
     }
 
+    /**
+     * Get the user's hourly rate governance log entries.
+     *
+     * @return HasMany Relationship to append-only hourly rate change logs.
+     */
     public function hourlyRateChanges(): HasMany
     {
         return $this->hasMany(UserRateLog::class);
     }
 
+    /**
+     * Get the user's commitments.
+     *
+     * @return HasMany Relationship to the user's commitments.
+     */
     public function commitments(): HasMany
     {
         return $this->hasMany(Commitment::class);
     }
 
+    /**
+     * Get the user's completed or interrupted Pomodoro sessions.
+     *
+     * @return HasMany Relationship to Pomodoro session history.
+     */
     public function pomodoroSessions(): HasMany
     {
         return $this->hasMany(PomodoroSession::class);
     }
 
+    /**
+     * Get the user's persisted active Pomodoro state rows.
+     *
+     * The current implementation stores a single row keyed by user_id even though
+     * the relation type remains has-many.
+     *
+     * @return HasMany Relationship to persisted active Pomodoro state.
+     */
     public function pomodoroActiveState(): HasMany
     {
         return $this->hasMany(PomodoroActiveState::class);
     }
 
+    /**
+     * Get the user's daily ledger summaries.
+     *
+     * @return HasMany Relationship to Halo ledger daily summaries.
+     */
     public function ledgerDailySummaries(): HasMany
     {
         return $this->hasMany(LedgerDailySummary::class);
     }
 
+    /**
+     * Get the user's Halo point ledger entries.
+     *
+     * @return HasMany Relationship to the append-only Halo ledger.
+     */
     public function haloPointLedgerEntries(): HasMany
     {
         return $this->hasMany(HaloPointLedger::class);
@@ -142,6 +183,8 @@ class User extends Authenticatable implements JWTSubject
 
     /**
      * Get the roles that belong to the user.
+     *
+     * @return BelongsToMany Relationship to the user's roles.
      */
     public function roles(): BelongsToMany
     {
@@ -161,8 +204,9 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Check if the user has a specific role.
      *
-     * @param string $roleName
-     * @return bool
+     * @param string $roleName Role name to look up.
+     *
+     * @return bool True when the user has the requested role.
      */
     public function hasRole(string $roleName): bool
     {
@@ -172,8 +216,9 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Check if the user has any of the given roles.
      *
-     * @param array $roles
-     * @return bool
+     * @param array $roles Role names to match.
+     *
+     * @return bool True when the user has at least one of the supplied roles.
      */
     public function hasAnyRole(array $roles): bool
     {
@@ -183,7 +228,8 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Assign a role to the user.
      *
-     * @param string|Role $role
+     * @param string|Role $role Role instance or role name.
+     *
      * @return void
      */
     public function assignRole(string|Role $role): void
@@ -198,7 +244,8 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Remove a role from the user.
      *
-     * @param string|Role $role
+     * @param string|Role $role Role instance or role name.
+     *
      * @return void
      */
     public function removeRole(string|Role $role): void
@@ -331,9 +378,12 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Check if the user has suspended status.
+     * Check whether the user is suspended by either status or explicit flag.
      *
-     * @return bool True if user status is 'suspended', false otherwise.
+     * Halo integrity enforcement marks both fields, so callers should treat
+     * either signal as authoritative.
+     *
+     * @return bool True if the user is suspended.
      */
     public function isSuspended(): bool
     {
