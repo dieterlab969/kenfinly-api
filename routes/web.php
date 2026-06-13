@@ -30,6 +30,7 @@ Route::get('/halo', function () {
     return view('welcome');
 });
 
+// Exclude /docs/* from the SPA catch-all so Scramble can serve the API documentation UI.
 Route::get('/{any}', function () {
     return view('welcome');
-})->where('any', '.*');
+})->where('any', '^(?!docs).*');

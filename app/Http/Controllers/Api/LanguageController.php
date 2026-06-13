@@ -7,8 +7,16 @@ use App\Models\Language;
 use App\Models\Translation;
 use Illuminate\Http\Request;
 
+/**
+ * Internationalisation — available languages and translations.
+ *
+ * @tags Languages & Translations
+ */
 class LanguageController extends Controller
 {
+    /**
+     * List all active languages.
+     */
     public function index()
     {
         $languages = Language::getActive();

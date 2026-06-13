@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Controller for managing saving habits.
+ * Saving habit management (CRUD for user-defined saving habits).
+ *
+ * @tags Saving Tracker — Habits
  */
 class HabitController extends Controller
 {

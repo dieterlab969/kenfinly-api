@@ -8,6 +8,11 @@ use App\Models\Language;
 use App\Models\Translation;
 use Illuminate\Http\Request;
 
+/**
+ * Transaction categories (read-only for regular users; managed by admins).
+ *
+ * @tags Categories
+ */
 class CategoryController extends Controller
 {
     /**

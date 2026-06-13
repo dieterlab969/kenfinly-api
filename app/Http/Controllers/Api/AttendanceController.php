@@ -9,12 +9,25 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Halo Attendance — clock-in / clock-out session management.
+ *
+ * Each attendance session contributes Halo points to the user's ledger.
+ *
+ * @tags Halo — Attendance
+ */
 class AttendanceController extends Controller
 {
     public function __construct(private readonly AttendanceService $attendanceService)
     {
     }
 
+    /**
+     * Get the current attendance status for the authenticated user.
+     *
+     * Returns the active session (if any) including start time, elapsed duration,
+     * and accumulated Halo points for the current session.
+     */
     public function status(): JsonResponse
     {
         logger()->info('AttendanceController.status called', ['user_id' => auth('api')->id()]);
