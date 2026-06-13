@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
             'beta.access' => \App\Http\Middleware\CheckBetaAccess::class,
             'halo.integrity' => \App\Http\Middleware\VerifyHaloPointLedgerIntegrity::class,
+            'pomodoro.acl' => \App\Http\Middleware\ResolvePomodoroAcl::class,
         ]);
         // Apply middleware to ALL web routes
         $middleware->web(append: [

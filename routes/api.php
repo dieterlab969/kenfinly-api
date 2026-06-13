@@ -36,6 +36,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PublicAnalyticsController;
 use App\Http\Controllers\Api\ConsentController;
 use App\Http\Controllers\Api\LogoController;
+use App\Http\Controllers\Api\PomodoroController;
 
 // Status / health endpoint (bypassed by CheckBetaAccess whitelist)
 Route::get('/status', function () {
@@ -56,6 +57,11 @@ Route::post('/waitlist', [\App\Http\Controllers\Api\WaitlistController::class, '
 Route::get('/auth/config', [AuthController::class, 'config']);
 Route::get('/settings/company', [PublicSettingsController::class, 'getCompanyInfo']);
 Route::get('/analytics/public-stats', [PublicAnalyticsController::class, 'getPublicStats']);
+Route::middleware('pomodoro.acl')->prefix('v1/pomodoro')->group(function () {
+    Route::post('/start', [PomodoroController::class, 'start']);
+    Route::get('/state', [PomodoroController::class, 'state']);
+    Route::post('/complete', [PomodoroController::class, 'complete']);
+});
 Route::prefix('consent')->group(function () {
     Route::post('/', [ConsentController::class, 'store']);
     Route::get('/', [ConsentController::class, 'show']);
@@ -98,9 +104,9 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/halo/transactions', [HaloTransactionController::class, 'index']);
         Route::post('/halo/transactions', [HaloTransactionController::class, 'store']);
 
-        // Hourly rate (Standard 3 — 6-month governance)
-        Route::post('/user/hourly-rate', [HourlyRateController::class, 'update']);
-        Route::get('/user/hourly-rate/history', [HourlyRateController::class, 'history']);
+        // Hourly rate governance
+        Route::put('/v1/user/hourly-rate', [HourlyRateController::class, 'update']);
+        Route::get('/v1/user/hourly-rate/history', [HourlyRateController::class, 'history']);
 
         // Commitments (Standard 10 — secure asset uploads)
         Route::get('/commitments', [CommitmentController::class, 'index']);
