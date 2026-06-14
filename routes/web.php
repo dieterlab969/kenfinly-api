@@ -23,10 +23,6 @@ Route::get('/_test_protected', fn () => response()->json(['ok' => true]));
 
 // Protected routes
 Route::get('/', function () {
-    return redirect('/halo');
-});
-
-Route::get('/halo', function () {
     return view('welcome');
 });
 
