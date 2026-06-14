@@ -10,25 +10,42 @@
 - **Content/Marketing**: WordPress is integrated as a headless CMS under `public/wordpress` and exposed through API routes.
 - **Deployment model**: Monolithic Laravel app with `routes/web.php` rendering the SPA fallback and `routes/api.php` handling REST API endpoints.
 
-## Frontend Structure and Organization
+## Frontend Structure and Organization (Updated for TSX Migration)
 
-- Frontend source is in `resources/js`.
-- Entry point: `resources/js/app.jsx` initializes global app config and wraps the SPA with React Router and optional Google reCAPTCHA.
-- Main application shell: `resources/js/components/App.jsx` defines public, authenticated, and super-admin routes.
-- Route protection: `ProtectedRoute.jsx` for authenticated users and `SuperAdminRoute.jsx` for super-admin-only administrative routes.
-- State/context providers:
-  - `AuthContext.jsx` manages authentication, login/register/logout, and token setup.
-  - `TranslationContext.jsx` loads translations through API and falls back to a manifest.
-  - `LogoContext.jsx` fetches brand logo assets.
-- API client:
-  - `resources/js/utils/api.js` creates a centralized axios instance with baseURL `/api` and JWT token injection.
-  - Some pages still use raw `axios` directly, creating inconsistent API client usage.
-- UI organization:
-  - `pages/` contains top-level views including public pages, admin pages, and the `halo` dashboard.
-  - `components/` contains reusable UI pieces, modals, forms, and layout wrappers.
-  - `components/admin/` and `pages/admin/` contain admin-management screens.
-  - `components/halo/` and `pages/halo/` contain the Halo habit/workflow experience.
-  - `components/subscription/` contains checkout and plan selection flows.
+- **Frontend source code is now located in** `resources/ts` (migrated from `resources/js`), reflecting the transition to TypeScript React (`.tsx` files).
+- **Entry point:**  
+  `resources/ts/app.tsx` initializes global app configuration and wraps the SPA with React Router and optional Google reCAPTCHA. This replaces the previous `app.jsx`.
+- **Main application shell:**  
+  `resources/ts/components/App.tsx` defines public, authenticated, and super-admin routes, updated to use strict typing and TypeScript interfaces.
+- **Route protection components:**
+  - `ProtectedRoute.tsx` handles route guarding for authenticated users.
+  - `SuperAdminRoute.tsx` restricts access to super-admin-only administrative routes.  
+    Both components now leverage TypeScript for enhanced type safety.
+- **State and context providers:**
+  - `AuthContext.tsx` manages authentication flows including login, registration, logout, and token management with typed context values.
+  - `TranslationContext.tsx` loads translations via API with fallback to a manifest, now typed for better reliability.
+  - `LogoContext.tsx` fetches brand logo assets with explicit typing.
+- **API client:**
+  - `resources/ts/utils/api.ts` creates a centralized Axios instance configured with baseURL `/api` and JWT token injection, fully typed.
+  - Note: Some legacy pages may still use raw `axios` calls directly, leading to inconsistent API client usage. Refactoring these is recommended to ensure uniformity and type safety.
+- **UI organization:**
+  - `pages/` contains top-level views including public pages, admin pages, and the `halo` dashboard, all migrated to `.tsx`.
+  - `components/` holds reusable UI elements, modals, forms, and layout wrappers, rewritten in TypeScript.
+  - `components/admin/` and `pages/admin/` contain admin-management screens, updated for TSX and strict typing.
+  - `components/halo/` and `pages/halo/` contain the Halo habit/workflow experience, fully migrated.
+  - `components/subscription/` contains checkout and plan selection flows, now with typed components and hooks.
+
+---
+
+### Notes on Migration Status and Next Steps
+
+- The previous frontend structure based on `.jsx` files is now **obsolete** following the migration plan to TSX. All new development and maintenance should be conducted in the TypeScript React codebase under `resources/ts`.
+- Ensure all components and utilities adhere to strict typing to maximize the benefits of the migration.
+- Prioritize refactoring legacy raw `axios` calls to use the centralized, typed API client for consistency and maintainability.
+- Review route protection and context providers to leverage TypeScript interfaces fully, improving developer experience and reducing runtime errors.
+- Maintain the Tailwind CSS integration within TSX files as per the migration roadmap to keep UI styling consistent and modern.
+
+---
 
 ## Backend Structure and Organization
 

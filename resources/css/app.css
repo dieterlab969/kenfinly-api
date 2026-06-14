@@ -7,6 +7,8 @@
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
 @source '../**/*.js';
+@source '../**/*.ts';
+@source '../**/*.tsx';
 
 @theme {
     --font-sans: 'Lora', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
