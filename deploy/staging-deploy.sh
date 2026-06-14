@@ -12,6 +12,22 @@ git pull --ff-only origin "$DEPLOY_BRANCH"
 
 php8.2 /usr/bin/composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
+==============================================================================
+# UPDATE: Activate NVM to force Node v20 (or newer)
+# ==============================================================================
+export NVM_DIR="$HOME/.nvm"
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+    source "$NVM_DIR/nvm.sh"
+    nvm use 20 || nvm install 20
+else
+    echo "WARNING: NVM not found. Using system default Node.js."
+fi
+# ==============================================================================
+
+# Clear old node_modules to avoid Tailwind (Oxide/Rust) binary conflicts when changing Node versions
+echo "Cleaning old build artifacts..."
+rm -rf node_modules package-lock.json
+
 if [ -f package-lock.json ]; then
     npm ci
 else
@@ -30,6 +46,7 @@ php8.2 artisan config:cache
 php8.2 artisan route:cache
 php8.2 artisan view:cache
 
+# Ensure PM2 runs with the new Node environment using --update-env
 pm2 startOrReload ecosystem.config.cjs --update-env
 pm2 save
 
