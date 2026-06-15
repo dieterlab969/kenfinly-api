@@ -5,18 +5,27 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "php:dev": "php -S 0.0.0.0:5000 server.php"
+        "php:dev": "php -S 0.0.0.0:5000 server.php",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/react": "^16.3.2",
+        "@testing-library/user-event": "^14.6.1",
         "@types/node": "^22.0.0",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
+        "@vitest/coverage-v8": "^4.1.9",
         "axios": "^1.11.0",
+        "jsdom": "^29.1.1",
         "laravel-vite-plugin": "^2.0.0",
         "tailwindcss": "^4.0.0",
         "typescript": "^5.0.0",
-        "vite": "^7.0.7"
+        "vite": "^7.0.7",
+        "vitest": "^4.1.9"
     },
     "dependencies": {
         "@vitejs/plugin-react": "^5.1.0",
