@@ -12,7 +12,7 @@ git pull --ff-only origin "$DEPLOY_BRANCH"
 
 php8.2 /usr/bin/composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
-#==============================================================================
+# ==============================================================================
 # UPDATE: Activate NVM to force Node v20 (or newer)
 # ==============================================================================
 export NVM_DIR="$HOME/.nvm"
