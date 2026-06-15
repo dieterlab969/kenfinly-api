@@ -13,6 +13,7 @@ import AccountSettingsModal from '../components/AccountSettingsModal';
 import PaymentInfoModal from '../components/PaymentInfoModal';
 import PaymentHistoryModal from '../components/PaymentHistoryModal';
 import TransactionDetailModal from '../components/TransactionDetailModal';
+import EditTransactionModal from '../components/EditTransactionModal';
 import MonthlySummaryCard from '../components/dashboard/MonthlySummaryCard';
 import BalanceTrendChart from '../components/dashboard/BalanceTrendChart';
 import AttendanceWidget from '../components/dashboard/AttendanceWidget';
@@ -31,6 +32,7 @@ const Dashboard = () => {
     const [showPaymentHistoryModal, setShowPaymentHistoryModal] = useState(false);
     const [selectedTransactionId, setSelectedTransactionId] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
 
     useEffect(() => {
         fetchDashboardData();
@@ -237,7 +239,7 @@ const Dashboard = () => {
                                     key={transaction.id}
                                     onClick={() => {
                                         setSelectedTransactionId(transaction.id);
-                                        setShowDetailModal(true);
+                                        setShowEditModal(true);
                                     }}
                                     className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
                                 >
@@ -329,6 +331,16 @@ const Dashboard = () => {
                 isOpen={showDetailModal}
                 onClose={() => {
                     setShowDetailModal(false);
+                    setSelectedTransactionId(null);
+                }}
+                transactionId={selectedTransactionId}
+                onUpdate={handleTransactionAdded}
+            />
+
+            <EditTransactionModal
+                isOpen={showEditModal}
+                onClose={() => {
+                    setShowEditModal(false);
                     setSelectedTransactionId(null);
                 }}
                 transactionId={selectedTransactionId}
