@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import Logo from '../assets/images/setting/logo.png'
 import { Link, useNavigate } from 'react-router-dom'
 import NotificationIcon from '../assets/svg/notification-icon.svg'
@@ -8,34 +8,210 @@ import icon2 from '../assets/images/tabbar/icon2.svg'
 import icon3 from '../assets/images/tabbar/icon3.svg'
 import icon4 from '../assets/images/tabbar/icon4.svg'
 import Setting from '../components/Setting.tsx'
+import api from '../../utils/api'
+import { formatCurrency, getCategoryIcon } from '../../constants/categories'
 
-type SpendingDay = { label: string; amount: number; isSpike?: boolean }
-type Transaction = { id: number; emoji: string; name: string; category: string; amount: number }
+type ApiAmount = string | number | null | undefined
+type TransactionType = 'income' | 'expense'
 
-const SPENDING_7DAYS: SpendingDay[] = [
-  { label: 'T2', amount: 1_200_000 },
-  { label: 'T3', amount: 850_000 },
-  { label: 'T4', amount: 2_100_000 },
-  { label: 'T5', amount: 3_800_000 },
-  { label: 'T6', amount: 6_342_324, isSpike: true },
-  { label: 'T7', amount: 1_500_000 },
-  { label: 'CN', amount: 920_000 },
-]
+interface UserProfile { id?: number; name?: string; email?: string }
 
-const TRANSACTIONS: Transaction[] = [
-  { id: 1, emoji: '☕', name: 'Cà phê sáng', category: 'Ẩm thực', amount: -45_000 },
-  { id: 2, emoji: '💰', name: 'Lương tháng 06', category: 'Thu nhập', amount: 22_000_000 },
-  { id: 3, emoji: '⚡', name: 'Điện lực HCM', category: 'Hóa đơn', amount: -1_250_000 },
-  { id: 4, emoji: '🍜', name: 'Kitty Nguyen', category: 'Thu nhập', amount: -45_000 },
-  { id: 5, emoji: '💰', name: 'Lương tháng 06', category: 'Thu nhập', amount: 15_000 },
-  { id: 6, emoji: '💰', name: 'Lương tháng 06', category: 'Thu nhập', amount: 15_000 },
-]
+interface DashboardAccount {
+  id: number
+  name: string
+  balance: ApiAmount
+  currency?: string
+  icon?: string | null
+  color?: string | null
+}
 
-const EXPENSE_CATEGORIES = ['Ăn uống', 'Di chuyển', 'Hóa đơn', 'Mua sắm', 'Sức khỏe', 'Giải trí', 'Khác']
+interface DashboardCategory {
+  id: number
+  name: string
+  slug?: string | null
+  icon?: string | null
+  color?: string | null
+  type?: TransactionType
+  children?: DashboardCategory[]
+}
 
-function fmtVND(n: number): string {
-  const absStr = Math.abs(n).toLocaleString('vi-VN')
-  return (n >= 0 ? '+' : '') + absStr + 'đ'
+interface DashboardSummaryPeriod {
+  month?: string
+  income?: ApiAmount
+  expense?: ApiAmount
+  net?: ApiAmount
+}
+
+interface SevenDayExpenseRow { date: string; total: ApiAmount }
+interface BalanceHistoryPoint { date: string; balance: ApiAmount }
+
+interface DashboardTransaction {
+  id: number
+  account_id?: number
+  category_id?: number
+  type: TransactionType
+  ledger_type?: string
+  amount: ApiAmount
+  amount_minor?: ApiAmount
+  currency?: string
+  transaction_date?: string | null
+  created_at?: string | null
+  category?: DashboardCategory | null
+  account?: DashboardAccount | null
+}
+
+interface DashboardData {
+  monthly_summary?: {
+    current?: DashboardSummaryPeriod
+    previous?: DashboardSummaryPeriod
+  }
+  seven_day_expenses?: SevenDayExpenseRow[]
+  balance_history?: BalanceHistoryPoint[]
+  recent_transactions?: DashboardTransaction[]
+  accounts?: DashboardAccount[]
+}
+
+interface SpendingDay { label: string; date: string; amount: number; isSpike?: boolean }
+interface CategoryOption extends DashboardCategory { children?: CategoryOption[] }
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string
+      errors?: Record<string, string[]>
+    }
+  }
+  message?: string
+}
+
+function toNumber(value: ApiAmount): number {
+  const parsed = typeof value === 'number' ? value : Number(value ?? 0)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+function normalizeVnd(value: number): string {
+  return formatCurrency(value, 'VND').replace(/\u00a0/g, ' ').replace(/\s?₫$/, 'đ')
+}
+
+function fmtVND(value: number): string {
+  return normalizeVnd(value)
+}
+
+function fmtSignedVND(value: number): string {
+  if (value === 0) return fmtVND(0)
+  return `${value > 0 ? '+' : '-'}${fmtVND(Math.abs(value))}`
+}
+
+function fmtCompactVND(value: number): string {
+  const sign = value < 0 ? '-' : value > 0 ? '+' : ''
+  const abs = Math.abs(value)
+  if (abs >= 1_000_000_000) return `${sign}${(abs / 1_000_000_000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}Bđ`
+  if (abs >= 1_000_000) return `${sign}${(abs / 1_000_000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}Mđ`
+  if (abs >= 1_000) return `${sign}${(abs / 1_000).toLocaleString('vi-VN', { maximumFractionDigits: 1 })}Kđ`
+  return `${sign}${abs.toLocaleString('vi-VN')}đ`
+}
+
+function getStoredUser(): UserProfile | null {
+  try {
+    const rawUser = localStorage.getItem('user')
+    return rawUser ? JSON.parse(rawUser) as UserProfile : null
+  } catch {
+    return null
+  }
+}
+
+function getApiErrorMessage(error: unknown, fallback: string): string {
+  const apiError = error as ApiError
+  const validationMessage = apiError.response?.data?.errors
+    ? Object.values(apiError.response.data.errors).flat()[0]
+    : undefined
+  return apiError.response?.data?.message || validationMessage || apiError.message || fallback
+}
+
+const MONTHS_VI: Record<string, string> = {
+  January: '01', February: '02', March: '03', April: '04', May: '05', June: '06',
+  July: '07', August: '08', September: '09', October: '10', November: '11', December: '12',
+}
+
+function formatMonthLabel(month?: string): string {
+  if (!month) return 'Không rõ tháng'
+  const [name, year] = month.split(' ')
+  return MONTHS_VI[name] && year ? `Tháng ${MONTHS_VI[name]}, ${year}` : month
+}
+
+function toDateKey(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function parseDateKey(dateKey: string): Date {
+  return new Date(`${dateKey}T00:00:00`)
+}
+
+function todayDateKey(): string {
+  return toDateKey(new Date())
+}
+
+function weekdayVi(date: Date): string {
+  return ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][date.getDay()]
+}
+
+function formatShortDate(dateKey?: string | null): string {
+  if (!dateKey) return ''
+  const date = parseDateKey(dateKey)
+  return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`
+}
+
+function formatMonthShort(dateKey: string): string {
+  const date = parseDateKey(dateKey)
+  return `T${String(date.getMonth() + 1).padStart(2, '0')} ${date.getFullYear()}`
+}
+
+function buildSevenDayExpenses(rows: SevenDayExpenseRow[] = []): SpendingDay[] {
+  const totalsByDate = new Map(rows.map(row => [row.date, toNumber(row.total)]))
+  const days = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date()
+    date.setDate(date.getDate() - (6 - index))
+    const key = toDateKey(date)
+    return { label: weekdayVi(date), date: key, amount: totalsByDate.get(key) ?? 0 }
+  })
+  const maxAmount = Math.max(...days.map(day => day.amount), 0)
+  return days.map(day => ({ ...day, isSpike: maxAmount > 0 && day.amount === maxAmount }))
+}
+
+function flattenCategories(categories: CategoryOption[] = []): CategoryOption[] {
+  return categories.flatMap(category => [category, ...flattenCategories(category.children ?? [])])
+}
+
+function buildMonthSummary(summary?: DashboardSummaryPeriod) {
+  const income = toNumber(summary?.income)
+  const expense = toNumber(summary?.expense)
+  const net = summary?.net !== undefined && summary?.net !== null ? toNumber(summary.net) : income - expense
+  const flowTotal = income + expense
+  return {
+    sub: formatMonthLabel(summary?.month),
+    expensePct: flowTotal > 0 ? (expense / flowTotal) * 100 : 0,
+    incomePct: flowTotal > 0 ? (income / flowTotal) * 100 : 0,
+    isEmpty: flowTotal === 0,
+    income: fmtVND(income),
+    expense: expense > 0 ? fmtSignedVND(-expense) : fmtVND(0),
+    total: fmtSignedVND(net),
+    incomeColor: income > 0 ? '#22c55e' : '#9ca3af',
+    expenseColor: expense > 0 ? '#ef4444' : '#9ca3af',
+    totalColor: net < 0 ? '#ef4444' : net > 0 ? '#22c55e' : '#9ca3af',
+  }
+}
+
+function getTransactionDateLabel(transaction: DashboardTransaction): string {
+  const dateKey = transaction.transaction_date || transaction.created_at?.slice(0, 10)
+  return dateKey ? formatShortDate(dateKey) : 'Không rõ ngày'
+}
+
+function getTransactionSignedAmount(transaction: DashboardTransaction): number {
+  const amount = toNumber(transaction.amount)
+  return transaction.type === 'income' ? amount : -amount
 }
 
 interface HalfDonutProps { expensePct: number; incomePct: number; isEmpty?: boolean; size?: number }
@@ -53,7 +229,7 @@ const HalfDonut: React.FC<HalfDonutProps> = ({ expensePct, incomePct, isEmpty, s
       <svg width={size} height={Math.round(size * 0.56)} viewBox="0 0 100 56" aria-hidden>
         <path d="M 14 50 A 36 36 0 0 1 86 50" fill="none" stroke="#374151" strokeWidth="11" strokeLinecap="butt" />
         <text x="50" y="38" fontSize="7" textAnchor="middle" fill="#6b7280" fontWeight="600">KHÔNG CÓ</text>
-        <text x="50" y="47" fontSize="7" textAnchor="middle" fill="#6b7280">DỮ LIỆU T05</text>
+        <text x="50" y="47" fontSize="7" textAnchor="middle" fill="#6b7280">DỮ LIỆU</text>
       </svg>
     )
   }
@@ -75,23 +251,25 @@ const HalfDonut: React.FC<HalfDonutProps> = ({ expensePct, incomePct, isEmpty, s
   )
 }
 
-const SpendingChart: React.FC = () => {
-  const maxVal = 8_000_000
+const SpendingChart: React.FC<{ data: SpendingDay[] }> = ({ data }) => {
+  const maxAmount = Math.max(...data.map(day => day.amount), 0)
+  const maxVal = maxAmount > 0 ? Math.ceil(maxAmount / 1_000_000) * 1_000_000 : 1_000_000
   const chartH = 88, chartB = 108, chartL = 30, barW = 18, colW = 240 / 7
+  const tickValues = Array.from({ length: 5 }, (_, index) => (maxVal / 4) * index)
 
   return (
     <svg viewBox="0 0 278 125" style={{ width: '100%' }} role="img" aria-label="Chi tiêu 7 ngày qua">
-      {[0, 2, 4, 6, 8].map((m, i) => {
-        const y = chartB - (m / 8) * chartH
+      {tickValues.map((value, i) => {
+        const y = chartB - (value / maxVal) * chartH
         return (
           <g key={i}>
             <line x1={chartL - 4} y1={y} x2={272} y2={y} stroke="#e5e7eb" strokeWidth="0.5" />
-            <text x={chartL - 6} y={y + 3} fontSize="7.5" textAnchor="end" fill="#9ca3af">{m}M</text>
+            <text x={chartL - 6} y={y + 3} fontSize="7.5" textAnchor="end" fill="#9ca3af">{fmtCompactVND(value)}</text>
           </g>
         )
       })}
-      {SPENDING_7DAYS.map((d, i) => {
-        const barH = Math.max((d.amount / maxVal) * chartH, 3)
+      {data.map((d, i) => {
+        const barH = d.amount > 0 ? Math.max((d.amount / maxVal) * chartH, 3) : 0
         const cx2 = chartL + i * colW + colW / 2
         const barX = cx2 - barW / 2
         const barY = chartB - barH
@@ -102,8 +280,8 @@ const SpendingChart: React.FC = () => {
             {d.isSpike && (
               <g>
                 <rect x={barX - 22} y={barY - 38} width={84} height={32} rx="5" fill="#1f2937" />
-                <text x={cx2 + 3} y={barY - 25} fontSize="7" textAnchor="middle" fill="#d1d5db">Thứ 6</text>
-                <text x={cx2 + 3} y={barY - 12} fontSize="7.5" textAnchor="middle" fill="#fbbf24" fontWeight="bold">6.342.324 đ</text>
+                <text x={cx2 + 3} y={barY - 25} fontSize="7" textAnchor="middle" fill="#d1d5db">{formatShortDate(d.date)}</text>
+                <text x={cx2 + 3} y={barY - 12} fontSize="7.5" textAnchor="middle" fill="#fbbf24" fontWeight="bold">{fmtVND(d.amount)}</text>
                 <polygon points={`${barX + 2},${barY - 6} ${cx2 + 3},${barY - 1} ${barX + barW},${barY - 6}`} fill="#1f2937" />
               </g>
             )}
@@ -115,16 +293,35 @@ const SpendingChart: React.FC = () => {
   )
 }
 
-const HistoricalChart: React.FC = () => {
-  const pts = [
-    { x: 22, y: 18 },
-    { x: 68, y: 82, tooltip: true },
-    { x: 118, y: 87 },
-    { x: 185, y: 80 },
-    { x: 252, y: 78 },
-  ]
+const HistoricalChart: React.FC<{ data: BalanceHistoryPoint[] }> = ({ data }) => {
+  if (data.length === 0) {
+    return (
+      <svg viewBox="0 0 275 130" style={{ width: '100%' }} role="img" aria-label="Số dư lịch sử">
+        <text x="137" y="66" fontSize="10" textAnchor="middle" fill="#9ca3af">Chưa có dữ liệu số dư</text>
+      </svg>
+    )
+  }
+
+  const chartTop = 18, chartBottom = 104, chartLeft = 22, chartRight = 252
+  const values = data.map(point => toNumber(point.balance))
+  const minValue = Math.min(...values)
+  const maxValue = Math.max(...values)
+  const range = maxValue - minValue
+  const yFor = (value: number) => range === 0
+    ? chartTop + (chartBottom - chartTop) / 2
+    : chartBottom - ((value - minValue) / range) * (chartBottom - chartTop)
+  const pts = data.map((point, index) => ({
+    x: data.length === 1 ? (chartLeft + chartRight) / 2 : chartLeft + (index / (data.length - 1)) * (chartRight - chartLeft),
+    y: yFor(toNumber(point.balance)),
+    value: toNumber(point.balance),
+    date: point.date,
+    tooltip: index === data.length - 1,
+  }))
   const poly = pts.map(p => `${p.x},${p.y}`).join(' ')
   const tip = pts.find(p => p.tooltip)!
+  const ticks = range === 0
+    ? [maxValue]
+    : Array.from({ length: 4 }, (_, index) => minValue + (range / 3) * index).reverse()
 
   return (
     <svg viewBox="0 0 275 130" style={{ width: '100%' }} role="img" aria-label="Số dư lịch sử">
@@ -134,13 +331,10 @@ const HistoricalChart: React.FC = () => {
           <stop offset="100%" stopColor="#7B51F1" stopOpacity="0.02" />
         </linearGradient>
       </defs>
-      {[
-        { v: '-568M', y: 18 }, { v: '-764M', y: 40 },
-        { v: '-944M', y: 62 }, { v: '-1094M', y: 84 },
-      ].map((item, i) => (
+      {ticks.map((value, i) => (
         <g key={i}>
-          <line x1="20" y1={item.y} x2="268" y2={item.y} stroke="#e5e7eb" strokeWidth="0.4" strokeDasharray="3 3" />
-          <text x="17" y={item.y + 3} fontSize="6" textAnchor="end" fill="#9ca3af">{item.v}</text>
+          <line x1="20" y1={yFor(value)} x2="268" y2={yFor(value)} stroke="#e5e7eb" strokeWidth="0.4" strokeDasharray="3 3" />
+          <text x="17" y={yFor(value) + 3} fontSize="6" textAnchor="end" fill="#9ca3af">{fmtCompactVND(value)}</text>
         </g>
       ))}
       <polygon points={`22,104 ${poly} 252,104`} fill="url(#histGrad)" />
@@ -150,21 +344,31 @@ const HistoricalChart: React.FC = () => {
           fill={p.tooltip ? '#7B51F1' : '#fff'} stroke="#7B51F1" strokeWidth="1.5" />
       ))}
       <rect x={tip.x - 26} y={tip.y - 54} width={82} height={38} rx="6" fill="#1f2937" />
-      <text x={tip.x + 15} y={tip.y - 38} fontSize="6.5" textAnchor="middle" fill="#d1d5db">Tháng 01, 2026</text>
+      <text x={tip.x + 15} y={tip.y - 38} fontSize="6.5" textAnchor="middle" fill="#d1d5db">{formatMonthShort(tip.date)}</text>
       <text x={tip.x + 15} y={tip.y - 27} fontSize="6.5" textAnchor="middle" fill="#fbbf24" fontWeight="bold">Số dư:</text>
-      <text x={tip.x + 15} y={tip.y - 16} fontSize="6" textAnchor="middle" fill="#fbbf24">-1.044.880.843 đ</text>
+      <text x={tip.x + 15} y={tip.y - 16} fontSize="6" textAnchor="middle" fill="#fbbf24">{fmtVND(tip.value)}</text>
       <polygon points={`${tip.x - 1},${tip.y - 16} ${tip.x + 4},${tip.y - 16} ${tip.x + 1},${tip.y - 10}`} fill="#1f2937" />
-      {[
-        { x: 22, label: 'T12 2025' }, { x: 118, label: 'T02 2026' },
-        { x: 185, label: 'T04 2026' }, { x: 252, label: 'T06 2026' },
-      ].map((item, i) => (
-        <text key={i} x={item.x} y={118} fontSize="6.5" textAnchor="middle" fill="#9ca3af">{item.label}</text>
+      {pts.filter((_, index) => index === 0 || index === pts.length - 1 || index % 2 === 0).map((item, i) => (
+        <text key={i} x={item.x} y={118} fontSize="6.5" textAnchor="middle" fill="#9ca3af">{formatMonthShort(item.date)}</text>
       ))}
     </svg>
   )
 }
 
-const S: Record<string, React.CSSProperties> = {
+type HomeStyleMap = {
+  card: React.CSSProperties
+  cardHeader: React.CSSProperties
+  cardTitle: React.CSSProperties
+  row: React.CSSProperties
+  dot: (color: string) => React.CSSProperties
+  statLabel: React.CSSProperties
+  statVal: (color: string) => React.CSSProperties
+  inputBase: React.CSSProperties
+  fieldLabel: React.CSSProperties
+  fieldWrap: React.CSSProperties
+}
+
+const S: HomeStyleMap = {
   card: {
     background: '#fff',
     borderRadius: '20px',
@@ -209,6 +413,18 @@ const S: Record<string, React.CSSProperties> = {
   fieldWrap: { marginBottom: '16px' },
 }
 
+type BottomNavItem =
+  | { to: string; icon: string; label: string; active: boolean; center?: false }
+  | { to: null; icon: null; label: string; center: true; active?: false }
+
+const bottomNavItems: BottomNavItem[] = [
+  { to: '/Home', icon: icon1, label: 'Trang chủ', active: true },
+  { to: '/Activity', icon: icon2, label: 'Phân tích', active: false },
+  { to: null, icon: null, label: 'THÊM NHANH', center: true },
+  { to: '/BarChart', icon: icon3, label: 'Mục tiêu', active: false },
+  { to: '/Invoicing', icon: icon4, label: 'Báo cáo', active: false },
+]
+
 const MonthCol: React.FC<{
   title: string; sub: string; expensePct: number; incomePct: number; isEmpty?: boolean;
   income: string; expense: string; total: string; incomeColor: string; expenseColor: string; totalColor: string;
@@ -241,12 +457,165 @@ const MonthCol: React.FC<{
 
 const Home: React.FC = () => {
   const navigate = useNavigate()
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [user, setUser] = useState<UserProfile | null>(() => getStoredUser())
   const [fabOpen, setFabOpen] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [transactionType, setTransactionType] = useState<TransactionType>('expense')
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState('')
+  const [accountId, setAccountId] = useState('')
+  const [transactionDate, setTransactionDate] = useState(todayDateKey())
   const [note, setNote] = useState('')
-  const [recurring, setRecurring] = useState(false)
+  const [categories, setCategories] = useState<CategoryOption[]>([])
+  const [accounts, setAccounts] = useState<DashboardAccount[]>([])
+  const [formLoading, setFormLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [formError, setFormError] = useState('')
+
+  const fetchDashboardData = useCallback(async (showLoading = true) => {
+    try {
+      if (showLoading) setLoading(true)
+      setError('')
+      const response = await api.get('/dashboard')
+      setDashboardData(response.data.data ?? null)
+    } catch (err) {
+      console.error('Failed to fetch dashboard data:', err)
+      setError(getApiErrorMessage(err, 'Không thể tải dữ liệu dashboard.'))
+    } finally {
+      if (showLoading) setLoading(false)
+    }
+  }, [])
+
+  const fetchUser = useCallback(async () => {
+    try {
+      const response = await api.get('/auth/me')
+      const nextUser = response.data.user as UserProfile | undefined
+      if (nextUser) {
+        setUser(nextUser)
+        localStorage.setItem('user', JSON.stringify(nextUser))
+      }
+    } catch (err) {
+      console.error('Failed to fetch user:', err)
+    }
+  }, [])
+
+  const loadQuickAddOptions = useCallback(async (type: TransactionType) => {
+    try {
+      setFormLoading(true)
+      setFormError('')
+      const [categoriesResponse, accountsResponse] = await Promise.all([
+        api.get(`/categories?type=${type}`),
+        api.get('/accounts'),
+      ])
+      const nextCategories = categoriesResponse.data.categories ?? []
+      const nextAccounts = accountsResponse.data.accounts ?? []
+      setCategories(nextCategories)
+      setAccounts(nextAccounts)
+      setAccountId(current => current || String(nextAccounts[0]?.id ?? ''))
+    } catch (err) {
+      console.error('Failed to fetch quick add options:', err)
+      setFormError(getApiErrorMessage(err, 'Không thể tải hạng mục hoặc tài khoản.'))
+    } finally {
+      setFormLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchDashboardData()
+    fetchUser()
+  }, [fetchDashboardData, fetchUser])
+
+  useEffect(() => {
+    if (showModal) {
+      setCategory('')
+      loadQuickAddOptions(transactionType)
+    }
+  }, [loadQuickAddOptions, showModal, transactionType])
+
+  const totalBalance = useMemo(() => (
+    dashboardData?.accounts?.reduce((sum, account) => sum + toNumber(account.balance), 0) ?? 0
+  ), [dashboardData])
+
+  const currentMonthSummary = useMemo(() => buildMonthSummary(dashboardData?.monthly_summary?.current), [dashboardData])
+  const previousMonthSummary = useMemo(() => buildMonthSummary(dashboardData?.monthly_summary?.previous), [dashboardData])
+  const spendingData = useMemo(() => buildSevenDayExpenses(dashboardData?.seven_day_expenses), [dashboardData])
+  const balanceHistory = useMemo(() => dashboardData?.balance_history ?? [], [dashboardData])
+  const balanceDelta = useMemo(() => {
+    if (balanceHistory.length < 2) return null
+    const latest = balanceHistory[balanceHistory.length - 1]
+    const previous = balanceHistory[balanceHistory.length - 2]
+    return toNumber(latest.balance) - toNumber(previous.balance)
+  }, [balanceHistory])
+  const recentTransactions = dashboardData?.recent_transactions ?? []
+  const categoryOptions = useMemo(() => flattenCategories(categories), [categories])
+  const quickAddSummary = currentMonthSummary
+  const transactionLabel = transactionType === 'income' ? 'THU NHẬP' : 'CHI TIÊU'
+  const transactionAccent = transactionType === 'income' ? '#22c55e' : '#ef4444'
+
+  const openQuickAdd = (type: TransactionType) => {
+    setTransactionType(type)
+    setFabOpen(false)
+    setShowModal(true)
+    setAmount('')
+    setCategory('')
+    setNote('')
+    setTransactionDate(todayDateKey())
+    setFormError('')
+  }
+
+  const handleSaveQuickAdd = async () => {
+    const amountValue = Number(amount)
+    if (!Number.isFinite(amountValue) || amountValue <= 0) {
+      setFormError('Vui lòng nhập số tiền hợp lệ.')
+      return
+    }
+    if (!category) {
+      setFormError('Vui lòng chọn hạng mục.')
+      return
+    }
+    if (!accountId) {
+      setFormError('Vui lòng chọn tài khoản.')
+      return
+    }
+
+    try {
+      setSaving(true)
+      setFormError('')
+      await api.post('/transactions', {
+        type: transactionType,
+        amount: amountValue,
+        category_id: Number(category),
+        account_id: Number(accountId),
+        transaction_date: transactionDate,
+        notes: note || undefined,
+      })
+      setShowModal(false)
+      setAmount('')
+      setCategory('')
+      setNote('')
+      await fetchDashboardData(false)
+    } catch (err) {
+      console.error('Failed to save quick add transaction:', err)
+      setFormError(getApiErrorMessage(err, 'Không thể lưu giao dịch.'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f3ff' }}>
+        <div style={{ textAlign: 'center', color: '#6b7280', fontFamily: 'Satoshi, sans-serif' }}>
+          <div style={{ width: '44px', height: '44px', border: '4px solid #ddd6fe', borderTopColor: '#7B51F1', borderRadius: '50%', margin: '0 auto 14px', animation: 'spin 0.9s linear infinite' }} />
+          <p>Đang tải dashboard...</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -278,13 +647,13 @@ const Home: React.FC = () => {
 
               <div style={{ paddingBottom: '24px', paddingTop: '4px' }}>
                 <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '14px', fontWeight: 500, fontFamily: 'Satoshi, sans-serif' }}>
-                  Chào Jessica,
+                  Chào {user?.name || 'bạn'},
                 </p>
                 <h1 style={{
                   color: '#fff', fontSize: '28px', fontWeight: 800,
                   marginTop: '4px', letterSpacing: '-0.5px', fontFamily: 'Poppins, sans-serif',
                 }}>
-                  -1.048.546.322 đ
+                  {fmtVND(totalBalance)}
                 </h1>
                 <p style={{
                   color: 'rgba(255,255,255,0.55)', fontSize: '10px', fontWeight: 700,
@@ -300,6 +669,12 @@ const Home: React.FC = () => {
           <div className="verify-number-bottom" id="homepage">
             <div className="verify-number-bottom-wrap">
 
+              {error && (
+                <div style={{ ...S.card, color: '#b91c1c', background: '#fef2f2', fontSize: '13px', fontWeight: 600 }}>
+                  {error}
+                </div>
+              )}
+
               <div style={S.card}>
                 <div style={S.cardHeader}>
                   <span style={S.cardTitle}>Sơ lược</span>
@@ -307,17 +682,19 @@ const Home: React.FC = () => {
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <MonthCol
-                    title="Tháng Này" sub="Tháng 06, 2026"
-                    expensePct={87} incomePct={13}
-                    income="15.993k đ" expense="-308.825k đ" total="-292.832k đ"
-                    incomeColor="#22c55e" expenseColor="#ef4444" totalColor="#ef4444"
+                    title="Tháng Này" sub={currentMonthSummary.sub}
+                    expensePct={currentMonthSummary.expensePct} incomePct={currentMonthSummary.incomePct}
+                    isEmpty={currentMonthSummary.isEmpty}
+                    income={currentMonthSummary.income} expense={currentMonthSummary.expense} total={currentMonthSummary.total}
+                    incomeColor={currentMonthSummary.incomeColor} expenseColor={currentMonthSummary.expenseColor} totalColor={currentMonthSummary.totalColor}
                   />
                   <div style={{ width: '1px', background: '#e5e7eb', margin: '0 4px', alignSelf: 'stretch' }} />
                   <MonthCol
-                    title="Tháng Trước" sub="Tháng 05, 2026"
-                    expensePct={0} incomePct={0} isEmpty
-                    income="0 đ" expense="0 đ" total="0 đ"
-                    incomeColor="#9ca3af" expenseColor="#9ca3af" totalColor="#9ca3af"
+                    title="Tháng Trước" sub={previousMonthSummary.sub}
+                    expensePct={previousMonthSummary.expensePct} incomePct={previousMonthSummary.incomePct}
+                    isEmpty={previousMonthSummary.isEmpty}
+                    income={previousMonthSummary.income} expense={previousMonthSummary.expense} total={previousMonthSummary.total}
+                    incomeColor={previousMonthSummary.incomeColor} expenseColor={previousMonthSummary.expenseColor} totalColor={previousMonthSummary.totalColor}
                   />
                 </div>
               </div>
@@ -327,7 +704,7 @@ const Home: React.FC = () => {
                   <span style={S.cardTitle}>Chi tiêu - 7 ngày qua</span>
                   <span style={{ fontSize: '18px', cursor: 'pointer' }}>📅</span>
                 </div>
-                <SpendingChart />
+                <SpendingChart data={spendingData} />
                 <p style={{ textAlign: 'center', fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>
                   Kéo ngang để xem chi tiết từng ngày
                 </p>
@@ -340,9 +717,9 @@ const Home: React.FC = () => {
                     fontSize: '11px', color: '#7B51F1',
                     background: 'rgba(123,81,241,0.1)', padding: '3px 10px',
                     borderRadius: '20px', fontWeight: 700,
-                  }}>-568M ▾</span>
+                  }}>{balanceDelta === null ? 'Chưa có dữ liệu' : `${fmtCompactVND(balanceDelta)} ▾`}</span>
                 </div>
-                <HistoricalChart />
+                <HistoricalChart data={balanceHistory} />
               </div>
 
               <div style={S.card}>
@@ -355,32 +732,41 @@ const Home: React.FC = () => {
                   }}>⊜</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  {TRANSACTIONS.map(tx => (
-                    <div key={tx.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {recentTransactions.length === 0 ? (
+                    <p style={{ color: '#9ca3af', fontSize: '13px', textAlign: 'center', padding: '10px 0' }}>
+                      Chưa có giao dịch nào.
+                    </p>
+                  ) : recentTransactions.map(tx => {
+                    const signedAmount = getTransactionSignedAmount(tx)
+                    return (
+                    <div key={tx.id} onClick={() => navigate('/Activity')} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
                       <div style={{
                         width: '44px', height: '44px', borderRadius: '14px', flexShrink: 0,
-                        background: tx.amount >= 0 ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.10)',
+                        background: signedAmount >= 0 ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.10)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px',
                       }}>
-                        {tx.emoji}
+                        {getCategoryIcon(tx.category?.slug)}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{
                           fontSize: '14px', fontWeight: 600, color: '#121212',
                           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                           fontFamily: 'Satoshi, sans-serif',
-                        }}>{tx.name}</p>
-                        <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>{tx.category}</p>
+                        }}>{tx.category?.name || (tx.type === 'income' ? 'Thu nhập' : 'Chi tiêu')}</p>
+                        <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>
+                          {[getTransactionDateLabel(tx), tx.account?.name].filter(Boolean).join(' · ')}
+                        </p>
                       </div>
                       <span style={{
                         fontSize: '14px', fontWeight: 700, flexShrink: 0,
-                        color: tx.amount >= 0 ? '#22c55e' : '#ef4444',
+                        color: signedAmount >= 0 ? '#22c55e' : '#ef4444',
                         fontFamily: 'Satoshi, sans-serif',
                       }}>
-                        {fmtVND(tx.amount)}
+                        {fmtSignedVND(signedAmount)}
                       </span>
                     </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
 
@@ -447,7 +833,7 @@ const Home: React.FC = () => {
           }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
               <button
-                onClick={() => setFabOpen(false)}
+                onClick={() => openQuickAdd('income')}
                 style={{
                   width: '60px', height: '60px', borderRadius: '50%',
                   background: 'linear-gradient(145deg, #22c55e, #16a34a)',
@@ -463,7 +849,7 @@ const Home: React.FC = () => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
               <button
-                onClick={() => { setFabOpen(false); setShowModal(true) }}
+                onClick={() => openQuickAdd('expense')}
                 style={{
                   width: '60px', height: '60px', borderRadius: '50%',
                   background: 'linear-gradient(145deg, #ef4444, #dc2626)',
@@ -482,13 +868,7 @@ const Home: React.FC = () => {
 
         <div className="navigation">
           <ul className="listWrap" style={{ alignItems: 'flex-start' }}>
-            {([
-              { to: '/Home', icon: icon1, label: 'Trang chủ', active: true },
-              { to: '/Activity', icon: icon2, label: 'Phân tích', active: false },
-              { to: null, icon: null, label: 'THÊM NHANH', center: true },
-              { to: '/BarChart', icon: icon3, label: 'Mục tiêu', active: false },
-              { to: '/Invoicing', icon: icon4, label: 'Báo cáo', active: false },
-            ] as const).map((item, i) => {
+            {bottomNavItems.map((item, i) => {
               if (item.center) {
                 return (
                   <li key={i} className="list" style={{ visibility: 'hidden', width: '80px', textAlign: 'center' }}>
@@ -560,16 +940,17 @@ const Home: React.FC = () => {
               >Hủy</button>
               <div style={{ textAlign: 'center' }}>
                 <p style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>THÊM KHOẢN</p>
-                <p style={{ fontSize: '14px', fontWeight: 800, color: '#ef4444', letterSpacing: '0.5px' }}>CHI TIÊU</p>
+                <p style={{ fontSize: '14px', fontWeight: 800, color: transactionAccent, letterSpacing: '0.5px' }}>{transactionLabel}</p>
               </div>
               <button
-                onClick={() => setShowModal(false)}
+                onClick={handleSaveQuickAdd}
+                disabled={saving || formLoading}
                 style={{
-                  background: '#7B51F1', border: 'none', color: '#fff',
+                  background: saving || formLoading ? '#a78bfa' : '#7B51F1', border: 'none', color: '#fff',
                   padding: '8px 18px', borderRadius: '20px',
-                  fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+                  fontSize: '14px', fontWeight: 700, cursor: saving || formLoading ? 'not-allowed' : 'pointer',
                 }}
-              >Lưu</button>
+              >{saving ? 'Đang lưu...' : 'Lưu'}</button>
             </div>
 
             <div style={{
@@ -580,15 +961,15 @@ const Home: React.FC = () => {
                 width: '70px', height: '48px', borderRadius: '12px', background: '#e5e7eb',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
               }}>
-                <HalfDonut expensePct={0} incomePct={0} isEmpty size={64} />
+                <HalfDonut expensePct={quickAddSummary.expensePct} incomePct={quickAddSummary.incomePct} isEmpty={quickAddSummary.isEmpty} size={64} />
               </div>
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: '10px', color: '#9ca3af', fontWeight: 600, marginBottom: '6px', letterSpacing: '1px' }}>SƠ LƯỢC</p>
                 <div style={{ display: 'flex', gap: '20px' }}>
                   {[
-                    { label: 'Thu nhập:', val: '0đ', color: '#22c55e' },
-                    { label: 'Chi phí:', val: '0đ', color: '#ef4444' },
-                    { label: 'Tổng cộng:', val: '0đ', color: '#121212' },
+                    { label: 'Thu nhập:', val: quickAddSummary.income, color: quickAddSummary.incomeColor },
+                    { label: 'Chi phí:', val: quickAddSummary.expense, color: quickAddSummary.expenseColor },
+                    { label: 'Tổng cộng:', val: quickAddSummary.total, color: quickAddSummary.totalColor },
                   ].map((s, i) => (
                     <div key={i}>
                       <p style={{ fontSize: '10px', color: '#9ca3af' }}>{s.label}</p>
@@ -600,6 +981,12 @@ const Home: React.FC = () => {
             </div>
 
             <div style={{ padding: '20px' }}>
+              {formError && (
+                <div style={{ color: '#b91c1c', background: '#fef2f2', borderRadius: '12px', padding: '10px 12px', fontSize: '13px', fontWeight: 600, marginBottom: '16px' }}>
+                  {formError}
+                </div>
+              )}
+
               <div style={S.fieldWrap}>
                 <label style={S.fieldLabel}>Số tiền</label>
                 <div style={{
@@ -609,8 +996,11 @@ const Home: React.FC = () => {
                 }}>
                   <input
                     type="number"
+                    min="0"
+                    step="1000"
                     value={amount}
                     onChange={e => setAmount(e.target.value)}
+                    disabled={saving}
                     placeholder="0"
                     style={{
                       flex: 1, border: 'none', outline: 'none',
@@ -628,10 +1018,11 @@ const Home: React.FC = () => {
                   <select
                     value={category}
                     onChange={e => setCategory(e.target.value)}
+                    disabled={formLoading || saving}
                     style={{ ...S.inputBase, appearance: 'none', paddingRight: '36px' }}
                   >
-                    <option value="">Chọn hạng mục</option>
-                    {EXPENSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    <option value="">{formLoading ? 'Đang tải hạng mục...' : 'Chọn hạng mục'}</option>
+                    {categoryOptions.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                   <span style={{
                     position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)',
@@ -642,12 +1033,31 @@ const Home: React.FC = () => {
 
               <div style={S.fieldWrap}>
                 <label style={S.fieldLabel}>Ngày</label>
-                <div style={{
-                  ...S.inputBase,
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                }}>
-                  <span>06/10/2026</span>
-                  <span style={{ fontSize: '18px' }}>📅</span>
+                <input
+                  type="date"
+                  value={transactionDate}
+                  onChange={e => setTransactionDate(e.target.value)}
+                  disabled={saving}
+                  style={S.inputBase}
+                />
+              </div>
+
+              <div style={S.fieldWrap}>
+                <label style={S.fieldLabel}>Tài khoản</label>
+                <div style={{ position: 'relative' }}>
+                  <select
+                    value={accountId}
+                    onChange={e => setAccountId(e.target.value)}
+                    disabled={formLoading || saving}
+                    style={{ ...S.inputBase, appearance: 'none', paddingRight: '36px' }}
+                  >
+                    <option value="">{formLoading ? 'Đang tải tài khoản...' : 'Chọn tài khoản'}</option>
+                    {accounts.map(account => <option key={account.id} value={account.id}>{account.name}</option>)}
+                  </select>
+                  <span style={{
+                    position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)',
+                    pointerEvents: 'none', fontSize: '12px', color: '#9ca3af',
+                  }}>▾</span>
                 </div>
               </div>
 
@@ -657,36 +1067,10 @@ const Home: React.FC = () => {
                   type="text"
                   value={note}
                   onChange={e => setNote(e.target.value)}
+                  disabled={saving}
                   placeholder="Thêm ghi chú..."
                   style={S.inputBase}
                 />
-              </div>
-
-              <div style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '14px 16px', border: '1.5px solid #e5e7eb', borderRadius: '14px',
-                marginBottom: '32px',
-              }}>
-                <div>
-                  <p style={{ fontSize: '14px', fontWeight: 600, color: '#121212' }}>Định kỳ</p>
-                  <p style={{ fontSize: '11px', color: '#9ca3af', marginTop: '2px' }}>Lặp lại giao dịch này</p>
-                </div>
-                <div
-                  onClick={() => setRecurring(r => !r)}
-                  style={{
-                    width: '48px', height: '28px', borderRadius: '14px',
-                    background: recurring ? '#7B51F1' : '#e5e7eb',
-                    cursor: 'pointer', position: 'relative', transition: 'background 0.22s ease',
-                    flexShrink: 0,
-                  }}
-                >
-                  <div style={{
-                    position: 'absolute', top: '4px',
-                    left: recurring ? '24px' : '4px',
-                    width: '20px', height: '20px', borderRadius: '50%', background: '#fff',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.22)', transition: 'left 0.22s ease',
-                  }} />
-                </div>
               </div>
             </div>
           </div>
