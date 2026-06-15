@@ -10,46 +10,167 @@ import { format, parseISO } from 'date-fns';
 import { useTranslation } from '../contexts/TranslationContext';
 import { processImageForUpload, validateImageFile, formatFileSize } from '../utils/imageCompression';
 
-const MAX_PHOTOS = 10;
-const AMOUNT_LOCK_MINUTES = 15;
+// ─────────────────────────────────────────────────────────────────────────────
+// Domain types
+// ─────────────────────────────────────────────────────────────────────────────
 
-const isAmountEditable = (createdAt) => {
+export interface TransactionCategory {
+    id: number;
+    name: string;
+    slug: string;
+}
+
+export interface TransactionAccount {
+    id: number;
+    name: string;
+}
+
+export interface TransactionPhoto {
+    id: number;
+    file_path: string;
+    original_filename: string;
+    file_size: number;
+}
+
+export interface ChangeLogDiffEntry {
+    from: string | number;
+    to: string | number;
+}
+
+export interface ChangeLogChanges {
+    diff?: Record<string, ChangeLogDiffEntry>;
+    filename?: string;
+}
+
+export type ChangeLogAction =
+    | 'created'
+    | 'updated'
+    | 'deleted'
+    | 'photo_added'
+    | 'photo_removed';
+
+export interface ChangeLog {
+    id: number;
+    action: ChangeLogAction;
+    created_at: string;
+    user?: { name: string };
+    changes?: ChangeLogChanges;
+}
+
+export interface Transaction {
+    id: number;
+    type: 'income' | 'expense';
+    amount: number;
+    category_id: number;
+    account_id: number;
+    notes: string | null;
+    transaction_date: string;
+    created_at: string;
+    category?: TransactionCategory;
+    account?: TransactionAccount;
+    photos?: TransactionPhoto[];
+    change_logs?: ChangeLog[];
+}
+
+export interface Permissions {
+    can_edit: boolean;
+    can_manage_photos: boolean;
+}
+
+export interface Category {
+    id: number;
+    name: string;
+    slug: string;
+}
+
+export interface Account {
+    id: number;
+    name: string;
+}
+
+export interface TransactionFormData {
+    amount?: number | string;
+    category_id?: number | string;
+    account_id?: number | string;
+    notes?: string;
+    transaction_date?: string;
+}
+
+export interface UploadProgress {
+    stage: string;
+    progress: number;
+    quality?: number;
+}
+
+export type TabId = 'details' | 'images' | 'history';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Component props
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface EditTransactionModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    transactionId: number | null;
+    onUpdate?: (transaction: Transaction) => void;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+const MAX_PHOTOS: number = 10;
+const AMOUNT_LOCK_MINUTES: number = 15;
+const TABS: TabId[] = ['details', 'images', 'history'];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pure helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+const isAmountEditable = (createdAt: string | undefined): boolean => {
     if (!createdAt) return false;
-    const createdMs = new Date(createdAt).getTime();
-    const nowMs = Date.now();
+    const createdMs: number = new Date(createdAt).getTime();
+    const nowMs: number = Date.now();
     return nowMs - createdMs < AMOUNT_LOCK_MINUTES * 60 * 1000;
 };
 
-const formatChangeValue = (key, value) => {
+const formatChangeValue = (key: string, value: string | number): string => {
     if (key === 'amount') return formatCurrency(value);
     if (key === 'transaction_date') {
-        try { return format(parseISO(value), 'MMM dd, yyyy'); } catch { return value; }
+        try { return format(parseISO(String(value)), 'MMM dd, yyyy'); } catch { return String(value); }
     }
-    return value || 'N/A';
+    return value != null ? String(value) : 'N/A';
 };
 
-const TABS = ['details', 'images', 'history'];
+// ─────────────────────────────────────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────────────────────────────────────
 
-const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
+const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
+    isOpen,
+    onClose,
+    transactionId,
+    onUpdate,
+}) => {
     const { t } = useTranslation();
 
-    const [transaction, setTransaction] = useState(null);
-    const [permissions, setPermissions] = useState({ can_edit: false, can_manage_photos: false });
-    const [loading, setLoading] = useState(false);
-    const [saving, setSaving] = useState(false);
-    const [error, setError] = useState('');
-    const [successMsg, setSuccessMsg] = useState('');
-    const [categories, setCategories] = useState([]);
-    const [accounts, setAccounts] = useState([]);
-    const [formData, setFormData] = useState({});
-    const [activeTab, setActiveTab] = useState('details');
-    const [amountLocked, setAmountLocked] = useState(true);
+    const [transaction, setTransaction] = useState<Transaction | null>(null);
+    const [permissions, setPermissions] = useState<Permissions>({ can_edit: false, can_manage_photos: false });
+    const [loading, setLoading] = useState<boolean>(false);
+    const [saving, setSaving] = useState<boolean>(false);
+    const [error, setError] = useState<string>('');
+    const [successMsg, setSuccessMsg] = useState<string>('');
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [accounts, setAccounts] = useState<Account[]>([]);
+    const [formData, setFormData] = useState<TransactionFormData>({});
+    const [activeTab, setActiveTab] = useState<TabId>('details');
+    const [amountLocked, setAmountLocked] = useState<boolean>(true);
 
-    const [uploadingPhoto, setUploadingPhoto] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState({ stage: '', progress: 0 });
-    const [photoError, setPhotoError] = useState('');
+    const [uploadingPhoto, setUploadingPhoto] = useState<boolean>(false);
+    const [uploadProgress, setUploadProgress] = useState<UploadProgress>({ stage: '', progress: 0 });
+    const [photoError, setPhotoError] = useState<string>('');
 
-    const fileInputRef = useRef(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (isOpen && transactionId) {
@@ -65,7 +186,7 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
         }
     }, [isOpen, transactionId]);
 
-    const fetchAll = async () => {
+    const fetchAll = async (): Promise<void> => {
         setLoading(true);
         try {
             await Promise.all([
@@ -78,10 +199,10 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
         }
     };
 
-    const fetchTransactionDetails = async () => {
+    const fetchTransactionDetails = async (): Promise<void> => {
         try {
             const response = await api.get(`/transactions/${transactionId}`);
-            const tx = response.data.transaction;
+            const tx: Transaction = response.data.transaction;
             setTransaction(tx);
             setPermissions(response.data.permissions || { can_edit: true, can_manage_photos: true });
             setAmountLocked(!isAmountEditable(tx.created_at));
@@ -98,7 +219,7 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
         }
     };
 
-    const fetchCategories = async () => {
+    const fetchCategories = async (): Promise<void> => {
         try {
             const response = await api.get('/categories');
             setCategories(response.data.categories || []);
@@ -107,7 +228,7 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
         }
     };
 
-    const fetchAccounts = async () => {
+    const fetchAccounts = async (): Promise<void> => {
         try {
             const response = await api.get('/accounts');
             setAccounts(response.data.accounts || []);
@@ -116,13 +237,13 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
         }
     };
 
-    const handleSave = async (e) => {
+    const handleSave = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
         setSaving(true);
         setError('');
         setSuccessMsg('');
         try {
-            const payload = {
+            const payload: Partial<TransactionFormData> = {
                 category_id: formData.category_id,
                 account_id: formData.account_id,
                 notes: formData.notes,
@@ -136,19 +257,20 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
             setSuccessMsg(t('transactions.transaction_updated_successfully') || 'Transaction updated successfully.');
             if (onUpdate) onUpdate(response.data.transaction);
             setTimeout(() => setSuccessMsg(''), 3000);
-        } catch (err) {
-            setError(err.response?.data?.message || t('transaction_detail_modal.failed_to_update_transaction'));
+        } catch (err: unknown) {
+            const axiosErr = err as { response?: { data?: { message?: string } } };
+            setError(axiosErr.response?.data?.message || t('transaction_detail_modal.failed_to_update_transaction'));
         } finally {
             setSaving(false);
         }
     };
 
-    const handlePhotoUpload = async (e) => {
-        const files = Array.from(e.target.files);
+    const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+        const files: File[] = Array.from(e.target.files ?? []);
         if (!files.length) return;
 
-        const currentCount = transaction?.photos?.length || 0;
-        const availableSlots = MAX_PHOTOS - currentCount;
+        const currentCount: number = transaction?.photos?.length || 0;
+        const availableSlots: number = MAX_PHOTOS - currentCount;
 
         if (availableSlots <= 0) {
             setPhotoError(
@@ -159,7 +281,7 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
             return;
         }
 
-        const filesToUpload = files.slice(0, availableSlots);
+        const filesToUpload: File[] = files.slice(0, availableSlots);
         if (files.length > availableSlots) {
             setPhotoError(
                 t('transactions.photos.upload_limit_exceeded') ||
@@ -174,17 +296,17 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
 
         try {
             for (let i = 0; i < filesToUpload.length; i++) {
-                const file = filesToUpload[i];
+                const file: File = filesToUpload[i];
 
-                const validation = validateImageFile(file);
+                const validation: { valid: boolean; error?: string } = validateImageFile(file);
                 if (!validation.valid) {
-                    setPhotoError(validation.error);
+                    setPhotoError(validation.error ?? 'Invalid file.');
                     continue;
                 }
 
-                const result = await processImageForUpload(file, (progress) => {
-                    const baseProgress = (i / filesToUpload.length) * 90;
-                    const stepProgress = (progress.progress / 100) * (90 / filesToUpload.length);
+                const result = await processImageForUpload(file, (progress: UploadProgress) => {
+                    const baseProgress: number = (i / filesToUpload.length) * 90;
+                    const stepProgress: number = (progress.progress / 100) * (90 / filesToUpload.length);
                     setUploadProgress({ stage: progress.stage, progress: Math.round(baseProgress + stepProgress) });
                 });
 
@@ -201,9 +323,10 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
 
             setUploadProgress({ stage: 'complete', progress: 100 });
             await fetchTransactionDetails();
-        } catch (err) {
+        } catch (err: unknown) {
             console.error('Photo upload error:', err);
-            setPhotoError(err.response?.data?.message || err.message || t('transactions.photos.error.upload_failed'));
+            const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
+            setPhotoError(axiosErr.response?.data?.message || axiosErr.message || t('transactions.photos.error.upload_failed'));
         } finally {
             setUploadingPhoto(false);
             setUploadProgress({ stage: '', progress: 0 });
@@ -211,7 +334,7 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
         }
     };
 
-    const handleDeletePhoto = async (photoId) => {
+    const handleDeletePhoto = async (photoId: number): Promise<void> => {
         if (!confirm(t('transactions.photos.delete_photo_confirmation') || 'Delete this photo?')) return;
         try {
             await api.delete(`/photos/${photoId}`);
@@ -221,7 +344,7 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
         }
     };
 
-    const handleClose = () => {
+    const handleClose = (): void => {
         setError('');
         setSuccessMsg('');
         setPhotoError('');
@@ -230,10 +353,10 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
 
     if (!isOpen) return null;
 
-    const photoCount = transaction?.photos?.length || 0;
-    const canUploadMore = photoCount < MAX_PHOTOS;
+    const photoCount: number = transaction?.photos?.length || 0;
+    const canUploadMore: boolean = photoCount < MAX_PHOTOS;
 
-    const tabLabel = (tab) => {
+    const tabLabel = (tab: TabId): string => {
         if (tab === 'details') return t('transactions.transaction_tab_details') || 'Detailed Info';
         if (tab === 'images') return `${t('transactions.transaction_tab_photos') || 'Images'} (${photoCount})`;
         if (tab === 'history') return t('transaction_detail_modal.history') || 'Transaction History';
@@ -293,7 +416,7 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
                 {/* Tabs */}
                 <div className="border-b border-gray-200 flex-shrink-0">
                     <div className="flex space-x-0 px-6">
-                        {TABS.map((tab) => (
+                        {TABS.map((tab: TabId) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
@@ -340,7 +463,7 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
                                                 step="0.01"
                                                 min="0"
                                                 value={formData.amount ?? ''}
-                                                onChange={(e) => !amountLocked && setFormData({ ...formData, amount: e.target.value })}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => !amountLocked && setFormData({ ...formData, amount: e.target.value })}
                                                 disabled={amountLocked}
                                                 className={`w-full px-4 py-2.5 border rounded-lg text-sm transition-colors
                                                     ${amountLocked
@@ -374,11 +497,11 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
                                         </label>
                                         <select
                                             value={formData.category_id ?? ''}
-                                            onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, category_id: e.target.value })}
                                             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                             required
                                         >
-                                            {categories.map((cat) => (
+                                            {categories.map((cat: Category) => (
                                                 <option key={cat.id} value={cat.id}>
                                                     {getCategoryIcon(cat.slug)} {t(`categories.${cat.slug}`) || cat.name}
                                                 </option>
@@ -395,11 +518,11 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
                                         </label>
                                         <select
                                             value={formData.account_id ?? ''}
-                                            onChange={(e) => setFormData({ ...formData, account_id: e.target.value })}
+                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, account_id: e.target.value })}
                                             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                             required
                                         >
-                                            {accounts.map((acc) => (
+                                            {accounts.map((acc: Account) => (
                                                 <option key={acc.id} value={acc.id}>
                                                     {acc.name}
                                                 </option>
@@ -418,7 +541,7 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
                                         <input
                                             type="date"
                                             value={formData.transaction_date ?? ''}
-                                            onChange={(e) => setFormData({ ...formData, transaction_date: e.target.value })}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, transaction_date: e.target.value })}
                                             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                             required
                                         />
@@ -434,7 +557,7 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
                                         </label>
                                         <textarea
                                             value={formData.notes ?? ''}
-                                            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, notes: e.target.value })}
                                             rows={3}
                                             placeholder={t('transactions.transaction_notes_placeholder') || 'Add a note…'}
                                             className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
@@ -562,7 +685,7 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
                                     {/* Photo gallery */}
                                     {transaction.photos && transaction.photos.length > 0 ? (
                                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                            {transaction.photos.map((photo) => (
+                                            {transaction.photos.map((photo: TransactionPhoto) => (
                                                 <div key={photo.id} className="relative group rounded-lg overflow-hidden border border-gray-200">
                                                     <img
                                                         src={`/storage/${photo.file_path}`}
@@ -601,7 +724,7 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
                                 <div className="p-6 space-y-4">
                                     {transaction.change_logs && transaction.change_logs.length > 0 ? (
                                         <div className="space-y-3">
-                                            {transaction.change_logs.map((log) => (
+                                            {transaction.change_logs.map((log: ChangeLog) => (
                                                 <div key={log.id} className="bg-gray-50 border border-gray-100 rounded-xl p-4">
                                                     <div className="flex items-start space-x-3">
                                                         <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -630,7 +753,7 @@ const EditTransactionModal = ({ isOpen, onClose, transactionId, onUpdate }) => {
                                                             {/* Field diffs */}
                                                             {log.changes?.diff && Object.keys(log.changes.diff).length > 0 && (
                                                                 <div className="mt-2 space-y-1">
-                                                                    {Object.entries(log.changes.diff).map(([key, change]) => (
+                                                                    {Object.entries(log.changes.diff).map(([key, change]: [string, ChangeLogDiffEntry]) => (
                                                                         <div key={key} className="flex items-center flex-wrap gap-1 text-xs">
                                                                             <span className="font-medium text-gray-600 capitalize">
                                                                                 {key.replace(/_/g, ' ')}:
