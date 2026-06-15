@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-    X, Save, Upload, Trash2, Calendar, DollarSign, Tag,
-    FileText, History, Loader2, Lock, AlertCircle, ImageIcon,
+    Upload, Trash2,
+    History, Loader2, Lock, AlertCircle, ImageIcon,
     ChevronRight
 } from 'lucide-react';
 import api from '../utils/api';
@@ -124,6 +124,43 @@ const AMOUNT_LOCK_MINUTES: number = 15;
 const TABS: TabId[] = ['details', 'images', 'history'];
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Design tokens (mirroring Add form's S object)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const MS = {
+    fieldWrap: { marginBottom: '16px' } as React.CSSProperties,
+    fieldLabel: {
+        fontSize: '13px', color: '#6b7280', display: 'block',
+        marginBottom: '8px', fontWeight: 600,
+    } as React.CSSProperties,
+    inputBase: {
+        width: '100%',
+        border: '1.5px solid #e5e7eb',
+        borderRadius: '14px',
+        padding: '13px 16px',
+        fontSize: '14px',
+        color: '#121212',
+        outline: 'none',
+        background: '#fff',
+        fontFamily: 'inherit',
+        boxSizing: 'border-box',
+    } as React.CSSProperties,
+    inputLocked: {
+        width: '100%',
+        border: '1.5px solid #e5e7eb',
+        borderRadius: '14px',
+        padding: '13px 16px',
+        fontSize: '14px',
+        color: '#9ca3af',
+        outline: 'none',
+        background: '#f9fafb',
+        fontFamily: 'inherit',
+        boxSizing: 'border-box',
+        cursor: 'not-allowed',
+    } as React.CSSProperties,
+} as const;
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Pure helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -171,6 +208,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     const [photoError, setPhotoError] = useState<string>('');
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const formRef = useRef<HTMLFormElement>(null);
 
     useEffect(() => {
         if (isOpen && transactionId) {
@@ -356,327 +394,422 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     const photoCount: number = transaction?.photos?.length || 0;
     const canUploadMore: boolean = photoCount < MAX_PHOTOS;
 
+    const transactionAccent: string = transaction?.type === 'income' ? '#22c55e' : '#ef4444';
+    const transactionLabel: string = transaction?.type === 'income' ? 'THU NHẬP' : 'CHI TIÊU';
+
     const tabLabel = (tab: TabId): string => {
-        if (tab === 'details') return t('transactions.transaction_tab_details') || 'Detailed Info';
-        if (tab === 'images') return `${t('transactions.transaction_tab_photos') || 'Images'} (${photoCount})`;
-        if (tab === 'history') return t('transaction_detail_modal.history') || 'Transaction History';
+        if (tab === 'details') return t('transactions.transaction_tab_details') || 'Chi tiết';
+        if (tab === 'images') return `${t('transactions.transaction_tab_photos') || 'Ảnh'} (${photoCount})`;
+        if (tab === 'history') return t('transaction_detail_modal.history') || 'Lịch sử';
         return tab;
     };
 
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+    // ─── Render ───────────────────────────────────────────────────────────────
 
-                {/* Header */}
-                <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
-                    <div className="flex items-center space-x-3">
-                        {transaction && (
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl ${
-                                transaction.type === 'income' ? 'bg-green-100' : 'bg-blue-100'
-                            }`}>
-                                {getCategoryIcon(transaction.category?.slug)}
-                            </div>
-                        )}
-                        <div>
-                            <h2 className="text-xl font-bold text-gray-900">
-                                {t('transactions.transaction_edit_title') || 'Edit Transaction'}
-                            </h2>
-                            {transaction && (
-                                <p className="text-sm text-gray-500">
-                                    {t(`categories.${transaction.category?.slug}`) || transaction.category?.name}
-                                    {' · '}
-                                    <span className={transaction.type === 'income' ? 'text-green-600 font-semibold' : 'text-red-600 font-semibold'}>
-                                        {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
-                                    </span>
-                                </p>
-                            )}
-                        </div>
-                    </div>
+    return (
+        <div
+            style={{
+                position: 'fixed', inset: 0, zIndex: 200,
+                background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)',
+                display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+            }}
+            onClick={e => { if (e.currentTarget === e.target) handleClose(); }}
+        >
+            <div style={{
+                background: '#fff', borderRadius: '24px 24px 0 0',
+                maxHeight: '92vh', overflowY: 'auto',
+                boxShadow: '0 -8px 48px rgba(0,0,0,0.25)',
+            }}>
+
+                {/* ── Sticky header ────────────────────────────────────────── */}
+                <div style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '16px 20px 14px', borderBottom: '1px solid #f1f5f9',
+                    position: 'sticky', top: 0, background: '#fff', zIndex: 1,
+                }}>
                     <button
                         onClick={handleClose}
-                        className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                        style={{
+                            background: 'none', border: 'none', color: '#6b7280',
+                            fontSize: '14px', fontWeight: 600, cursor: 'pointer', padding: '4px 8px',
+                        }}
                     >
-                        <X className="w-5 h-5" />
+                        Hủy
+                    </button>
+
+                    <div style={{ textAlign: 'center' }}>
+                        <p style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>SỬA GIAO DỊCH</p>
+                        <p style={{ fontSize: '14px', fontWeight: 800, color: transaction ? transactionAccent : '#7B51F1', letterSpacing: '0.5px' }}>
+                            {transaction ? transactionLabel : '…'}
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={() => {
+                            if (activeTab === 'details') {
+                                formRef.current?.requestSubmit();
+                            }
+                        }}
+                        disabled={saving || (activeTab === 'details' && !permissions.can_edit)}
+                        style={{
+                            background: (saving || activeTab !== 'details') ? '#a78bfa' : '#7B51F1',
+                            border: 'none', color: '#fff',
+                            padding: '8px 18px', borderRadius: '20px',
+                            fontSize: '14px', fontWeight: 700,
+                            cursor: (saving || activeTab !== 'details') ? 'not-allowed' : 'pointer',
+                            opacity: activeTab !== 'details' ? 0.4 : 1,
+                            transition: 'opacity 0.2s, background 0.2s',
+                        }}
+                    >
+                        {saving
+                            ? (t('transactions.transaction_saving_state') || 'Đang lưu...')
+                            : (t('transactions.transaction_save_action') || 'Lưu')}
                     </button>
                 </div>
 
-                {/* Global error / success banners */}
+                {/* ── Transaction summary strip ─────────────────────────────── */}
+                {transaction && (
+                    <div style={{
+                        display: 'flex', alignItems: 'center', gap: '12px',
+                        padding: '12px 20px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9',
+                    }}>
+                        <div style={{
+                            width: '38px', height: '38px', borderRadius: '11px', flexShrink: 0,
+                            background: transaction.type === 'income' ? '#dcfce7' : '#fee2e2',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
+                        }}>
+                            {getCategoryIcon(transaction.category?.slug)}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, marginBottom: '2px' }}>
+                                {t(`categories.${transaction.category?.slug}`) || transaction.category?.name || '—'}
+                            </p>
+                            <p style={{ fontSize: '16px', fontWeight: 800, color: transactionAccent }}>
+                                {transaction.type === 'income' ? '+' : '−'}{formatCurrency(transaction.amount)}
+                            </p>
+                        </div>
+                        {amountLocked && (
+                            <div style={{
+                                display: 'flex', alignItems: 'center', gap: '4px',
+                                background: '#fffbeb', border: '1px solid #fde68a',
+                                borderRadius: '20px', padding: '4px 10px',
+                            }}>
+                                <Lock style={{ width: '11px', height: '11px', color: '#d97706' }} />
+                                <span style={{ fontSize: '11px', color: '#d97706', fontWeight: 600 }}>
+                                    {t('transactions.amount_locked_hint') || `Khoá sau ${AMOUNT_LOCK_MINUTES} phút`}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* ── Global error / success banners ────────────────────────── */}
                 {error && (
-                    <div className="mx-6 mt-3 flex items-start space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex-shrink-0">
-                        <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                    <div style={{
+                        margin: '12px 20px 0',
+                        display: 'flex', alignItems: 'flex-start', gap: '8px',
+                        background: '#fef2f2', border: '1px solid #fecaca',
+                        borderRadius: '12px', padding: '10px 12px',
+                        fontSize: '13px', color: '#b91c1c', fontWeight: 600,
+                    }}>
+                        <AlertCircle style={{ width: '15px', height: '15px', flexShrink: 0, marginTop: '1px' }} />
                         <span>{error}</span>
                     </div>
                 )}
                 {successMsg && (
-                    <div className="mx-6 mt-3 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm flex-shrink-0">
+                    <div style={{
+                        margin: '12px 20px 0',
+                        background: '#f0fdf4', border: '1px solid #bbf7d0',
+                        borderRadius: '12px', padding: '10px 12px',
+                        fontSize: '13px', color: '#15803d', fontWeight: 600,
+                    }}>
                         {successMsg}
                     </div>
                 )}
 
-                {/* Tabs */}
-                <div className="border-b border-gray-200 flex-shrink-0">
-                    <div className="flex space-x-0 px-6">
-                        {TABS.map((tab: TabId) => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                                    activeTab === tab
-                                        ? 'text-blue-600 border-blue-600'
-                                        : 'text-gray-500 border-transparent hover:text-gray-800'
-                                }`}
-                            >
-                                {tabLabel(tab)}
-                            </button>
-                        ))}
-                    </div>
+                {/* ── Tabs ─────────────────────────────────────────────────── */}
+                <div style={{
+                    display: 'flex', borderBottom: '1px solid #f1f5f9',
+                    padding: '0 20px', gap: '0',
+                }}>
+                    {TABS.map((tab: TabId) => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            style={{
+                                flex: 1, background: 'none', border: 'none',
+                                padding: '12px 4px', fontSize: '13px', fontWeight: 600,
+                                cursor: 'pointer',
+                                color: activeTab === tab ? '#7B51F1' : '#9ca3af',
+                                borderBottom: `2px solid ${activeTab === tab ? '#7B51F1' : 'transparent'}`,
+                                marginBottom: '-1px',
+                                transition: 'color 0.15s, border-color 0.15s',
+                            }}
+                        >
+                            {tabLabel(tab)}
+                        </button>
+                    ))}
                 </div>
 
-                {/* Body */}
-                <div className="flex-1 overflow-y-auto">
+                {/* ── Body ─────────────────────────────────────────────────── */}
+                <div>
                     {loading && !transaction ? (
-                        <div className="flex items-center justify-center py-20">
-                            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 20px' }}>
+                            <div style={{
+                                width: '36px', height: '36px',
+                                border: '4px solid #ddd6fe', borderTopColor: '#7B51F1',
+                                borderRadius: '50%', animation: 'spin 0.9s linear infinite',
+                            }} />
+                            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                         </div>
                     ) : !transaction ? null : (
                         <>
-                            {/* ─── TAB 1: DETAILED INFO ─── */}
+                            {/* ─── TAB 1: DETAILS ─── */}
                             {activeTab === 'details' && (
-                                <form onSubmit={handleSave} className="p-6 space-y-5">
+                                <form ref={formRef} onSubmit={handleSave} style={{ padding: '20px' }}>
+
                                     {/* Amount */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                            <span className="flex items-center space-x-1.5">
-                                                <DollarSign className="w-4 h-4 text-gray-400" />
-                                                <span>{t('transactions.transaction_form_amount_label') || 'Amount'}</span>
-                                                {amountLocked && (
-                                                    <span className="ml-auto flex items-center space-x-1 text-xs text-amber-600 font-normal bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                                                        <Lock className="w-3 h-3" />
-                                                        <span>{t('transactions.amount_locked_hint') || `Locked after ${AMOUNT_LOCK_MINUTES} min`}</span>
-                                                    </span>
-                                                )}
-                                            </span>
+                                    <div style={MS.fieldWrap}>
+                                        <label style={MS.fieldLabel}>
+                                            {t('transactions.transaction_form_amount_label') || 'Số tiền'}
                                         </label>
-                                        <div className="relative">
+                                        <div style={{ position: 'relative' }}>
                                             <input
                                                 type="number"
                                                 step="0.01"
                                                 min="0"
                                                 value={formData.amount ?? ''}
-                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => !amountLocked && setFormData({ ...formData, amount: e.target.value })}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                                    !amountLocked && setFormData({ ...formData, amount: e.target.value })
+                                                }
                                                 disabled={amountLocked}
-                                                className={`w-full px-4 py-2.5 border rounded-lg text-sm transition-colors
-                                                    ${amountLocked
-                                                        ? 'bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed'
-                                                        : 'bg-white border-gray-300 text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-                                                    }`}
                                                 required
+                                                style={amountLocked ? MS.inputLocked : MS.inputBase}
                                                 title={amountLocked
                                                     ? (t('transactions.amount_locked_tooltip') || `Amount can only be edited within ${AMOUNT_LOCK_MINUTES} minutes of creation.`)
                                                     : ''}
                                             />
                                             {amountLocked && (
-                                                <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                <Lock style={{
+                                                    position: 'absolute', right: '14px', top: '50%',
+                                                    transform: 'translateY(-50%)',
+                                                    width: '14px', height: '14px', color: '#9ca3af',
+                                                }} />
                                             )}
                                         </div>
                                         {amountLocked && (
-                                            <p className="mt-1 text-xs text-amber-600">
+                                            <p style={{ marginTop: '6px', fontSize: '12px', color: '#d97706' }}>
                                                 {t('transactions.amount_locked_description') ||
-                                                    `This field is read-only because the transaction was created more than ${AMOUNT_LOCK_MINUTES} minutes ago.`}
+                                                    `Trường này chỉ đọc vì giao dịch được tạo hơn ${AMOUNT_LOCK_MINUTES} phút trước.`}
                                             </p>
                                         )}
                                     </div>
 
                                     {/* Category */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                            <span className="flex items-center space-x-1.5">
-                                                <Tag className="w-4 h-4 text-gray-400" />
-                                                <span>{t('transactions.transaction_form_category_label') || 'Category'}</span>
-                                            </span>
+                                    <div style={MS.fieldWrap}>
+                                        <label style={MS.fieldLabel}>
+                                            {t('transactions.transaction_form_category_label') || 'Hạng mục'}
                                         </label>
-                                        <select
-                                            value={formData.category_id ?? ''}
-                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, category_id: e.target.value })}
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            required
-                                        >
-                                            {categories.map((cat: Category) => (
-                                                <option key={cat.id} value={cat.id}>
-                                                    {getCategoryIcon(cat.slug)} {t(`categories.${cat.slug}`) || cat.name}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        <div style={{ position: 'relative' }}>
+                                            <select
+                                                value={formData.category_id ?? ''}
+                                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                                                    setFormData({ ...formData, category_id: e.target.value })
+                                                }
+                                                required
+                                                style={{ ...MS.inputBase, appearance: 'none', paddingRight: '36px' }}
+                                            >
+                                                {categories.map((cat: Category) => (
+                                                    <option key={cat.id} value={cat.id}>
+                                                        {getCategoryIcon(cat.slug)} {t(`categories.${cat.slug}`) || cat.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <span style={{
+                                                position: 'absolute', right: '14px', top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                pointerEvents: 'none', fontSize: '12px', color: '#9ca3af',
+                                            }}>▾</span>
+                                        </div>
                                     </div>
 
                                     {/* Account */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                            <span className="flex items-center space-x-1.5">
-                                                <span>{t('transactions.transaction_form_account_label') || 'Account'}</span>
-                                            </span>
+                                    <div style={MS.fieldWrap}>
+                                        <label style={MS.fieldLabel}>
+                                            {t('transactions.transaction_form_account_label') || 'Tài khoản'}
                                         </label>
-                                        <select
-                                            value={formData.account_id ?? ''}
-                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFormData({ ...formData, account_id: e.target.value })}
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            required
-                                        >
-                                            {accounts.map((acc: Account) => (
-                                                <option key={acc.id} value={acc.id}>
-                                                    {acc.name}
-                                                </option>
-                                            ))}
-                                        </select>
+                                        <div style={{ position: 'relative' }}>
+                                            <select
+                                                value={formData.account_id ?? ''}
+                                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                                                    setFormData({ ...formData, account_id: e.target.value })
+                                                }
+                                                required
+                                                style={{ ...MS.inputBase, appearance: 'none', paddingRight: '36px' }}
+                                            >
+                                                {accounts.map((acc: Account) => (
+                                                    <option key={acc.id} value={acc.id}>
+                                                        {acc.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <span style={{
+                                                position: 'absolute', right: '14px', top: '50%',
+                                                transform: 'translateY(-50%)',
+                                                pointerEvents: 'none', fontSize: '12px', color: '#9ca3af',
+                                            }}>▾</span>
+                                        </div>
                                     </div>
 
                                     {/* Date */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                            <span className="flex items-center space-x-1.5">
-                                                <Calendar className="w-4 h-4 text-gray-400" />
-                                                <span>{t('transactions.transaction_form_date_label') || 'Date'}</span>
-                                            </span>
+                                    <div style={MS.fieldWrap}>
+                                        <label style={MS.fieldLabel}>
+                                            {t('transactions.transaction_form_date_label') || 'Ngày'}
                                         </label>
                                         <input
                                             type="date"
                                             value={formData.transaction_date ?? ''}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, transaction_date: e.target.value })}
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                                                setFormData({ ...formData, transaction_date: e.target.value })
+                                            }
                                             required
+                                            style={MS.inputBase}
                                         />
                                     </div>
 
                                     {/* Notes */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                                            <span className="flex items-center space-x-1.5">
-                                                <FileText className="w-4 h-4 text-gray-400" />
-                                                <span>{t('transactions.transaction_form_notes_label') || 'Notes'}</span>
-                                            </span>
+                                    <div style={MS.fieldWrap}>
+                                        <label style={MS.fieldLabel}>
+                                            {t('transactions.transaction_form_notes_label') || 'Ghi chú'}
                                         </label>
                                         <textarea
                                             value={formData.notes ?? ''}
-                                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, notes: e.target.value })}
+                                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                                                setFormData({ ...formData, notes: e.target.value })
+                                            }
                                             rows={3}
-                                            placeholder={t('transactions.transaction_notes_placeholder') || 'Add a note…'}
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                            placeholder={t('transactions.transaction_notes_placeholder') || 'Thêm ghi chú…'}
+                                            style={{ ...MS.inputBase, resize: 'none', lineHeight: '1.5' }}
                                         />
                                     </div>
 
-                                    {/* Actions */}
-                                    <div className="flex space-x-3 pt-2">
-                                        <button
-                                            type="button"
-                                            onClick={handleClose}
-                                            className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
-                                        >
-                                            {t('common.cancel') || 'Cancel'}
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={saving || !permissions.can_edit}
-                                            className="flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                        >
-                                            {saving ? (
-                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                            ) : (
-                                                <Save className="w-4 h-4" />
-                                            )}
-                                            <span>{saving
-                                                ? (t('transactions.transaction_saving_state') || 'Saving…')
-                                                : (t('transactions.transaction_save_action') || 'Save Changes')
-                                            }</span>
-                                        </button>
-                                    </div>
+                                    {/* Hidden submit — triggered by header Save button */}
+                                    <button type="submit" style={{ display: 'none' }} aria-hidden />
                                 </form>
                             )}
 
                             {/* ─── TAB 2: IMAGES ─── */}
                             {activeTab === 'images' && (
-                                <div className="p-6 space-y-4">
-                                    {/* Photo count indicator */}
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-sm font-medium text-gray-700">
-                                            {t('transactions.photos.count_label') || 'Photos'}:{' '}
-                                            <span className={photoCount >= MAX_PHOTOS ? 'text-red-600 font-bold' : 'text-blue-600 font-bold'}>
+                                <div style={{ padding: '20px' }}>
+
+                                    {/* Count indicator */}
+                                    <div style={{
+                                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                        marginBottom: '16px',
+                                    }}>
+                                        <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280' }}>
+                                            {t('transactions.photos.count_label') || 'Ảnh'}:{' '}
+                                            <span style={{ color: photoCount >= MAX_PHOTOS ? '#ef4444' : '#7B51F1', fontWeight: 800 }}>
                                                 {photoCount}
                                             </span>
-                                            <span className="text-gray-400"> / {MAX_PHOTOS}</span>
+                                            <span style={{ color: '#9ca3af' }}> / {MAX_PHOTOS}</span>
                                         </span>
                                         {photoCount >= MAX_PHOTOS && (
-                                            <span className="flex items-center space-x-1 text-xs text-red-600 bg-red-50 px-2 py-1 rounded-full border border-red-200">
-                                                <AlertCircle className="w-3 h-3" />
-                                                <span>{t('transactions.photos.max_reached_badge') || 'Maximum reached'}</span>
-                                            </span>
+                                            <div style={{
+                                                display: 'flex', alignItems: 'center', gap: '4px',
+                                                background: '#fef2f2', border: '1px solid #fecaca',
+                                                borderRadius: '20px', padding: '4px 10px',
+                                            }}>
+                                                <AlertCircle style={{ width: '11px', height: '11px', color: '#ef4444' }} />
+                                                <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 600 }}>
+                                                    {t('transactions.photos.max_reached_badge') || 'Đã đạt giới hạn'}
+                                                </span>
+                                            </div>
                                         )}
                                     </div>
 
                                     {photoError && (
-                                        <div className="flex items-start space-x-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-700 text-sm">
-                                            <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                        <div style={{
+                                            display: 'flex', alignItems: 'flex-start', gap: '8px',
+                                            background: '#fffbeb', border: '1px solid #fde68a',
+                                            borderRadius: '12px', padding: '10px 12px',
+                                            fontSize: '13px', color: '#92400e', fontWeight: 500,
+                                            marginBottom: '16px',
+                                        }}>
+                                            <AlertCircle style={{ width: '14px', height: '14px', flexShrink: 0, marginTop: '1px' }} />
                                             <span>{photoError}</span>
                                         </div>
                                     )}
 
                                     {/* Upload zone */}
                                     {permissions.can_manage_photos && (
-                                        <div className="space-y-2">
+                                        <div style={{ marginBottom: '16px' }}>
+                                            <input
+                                                ref={fileInputRef}
+                                                type="file"
+                                                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                                                multiple
+                                                onChange={handlePhotoUpload}
+                                                disabled={!canUploadMore || uploadingPhoto}
+                                                style={{ display: 'none' }}
+                                                id="edit-photo-upload"
+                                            />
                                             <label
-                                                className={`flex flex-col items-center justify-center space-y-2 px-4 py-6 border-2 border-dashed rounded-xl transition-colors
-                                                    ${!canUploadMore || uploadingPhoto
-                                                        ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60'
-                                                        : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50 cursor-pointer'
-                                                    }`}
+                                                htmlFor="edit-photo-upload"
+                                                style={{
+                                                    display: 'flex', flexDirection: 'column',
+                                                    alignItems: 'center', justifyContent: 'center',
+                                                    gap: '8px', padding: '24px 16px',
+                                                    border: `2px dashed ${!canUploadMore || uploadingPhoto ? '#e5e7eb' : '#7B51F1'}`,
+                                                    borderRadius: '14px',
+                                                    background: !canUploadMore || uploadingPhoto ? '#f9fafb' : '#f5f3ff',
+                                                    cursor: !canUploadMore || uploadingPhoto ? 'not-allowed' : 'pointer',
+                                                    opacity: !canUploadMore ? 0.55 : 1,
+                                                    transition: 'border-color 0.2s, background 0.2s',
+                                                }}
                                             >
                                                 {uploadingPhoto ? (
-                                                    <Loader2 className="w-6 h-6 text-blue-500 animate-spin" />
+                                                    <div style={{
+                                                        width: '24px', height: '24px',
+                                                        border: '3px solid #ddd6fe', borderTopColor: '#7B51F1',
+                                                        borderRadius: '50%', animation: 'spin 0.9s linear infinite',
+                                                    }} />
                                                 ) : canUploadMore ? (
-                                                    <Upload className="w-6 h-6 text-gray-400" />
+                                                    <Upload style={{ width: '22px', height: '22px', color: '#7B51F1' }} />
                                                 ) : (
-                                                    <Lock className="w-6 h-6 text-gray-400" />
+                                                    <Lock style={{ width: '22px', height: '22px', color: '#9ca3af' }} />
                                                 )}
-
-                                                <div className="text-center">
-                                                    <span className="text-sm text-gray-600 font-medium">
-                                                        {uploadingPhoto
-                                                            ? (uploadProgress.stage === 'compressing'
-                                                                ? (t('transactions.photos.compressing') || 'Compressing…')
-                                                                : uploadProgress.stage === 'uploading'
-                                                                    ? (t('transactions.photos.uploading') || 'Uploading…')
-                                                                    : (t('transactions.transaction_uploading_state') || 'Processing…'))
-                                                            : canUploadMore
-                                                                ? (t('transactions.transaction_upload_photo_action') || 'Click to upload photos')
-                                                                : (t('transactions.photos.max_photos_reached') || `Maximum of ${MAX_PHOTOS} photos reached`)
-                                                        }
+                                                <span style={{ fontSize: '13px', fontWeight: 600, color: uploadingPhoto ? '#7B51F1' : canUploadMore ? '#4b5563' : '#9ca3af' }}>
+                                                    {uploadingPhoto
+                                                        ? (uploadProgress.stage === 'compressing'
+                                                            ? (t('transactions.photos.compressing') || 'Đang nén…')
+                                                            : uploadProgress.stage === 'uploading'
+                                                                ? (t('transactions.photos.uploading') || 'Đang tải lên…')
+                                                                : (t('transactions.transaction_uploading_state') || 'Đang xử lý…'))
+                                                        : canUploadMore
+                                                            ? (t('transactions.transaction_upload_photo_action') || 'Nhấn để tải ảnh lên')
+                                                            : (t('transactions.photos.max_photos_reached') || `Đã đạt tối đa ${MAX_PHOTOS} ảnh`)
+                                                    }
+                                                </span>
+                                                {!uploadingPhoto && canUploadMore && (
+                                                    <span style={{ fontSize: '11px', color: '#9ca3af' }}>
+                                                        JPEG, PNG, WebP · tối đa 10 MB · còn {MAX_PHOTOS - photoCount} ô
                                                     </span>
-                                                    {!uploadingPhoto && canUploadMore && (
-                                                        <p className="text-xs text-gray-400 mt-1">
-                                                            {t('transactions.photos.size_hint') || 'JPEG, PNG, GIF, WebP · max 10 MB'}
-                                                            {' · '}
-                                                            {MAX_PHOTOS - photoCount} {t('transactions.photos.slots_remaining') || 'slot(s) remaining'}
-                                                        </p>
-                                                    )}
-                                                </div>
-
-                                                <input
-                                                    ref={fileInputRef}
-                                                    type="file"
-                                                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                                                    multiple
-                                                    onChange={handlePhotoUpload}
-                                                    className="hidden"
-                                                    disabled={!canUploadMore || uploadingPhoto}
-                                                />
+                                                )}
                                             </label>
 
                                             {/* Progress bar */}
                                             {uploadingPhoto && (
-                                                <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                                                    <div
-                                                        className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
-                                                        style={{ width: `${uploadProgress.progress}%` }}
-                                                    />
+                                                <div style={{
+                                                    width: '100%', height: '4px', background: '#ede9fe',
+                                                    borderRadius: '4px', overflow: 'hidden', marginTop: '8px',
+                                                }}>
+                                                    <div style={{
+                                                        height: '100%', background: '#7B51F1',
+                                                        borderRadius: '4px',
+                                                        width: `${uploadProgress.progress}%`,
+                                                        transition: 'width 0.3s ease',
+                                                    }} />
                                                 </div>
                                             )}
                                         </div>
@@ -684,85 +817,115 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
                                     {/* Photo gallery */}
                                     {transaction.photos && transaction.photos.length > 0 ? (
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                        <div style={{
+                                            display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)',
+                                            gap: '10px',
+                                        }}>
                                             {transaction.photos.map((photo: TransactionPhoto) => (
-                                                <div key={photo.id} className="relative group rounded-lg overflow-hidden border border-gray-200">
+                                                <div
+                                                    key={photo.id}
+                                                    style={{
+                                                        position: 'relative', borderRadius: '12px',
+                                                        overflow: 'hidden', border: '1.5px solid #e5e7eb',
+                                                    }}
+                                                    className="group"
+                                                >
                                                     <img
                                                         src={`/storage/${photo.file_path}`}
                                                         alt={photo.original_filename}
-                                                        className="w-full h-36 object-cover"
+                                                        style={{ width: '100%', height: '120px', objectFit: 'cover', display: 'block' }}
                                                     />
-                                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all flex items-center justify-center">
-                                                        {permissions.can_manage_photos && (
-                                                            <button
-                                                                onClick={() => handleDeletePhoto(photo.id)}
-                                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                                                                title={t('transactions.photos.delete_photo') || 'Delete photo'}
-                                                            >
-                                                                <Trash2 className="w-4 h-4" />
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                    <div className="px-2 py-1.5 bg-white">
-                                                        <p className="text-xs text-gray-600 truncate">{photo.original_filename}</p>
-                                                        <p className="text-xs text-gray-400">{(photo.file_size / 1024).toFixed(1)} KB</p>
+                                                    {permissions.can_manage_photos && (
+                                                        <button
+                                                            onClick={() => handleDeletePhoto(photo.id)}
+                                                            style={{
+                                                                position: 'absolute', top: '6px', right: '6px',
+                                                                background: '#ef4444', border: 'none',
+                                                                color: '#fff', borderRadius: '8px',
+                                                                padding: '4px', cursor: 'pointer',
+                                                                display: 'flex', alignItems: 'center',
+                                                            }}
+                                                            title={t('transactions.photos.delete_photo') || 'Xóa ảnh'}
+                                                        >
+                                                            <Trash2 style={{ width: '13px', height: '13px' }} />
+                                                        </button>
+                                                    )}
+                                                    <div style={{ padding: '6px 8px', background: '#fff' }}>
+                                                        <p style={{ fontSize: '11px', color: '#4b5563', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                            {photo.original_filename}
+                                                        </p>
+                                                        <p style={{ fontSize: '11px', color: '#9ca3af' }}>
+                                                            {(photo.file_size / 1024).toFixed(1)} KB
+                                                        </p>
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col items-center py-12 text-gray-400">
-                                            <ImageIcon className="w-12 h-12 mb-3 opacity-40" />
-                                            <p className="text-sm">{t('transaction_detail_modal.no_photos_uploaded_yet') || 'No photos uploaded yet.'}</p>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 20px', color: '#9ca3af' }}>
+                                            <ImageIcon style={{ width: '44px', height: '44px', opacity: 0.35, marginBottom: '10px' }} />
+                                            <p style={{ fontSize: '13px' }}>
+                                                {t('transaction_detail_modal.no_photos_uploaded_yet') || 'Chưa có ảnh nào.'}
+                                            </p>
                                         </div>
                                     )}
                                 </div>
                             )}
 
-                            {/* ─── TAB 3: TRANSACTION HISTORY ─── */}
+                            {/* ─── TAB 3: HISTORY ─── */}
                             {activeTab === 'history' && (
-                                <div className="p-6 space-y-4">
+                                <div style={{ padding: '20px' }}>
                                     {transaction.change_logs && transaction.change_logs.length > 0 ? (
-                                        <div className="space-y-3">
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                             {transaction.change_logs.map((log: ChangeLog) => (
-                                                <div key={log.id} className="bg-gray-50 border border-gray-100 rounded-xl p-4">
-                                                    <div className="flex items-start space-x-3">
-                                                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                            <History className="w-4 h-4 text-blue-600" />
+                                                <div
+                                                    key={log.id}
+                                                    style={{
+                                                        background: '#f8fafc', border: '1px solid #f1f5f9',
+                                                        borderRadius: '14px', padding: '14px',
+                                                    }}
+                                                >
+                                                    <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                                                        <div style={{
+                                                            width: '32px', height: '32px', borderRadius: '50%',
+                                                            background: '#ede9fe', display: 'flex',
+                                                            alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                                                        }}>
+                                                            <History style={{ width: '15px', height: '15px', color: '#7B51F1' }} />
                                                         </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center justify-between flex-wrap gap-1">
-                                                                <span className="font-medium text-gray-900 text-sm">
-                                                                    {log.action === 'created' && (t('transactions.transaction_history_created') || 'Created')}
-                                                                    {log.action === 'updated' && (t('transactions.transaction_history_updated') || 'Updated')}
-                                                                    {log.action === 'deleted' && (t('transactions.transaction_history_deleted') || 'Deleted')}
-                                                                    {log.action === 'photo_added' && (t('transactions.transaction_history_photo_added') || 'Photo Added')}
-                                                                    {log.action === 'photo_removed' && (t('transactions.transaction_history_photo_removed') || 'Photo Removed')}
+                                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                                            <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', marginBottom: '2px' }}>
+                                                                <span style={{ fontSize: '13px', fontWeight: 700, color: '#121212' }}>
+                                                                    {log.action === 'created' && (t('transactions.transaction_history_created') || 'Tạo mới')}
+                                                                    {log.action === 'updated' && (t('transactions.transaction_history_updated') || 'Cập nhật')}
+                                                                    {log.action === 'deleted' && (t('transactions.transaction_history_deleted') || 'Xóa')}
+                                                                    {log.action === 'photo_added' && (t('transactions.transaction_history_photo_added') || 'Thêm ảnh')}
+                                                                    {log.action === 'photo_removed' && (t('transactions.transaction_history_photo_removed') || 'Xóa ảnh')}
                                                                 </span>
-                                                                <span className="text-xs text-gray-400">
+                                                                <span style={{ fontSize: '11px', color: '#9ca3af' }}>
                                                                     {format(parseISO(log.created_at), 'MMM dd, yyyy h:mm a')}
                                                                 </span>
                                                             </div>
-                                                            <p className="text-xs text-gray-500 mt-0.5">
-                                                                {t('transactions.transaction_history_by') || 'By'}{' '}
-                                                                <span className="font-medium text-gray-700">
-                                                                    {log.user?.name || (t('transactions.transaction_history_unknown_user') || 'Unknown')}
+                                                            <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
+                                                                {t('transactions.transaction_history_by') || 'Bởi'}{' '}
+                                                                <span style={{ fontWeight: 700, color: '#374151' }}>
+                                                                    {log.user?.name || (t('transactions.transaction_history_unknown_user') || 'Không rõ')}
                                                                 </span>
                                                             </p>
 
                                                             {/* Field diffs */}
                                                             {log.changes?.diff && Object.keys(log.changes.diff).length > 0 && (
-                                                                <div className="mt-2 space-y-1">
+                                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                                                     {Object.entries(log.changes.diff).map(([key, change]: [string, ChangeLogDiffEntry]) => (
-                                                                        <div key={key} className="flex items-center flex-wrap gap-1 text-xs">
-                                                                            <span className="font-medium text-gray-600 capitalize">
+                                                                        <div key={key} style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px', fontSize: '12px' }}>
+                                                                            <span style={{ fontWeight: 600, color: '#6b7280', textTransform: 'capitalize' }}>
                                                                                 {key.replace(/_/g, ' ')}:
                                                                             </span>
-                                                                            <span className="px-1.5 py-0.5 bg-red-100 text-red-700 rounded line-through">
+                                                                            <span style={{ padding: '2px 6px', background: '#fee2e2', color: '#b91c1c', borderRadius: '4px', textDecoration: 'line-through' }}>
                                                                                 {formatChangeValue(key, change.from)}
                                                                             </span>
-                                                                            <ChevronRight className="w-3 h-3 text-gray-400" />
-                                                                            <span className="px-1.5 py-0.5 bg-green-100 text-green-700 rounded">
+                                                                            <ChevronRight style={{ width: '12px', height: '12px', color: '#9ca3af' }} />
+                                                                            <span style={{ padding: '2px 6px', background: '#dcfce7', color: '#15803d', borderRadius: '4px' }}>
                                                                                 {formatChangeValue(key, change.to)}
                                                                             </span>
                                                                         </div>
@@ -772,7 +935,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
                                                             {/* Photo filename */}
                                                             {log.changes?.filename && (
-                                                                <p className="mt-1.5 text-xs text-gray-500">
+                                                                <p style={{ marginTop: '6px', fontSize: '12px', color: '#6b7280' }}>
                                                                     📎 {log.changes.filename}
                                                                 </p>
                                                             )}
@@ -782,9 +945,11 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col items-center py-12 text-gray-400">
-                                            <History className="w-12 h-12 mb-3 opacity-40" />
-                                            <p className="text-sm">{t('transaction_detail_modal.no_history_available') || 'No history available.'}</p>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 20px', color: '#9ca3af' }}>
+                                            <History style={{ width: '44px', height: '44px', opacity: 0.35, marginBottom: '10px' }} />
+                                            <p style={{ fontSize: '13px' }}>
+                                                {t('transaction_detail_modal.no_history_available') || 'Chưa có lịch sử.'}
+                                            </p>
                                         </div>
                                     )}
                                 </div>
