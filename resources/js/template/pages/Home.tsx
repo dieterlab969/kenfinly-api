@@ -10,6 +10,7 @@ import icon4 from '../assets/images/tabbar/icon4.svg'
 import Setting from '../components/Setting.tsx'
 import api from '../../utils/api'
 import { formatCurrency, getCategoryIcon } from '../../constants/categories'
+import EditTransactionModal from '../../components/EditTransactionModal'
 
 type ApiAmount = string | number | null | undefined
 type TransactionType = 'income' | 'expense'
@@ -474,6 +475,8 @@ const Home: React.FC = () => {
   const [formLoading, setFormLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState('')
+  const [selectedTransactionId, setSelectedTransactionId] = useState<number | null>(null)
+  const [showEditModal, setShowEditModal] = useState<boolean>(false)
 
   const fetchDashboardData = useCallback(async (showLoading = true) => {
     try {
@@ -739,7 +742,7 @@ const Home: React.FC = () => {
                   ) : recentTransactions.map(tx => {
                     const signedAmount = getTransactionSignedAmount(tx)
                     return (
-                    <div key={tx.id} onClick={() => navigate('/Activity')} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                    <div key={tx.id} onClick={() => { setSelectedTransactionId(tx.id); setShowEditModal(true) }} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
                       <div style={{
                         width: '44px', height: '44px', borderRadius: '14px', flexShrink: 0,
                         background: signedAmount >= 0 ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.10)',
@@ -1076,6 +1079,16 @@ const Home: React.FC = () => {
           </div>
         </div>
       )}
+
+      <EditTransactionModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false)
+          setSelectedTransactionId(null)
+        }}
+        transactionId={selectedTransactionId}
+        onUpdate={() => fetchDashboardData(false)}
+      />
 
       <style>{`
         @keyframes fadeUp {
