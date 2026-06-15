@@ -11,6 +11,7 @@ import Setting from '../components/Setting.tsx'
 import api from '../../utils/api'
 import { formatCurrency, getCategoryIcon } from '../../constants/categories'
 import EditTransactionModal from '../../components/EditTransactionModal'
+import { processImageForUpload, validateImageFile, formatFileSize } from '../../utils/imageCompression'
 
 type ApiAmount = string | number | null | undefined
 type TransactionType = 'income' | 'expense'
@@ -477,6 +478,9 @@ const Home: React.FC = () => {
   const [formError, setFormError] = useState('')
   const [selectedTransactionId, setSelectedTransactionId] = useState<number | null>(null)
   const [showEditModal, setShowEditModal] = useState<boolean>(false)
+  const [receipt, setReceipt] = useState<File | null>(null)
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null)
+  const [compressionStatus, setCompressionStatus] = useState<string>('')
 
   const fetchDashboardData = useCallback(async (showLoading = true) => {
     try {
@@ -567,6 +571,47 @@ const Home: React.FC = () => {
     setNote('')
     setTransactionDate(todayDateKey())
     setFormError('')
+    setReceipt(null)
+    setReceiptPreview(null)
+    setCompressionStatus('')
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const validation = validateImageFile(file)
+    if (!validation.valid) {
+      setFormError(validation.error ?? 'Tệp không hợp lệ.')
+      e.target.value = ''
+      return
+    }
+
+    try {
+      setCompressionStatus('Đang nén ảnh...')
+      setFormError('')
+
+      const result = await processImageForUpload(file, (progress: { stage: string }) => {
+        if (progress.stage === 'compressing') {
+          setCompressionStatus('Đang nén ảnh...')
+        }
+      })
+
+      if (result.wasCompressed) {
+        console.log(`Ảnh đã nén: ${formatFileSize(result.originalSize)} → ${formatFileSize(result.compressedSize)} (giảm ${result.compressionRatio}%)`)
+      }
+
+      setReceipt(result.file)
+      const reader = new FileReader()
+      reader.onloadend = () => { setReceiptPreview(reader.result as string) }
+      reader.readAsDataURL(result.file)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Không thể xử lý ảnh.'
+      setFormError(message)
+      e.target.value = ''
+    } finally {
+      setCompressionStatus('')
+    }
   }
 
   const handleSaveQuickAdd = async () => {
@@ -587,18 +632,24 @@ const Home: React.FC = () => {
     try {
       setSaving(true)
       setFormError('')
-      await api.post('/transactions', {
-        type: transactionType,
-        amount: amountValue,
-        category_id: Number(category),
-        account_id: Number(accountId),
-        transaction_date: transactionDate,
-        notes: note || undefined,
-      })
+
+      const submitData = new FormData()
+      submitData.append('type', transactionType)
+      submitData.append('amount', String(amountValue))
+      submitData.append('category_id', String(Number(category)))
+      submitData.append('account_id', String(Number(accountId)))
+      submitData.append('transaction_date', transactionDate)
+      if (note) submitData.append('notes', note)
+      if (receipt) submitData.append('receipt', receipt)
+
+      await api.post('/transactions', submitData)
+
       setShowModal(false)
       setAmount('')
       setCategory('')
       setNote('')
+      setReceipt(null)
+      setReceiptPreview(null)
       await fetchDashboardData(false)
     } catch (err) {
       console.error('Failed to save quick add transaction:', err)
@@ -1074,6 +1125,72 @@ const Home: React.FC = () => {
                   placeholder="Thêm ghi chú..."
                   style={S.inputBase}
                 />
+              </div>
+
+              <div style={S.fieldWrap}>
+                <label style={S.fieldLabel}>Ảnh hóa đơn <span style={{ color: '#9ca3af', fontWeight: 400 }}>(tuỳ chọn)</span></label>
+                <input
+                  type="file"
+                  id="quick-add-receipt"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  onChange={handleFileChange}
+                  disabled={saving || !!compressionStatus}
+                  style={{ display: 'none' }}
+                />
+                <label
+                  htmlFor="quick-add-receipt"
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    border: `2px dashed ${compressionStatus ? '#7B51F1' : receiptPreview ? '#7B51F1' : '#e5e7eb'}`,
+                    borderRadius: '14px', padding: '16px',
+                    background: compressionStatus ? '#f5f3ff' : receiptPreview ? '#faf9ff' : '#f8fafc',
+                    cursor: saving || compressionStatus ? 'not-allowed' : 'pointer',
+                    transition: 'border-color 0.2s, background 0.2s',
+                    minHeight: '80px',
+                  }}
+                >
+                  {compressionStatus ? (
+                    <>
+                      <div style={{
+                        width: '24px', height: '24px', border: '3px solid #ddd6fe', borderTopColor: '#7B51F1',
+                        borderRadius: '50%', marginBottom: '8px',
+                        animation: 'spin 0.9s linear infinite',
+                      }} />
+                      <span style={{ fontSize: '13px', color: '#7B51F1', fontWeight: 600 }}>{compressionStatus}</span>
+                    </>
+                  ) : receiptPreview ? (
+                    <>
+                      <img
+                        src={receiptPreview}
+                        alt="Xem trước hóa đơn"
+                        style={{ maxHeight: '120px', borderRadius: '10px', marginBottom: '8px', objectFit: 'contain' }}
+                      />
+                      <span style={{ fontSize: '12px', color: '#7B51F1', fontWeight: 600 }}>Nhấn để thay ảnh</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '8px' }}>
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                      </svg>
+                      <span style={{ fontSize: '13px', color: '#6b7280', fontWeight: 500 }}>Tải ảnh lên</span>
+                      <span style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>JPEG, PNG, WebP · tối đa 10 MB</span>
+                    </>
+                  )}
+                </label>
+                {receiptPreview && !compressionStatus && (
+                  <button
+                    type="button"
+                    onClick={() => { setReceipt(null); setReceiptPreview(null) }}
+                    disabled={saving}
+                    style={{
+                      marginTop: '8px', background: 'none', border: 'none',
+                      color: '#ef4444', fontSize: '12px', fontWeight: 600,
+                      cursor: 'pointer', padding: '2px 0',
+                    }}
+                  >✕ Xoá ảnh</button>
+                )}
               </div>
             </div>
           </div>
