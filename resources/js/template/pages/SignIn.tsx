@@ -6,6 +6,11 @@ import { Link, useNavigate } from 'react-router-dom';
 interface LoginSuccessResponse {
   access_token: string;
   token_type: string;
+  user?: {
+    id?: number;
+    name?: string;
+    email?: string;
+  };
 }
 
 interface LoginErrorResponse {
@@ -39,8 +44,12 @@ const SignIn: React.FC = () => {
         setError(errData.message || 'Login failed. Please check your credentials.');
         return;
       }
-      const { access_token } = data as LoginSuccessResponse;
+      const { access_token, user } = data as LoginSuccessResponse;
       localStorage.setItem('auth_token', access_token);
+      localStorage.setItem('token', access_token);
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+      }
       navigate('/Home');
     } catch {
       setError('Network error. Please try again.');

@@ -13,30 +13,91 @@ import AccountSettingsModal from '../components/AccountSettingsModal';
 import PaymentInfoModal from '../components/PaymentInfoModal';
 import PaymentHistoryModal from '../components/PaymentHistoryModal';
 import TransactionDetailModal from '../components/TransactionDetailModal';
+import EditTransactionModal from '../components/EditTransactionModal';
 import MonthlySummaryCard from '../components/dashboard/MonthlySummaryCard';
 import BalanceTrendChart from '../components/dashboard/BalanceTrendChart';
 import AttendanceWidget from '../components/dashboard/AttendanceWidget';
 import { getCategoryIcon, formatCurrency } from '../constants/categories';
+import type { Transaction } from '../components/EditTransactionModal';
 
-const Dashboard = () => {
-    const { user, logout } = useAuth();
+// ─────────────────────────────────────────────────────────────────────────────
+// Domain types
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface AuthUser {
+    name: string;
+    email?: string;
+}
+
+interface DashboardCategory {
+    id: number;
+    name: string;
+    slug: string;
+}
+
+interface DashboardTransactionAccount {
+    name: string;
+}
+
+interface DashboardTransaction {
+    id: number;
+    type: 'income' | 'expense';
+    amount: number | string;
+    transaction_date: string;
+    category?: DashboardCategory;
+    account?: DashboardTransactionAccount;
+}
+
+interface DashboardAccount {
+    id: number;
+    name: string;
+    balance: string | number;
+}
+
+interface SevenDayExpense {
+    date: string;
+    total: string | number;
+}
+
+interface ChartDataPoint {
+    date: string;
+    amount: number;
+}
+
+interface DashboardData {
+    accounts?: DashboardAccount[];
+    recent_transactions?: DashboardTransaction[];
+    seven_day_expenses?: SevenDayExpense[];
+    monthly_summary?: unknown;
+    balance_history?: unknown;
+}
+
+type DayTranslationMap = Record<string, string>;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Component
+// ─────────────────────────────────────────────────────────────────────────────
+
+const Dashboard: React.FC = () => {
+    const { user, logout } = useAuth() as { user: AuthUser | null; logout: () => Promise<void> };
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const [dashboardData, setDashboardData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [showSettingsModal, setShowSettingsModal] = useState(false);
-    const [showAccountModal, setShowAccountModal] = useState(false);
-    const [showPaymentModal, setShowPaymentModal] = useState(false);
-    const [showPaymentHistoryModal, setShowPaymentHistoryModal] = useState(false);
-    const [selectedTransactionId, setSelectedTransactionId] = useState(null);
-    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [showAddModal, setShowAddModal] = useState<boolean>(false);
+    const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
+    const [showAccountModal, setShowAccountModal] = useState<boolean>(false);
+    const [showPaymentModal, setShowPaymentModal] = useState<boolean>(false);
+    const [showPaymentHistoryModal, setShowPaymentHistoryModal] = useState<boolean>(false);
+    const [selectedTransactionId, setSelectedTransactionId] = useState<number | null>(null);
+    const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
+    const [showEditModal, setShowEditModal] = useState<boolean>(false);
 
     useEffect(() => {
         fetchDashboardData();
     }, []);
 
-    const fetchDashboardData = async (showLoading = true) => {
+    const fetchDashboardData = async (showLoading: boolean = true): Promise<void> => {
         try {
             if (showLoading) {
                 setLoading(true);
@@ -52,18 +113,18 @@ const Dashboard = () => {
         }
     };
 
-    const handleLogout = async () => {
+    const handleLogout = async (): Promise<void> => {
         await logout();
         navigate('/login');
     };
 
-    const handleTransactionAdded = (newTransaction) => {
+    const handleTransactionAdded = (newTransaction?: DashboardTransaction | Transaction): void => {
         if (newTransaction && dashboardData) {
             setDashboardData(prev => ({
                 ...prev,
                 recent_transactions: [
-                    newTransaction,
-                    ...(prev.recent_transactions || [])
+                    newTransaction as DashboardTransaction,
+                    ...(prev?.recent_transactions || [])
                 ].slice(0, 6)
             }));
         }
@@ -73,12 +134,12 @@ const Dashboard = () => {
         });
     };
 
-    const prepareChartData = () => {
+    const prepareChartData = (): ChartDataPoint[] => {
         if (!dashboardData?.seven_day_expenses) return [];
         
-        const last7Days = [];
-        const today = new Date();
-        const dayTranslations = {
+        const last7Days: ChartDataPoint[] = [];
+        const today: Date = new Date();
+        const dayTranslations: DayTranslationMap = {
             'Mon': 'Thứ 2',
             'Tue': 'Thứ 3',
             'Wed': 'Thứ 4',
@@ -89,26 +150,26 @@ const Dashboard = () => {
         };
         
         for (let i = 6; i >= 0; i--) {
-            const date = new Date(today);
+            const date: Date = new Date(today);
             date.setDate(date.getDate() - i);
-            const dateStr = format(date, 'yyyy-MM-dd');
+            const dateStr: string = format(date, 'yyyy-MM-dd');
             
-            const existingData = dashboardData.seven_day_expenses.find(
-                item => item.date === dateStr
+            const existingData: SevenDayExpense | undefined = dashboardData.seven_day_expenses!.find(
+                (item: SevenDayExpense) => item.date === dateStr
             );
             
-            const dayName = format(date, 'EEE');
+            const dayName: string = format(date, 'EEE');
             last7Days.push({
                 date: dayTranslations[dayName] || dayName,
-                amount: existingData ? parseFloat(existingData.total) : 0
+                amount: existingData ? parseFloat(String(existingData.total)) : 0
             });
         }
         
         return last7Days;
     };
 
-    const totalBalance = dashboardData?.accounts?.reduce(
-        (sum, account) => sum + parseFloat(account.balance), 
+    const totalBalance: number = dashboardData?.accounts?.reduce(
+        (sum: number, account: DashboardAccount) => sum + parseFloat(String(account.balance)), 
         0
     ) || 0;
 
@@ -186,7 +247,7 @@ const Dashboard = () => {
                             <YAxis 
                                 tick={{ fill: '#6b7280', fontSize: 12 }}
                                 axisLine={{ stroke: '#e5e7eb' }}
-                                tickFormatter={(value) => {
+                                tickFormatter={(value: number) => {
                                     if (value >= 1000000) {
                                         return `${(value / 1000000).toFixed(0)}M`;
                                     }
@@ -197,7 +258,7 @@ const Dashboard = () => {
                                 }}
                             />
                             <Tooltip 
-                                formatter={(value) => formatCurrency(value)}
+                                formatter={(value: number) => formatCurrency(value)}
                                 contentStyle={{ 
                                     backgroundColor: '#ffffff', 
                                     border: '1px solid #e5e7eb',
@@ -230,14 +291,14 @@ const Dashboard = () => {
                         </button>
                     </div>
                     
-                    {dashboardData?.recent_transactions?.length > 0 ? (
+                    {dashboardData?.recent_transactions?.length ?? 0 > 0 ? (
                         <div className="space-y-3">
-                            {dashboardData.recent_transactions.map((transaction) => (
+                            {dashboardData?.recent_transactions?.map((transaction: DashboardTransaction) => (
                                 <div
                                     key={transaction.id}
                                     onClick={() => {
                                         setSelectedTransactionId(transaction.id);
-                                        setShowDetailModal(true);
+                                        setShowEditModal(true);
                                     }}
                                     className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors cursor-pointer"
                                 >
@@ -329,6 +390,16 @@ const Dashboard = () => {
                 isOpen={showDetailModal}
                 onClose={() => {
                     setShowDetailModal(false);
+                    setSelectedTransactionId(null);
+                }}
+                transactionId={selectedTransactionId}
+                onUpdate={handleTransactionAdded}
+            />
+
+            <EditTransactionModal
+                isOpen={showEditModal}
+                onClose={() => {
+                    setShowEditModal(false);
                     setSelectedTransactionId(null);
                 }}
                 transactionId={selectedTransactionId}

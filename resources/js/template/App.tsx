@@ -3,8 +3,10 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './assets/css/swap.css';
 import './assets/css/style.css';
 import './assets/css/media-query.css';
+import type { ReactElement } from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DarkModeProvider } from "./components/DarkModeContext";
+import { TranslationProvider } from '../contexts/TranslationContext';
 import Loader from "./components/Loader";
 import Splashscreen from "./pages/Splashscreen";
 import LetYouScreen from "./pages/LetYouScreen";
@@ -126,8 +128,9 @@ import DeleteDeactivateAccount from './pages/DeleteDeactivateAccount';
 import InviteFriend from './pages/InviteFriend';
 import PersonalInfo from './pages/PersonalInfo';
 
-function App(): JSX.Element {
+function App(): ReactElement {
   return (
+    <TranslationProvider>
     <DarkModeProvider>
       <BrowserRouter>
         <Loader />
@@ -254,6 +257,7 @@ function App(): JSX.Element {
         </Routes>
       </BrowserRouter>
     </DarkModeProvider>
+    </TranslationProvider>
   );
 }
 

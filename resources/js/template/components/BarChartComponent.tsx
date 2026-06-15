@@ -3,6 +3,7 @@ import React from "react";
 import { Bar } from "react-chartjs-2";
 import {
     Chart as ChartJS,
+    type ChartOptions,
     CategoryScale,
     LinearScale,
     BarElement,
@@ -29,7 +30,7 @@ const BarChartComponent: React.FC = () => {
         ]
     };
 
-    const options = {
+    const options: ChartOptions<"bar"> = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
@@ -45,7 +46,7 @@ const BarChartComponent: React.FC = () => {
         scales: {
             y: {
                 ticks: {
-                    callback: (value) => `$${value / 1000}k`
+                    callback: (value) => `$${Number(value) / 1000}k`
                 },
                 grid: {
                     color: "#eee"
