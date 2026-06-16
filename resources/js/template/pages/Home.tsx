@@ -460,6 +460,7 @@ const MonthCol: React.FC<{
 const Home: React.FC = () => {
   const navigate = useNavigate()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [user, setUser] = useState<UserProfile | null>(() => getStoredUser())
   const [fabOpen, setFabOpen] = useState(false)
@@ -481,14 +482,17 @@ const Home: React.FC = () => {
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null)
   const [compressionStatus, setCompressionStatus] = useState<string>('')
 
-  const fetchDashboardData = useCallback(async () => {
+  const fetchDashboardData = useCallback(async (showLoading = true) => {
     try {
+      if (showLoading) setLoading(true)
       setError('')
       const response = await api.get('/dashboard')
       setDashboardData(response.data.data ?? null)
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err)
       setError(getApiErrorMessage(err, 'Không thể tải dữ liệu dashboard.'))
+    } finally {
+      if (showLoading) setLoading(false)
     }
   }, [])
 
@@ -646,13 +650,25 @@ const Home: React.FC = () => {
       setNote('')
       setReceipt(null)
       setReceiptPreview(null)
-      await fetchDashboardData()
+      await fetchDashboardData(false)
     } catch (err) {
       console.error('Failed to save quick add transaction:', err)
       setFormError(getApiErrorMessage(err, 'Không thể lưu giao dịch.'))
     } finally {
       setSaving(false)
     }
+  }
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f3ff' }}>
+        <div style={{ textAlign: 'center', color: '#6b7280', fontFamily: 'Satoshi, sans-serif' }}>
+          <div style={{ width: '44px', height: '44px', border: '4px solid #ddd6fe', borderTopColor: '#7B51F1', borderRadius: '50%', margin: '0 auto 14px', animation: 'spin 0.9s linear infinite' }} />
+          <p>Đang tải dashboard...</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -1188,7 +1204,7 @@ const Home: React.FC = () => {
           setSelectedTransactionId(null)
         }}
         transactionId={selectedTransactionId}
-        onUpdate={() => fetchDashboardData()}
+        onUpdate={() => fetchDashboardData(false)}
       />
 
       <style>{`

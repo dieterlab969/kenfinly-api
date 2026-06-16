@@ -7,7 +7,6 @@ import type { ReactElement } from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DarkModeProvider } from "./components/DarkModeContext";
 import { TranslationProvider } from '../contexts/TranslationContext';
-import Loader from "./components/Loader";
 import Splashscreen from "./pages/Splashscreen";
 import LetYouScreen from "./pages/LetYouScreen";
 import SignIn from './pages/SignIn';
@@ -133,7 +132,6 @@ function App(): ReactElement {
     <TranslationProvider>
     <DarkModeProvider>
       <BrowserRouter>
-        <Loader />
         <Routes>
           <Route path="/" element={<Splashscreen />} />
           <Route path="/LetYouScreen" element={<LetYouScreen />} />
