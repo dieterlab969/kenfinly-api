@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Logo from '../assets/images/setting/logo.png'
 import { Link, useNavigate } from 'react-router-dom'
 import NotificationIcon from '../assets/svg/notification-icon.svg'
@@ -254,13 +254,29 @@ const HalfDonut: React.FC<HalfDonutProps> = ({ expensePct, incomePct, isEmpty, s
 }
 
 const SpendingChart: React.FC<{ data: SpendingDay[] }> = ({ data }) => {
+  const [hoveredBar, setHoveredBar] = useState<number | null>(null)
   const maxAmount = Math.max(...data.map(day => day.amount), 0)
   const maxVal = maxAmount > 0 ? Math.ceil(maxAmount / 1_000_000) * 1_000_000 : 1_000_000
   const chartH = 88, chartB = 108, chartL = 30, barW = 18, colW = 240 / 7
   const tickValues = Array.from({ length: 5 }, (_, index) => (maxVal / 4) * index)
 
   return (
-    <svg viewBox="0 0 278 125" style={{ width: '100%' }} role="img" aria-label="Chi tiêu 7 ngày qua">
+    <svg
+      viewBox="0 0 278 130"
+      style={{ width: '100%', overflow: 'visible' }}
+      role="img"
+      aria-label="Chi tiêu 7 ngày qua"
+      onMouseLeave={() => setHoveredBar(null)}
+    >
+      <defs>
+        <style>{`
+          @keyframes scTtFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+          .sc-tooltip { animation: scTtFade 0.18s ease forwards; }
+          .sc-crosshair { animation: scTtFade 0.12s ease forwards; }
+        `}</style>
+      </defs>
+
+      {/* Grid lines */}
       {tickValues.map((value, i) => {
         const y = chartB - (value / maxVal) * chartH
         return (
@@ -270,24 +286,87 @@ const SpendingChart: React.FC<{ data: SpendingDay[] }> = ({ data }) => {
           </g>
         )
       })}
+
+      {/* Vertical crosshair */}
+      {hoveredBar !== null && (
+        <line
+          className="sc-crosshair"
+          x1={chartL + hoveredBar * colW + colW / 2}
+          y1={18}
+          x2={chartL + hoveredBar * colW + colW / 2}
+          y2={chartB}
+          stroke="#7B51F1"
+          strokeWidth="1"
+          strokeDasharray="4 3"
+          opacity="0.45"
+        />
+      )}
+
+      {/* Bars + hit areas */}
       {data.map((d, i) => {
         const barH = d.amount > 0 ? Math.max((d.amount / maxVal) * chartH, 3) : 0
-        const cx2 = chartL + i * colW + colW / 2
-        const barX = cx2 - barW / 2
+        const cx = chartL + i * colW + colW / 2
+        const barX = cx - barW / 2
         const barY = chartB - barH
+        const isHot = hoveredBar === i
+        const tipW = 68
+        const tipX = Math.max(chartL + tipW / 2, Math.min(cx, 272 - tipW / 2))
+
         return (
-          <g key={i}>
-            <rect x={barX} y={barY} width={barW} height={barH} rx="4" ry="4"
-              fill={d.isSpike ? '#ef4444' : '#7B51F1'} fillOpacity={d.isSpike ? 1 : 0.6} />
-            {d.isSpike && (
-              <g>
-                <rect x={barX - 22} y={barY - 38} width={84} height={32} rx="5" fill="#1f2937" />
-                <text x={cx2 + 3} y={barY - 25} fontSize="7" textAnchor="middle" fill="#d1d5db">{formatShortDate(d.date)}</text>
-                <text x={cx2 + 3} y={barY - 12} fontSize="7.5" textAnchor="middle" fill="#fbbf24" fontWeight="bold">{fmtVND(d.amount)}</text>
-                <polygon points={`${barX + 2},${barY - 6} ${cx2 + 3},${barY - 1} ${barX + barW},${barY - 6}`} fill="#1f2937" />
+          <g
+            key={i}
+            onMouseEnter={() => setHoveredBar(i)}
+            onClick={() => setHoveredBar(isHot ? null : i)}
+            style={{ cursor: 'pointer' }}
+          >
+            {/* Invisible wider hit zone */}
+            <rect x={barX - 8} y={18} width={barW + 16} height={chartB - 18} fill="transparent" />
+
+            {/* Bar */}
+            <rect
+              x={barX} y={barY} width={barW} height={Math.max(barH, 0.5)} rx="4" ry="4"
+              fill={d.isSpike ? '#ef4444' : '#7B51F1'}
+              fillOpacity={isHot ? 1 : (d.isSpike ? 0.85 : 0.6)}
+              style={{ transition: 'fill-opacity 0.15s ease' }}
+            />
+
+            {/* Dot on top of bar */}
+            {barH > 3 && (
+              <circle
+                cx={cx} cy={barY} r="2.5"
+                fill={isHot ? '#fff' : 'transparent'}
+                stroke={d.isSpike ? '#ef4444' : '#7B51F1'}
+                strokeWidth="1.5"
+                style={{ transition: 'fill 0.15s ease' }}
+              />
+            )}
+
+            {/* X-axis label */}
+            <text
+              x={cx} y={chartB + 13} fontSize="7.5" textAnchor="middle"
+              fill={isHot ? '#7B51F1' : '#6b7280'}
+              fontWeight={isHot ? 'bold' : 'normal'}
+              style={{ transition: 'fill 0.15s ease' }}
+            >
+              {d.label}
+            </text>
+
+            {/* Tooltip — hover only */}
+            {isHot && d.amount > 0 && (
+              <g className="sc-tooltip">
+                <rect x={tipX - tipW / 2} y={barY - 42} width={tipW} height={32} rx="6" fill="#1f2937" />
+                <text x={tipX} y={barY - 28} fontSize="7" textAnchor="middle" fill="#d1d5db">
+                  {formatShortDate(d.date)}
+                </text>
+                <text x={tipX} y={barY - 15} fontSize="7.5" textAnchor="middle" fill="#fbbf24" fontWeight="bold">
+                  {fmtVND(d.amount)}
+                </text>
+                <polygon
+                  points={`${cx - 4},${barY - 10} ${cx + 4},${barY - 10} ${cx},${barY - 4}`}
+                  fill="#1f2937"
+                />
               </g>
             )}
-            <text x={cx2} y={chartB + 13} fontSize="7.5" textAnchor="middle" fill="#6b7280">{d.label}</text>
           </g>
         )
       })}
@@ -296,6 +375,9 @@ const SpendingChart: React.FC<{ data: SpendingDay[] }> = ({ data }) => {
 }
 
 const HistoricalChart: React.FC<{ data: BalanceHistoryPoint[] }> = ({ data }) => {
+  const [hoveredPt, setHoveredPt] = useState<number | null>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
+
   if (data.length === 0) {
     return (
       <svg viewBox="0 0 275 130" style={{ width: '100%' }} role="img" aria-label="Số dư lịch sử">
@@ -317,42 +399,123 @@ const HistoricalChart: React.FC<{ data: BalanceHistoryPoint[] }> = ({ data }) =>
     y: yFor(toNumber(point.balance)),
     value: toNumber(point.balance),
     date: point.date,
-    tooltip: index === data.length - 1,
   }))
   const poly = pts.map(p => `${p.x},${p.y}`).join(' ')
-  const tip = pts.find(p => p.tooltip)!
   const ticks = range === 0
     ? [maxValue]
     : Array.from({ length: 4 }, (_, index) => minValue + (range / 3) * index).reverse()
 
+  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+    if (!svgRef.current || pts.length === 0) return
+    const rect = svgRef.current.getBoundingClientRect()
+    const mouseX = ((e.clientX - rect.left) / rect.width) * 275
+    let minDist = Infinity, nearest = 0
+    pts.forEach((p, i) => {
+      const d = Math.abs(p.x - mouseX)
+      if (d < minDist) { minDist = d; nearest = i }
+    })
+    setHoveredPt(nearest)
+  }
+
+  const hovered = hoveredPt !== null ? pts[hoveredPt] : null
+  const tipW = 82
+  const tipX = hovered ? Math.max(chartLeft + tipW / 2, Math.min(hovered.x, chartRight - tipW / 2)) : 0
+  const tipAbove = hovered ? hovered.y - chartTop > 50 : true
+  const tipY = hovered ? (tipAbove ? hovered.y - 56 : hovered.y + 14) : 0
+
   return (
-    <svg viewBox="0 0 275 130" style={{ width: '100%' }} role="img" aria-label="Số dư lịch sử">
+    <svg
+      ref={svgRef}
+      viewBox="0 0 275 130"
+      style={{ width: '100%', overflow: 'visible', cursor: 'crosshair' }}
+      role="img"
+      aria-label="Số dư lịch sử"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setHoveredPt(null)}
+      onClick={handleMouseMove}
+    >
       <defs>
         <linearGradient id="histGrad" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#7B51F1" stopOpacity="0.25" />
           <stop offset="100%" stopColor="#7B51F1" stopOpacity="0.02" />
         </linearGradient>
+        <style>{`
+          @keyframes hcTtFade { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
+          .hc-tooltip { animation: hcTtFade 0.18s ease forwards; }
+          .hc-crosshair { animation: hcTtFade 0.12s ease forwards; }
+        `}</style>
       </defs>
+
+      {/* Grid lines */}
       {ticks.map((value, i) => (
         <g key={i}>
           <line x1="20" y1={yFor(value)} x2="268" y2={yFor(value)} stroke="#e5e7eb" strokeWidth="0.4" strokeDasharray="3 3" />
           <text x="17" y={yFor(value) + 3} fontSize="6" textAnchor="end" fill="#9ca3af">{fmtCompactVND(value)}</text>
         </g>
       ))}
+
+      {/* Area fill */}
       <polygon points={`22,104 ${poly} 252,104`} fill="url(#histGrad)" />
+
+      {/* Line */}
       <polyline points={poly} fill="none" stroke="#7B51F1" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+
+      {/* Vertical crosshair */}
+      {hovered && (
+        <line
+          className="hc-crosshair"
+          x1={hovered.x} y1={chartTop}
+          x2={hovered.x} y2={chartBottom}
+          stroke="#7B51F1" strokeWidth="1" strokeDasharray="4 3" opacity="0.45"
+        />
+      )}
+
+      {/* Data point dots */}
       {pts.map((p, i) => (
         <circle key={i} cx={p.x} cy={p.y} r="3.5"
-          fill={p.tooltip ? '#7B51F1' : '#fff'} stroke="#7B51F1" strokeWidth="1.5" />
+          fill={hoveredPt === i ? '#7B51F1' : '#fff'}
+          stroke="#7B51F1" strokeWidth="1.5"
+          style={{ transition: 'fill 0.15s ease' }}
+        />
       ))}
-      <rect x={tip.x - 26} y={tip.y - 54} width={82} height={38} rx="6" fill="#1f2937" />
-      <text x={tip.x + 15} y={tip.y - 38} fontSize="6.5" textAnchor="middle" fill="#d1d5db">{formatMonthShort(tip.date)}</text>
-      <text x={tip.x + 15} y={tip.y - 27} fontSize="6.5" textAnchor="middle" fill="#fbbf24" fontWeight="bold">Số dư:</text>
-      <text x={tip.x + 15} y={tip.y - 16} fontSize="6" textAnchor="middle" fill="#fbbf24">{fmtVND(tip.value)}</text>
-      <polygon points={`${tip.x - 1},${tip.y - 16} ${tip.x + 4},${tip.y - 16} ${tip.x + 1},${tip.y - 10}`} fill="#1f2937" />
-      {pts.filter((_, index) => index === 0 || index === pts.length - 1 || index % 2 === 0).map((item, i) => (
-        <text key={i} x={item.x} y={118} fontSize="6.5" textAnchor="middle" fill="#9ca3af">{formatMonthShort(item.date)}</text>
+
+      {/* X-axis date labels */}
+      {pts.filter((_, i) => i === 0 || i === pts.length - 1 || i % 2 === 0).map((item, i) => (
+        <text key={i} x={item.x} y={118} fontSize="6.5" textAnchor="middle"
+          fill={pts.indexOf(item) === hoveredPt ? '#7B51F1' : '#9ca3af'}
+          fontWeight={pts.indexOf(item) === hoveredPt ? 'bold' : 'normal'}
+          style={{ transition: 'fill 0.15s ease' }}>
+          {formatMonthShort(item.date)}
+        </text>
       ))}
+
+      {/* Tooltip — hover only */}
+      {hovered && (
+        <g className="hc-tooltip">
+          <rect x={tipX - tipW / 2} y={tipY} width={tipW} height={40} rx="6" fill="#1f2937" />
+          <text x={tipX} y={tipY + 13} fontSize="6.5" textAnchor="middle" fill="#d1d5db">
+            {formatMonthShort(hovered.date)}
+          </text>
+          <text x={tipX} y={tipY + 24} fontSize="6.5" textAnchor="middle" fill="#fbbf24" fontWeight="bold">
+            Số dư:
+          </text>
+          <text x={tipX} y={tipY + 35} fontSize="6" textAnchor="middle" fill="#fbbf24">
+            {fmtVND(hovered.value)}
+          </text>
+          {/* Arrow pointing toward the data point */}
+          {tipAbove ? (
+            <polygon
+              points={`${hovered.x - 4},${tipY + 40} ${hovered.x + 4},${tipY + 40} ${hovered.x},${tipY + 46}`}
+              fill="#1f2937"
+            />
+          ) : (
+            <polygon
+              points={`${hovered.x - 4},${tipY} ${hovered.x + 4},${tipY} ${hovered.x},${tipY - 6}`}
+              fill="#1f2937"
+            />
+          )}
+        </g>
+      )}
     </svg>
   )
 }
