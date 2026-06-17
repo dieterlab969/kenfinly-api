@@ -7,10 +7,11 @@ use App\Models\User;
 use App\Services\CurrencyService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use PayOS\PayOS;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
-use Illuminate\Support\Facades\Log;
 
 /**
  * Handles the One-Page Checkout (OPC) flow for subscription plan purchases.
@@ -31,14 +32,29 @@ use Illuminate\Support\Facades\Log;
  *   GET  /checkout/complete          — clear cart after confirmed payment, redirect to success
  *   GET  /order/{order_code}         — QR countdown page (PayOS orders)
  *
+ * Cart session keying:
+ *   Every method calls \Cart::session(session()->getId()) before any cart
+ *   operation. With the DB storage driver this scopes all reads/writes to
+ *   the current PHP session's unique ID, giving each user their own cart
+ *   rows in the `shopping_cart` table — exactly as PHP session storage did,
+ *   but now durable across PHP restarts.
+ *
  * Cart lifecycle:
- *   The cart (and cart_coupon session key) is intentionally NOT cleared at order
- *   creation time. It is cleared only when payment is actually confirmed:
+ *   The cart (and cart_coupon session key) is intentionally NOT cleared at
+ *   order creation time. It is cleared only when payment is actually confirmed:
  *     - PayPal: in paypalCapture() on COMPLETED status.
- *     - PayOS:  the order page JS polls for 'paid' then redirects to /checkout/complete,
- *               which clears the cart before forwarding to /pricing?payment=success.
+ *     - PayOS webhook: in PayOSPaymentController::handleCartOrder() on code "00".
+ *     - PayOS polling: the order page JS polls for 'paid' then redirects to
+ *       /checkout/complete, which also clears the cart as a safety net.
  *   This allows the user to navigate back to /checkout at any time without
  *   losing their selected plan and coupon.
+ *
+ * Stale-order logic (improved from the previous time-window heuristic):
+ *   Rather than cancelling ALL pending orders created within the last 5 minutes
+ *   for the user, store() now cancels only orders that share the same
+ *   `cart_session_key` as the current request. This ties cancellation to the
+ *   specific database-cart instance rather than a wall-clock window, matching
+ *   the Magento Quote→Order supersession model.
  */
 class CheckoutController extends Controller
 {
@@ -60,6 +76,8 @@ class CheckoutController extends Controller
      */
     public function index(Request $request, CurrencyService $currencyService): View|RedirectResponse
     {
+        \Cart::session(session()->getId());
+
         $plan = $request->query('plan');
 
         if (in_array($plan, ['monthly', 'yearly'], true)) {
@@ -75,15 +93,12 @@ class CheckoutController extends Controller
             return redirect('/pricing')->with('info', 'Vui lòng chọn gói dịch vụ trước.');
         }
 
-        // Show PayPal tile only when credentials are configured
         $paypalMode    = config('paypal.mode', 'sandbox');
         $paypalEnabled = ! empty(config("paypal.{$paypalMode}.client_id"));
 
-        // Currency & gateway detection
         $currency       = $currencyService->detectUserCurrency($request);
         $defaultGateway = $currencyService->defaultGateway($currency);
 
-        // For USD visitors, surface the PayPal USD amount for the selected plan
         $totalUsd = null;
         if ($currency === 'USD' && ! $cartItems->isEmpty()) {
             $planKey  = $cartItems->first()->attributes['plan'];
@@ -99,9 +114,10 @@ class CheckoutController extends Controller
     /**
      * Process the OPC form submission.
      *
-     * Authenticates the user via `_jwt_token`, reads the cart, determines
-     * the selected `gateway`, then delegates to processPayOS() or
-     * processPayPal().
+     * Authenticates the user via `_jwt_token`, reads the DB-backed cart,
+     * determines the selected `gateway`, cancels any existing pending order
+     * that was created from the same DB-cart session, then delegates to
+     * processPayOS() or processPayPal().
      *
      * POST /checkout
      */
@@ -126,7 +142,22 @@ class CheckoutController extends Controller
             return redirect('/SignIn?redirect_to=/checkout');
         }
 
-        // ── 2. Read cart ─────────────────────────────────────────────────
+        // ── 2. Bind cart to this PHP session ─────────────────────────────
+        // The session ID is the cart's DB key prefix.  Setting it explicitly
+        // ensures every \Cart::* call below reads the correct rows even if
+        // the singleton's default key has been changed by a previous request.
+        $cartSessionKey = session()->getId();
+        \Cart::session($cartSessionKey);
+
+        // Associate the shopping_cart rows with this user so they can be
+        // queried or cleaned up by user_id (e.g. an admin purge, or a future
+        // "restore cart" feature after session expiry).
+        DB::table('shopping_cart')
+            ->where('cart_key', 'LIKE', $cartSessionKey . '%')
+            ->whereNull('user_id')
+            ->update(['user_id' => $user->id]);
+
+        // ── 3. Read cart ─────────────────────────────────────────────────
         $cartItems = \Cart::getContent();
 
         if ($cartItems->isEmpty()) {
@@ -144,45 +175,48 @@ class CheckoutController extends Controller
                      ? $request->input('gateway')
                      : 'payos';
 
-        // ── 3. Replace any stale pending orders ──────────────────────────
-        // If this user already has a pending order created in the last 5 minutes,
-        // mark it 'cancelled' so there are no ghost orders sitting in the DB.
-        // This covers the case where the user went back to /checkout and resubmitted
-        // before the previous order's 5-minute countdown expired.
+        // ── 4. Cancel any pending order linked to this exact DB cart ─────
+        // If the user went back to /checkout and resubmitted before paying,
+        // the old pending order for this cart session is superseded.
+        // This replaces the previous time-window heuristic (last 5 minutes)
+        // with a proper cart-identity check: only orders whose
+        // `cart_session_key` matches the current PHP session are cancelled.
         $stalePending = Order::where('user_id', $user->id)
                              ->where('status', 'pending')
-                             ->where('created_at', '>=', now()->subMinutes(5))
+                             ->where('cart_session_key', $cartSessionKey)
                              ->get();
 
         foreach ($stalePending as $staleOrder) {
             $staleOrder->update(['status' => 'cancelled']);
-            Log::channel('single')->info('Cancelled stale pending order before new checkout', [
+            Log::channel('single')->info('Cancelled superseded pending order (cart resubmit)', [
                 'replaced_order_code' => $staleOrder->order_code,
+                'cart_session_key'    => $cartSessionKey,
                 'user_id'             => $user->id,
             ]);
         }
 
         $orderCode = (int) (time() . rand(10, 99));
 
-        // ── 4. Route to gateway ──────────────────────────────────────────
+        // ── 5. Route to gateway ──────────────────────────────────────────
         if ($gateway === 'paypal') {
-            return $this->processPayPal($user, $plan, $total, $discount, $coupon, $orderCode);
+            return $this->processPayPal($user, $plan, $total, $discount, $coupon, $orderCode, $cartSessionKey);
         }
 
-        return $this->processPayOS($user, $plan, $total, $discount, $coupon, $orderCode);
+        return $this->processPayOS($user, $plan, $total, $discount, $coupon, $orderCode, $cartSessionKey);
     }
 
     /**
      * Capture a PayPal order after the buyer approves it on PayPal's site.
      *
      * PayPal redirects here with `?token=<PayPal_Order_ID>`. We capture
-     * the payment, mark the order paid, and activate the subscription.
+     * the payment, mark the order paid, clear the DB cart, and activate
+     * the subscription.
      *
      * GET /checkout/paypal/capture
      */
     public function paypalCapture(Request $request): RedirectResponse
     {
-        $paypalToken = $request->query('token'); // PayPal Order ID
+        $paypalToken = $request->query('token');
 
         if (! $paypalToken) {
             return redirect('/pricing?payment=error');
@@ -210,12 +244,12 @@ class CheckoutController extends Controller
                 $this->activateSubscription($order->user, $order->plan);
                 $order->update(['status' => 'paid']);
 
-                // Payment confirmed — now it is safe to clear the cart.
-                \Cart::clear();
-                \Cart::clearCartConditions();
+                // Payment confirmed — clear the DB cart.
+                // Use the cart_session_key stored on the order so the right
+                // rows are targeted even if the session ID has changed.
+                $this->clearCartBySessionKey($order->cart_session_key);
                 session()->forget('cart_coupon');
 
-                // Reload user to get fresh subscription_expires_at after activation.
                 $order->load('user');
                 session()->flash('thank_you', $this->buildThankYouPayload($order));
 
@@ -291,29 +325,33 @@ class CheckoutController extends Controller
      * The order page JS redirects here as:
      *   GET /checkout/complete?order={order_code}
      *
-     * The optional `order` query param lets us look up the just-paid order,
-     * build the thank-you payload, and flash it to the session before
-     * forwarding to /checkout/thank-you.
+     * Clears the DB cart using the `cart_session_key` stored on the order
+     * (preferred) or the current session ID (fallback). Also calls
+     * \Cart::clear() via the session-scoped facade as an extra safety net.
      *
      * GET /checkout/complete
      */
     public function complete(Request $request): RedirectResponse
     {
-        \Cart::clear();
-        \Cart::clearCartConditions();
-        session()->forget('cart_coupon');
-
         $orderCode = $request->query('order');
+        $order     = null;
 
         if ($orderCode) {
             $order = Order::where('order_code', $orderCode)
                           ->where('status', 'paid')
                           ->with('user')
                           ->first();
+        }
 
-            if ($order) {
-                session()->flash('thank_you', $this->buildThankYouPayload($order));
-            }
+        // Clear DB cart — prefer the key stored on the order; fall back to
+        // the current PHP session ID (covers the case where the user is still
+        // in the same browser session that created the order).
+        $keyToClear = $order?->cart_session_key ?? session()->getId();
+        $this->clearCartBySessionKey($keyToClear);
+        session()->forget('cart_coupon');
+
+        if ($order) {
+            session()->flash('thank_you', $this->buildThankYouPayload($order));
         }
 
         return redirect('/checkout/thank-you');
@@ -330,7 +368,7 @@ class CheckoutController extends Controller
      */
     public function thankYou(): View
     {
-        $order = session('thank_you'); // null on refresh — graceful fallback
+        $order = session('thank_you');
 
         return view('thank-you', compact('order'));
     }
@@ -340,9 +378,12 @@ class CheckoutController extends Controller
     /**
      * Create a PayOS payment link, persist the order, and redirect to the
      * QR countdown page.
+     *
+     * @param  string  $cartSessionKey  PHP session ID of the originating cart.
      */
     private function processPayOS(
-        User $user, string $plan, int $total, int $discount, ?string $coupon, int $orderCode
+        User $user, string $plan, int $total, int $discount, ?string $coupon,
+        int $orderCode, string $cartSessionKey
     ): RedirectResponse {
         $checkoutUrl = null;
         $qrCode      = null;
@@ -377,6 +418,7 @@ class CheckoutController extends Controller
 
         Order::create([
             'user_id'           => $user->id,
+            'cart_session_key'  => $cartSessionKey,
             'order_code'        => $orderCode,
             'plan'              => $plan,
             'total_amount'      => $total,
@@ -391,14 +433,16 @@ class CheckoutController extends Controller
 
         // Cart is intentionally NOT cleared here. It is preserved so the user
         // can navigate back to /checkout without losing their plan/coupon.
-        // It will be cleared when the order page JS detects payment and
-        // redirects to /checkout/complete.
+        // The cart will be cleared by PayOSPaymentController::handleCartOrder()
+        // on webhook confirmation, or by complete() if the order page JS
+        // detects payment and redirects there first.
 
         Log::channel('single')->info('Order created (PayOS)', [
-            'user_id'    => $user->id,
-            'order_code' => $orderCode,
-            'plan'       => $plan,
-            'total'      => $total,
+            'user_id'          => $user->id,
+            'order_code'       => $orderCode,
+            'plan'             => $plan,
+            'total'            => $total,
+            'cart_session_key' => $cartSessionKey,
         ]);
 
         return redirect('/order/' . $orderCode);
@@ -408,18 +452,13 @@ class CheckoutController extends Controller
      * Create a PayPal order, persist our Order row, and redirect the buyer
      * to PayPal's approval page.
      *
-     * The VND plan price (from PayOS config) is converted to USD using the
-     * live exchange rate fetched by CurrencyService::getLiveUsdToVndRate().
-     * The rate is locked into the order row so we can always reconstruct
-     * the exact amount charged regardless of future rate drift.
+     * @param  string  $cartSessionKey  PHP session ID of the originating cart.
      */
     private function processPayPal(
-        User $user, string $plan, int $total, int $discount, ?string $coupon, int $orderCode
+        User $user, string $plan, int $total, int $discount, ?string $coupon,
+        int $orderCode, string $cartSessionKey
     ): RedirectResponse {
-        // Fetch the live USD→VND rate (cached 24 h, falls back to .env static)
         $liveRate  = $this->currencyService->getLiveUsdToVndRate();
-
-        // Convert the VND cart total to USD using the locked live rate
         $amountUsd = number_format(round($total / $liveRate, 2), 2, '.', '');
 
         try {
@@ -459,6 +498,7 @@ class CheckoutController extends Controller
 
             Order::create([
                 'user_id'             => $user->id,
+                'cart_session_key'    => $cartSessionKey,
                 'order_code'          => $orderCode,
                 'plan'                => $plan,
                 'total_amount'        => $total,
@@ -473,17 +513,17 @@ class CheckoutController extends Controller
                 'expires_at'          => now()->addMinutes(30),
             ]);
 
-            // Cart is intentionally NOT cleared here. It is preserved so the user
-            // can navigate back to /checkout without losing their plan/coupon.
-            // It will be cleared in paypalCapture() when PayPal confirms payment.
+            // Cart is intentionally NOT cleared here. It will be cleared in
+            // paypalCapture() when PayPal confirms COMPLETED status.
 
             Log::channel('single')->info('Order created (PayPal)', [
-                'user_id'             => $user->id,
-                'order_code'          => $orderCode,
-                'plan'                => $plan,
-                'paypal_order_id'     => $paypalOrderId,
-                'amount_usd'          => $amountUsd,
-                'exchange_rate_used'  => $liveRate,
+                'user_id'          => $user->id,
+                'order_code'       => $orderCode,
+                'plan'             => $plan,
+                'paypal_order_id'  => $paypalOrderId,
+                'amount_usd'       => $amountUsd,
+                'exchange_rate'    => $liveRate,
+                'cart_session_key' => $cartSessionKey,
             ]);
 
             return redirect($approveLink);
@@ -500,10 +540,39 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Build the thank-you session flash payload from a paid Order.
+     * Clear all DB-cart rows associated with a given cart session key.
      *
-     * Returns an array that the thank-you.blade.php view can consume directly.
-     * Called by both complete() (PayOS) and paypalCapture() (PayPal).
+     * Deletes both the `_cart_items` and `_cart_conditions` rows directly
+     * from the `shopping_cart` table using a prefix match.  This works
+     * whether or not there is an active PHP session, making it safe to call
+     * from both browser-context routes (complete, paypalCapture) and from
+     * within the same request that owns the session.
+     *
+     * As a belt-and-suspenders measure, also calls \Cart::clear() through
+     * the facade so that any in-memory Cart singleton state is reset.
+     *
+     * @param  string|null  $cartSessionKey  The PHP session ID prefix to clear.
+     *                                       No-op when null.
+     */
+    private function clearCartBySessionKey(?string $cartSessionKey): void
+    {
+        if (! $cartSessionKey) {
+            return;
+        }
+
+        // Direct DB delete — works even from webhook context (no PHP session).
+        DB::table('shopping_cart')
+            ->where('cart_key', 'LIKE', $cartSessionKey . '%')
+            ->delete();
+
+        // Reset the in-memory Cart singleton for the current request.
+        \Cart::session($cartSessionKey);
+        \Cart::clear();
+        \Cart::clearCartConditions();
+    }
+
+    /**
+     * Build the thank-you session flash payload from a paid Order.
      *
      * @param  Order  $order  A paid order with `user` relation loaded.
      * @return array<string, mixed>
@@ -531,6 +600,8 @@ class CheckoutController extends Controller
 
     /**
      * Clear the cart and add the specified plan as the sole item.
+     *
+     * Assumes \Cart::session() has already been set by the calling method.
      */
     private function addPlanToCart(string $plan): void
     {
