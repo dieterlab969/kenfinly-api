@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * An Order is created by CheckoutController when a logged-in user submits
  * the cart form. It holds the PayOS order code, the chosen plan, final
- * amounts after any coupon discount, and the PayOS QR / checkout URL.
+ * amounts after any coupon discount, the PayOS QR / checkout URL, and a
+ * reference back to the database-cart session that generated it.
  *
  * Lifecycle statuses:
  *  - pending   → created, awaiting payment confirmation
@@ -18,19 +19,29 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *  - expired   → TTL elapsed without payment (set by ExpireOldOrders command
  *                or lazily on read in orderStatus / show)
  *  - cancelled → user resubmitted checkout while this order was still pending;
- *                replaced by a fresh order with a new 5-minute countdown
+ *                replaced by a fresh order linked to the same cart session
+ *
+ * Cart link:
+ *  `cart_session_key` stores the PHP session ID that was active when the
+ *  order was placed.  It matches the prefix used in `shopping_cart.cart_key`
+ *  ({sessionId}_cart_items / {sessionId}_cart_conditions), providing a
+ *  direct Quote→Order link without a separate quote table.
  *
  * @property int         $id
  * @property int         $user_id
- * @property int         $order_code       Numeric code shared with PayOS
- * @property string      $plan             "monthly" or "yearly"
- * @property int         $total_amount     Final charged amount in VND
- * @property string|null $coupon_applied   Coupon code used, if any
- * @property int         $discount_amount  Discount in VND (0 when no coupon)
- * @property string      $status           "pending" | "paid" | "expired"
- * @property string|null $checkout_url     PayOS hosted checkout URL
- * @property string|null $qr_code          PayOS QR code string
- * @property \Carbon\Carbon $expires_at    Timestamp after which the order expires
+ * @property string|null $cart_session_key  PHP session ID of the originating cart
+ * @property int         $order_code        Numeric code shared with PayOS
+ * @property string      $plan              "monthly" or "yearly"
+ * @property int         $total_amount      Final charged amount in VND
+ * @property string|null $coupon_applied    Coupon code used, if any
+ * @property int         $discount_amount   Discount in VND (0 when no coupon)
+ * @property float|null  $exchange_rate_used VND→USD rate locked at order time
+ * @property string      $status            "pending" | "paid" | "expired" | "cancelled"
+ * @property string      $gateway           "payos" | "paypal"
+ * @property string|null $payment_reference External gateway order ID
+ * @property string|null $checkout_url      PayOS hosted checkout URL
+ * @property string|null $qr_code           PayOS QR code string
+ * @property \Carbon\Carbon $expires_at     Timestamp after which the order expires
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  */
@@ -39,6 +50,7 @@ class Order extends Model
     /** @var list<string> Mass-assignable attributes. */
     protected $fillable = [
         'user_id',
+        'cart_session_key',
         'order_code',
         'plan',
         'total_amount',

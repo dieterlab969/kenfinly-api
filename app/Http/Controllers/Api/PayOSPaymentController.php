@@ -8,6 +8,7 @@ use App\Models\PayosPaymentOrder;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use PayOS\PayOS;
 
@@ -21,6 +22,14 @@ use PayOS\PayOS;
  * Webhook signature verification is performed by the PayOS PHP SDK using
  * the PAYOS_CHECKSUM_KEY environment variable. Any payload whose HMAC does
  * not match is rejected with HTTP 400.
+ *
+ * Cart clearing (cart-based orders):
+ *   The shopping cart is cleared inside handleCartOrder() the moment the
+ *   webhook confirms payment (code "00"). Because webhooks are server-to-
+ *   server calls with no PHP session, clearing is done by direct DB delete
+ *   on the `shopping_cart` table using the `cart_session_key` stored on the
+ *   Order row. The \Cart facade is then refreshed via that same key to reset
+ *   any in-process singleton state.
  *
  * @tags PayOS Payments
  */
@@ -39,15 +48,10 @@ class PayOSPaymentController extends Controller
     /**
      * Create a PayOS payment link for the selected plan (direct pricing-page flow).
      *
-     * Validates the requested plan, calls the PayOS SDK to generate a hosted
-     * checkout URL, records a `payos_payment_orders` row with status "pending",
-     * and returns the checkout URL to the React frontend.
-     *
      * POST /api/payment/payos/create
      *
      * @param  Request  $request  JSON body: { "plan": "monthly"|"yearly" }
      * @return JsonResponse       { checkout_url: string, order_code: int }
-     *                            or HTTP 500 on PayOS SDK failure.
      */
     public function createPaymentLink(Request $request): JsonResponse
     {
@@ -112,17 +116,14 @@ class PayOSPaymentController extends Controller
     /**
      * Handle asynchronous webhook notifications from PayOS.
      *
-     * PayOS calls this endpoint after a payment attempt completes (success or
-     * failure). The payload is verified via HMAC checksum before any state
-     * changes are made. Lookup order:
+     * Lookup order:
      *  1. `orders` table              — cart-based checkout flow
      *  2. `payos_payment_orders` table — direct pricing-page flow
      *
      * POST /api/payment/payos-webhook  (no auth — signature verified internally)
      *
-     * @param  Request  $request  Raw PayOS webhook payload.
-     * @return JsonResponse       HTTP 200 on success, 400 on bad signature / missing data,
-     *                            404 when the order_code is unknown.
+     * @return JsonResponse  HTTP 200 on success, 400 on bad signature / missing data,
+     *                       404 when the order_code is unknown.
      */
     public function webhook(Request $request): JsonResponse
     {
@@ -152,13 +153,11 @@ class PayOSPaymentController extends Controller
             return response()->json(['message' => 'Missing order code'], 400);
         }
 
-        // ── 1. Try cart-based orders table first ──────────────────────────
         $cartOrder = Order::where('order_code', $orderCode)->first();
         if ($cartOrder) {
             return $this->handleCartOrder($cartOrder, $code, $verifiedData);
         }
 
-        // ── 2. Fall back to direct pricing-page orders ─────────────────────
         $directOrder = PayosPaymentOrder::where('order_code', $orderCode)->first();
         if ($directOrder) {
             return $this->handleDirectOrder($directOrder, $code, $verifiedData);
@@ -174,13 +173,9 @@ class PayOSPaymentController extends Controller
     /**
      * Return the current status of a cart-based order (polled by the order page JS).
      *
-     * Also performs lazy expiry: if the order is still "pending" but its
-     * `expires_at` has passed, it is flipped to "expired" on this read.
-     *
      * GET /api/orders/{orderCode}/status
      *
-     * @param  string  $orderCode  Numeric order code cast from the URL segment.
-     * @return JsonResponse        { order_code, status, plan } or HTTP 404.
+     * @return JsonResponse  { order_code, status, plan } or HTTP 404.
      */
     public function orderStatus(string $orderCode): JsonResponse
     {
@@ -190,7 +185,6 @@ class PayOSPaymentController extends Controller
             return response()->json(['message' => 'Order not found'], 404);
         }
 
-        // Auto-expire on read if the timer has passed
         if ($order->status === 'pending' && $order->isExpired()) {
             $order->update(['status' => 'expired']);
         }
@@ -207,15 +201,14 @@ class PayOSPaymentController extends Controller
     /**
      * Process a verified PayOS webhook for a cart-based order.
      *
-     * Marks the order "paid" and activates the user's subscription when
-     * PayOS returns code "00" (success). Any other code marks the order
-     * "expired" (cancelled / timed out on the PayOS side).
-     * Idempotent: already-processed orders return HTTP 200 without changes.
+     * On success (code "00"):
+     *  1. Activate the user's subscription.
+     *  2. Mark the order "paid".
+     *  3. Clear the DB-backed shopping cart using the order's `cart_session_key`.
+     *     This is done via direct DB delete (no PHP session available in webhook
+     *     context) followed by a \Cart::session() reset of the in-memory singleton.
      *
-     * @param  Order        $order        The matched cart order.
-     * @param  string|null  $code         PayOS result code ("00" = success).
-     * @param  mixed        $verifiedData Full verified webhook payload object.
-     * @return JsonResponse               HTTP 200 with a status message.
+     * Idempotent: already-processed orders return HTTP 200 without changes.
      */
     private function handleCartOrder(Order $order, ?string $code, mixed $verifiedData): JsonResponse
     {
@@ -228,10 +221,16 @@ class PayOSPaymentController extends Controller
 
             $order->update(['status' => 'paid']);
 
+            // Clear the DB cart now that payment is confirmed.
+            // The webhook runs without a browser session, so we delete the
+            // shopping_cart rows directly rather than relying on the session.
+            $this->clearCartBySessionKey($order->cart_session_key);
+
             Log::channel('single')->info('PayOS webhook: cart order paid', [
-                'user_id'    => $order->user_id,
-                'plan'       => $order->plan,
-                'order_code' => $order->order_code,
+                'user_id'          => $order->user_id,
+                'plan'             => $order->plan,
+                'order_code'       => $order->order_code,
+                'cart_session_key' => $order->cart_session_key,
             ]);
         } else {
             $order->update(['status' => 'expired']);
@@ -248,15 +247,7 @@ class PayOSPaymentController extends Controller
     /**
      * Process a verified PayOS webhook for a direct pricing-page order.
      *
-     * On success (code "00") the user's subscription is activated and the
-     * order row is updated to "completed" with the full verified response
-     * stored for audit purposes. On failure the row is set to "failed".
      * Idempotent: already-processed orders return HTTP 200 without changes.
-     *
-     * @param  PayosPaymentOrder  $order        The matched direct payment order.
-     * @param  string|null        $code         PayOS result code ("00" = success).
-     * @param  mixed              $verifiedData Full verified webhook payload object.
-     * @return JsonResponse                     HTTP 200 with a status message.
      */
     private function handleDirectOrder(PayosPaymentOrder $order, ?string $code, mixed $verifiedData): JsonResponse
     {
@@ -288,15 +279,38 @@ class PayOSPaymentController extends Controller
     }
 
     /**
+     * Clear all DB-cart rows associated with a given cart session key.
+     *
+     * Safe to call from webhook context (no active PHP session).
+     * Deletes rows where `cart_key LIKE '{cartSessionKey}%'`, covering both
+     * the `_cart_items` and `_cart_conditions` suffixes.
+     *
+     * @param  string|null  $cartSessionKey  No-op when null or empty.
+     */
+    private function clearCartBySessionKey(?string $cartSessionKey): void
+    {
+        if (! $cartSessionKey) {
+            return;
+        }
+
+        DB::table('shopping_cart')
+            ->where('cart_key', 'LIKE', $cartSessionKey . '%')
+            ->delete();
+
+        // Reset the Cart singleton state so any subsequent in-process reads
+        // (e.g. a subsequent request on the same PHP-FPM worker) return empty.
+        try {
+            \Cart::session($cartSessionKey);
+            \Cart::clear();
+            \Cart::clearCartConditions();
+        } catch (\Exception) {
+            // The \Cart facade may not be available in all contexts; the DB
+            // delete above is the authoritative cleanup operation.
+        }
+    }
+
+    /**
      * Set the user's subscription to "active" for the given plan.
-     *
-     * Calculates the expiry date from the current moment:
-     *  - monthly → +1 month
-     *  - yearly  → +1 year
-     *
-     * @param  User    $user  The user whose subscription should be activated.
-     * @param  string  $plan  "monthly" or "yearly".
-     * @return void
      */
     private function activateSubscription(User $user, string $plan): void
     {

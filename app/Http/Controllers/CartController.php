@@ -10,15 +10,22 @@ use Illuminate\View\View;
 /**
  * Manages the shopping cart for plan purchases.
  *
- * Uses the `darryldecode/cart` package (stored in the PHP session) to hold
- * a single subscription plan at a time. Supports optional coupon codes
- * defined in `config/payos.php` that are applied as named CartConditions.
+ * Uses the `darryldecode/cart` package with database-backed storage
+ * (App\Cart\DatabaseCartStorage) to hold a single subscription plan at a
+ * time. Supports optional coupon codes defined in `config/payos.php` that
+ * are applied as named CartConditions.
+ *
+ * Every method begins by calling \Cart::session(session()->getId()) to scope
+ * all cart operations to the current PHP session's unique ID.  With the DB
+ * storage driver this produces a dedicated row-set per user session, exactly
+ * as the session-driver did — except carts now survive PHP restarts and can
+ * be queried / cleaned up server-side (e.g. from a payment webhook).
  *
  * Routes (defined in web.php):
- *   GET  /cart           — show cart, optionally pre-loading a plan
- *   POST /cart/clear     — empty the cart and redirect to /pricing
- *   POST /cart/coupon    — apply a coupon code
- *   POST /cart/coupon/remove — remove the active coupon
+ *   GET  /cart                   — show cart, optionally pre-loading a plan
+ *   POST /cart/clear             — empty the cart and redirect to /pricing
+ *   POST /cart/coupon            — apply a coupon code
+ *   POST /cart/coupon/remove     — remove the active coupon
  */
 class CartController extends Controller
 {
@@ -37,6 +44,8 @@ class CartController extends Controller
      */
     public function index(Request $request): View
     {
+        \Cart::session(session()->getId());
+
         $plan = $request->query('plan');
 
         if (in_array($plan, ['monthly', 'yearly'], true)) {
@@ -64,6 +73,7 @@ class CartController extends Controller
      */
     public function clear(): RedirectResponse
     {
+        \Cart::session(session()->getId());
         \Cart::clear();
         \Cart::clearCartConditions();
         session()->forget('cart_coupon');
@@ -87,6 +97,8 @@ class CartController extends Controller
      */
     public function applyCoupon(Request $request): RedirectResponse
     {
+        \Cart::session(session()->getId());
+
         $code    = strtoupper(trim($request->input('coupon_code', '')));
         $coupons = config('payos.coupons', []);
 
@@ -127,6 +139,7 @@ class CartController extends Controller
      */
     public function removeCoupon(): RedirectResponse
     {
+        \Cart::session(session()->getId());
         \Cart::removeCartCondition('coupon');
         session()->forget('cart_coupon');
 
@@ -138,6 +151,7 @@ class CartController extends Controller
     /**
      * Clear the cart and add the requested plan as the sole item.
      *
+     * Assumes \Cart::session() has already been set by the calling method.
      * Plan details (label, amount) are sourced from `config/payos.plans`.
      * The cart supports only a single plan at a time — any existing item,
      * condition, and active coupon are removed before the new item is added.
@@ -149,7 +163,6 @@ class CartController extends Controller
     {
         $planConf = config("payos.plans.{$plan}");
 
-        // One plan at a time — clear cart before adding
         \Cart::clear();
         \Cart::clearCartConditions();
         session()->forget('cart_coupon');

@@ -6,3 +6,4 @@
 - [Halo Invisible Design](halo-invisible-design.md) — 12 PM threshold logic, auto-close, halo_histories table, frontend start_time+duration pattern.
 - [Scramble docs routing](scramble-docs-routing.md) — /docs/* must be excluded from SPA catch-all in web.php; use where('any', '^(?!docs).*') on the catch-all route
 - [TSX migration & template integration](tsx-migration.md) — Payfast eWallet template at resources/js/template/; entry is app.tsx; Bootstrap JS kept via npm bootstrap package; shell-quote blocks concurrently (removed); react-flags-select IS installable
+- [DB cart storage (darryldecode/cart)](db-cart-storage.md) — Cart uses DatabaseCartStorage; session key = session()->getId(); base64+serialize for Postgres safety; cart_session_key on orders for stale-order scoping
