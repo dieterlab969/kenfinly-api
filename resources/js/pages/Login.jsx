@@ -19,6 +19,10 @@ const Login = () => {
     const location = useLocation();
     const successMessage = location.state?.message || '';
 
+    const searchParams   = new URLSearchParams(location.search);
+    const redirectTo     = searchParams.get('redirect_to') || '';
+    const isCartRedirect = redirectTo === '/cart';
+
     useEffect(() => {
         if (user) {
             navigate('/halo');
@@ -44,7 +48,11 @@ const Login = () => {
 
             const result = await login(email, password, recaptchaToken);
             if (result.success) {
-                navigate('/halo');
+                if (redirectTo) {
+                    window.location.href = redirectTo;
+                } else {
+                    navigate('/halo');
+                }
             } else if (result.action === 'verify_email') {
                 navigate('/verification-pending', {
                     state: {
@@ -106,6 +114,13 @@ const Login = () => {
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-4">
+                                {isCartRedirect && (
+                                    <div className="flex items-start gap-3 bg-indigo-50 border border-indigo-200 text-indigo-800 px-4 py-3 rounded-xl text-sm">
+                                        <span className="text-lg leading-none mt-0.5">🛒</span>
+                                        <span>Vui lòng đăng nhập hoặc đăng ký tài khoản mới để hoàn tất đơn hàng của bạn.</span>
+                                    </div>
+                                )}
+
                                 {successMessage && (
                                     <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
                                         {successMessage}
@@ -163,7 +178,7 @@ const Login = () => {
 
                             <p className="text-center text-gray-600 text-sm mt-6">
                                 {t('auth.no_account')}{' '}
-                                <Link to="/register" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                                <Link to="/SignUp" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
                                     {t('auth.register_here')}
                                 </Link>
                             </p>

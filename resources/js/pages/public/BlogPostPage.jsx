@@ -181,7 +181,7 @@ function BlogPostPage() {
                                 </button>
                             </div>
                             <Link
-                                to="/register"
+                                to="/SignUp"
                                 className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 transition-all"
                             >
                                 {t('blogpostpage.share_section.try_kenfinly')}

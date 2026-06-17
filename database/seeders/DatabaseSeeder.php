@@ -33,6 +33,9 @@ class DatabaseSeeder extends Seeder
         // Seed accounts for test users
         $this->call(AccountSeeder::class);
 
+        // Seed the 3-tier subscription plans (Free, Monthly Pro, Yearly Pro)
+        $this->call(SubscriptionPlanSeeder::class);
+
         $this->command->info('Database seeded successfully!');
     }
 }

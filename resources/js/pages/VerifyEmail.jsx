@@ -31,7 +31,7 @@ export default function VerifyEmail() {
         setMessage(response.data.message || t('verifyEmail.email_verified_success'));
 
         setTimeout(() => {
-          navigate('/login', {
+          navigate('/SignIn', {
             state: { message: t('verifyEmail.email_verified_redirect_message') },
           });
         }, 2500);
@@ -109,13 +109,13 @@ export default function VerifyEmail() {
                   <p className="text-gray-600 mb-6">{message}</p>
                   <div className="space-y-3">
                     <button 
-                      onClick={() => navigate('/login')}
+                      onClick={() => navigate('/SignIn')}
                       className="w-full py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
                     >
                       {t('verifyEmail.go_to_login')}
                     </button>
                     <button 
-                      onClick={() => navigate('/register')}
+                      onClick={() => navigate('/SignUp')}
                       className="w-full py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all duration-200"
                     >
                       {t('verifyEmail.register_again')}

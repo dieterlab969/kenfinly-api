@@ -141,9 +141,9 @@ function App({ recaptchaEnabled = false }) {
                         <Route path="/textcase" element={<TextCaseConverter />} />
                         <Route path="/pomodoro" element={<PomodoroTimer />} />
                         <Route path="/pricing" element={<PricingPage />} />
-                        <Route path="/login" element={<Login />} />
+                        <Route path="/SignIn" element={<Login />} />
                         <Route path="/go-tieng-viet" element={<VietnameseTyping />} />
-                        <Route path="/register" element={<Register />} />
+                        <Route path="/SignUp" element={<Register />} />
                         <Route path="/verify-email" element={<VerifyEmail />} />
                         <Route path="/verification-pending" element={<VerificationPending />} />
                         <Route
