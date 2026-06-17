@@ -31,15 +31,23 @@ Route::get('/pricing', function () {
     return view('pricing');
 })->name('pricing');
 
-// ── Cart & Checkout ───────────────────────────────────────────────────────
+// ── Cart ──────────────────────────────────────────────────────────────────
 Route::get('/cart',               [\App\Http\Controllers\CartController::class,     'index'])->name('cart');
 Route::post('/cart/clear',        [\App\Http\Controllers\CartController::class,     'clear'])->name('cart.clear');
 Route::post('/cart/coupon',       [\App\Http\Controllers\CartController::class,     'applyCoupon'])->name('cart.coupon');
 Route::post('/cart/coupon/remove',[\App\Http\Controllers\CartController::class,     'removeCoupon'])->name('cart.coupon.remove');
 Route::post('/cart/checkout',     [\App\Http\Controllers\CheckoutController::class, 'store'])->name('cart.checkout');
+
+// ── One-Page Checkout ─────────────────────────────────────────────────────
+Route::get('/checkout',                    [\App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout');
+Route::post('/checkout',                   [\App\Http\Controllers\CheckoutController::class, 'store'])->name('checkout.store');
+Route::get('/checkout/paypal/capture',     [\App\Http\Controllers\CheckoutController::class, 'paypalCapture'])->name('checkout.paypal.capture');
+Route::get('/checkout/paypal/cancel',      [\App\Http\Controllers\CheckoutController::class, 'paypalCancel'])->name('checkout.paypal.cancel');
+
+// ── Order QR page ─────────────────────────────────────────────────────────
 Route::get('/order/{orderCode}',  [\App\Http\Controllers\CheckoutController::class, 'show'])->name('order.show');
 
-// Exclude /docs, /pricing, /cart, /order/* from the SPA catch-all.
+// Exclude Blade-rendered paths from the SPA catch-all.
 Route::get('/{any}', function () {
     return view('welcome');
-})->where('any', '^(?!docs|pricing|cart|order).*');
+})->where('any', '^(?!docs|pricing|cart|checkout|order).*');

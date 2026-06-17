@@ -43,6 +43,8 @@ class Order extends Model
         'coupon_applied',
         'discount_amount',
         'status',
+        'gateway',
+        'payment_reference',
         'checkout_url',
         'qr_code',
         'expires_at',

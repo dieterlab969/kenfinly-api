@@ -186,6 +186,10 @@ Route::middleware('auth:api')->group(function () {
 // Async webhook from PayOS — no auth, signature is verified internally.
 Route::post('/payment/payos-webhook', [PayOSPaymentController::class, 'webhook']);
 
+// ── PayPal Payment Routes ─────────────────────────────────────────────────
+// Async webhook from PayPal — no auth, verified by re-fetching order status.
+Route::post('/payment/paypal-webhook', [\App\Http\Controllers\Api\PayPalWebhookController::class, 'webhook']);
+
 // Order status polling — used by the /order/{code} page countdown JS.
 Route::get('/orders/{orderCode}/status', [PayOSPaymentController::class, 'orderStatus']);
 
