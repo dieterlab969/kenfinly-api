@@ -23,6 +23,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Apply middleware to ALL web routes
         $middleware->web(append: [
             \App\Http\Middleware\CheckBetaAccess::class,
+            // Runs geo-detection ONCE per session, sets user_country/user_currency
+            // in the session, and attaches the JS-readable app_currency cookie.
+            \App\Http\Middleware\LocalizationMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

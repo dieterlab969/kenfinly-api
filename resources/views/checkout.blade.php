@@ -150,6 +150,15 @@
 </head>
 <body>
 
+@php
+    // Variables passed from CheckoutController::index() via CurrencyService.
+    // Defaults ensure the view renders gracefully even if called without them.
+    $currency       = $currency       ?? 'VND';
+    $defaultGateway = $defaultGateway ?? 'payos';
+    $totalUsd       = $totalUsd       ?? null;
+    $isUsd          = $currency === 'USD';
+@endphp
+
 {{-- ── Navbar ────────────────────────────────────────────────────────── --}}
 <nav class="navbar">
     <a href="/" class="navbar-logo">
@@ -250,7 +259,7 @@
 
                     {{-- VietQR / PayOS --}}
                     <label class="gateway-tile">
-                        <input type="radio" name="_gateway_select" value="payos" checked>
+                        <input type="radio" name="_gateway_select" value="payos" {{ $defaultGateway === 'payos' ? 'checked' : '' }}>
                         <div class="tile-body">
                             <div class="tile-radio"></div>
                             <div class="tile-icon">🏦</div>
@@ -268,7 +277,7 @@
                     {{-- PayPal --}}
                     @if($paypalEnabled)
                     <label class="gateway-tile">
-                        <input type="radio" name="_gateway_select" value="paypal">
+                        <input type="radio" name="_gateway_select" value="paypal" {{ $defaultGateway === 'paypal' ? 'checked' : '' }}>
                         <div class="tile-body">
                             <div class="tile-radio"></div>
                             <div class="tile-icon">🌐</div>
@@ -305,45 +314,53 @@
         {{-- ═══════════════════════════════════════════════════════════ --}}
         <div class="sticky-col">
             <div class="card">
-                <div class="card-title"><span class="card-title-icon">📋</span> Tóm tắt đơn hàng</div>
+                <div class="card-title"><span class="card-title-icon">📋</span> {{ $isUsd ? 'Order Summary' : 'Tóm tắt đơn hàng' }}</div>
 
                 @foreach($cartItems as $item)
                     @php
                         $icon  = $item->id === 'monthly' ? '🚀' : '🏆';
-                        $cycle = $item->id === 'monthly' ? 'hàng tháng' : 'hàng năm';
+                        $cycle = $item->id === 'monthly' ? ($isUsd ? 'monthly' : 'hàng tháng') : ($isUsd ? 'yearly' : 'hàng năm');
                     @endphp
                     <div class="plan-hero">
                         <div class="plan-hero-icon">{{ $icon }}</div>
                         <div>
                             <div class="plan-hero-name">{{ $item->name }}</div>
-                            <div class="plan-hero-cycle">Thanh toán {{ $cycle }} · VND</div>
+                            <div class="plan-hero-cycle">{{ $isUsd ? 'Billed' : 'Thanh toán' }} {{ $cycle }} · {{ $isUsd ? 'USD' : 'VND' }}</div>
                         </div>
                     </div>
                     <div class="summary-row">
-                        <span>Giá gốc</span>
+                        <span>{{ $isUsd ? 'Original price' : 'Giá gốc' }}</span>
                         <span>{{ number_format($item->price) }}<span class="vnd">₫</span></span>
                     </div>
                 @endforeach
 
                 @if($subTotal != $total)
                     <div class="summary-row discount">
-                        <span>🏷️ Giảm giá</span>
+                        <span>🏷️ {{ $isUsd ? 'Discount' : 'Giảm giá' }}</span>
                         <span>−{{ number_format($subTotal - $total) }}<span class="vnd">₫</span></span>
                     </div>
                 @endif
 
                 <div class="summary-row total">
-                    <span>Tổng thanh toán</span>
+                    <span>{{ $isUsd ? 'Total' : 'Tổng thanh toán' }}</span>
                     <span id="totalDisplay">{{ number_format($total) }}<span class="vnd">₫</span></span>
                 </div>
+
+                {{-- USD secondary total: shows PayPal charge amount when gateway = paypal --}}
+                @if($isUsd && $totalUsd)
+                    <div id="usdTotalRow" class="summary-row" style="color:#fbbf24;font-size:.88rem;padding-bottom:.6rem;">
+                        <span>🌐 {{ $isUsd ? 'PayPal charge' : 'Thanh toán PayPal' }}</span>
+                        <span style="font-weight:700;">${{ number_format($totalUsd, 2) }} USD</span>
+                    </div>
+                @endif
 
                 {{-- Main checkout form --}}
                 <form method="POST" action="/checkout" id="checkoutForm">
                     @csrf
                     <input type="hidden" name="_jwt_token" id="jwtField">
-                    <input type="hidden" name="gateway"    id="gatewayField" value="payos">
+                    <input type="hidden" name="gateway"    id="gatewayField" value="{{ $defaultGateway }}">
                     <button type="submit" class="btn-place" id="placeBtn">
-                        🔒 Đặt hàng &amp; Thanh toán
+                        🔒 {{ $isUsd ? 'Place Order &amp; Pay' : 'Đặt hàng &amp; Thanh toán' }}
                     </button>
                 </form>
 
