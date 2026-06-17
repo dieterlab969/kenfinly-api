@@ -215,13 +215,17 @@ class CheckoutController extends Controller
                 \Cart::clearCartConditions();
                 session()->forget('cart_coupon');
 
+                // Reload user to get fresh subscription_expires_at after activation.
+                $order->load('user');
+                session()->flash('thank_you', $this->buildThankYouPayload($order));
+
                 Log::channel('single')->info('PayPal capture: order paid', [
                     'user_id'    => $order->user_id,
                     'plan'       => $order->plan,
                     'order_code' => $order->order_code,
                 ]);
 
-                return redirect('/pricing?payment=success');
+                return redirect('/checkout/thank-you');
             }
 
             Log::channel('single')->warning('PayPal capture: unexpected status', [
@@ -281,21 +285,54 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Clear the cart after a confirmed PayOS payment and redirect to success.
+     * Clear the cart after a confirmed PayOS payment and redirect to the
+     * Thank You page with flashed order details.
      *
-     * The order page's polling JS redirects here (instead of directly to
-     * /pricing) once it detects status === 'paid', allowing the server to
-     * clear the cart session before the user lands on the success screen.
+     * The order page JS redirects here as:
+     *   GET /checkout/complete?order={order_code}
+     *
+     * The optional `order` query param lets us look up the just-paid order,
+     * build the thank-you payload, and flash it to the session before
+     * forwarding to /checkout/thank-you.
      *
      * GET /checkout/complete
      */
-    public function complete(): RedirectResponse
+    public function complete(Request $request): RedirectResponse
     {
         \Cart::clear();
         \Cart::clearCartConditions();
         session()->forget('cart_coupon');
 
-        return redirect('/pricing?payment=success');
+        $orderCode = $request->query('order');
+
+        if ($orderCode) {
+            $order = Order::where('order_code', $orderCode)
+                          ->where('status', 'paid')
+                          ->with('user')
+                          ->first();
+
+            if ($order) {
+                session()->flash('thank_you', $this->buildThankYouPayload($order));
+            }
+        }
+
+        return redirect('/checkout/thank-you');
+    }
+
+    /**
+     * Render the post-payment Thank You page.
+     *
+     * Order details are read from the `thank_you` session flash key set by
+     * complete() or paypalCapture(). If the user refreshes the page (flash
+     * is gone), a generic success screen is shown instead.
+     *
+     * GET /checkout/thank-you
+     */
+    public function thankYou(): View
+    {
+        $order = session('thank_you'); // null on refresh — graceful fallback
+
+        return view('thank-you', compact('order'));
     }
 
     // ── Private helpers ───────────────────────────────────────────────────
@@ -460,6 +497,36 @@ class CheckoutController extends Controller
 
             return back()->with('error', 'Lỗi kết nối PayPal. Vui lòng thử lại hoặc chọn phương thức VietQR.');
         }
+    }
+
+    /**
+     * Build the thank-you session flash payload from a paid Order.
+     *
+     * Returns an array that the thank-you.blade.php view can consume directly.
+     * Called by both complete() (PayOS) and paypalCapture() (PayPal).
+     *
+     * @param  Order  $order  A paid order with `user` relation loaded.
+     * @return array<string, mixed>
+     */
+    private function buildThankYouPayload(Order $order): array
+    {
+        $amountUsd = null;
+
+        if ($order->gateway === 'paypal' && $order->exchange_rate_used) {
+            $amountUsd = round($order->total_amount / $order->exchange_rate_used, 2);
+        }
+
+        return [
+            'order_code'      => $order->order_code,
+            'plan'            => $order->plan,
+            'total_amount'    => $order->total_amount,
+            'amount_usd'      => $amountUsd,
+            'coupon_applied'  => $order->coupon_applied,
+            'discount_amount' => $order->discount_amount,
+            'gateway'         => $order->gateway,
+            'paid_at'         => $order->updated_at->format('d/m/Y H:i'),
+            'expires_at'      => $order->user?->subscription_expires_at?->format('d/m/Y'),
+        ];
     }
 
     /**

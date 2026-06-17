@@ -298,9 +298,9 @@
                 if (data.status === 'paid') {
                     clearInterval(timer);
                     clearInterval(pollTimer);
-                    // Route through /checkout/complete so the server can clear
-                    // the cart session before landing on the success screen.
-                    window.location.href = '/checkout/complete';
+                    // Route through /checkout/complete?order=CODE so the server
+                    // can clear the cart and build the Thank You page data.
+                    window.location.href = '/checkout/complete?order=' + ORDER_CODE;
                 }
             } catch (e) {
                 // Network error — continue polling
