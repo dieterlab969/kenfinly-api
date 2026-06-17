@@ -24,8 +24,8 @@ const Register = () => {
     const location = useLocation();
 
     const searchParams   = new URLSearchParams(location.search);
-    const redirectParam  = searchParams.get('redirect');
-    const isCartRedirect = redirectParam === 'cart';
+    const redirectTo     = searchParams.get('redirect_to') || '';
+    const isCartRedirect = redirectTo === '/cart';
 
     useEffect(() => {
         if (user) {
@@ -79,7 +79,7 @@ const Register = () => {
                     navigate('/verification-pending', {
                         state: {
                             user: result.user,
-                            redirect: redirectParam,
+                            redirectTo: redirectTo,
                         }
                     });
                 }, 1200);
@@ -241,7 +241,7 @@ const Register = () => {
                             <p className="text-center text-gray-600 text-sm mt-6">
                                 {t('auth.have_account')}{' '}
                                 <Link
-                                    to={isCartRedirect ? '/login?redirect=cart' : '/login'}
+                                    to={redirectTo ? `/login?redirect_to=${encodeURIComponent(redirectTo)}` : '/login'}
                                     className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
                                 >
                                     {t('auth.login_here')}

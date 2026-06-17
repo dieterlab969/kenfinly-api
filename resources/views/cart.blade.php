@@ -284,9 +284,9 @@
             Bạn cần đăng nhập hoặc tạo tài khoản để thực hiện thanh toán và lưu trữ gói dịch vụ.
         </p>
         <div class="modal-actions">
-            <a href="/login?redirect=cart" class="btn-modal-login">Đăng nhập</a>
+            <a href="/login?redirect_to=/cart" class="btn-modal-login">Đăng nhập</a>
             <div class="modal-divider"><span></span><em>hoặc</em><span></span></div>
-            <a href="/register?redirect=cart" class="btn-modal-register">Đăng ký tài khoản mới</a>
+            <a href="/register?redirect_to=/cart" class="btn-modal-register">Đăng ký tài khoản mới</a>
             <button class="btn-modal-dismiss" onclick="closeAuthModal()">Tiếp tục xem giỏ hàng</button>
         </div>
     </div>

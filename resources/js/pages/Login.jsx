@@ -19,9 +19,9 @@ const Login = () => {
     const location = useLocation();
     const successMessage = location.state?.message || '';
 
-    const searchParams  = new URLSearchParams(location.search);
-    const redirectParam = searchParams.get('redirect');
-    const isCartRedirect = redirectParam === 'cart';
+    const searchParams   = new URLSearchParams(location.search);
+    const redirectTo     = searchParams.get('redirect_to') || '';
+    const isCartRedirect = redirectTo === '/cart';
 
     useEffect(() => {
         if (user) {
@@ -48,8 +48,8 @@ const Login = () => {
 
             const result = await login(email, password, recaptchaToken);
             if (result.success) {
-                if (isCartRedirect) {
-                    window.location.href = '/cart';
+                if (redirectTo) {
+                    window.location.href = redirectTo;
                 } else {
                     navigate('/halo');
                 }

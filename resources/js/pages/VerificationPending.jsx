@@ -11,6 +11,7 @@ export default function VerificationPending() {
   const [userEmail, setUserEmail] = useState(location.state?.user?.email || '');
   const [source, setSource] = useState(location.state?.source || 'register');
   const [customMessage, setCustomMessage] = useState(location.state?.message || '');
+  const redirectTo = location.state?.redirectTo || '';
 
   const [isResending, setIsResending] = useState(false);
   const [resendStatus, setResendStatus] = useState(null);
@@ -53,7 +54,10 @@ export default function VerificationPending() {
   };
 
   const handleBackToLogin = () => {
-    navigate('/login');
+    const loginPath = redirectTo
+      ? `/login?redirect_to=${encodeURIComponent(redirectTo)}`
+      : '/login';
+    navigate(loginPath);
   };
 
   return (
