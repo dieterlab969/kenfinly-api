@@ -86,11 +86,19 @@ class AuthController extends Controller
             ], 422);
         }
 
+        // Read geo-locale values sent by the React frontend (from app_currency cookie)
+        $regCurrency = strtoupper((string) $request->input('app_currency', ''));
+        $regCountry  = strtoupper((string) $request->input('app_country',  ''));
+        if (! in_array($regCurrency, ['VND', 'USD'], true)) { $regCurrency = 'VND'; }
+        if (strlen($regCountry) !== 2)                       { $regCountry  = null; }
+
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'status' => 'pending',
+            'name'         => $request->name,
+            'email'        => $request->email,
+            'password'     => Hash::make($request->password),
+            'status'       => 'pending',
+            'currency'     => $regCurrency ?: 'VND',
+            'country_code' => $regCountry,
         ]);
 
         $user->assignRole('owner');
@@ -328,7 +336,10 @@ class AuthController extends Controller
     /**
      * Format and return the token response structure.
      *
-     * Includes the token, token type, expiration, and authenticated user data.
+     * Also syncs the session-detected country/currency into the user row the
+     * first time they log in (when country_code is still null). The values
+     * come from the `app_currency` / `app_country` fields the React frontend
+     * reads from its cookie and passes along in the login request body.
      *
      * @param string $token JWT access token
      * @return \Illuminate\Http\JsonResponse JSON response with token and user info
@@ -338,12 +349,74 @@ class AuthController extends Controller
         $user = auth('api')->user();
         $user->load('roles');
 
+        // Sync geo-detected locale into the user profile on first login.
+        // Uses request() helper because $request is not injected here.
+        $this->syncLocalizationToUser($user, request());
+
         return response()->json([
             'success' => true,
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60,
             'user' => $user
+        ]);
+    }
+
+    /**
+     * Sync the client-detected country and currency into the user's profile.
+     *
+     * WHY THIS IS NEEDED
+     * ──────────────────
+     * The API middleware group has no session, so LocalizationMiddleware's
+     * session data is not available here. Instead, the React frontend reads
+     * the `app_currency` cookie (set by LocalizationMiddleware on any prior
+     * web page visit) and includes its value in the login/register request.
+     *
+     * SYNC RULES
+     * ──────────
+     * - Only syncs when `country_code` IS NULL (user has never been located).
+     *   Once country_code is populated we respect it as a permanent record.
+     * - `currency` follows `country_code`: first-time only.
+     * - Values accepted: "VND" | "USD" for currency; 2-char ISO code for country.
+     *
+     * @param  \App\Models\User             $user
+     * @param  \Illuminate\Http\Request     $request
+     */
+    private function syncLocalizationToUser($user, $request): void
+    {
+        // Only sync on first login (country_code not yet set)
+        if (! empty($user->country_code)) {
+            return;
+        }
+
+        $currency = strtoupper((string) $request->input('app_currency', ''));
+        $country  = strtoupper((string) $request->input('app_country',  ''));
+
+        if (! in_array($currency, ['VND', 'USD'], true)) {
+            $currency = '';
+        }
+        if (strlen($country) !== 2) {
+            $country = '';
+        }
+
+        if ($currency === '' && $country === '') {
+            return; // Nothing to sync
+        }
+
+        $updates = [];
+        if ($country !== '') {
+            $updates['country_code'] = $country;
+        }
+        if ($currency !== '') {
+            $updates['currency'] = $currency;
+        }
+
+        $user->update($updates);
+
+        Log::info('AuthController: synced localization to user profile', [
+            'user_id'      => $user->id,
+            'country_code' => $country ?: '(none)',
+            'currency'     => $currency ?: '(none)',
         ]);
     }
 }

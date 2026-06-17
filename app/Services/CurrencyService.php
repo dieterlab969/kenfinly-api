@@ -21,19 +21,28 @@ use Stevebauman\Location\Facades\Location;
  *                      Amounts are floats with 2 decimal places.
  *                      Config: config/paypal.php →  plans.*.amount_usd
  *
- * The two sets of plan prices are maintained independently.  There is no
- * live conversion between them on the fly; each is the "correct" price
- * for that market, set by the business.
+ * The two sets of plan prices are maintained independently. There is no
+ * live conversion on the fly; each is the "correct" price for that market.
+ *
+ * SESSION ARCHITECTURE
+ * ─────────────────────
+ * LocalizationMiddleware runs detection ONCE per session (first web request)
+ * and stores the result in two canonical session keys:
+ *
+ *   session('user_currency')  — "VND" | "USD"
+ *   session('user_country')   — ISO 3166-1 alpha-2 or null
+ *
+ * All subsequent calls to this service read directly from those session keys
+ * without running any GeoIP logic. The detection methods below are the
+ * fallback used by the middleware on that first request.
  *
  * DETECTION PRIORITY (highest → lowest)
  * ──────────────────────────────────────
- *  1. Authenticated user's saved `currency` column  (explicit user preference)
- *  2. Session cache  (TTL controlled by config/currency.php → session_ttl_minutes)
- *  3. Cloudflare CF-IPCountry header  (free, ~0 ms, requires CF proxy)
+ *  1. Authenticated user's saved `currency` column  (permanent DB preference)
+ *  2. Session cache  (populated by LocalizationMiddleware on first request)
+ *  3. Cloudflare CF-IPCountry header  (free, ~0 ms, if behind CF proxy)
  *  4. stevebauman/location IP lookup  (local MaxMind GeoLite2 DB)
  *  5. Config default  (env CURRENCY_DEFAULT → "VND")
- *
- * Supported currencies: "VND" (Vietnam) and "USD" (all other countries).
  */
 class CurrencyService
 {
@@ -98,36 +107,69 @@ class CurrencyService
         ];
     }
 
+    // ── Session accessors ─────────────────────────────────────────────────
+
+    /**
+     * Read the currency that LocalizationMiddleware stored in the session.
+     * Returns null when the session hasn't been populated yet (first request,
+     * or when called from an API route that has no session).
+     *
+     * @return string|null  "VND" | "USD" | null
+     */
+    public function getSessionCurrency(): ?string
+    {
+        $c = session('user_currency');
+        return ($c !== null && $c !== '') ? strtoupper($c) : null;
+    }
+
+    /**
+     * Read the country code that LocalizationMiddleware stored in the session.
+     *
+     * @return string|null  e.g. "VN", "US", or null
+     */
+    public function getSessionCountry(): ?string
+    {
+        $c = session('user_country');
+        return ($c !== null && $c !== '') ? strtoupper($c) : null;
+    }
+
     // ── Detection API ─────────────────────────────────────────────────────
 
     /**
      * Detect the currency that should be presented to the current visitor.
      *
-     * Checks priority order: saved user preference → session cache →
-     * Cloudflare header → IP lookup → configured default.
+     * Priority: saved DB preference → session → CF header → IP lookup → default.
+     *
+     * In practice, on all web routes the session is already populated by
+     * LocalizationMiddleware before this method is ever called, so the
+     * CF/IP code paths are cold-standby fallbacks.
      *
      * @param  Request  $request
      * @return string  "VND" | "USD"
      */
     public function detectUserCurrency(Request $request): string
     {
-        // 1. Authenticated user's saved preference
+        // 1. Authenticated user's saved permanent preference
         $saved = $this->savedUserCurrency();
         if ($saved !== null) {
             return $saved;
         }
 
-        // 2. Session cache
-        $cached = $this->sessionCurrency();
+        // 2. Session — populated by LocalizationMiddleware on first web request
+        $cached = $this->getSessionCurrency();
         if ($cached !== null) {
             return $cached;
         }
 
-        // 3 + 4. Geo-detect
+        // 3 + 4. Geo-detect (fallback for API routes / missing session)
         $country  = $this->detectCountryCode($request);
         $currency = $this->countryToCurrency($country);
 
-        $this->cacheInSession($currency, $country);
+        // Write to session for the rest of this request's lifecycle
+        session([
+            'user_country'  => $country,
+            'user_currency' => $currency,
+        ]);
 
         return $currency;
     }
@@ -205,12 +247,14 @@ class CurrencyService
     }
 
     /**
-     * Clear the session-cached currency (e.g. after the user changes their
-     * country preference in settings).
+     * Clear the currency/country from the session.
+     *
+     * Call this after the user explicitly changes their currency preference
+     * so the next request re-evaluates it (or picks up the new DB value).
      */
     public function clearSessionCache(): void
     {
-        session()->forget(['detected_currency', 'detected_country', 'currency_cached_at']);
+        session()->forget(['user_currency', 'user_country']);
     }
 
     // ── Private helpers ───────────────────────────────────────────────────
@@ -224,21 +268,6 @@ class CurrencyService
             }
         } catch (\Exception) {
             // JWT guard throws when no token is present — that is fine
-        }
-
-        return null;
-    }
-
-    private function sessionCurrency(): ?string
-    {
-        $cachedAt = session('currency_cached_at');
-        $ttl      = (int) config('currency.session_ttl_minutes', 30);
-
-        if ($cachedAt && now()->diffInMinutes($cachedAt) < $ttl) {
-            $c = session('detected_currency');
-            if ($c !== null) {
-                return $c;
-            }
         }
 
         return null;
@@ -282,14 +311,5 @@ class CurrencyService
 
             return null;
         }
-    }
-
-    private function cacheInSession(string $currency, ?string $country): void
-    {
-        session([
-            'detected_currency'  => $currency,
-            'detected_country'   => $country,
-            'currency_cached_at' => now()->toISOString(),
-        ]);
     }
 }
