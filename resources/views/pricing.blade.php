@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Pricing — {{ config('app.name', 'Kenfinly') }}</title>
+    <title>Bảng Giá — {{ config('app.name', 'Kenfinly') }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @php
         $favicon = \App\Models\AppSetting::where('key', 'favicon')->value('value');
@@ -36,13 +36,9 @@
             top: 0;
             z-index: 50;
         }
+        .navbar-logo { text-decoration: none; display: flex; align-items: center; gap: 0.5rem; }
         .navbar-logo img { height: 36px; }
-        .navbar-logo span {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #818cf8;
-            letter-spacing: -0.5px;
-        }
+        .navbar-logo span { font-size: 1.4rem; font-weight: 700; color: #818cf8; letter-spacing: -0.5px; }
         .navbar-links { display: flex; gap: 1rem; }
         .navbar-links a {
             color: #94a3b8;
@@ -54,17 +50,14 @@
         }
         .navbar-links a:hover { color: #e2e8f0; background: rgba(99,102,241,0.15); }
         .btn-nav-login {
-            background: #4f46e5;
+            background: #4f46e5 !important;
             color: #fff !important;
             font-weight: 600;
         }
         .btn-nav-login:hover { background: #4338ca !important; }
 
         /* ── Hero ── */
-        .hero {
-            text-align: center;
-            padding: 5rem 1rem 3rem;
-        }
+        .hero { text-align: center; padding: 5rem 1rem 3rem; }
         .badge {
             display: inline-flex;
             align-items: center;
@@ -81,9 +74,9 @@
             text-transform: uppercase;
         }
         .hero h1 {
-            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-size: clamp(1.8rem, 4.5vw, 3rem);
             font-weight: 800;
-            line-height: 1.15;
+            line-height: 1.2;
             margin-bottom: 1rem;
             background: linear-gradient(135deg, #e2e8f0 30%, #818cf8 100%);
             -webkit-background-clip: text;
@@ -92,21 +85,16 @@
         }
         .hero p {
             color: #94a3b8;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             max-width: 520px;
             margin: 0 auto 0.5rem;
         }
-        .trial-note {
-            color: #4ade80;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-top: 0.5rem;
-        }
+        .trial-note { color: #4ade80; font-size: 0.85rem; font-weight: 600; margin-top: 0.5rem; }
 
-        /* ── Flash messages ── */
+        /* ── Flash ── */
         .flash {
             max-width: 480px;
-            margin: 0 auto 1rem;
+            margin: 1.5rem auto 0;
             padding: 0.8rem 1.2rem;
             border-radius: 10px;
             font-size: 0.9rem;
@@ -114,8 +102,7 @@
             text-align: center;
         }
         .flash-success { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.35); color: #4ade80; }
-        .flash-cancel  { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.35); color: #fbbf24; }
-        .flash-error   { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.35); color: #f87171; }
+        .flash-cancel  { background: rgba(251,191,36,0.12);  border: 1px solid rgba(251,191,36,0.35);  color: #fbbf24; }
 
         /* ── Cards ── */
         .cards-wrapper {
@@ -127,7 +114,6 @@
             max-width: 1100px;
             margin: 0 auto;
         }
-
         .card {
             background: #1e293b;
             border: 1px solid rgba(99,102,241,0.2);
@@ -140,27 +126,21 @@
             position: relative;
             overflow: hidden;
         }
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
 
-        /* Featured card */
         .card.featured {
             border-color: #4f46e5;
             background: linear-gradient(160deg, #1e1b4b 0%, #1e293b 100%);
             box-shadow: 0 0 0 1px #4f46e5, 0 8px 32px rgba(79,70,229,0.25);
         }
-        .card.featured:hover {
-            box-shadow: 0 0 0 1px #4f46e5, 0 24px 48px rgba(79,70,229,0.35);
-        }
+        .card.featured:hover { box-shadow: 0 0 0 1px #4f46e5, 0 24px 48px rgba(79,70,229,0.35); }
+
         .popular-badge {
             position: absolute;
-            top: 0;
-            right: 1.5rem;
+            top: 0; right: 1.5rem;
             background: linear-gradient(90deg, #4f46e5, #7c3aed);
             color: #fff;
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -168,58 +148,23 @@
             border-radius: 0 0 10px 10px;
         }
 
-        .plan-icon {
-            font-size: 2rem;
-            margin-bottom: 0.8rem;
-        }
-        .plan-name {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #e2e8f0;
-            margin-bottom: 0.3rem;
-        }
-        .plan-desc {
-            color: #64748b;
-            font-size: 0.85rem;
-            margin-bottom: 1.5rem;
-        }
+        .plan-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+        .plan-name { font-size: 1.25rem; font-weight: 700; color: #e2e8f0; margin-bottom: 0.3rem; }
+        .plan-desc { color: #64748b; font-size: 0.85rem; margin-bottom: 1.5rem; }
 
         .price-block { margin-bottom: 1.8rem; }
-        .price-amount {
-            font-size: 2.4rem;
-            font-weight: 800;
-            color: #e2e8f0;
-            line-height: 1;
-        }
+        .price-row { display: flex; align-items: baseline; gap: 0.2rem; }
+        .price-amount { font-size: 2.4rem; font-weight: 800; color: #e2e8f0; line-height: 1; }
         .price-amount.free { color: #4ade80; }
-        .price-currency {
-            font-size: 1rem;
-            color: #94a3b8;
-            margin-right: 2px;
-        }
-        .price-period {
-            font-size: 0.85rem;
-            color: #64748b;
-            margin-top: 0.2rem;
-        }
-        .price-saving {
-            font-size: 0.78rem;
-            color: #4ade80;
-            font-weight: 600;
-            margin-top: 0.3rem;
-        }
+        .price-symbol { font-size: 1.1rem; color: #94a3b8; margin-left: 2px; }
+        .price-period { font-size: 0.85rem; color: #64748b; margin-top: 0.25rem; }
+        .price-saving { font-size: 0.78rem; color: #4ade80; font-weight: 600; margin-top: 0.3rem; }
 
-        .divider {
-            height: 1px;
-            background: rgba(99,102,241,0.15);
-            margin-bottom: 1.5rem;
-        }
+        .divider { height: 1px; background: rgba(99,102,241,0.15); margin-bottom: 1.5rem; }
 
-        .features-list {
-            list-style: none;
-            flex: 1;
-            margin-bottom: 2rem;
-        }
+        .features-heading { font-size: 0.78rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.8rem; }
+
+        .features-list { list-style: none; flex: 1; margin-bottom: 2rem; }
         .features-list li {
             display: flex;
             align-items: flex-start;
@@ -228,21 +173,9 @@
             color: #cbd5e1;
             padding: 0.35rem 0;
         }
-        .features-list li .check {
-            color: #4ade80;
-            font-size: 0.9rem;
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-        .features-list li .cross {
-            color: #475569;
-            font-size: 0.9rem;
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-        .features-list li.disabled { color: #475569; }
+        .check { color: #4ade80; font-size: 0.9rem; flex-shrink: 0; margin-top: 1px; }
 
-        /* Buttons */
+        /* ── Buttons ── */
         .btn {
             display: block;
             width: 100%;
@@ -261,10 +194,7 @@
             border: 1px solid rgba(99,102,241,0.3);
             color: #818cf8;
         }
-        .btn-free:hover {
-            background: rgba(99,102,241,0.2);
-            border-color: rgba(99,102,241,0.5);
-        }
+        .btn-free:hover { background: rgba(99,102,241,0.2); border-color: rgba(99,102,241,0.5); }
         .btn-primary {
             background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
             color: #fff;
@@ -275,23 +205,19 @@
             box-shadow: 0 6px 20px rgba(79,70,229,0.5);
             transform: translateY(-1px);
         }
-        .btn-secondary {
-            background: rgba(30,41,59,0.6);
-            border: 1px solid rgba(99,102,241,0.25);
-            color: #818cf8;
+        .btn-teal {
+            background: linear-gradient(135deg, #0f766e 0%, #0891b2 100%);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(8,145,178,0.3);
         }
-        .btn-secondary:hover {
-            background: rgba(79,70,229,0.15);
-            border-color: rgba(99,102,241,0.5);
+        .btn-teal:hover {
+            background: linear-gradient(135deg, #0d6460 0%, #0779a0 100%);
+            box-shadow: 0 6px 20px rgba(8,145,178,0.45);
+            transform: translateY(-1px);
         }
-
-        /* Loading state */
         .btn.loading { opacity: 0.7; pointer-events: none; }
-        .btn.loading::after {
-            content: ' ⏳';
-        }
+        .btn.loading::after { content: ' ⏳'; }
 
-        /* Error inline */
         .inline-error {
             display: none;
             color: #f87171;
@@ -300,15 +226,15 @@
             margin-top: 0.6rem;
         }
 
-        /* FAQ strip */
-        .faq-strip {
+        /* ── Footer strip ── */
+        .footer-strip {
             text-align: center;
             padding: 0 1.5rem 4rem;
             color: #64748b;
             font-size: 0.88rem;
         }
-        .faq-strip a { color: #818cf8; text-decoration: none; }
-        .faq-strip a:hover { text-decoration: underline; }
+        .footer-strip a { color: #818cf8; text-decoration: none; }
+        .footer-strip a:hover { text-decoration: underline; }
 
         @media (max-width: 640px) {
             .cards-wrapper { gap: 1rem; }
@@ -320,7 +246,7 @@
 
 <!-- Navbar -->
 <nav class="navbar">
-    <a href="/" class="navbar-logo" style="text-decoration:none;display:flex;align-items:center;gap:0.5rem;">
+    <a href="/" class="navbar-logo">
         @if(file_exists(public_path('logos/logo-white.png')))
             <img src="{{ asset('logos/logo-white.png') }}" alt="{{ config('app.name') }}">
         @else
@@ -328,136 +254,126 @@
         @endif
     </a>
     <div class="navbar-links">
-        <a href="/">Home</a>
-        <a href="/pricing" style="color:#818cf8;">Pricing</a>
-        <a href="/login" class="btn-nav-login">Sign In</a>
+        <a href="/">Trang chủ</a>
+        <a href="/pricing" style="color:#818cf8;">Bảng giá</a>
+        <a href="/login" class="btn-nav-login">Đăng nhập</a>
     </div>
 </nav>
 
 <!-- Hero -->
 <section class="hero">
-    <div class="badge">💎 Pricing Plans</div>
-    <h1>Simple, Transparent Pricing</h1>
-    <p>Start free, upgrade when you need more. Cancel anytime.</p>
-    <p class="trial-note">✓ All new accounts get a 7-day free trial of Pro features</p>
+    <div class="badge">💎 Bảng Giá Dịch Vụ</div>
+    <h1>Chọn gói dịch vụ phù hợp cho bạn</h1>
+    <p>Mở khóa các tính năng cao cấp và làm chủ tài chính của bạn.</p>
+    <p class="trial-note">✓ Tất cả tài khoản mới được dùng thử 7 ngày miễn phí</p>
 
-    @php
-        $payment = request('payment');
-    @endphp
+    @php $payment = request('payment'); @endphp
     @if($payment === 'success')
-        <div class="flash flash-success" style="margin-top:1.5rem;">
-            🎉 Payment successful! Your subscription is now active.
-        </div>
+        <div class="flash flash-success">🎉 Thanh toán thành công! Gói đăng ký của bạn đã được kích hoạt.</div>
     @elseif($payment === 'cancelled')
-        <div class="flash flash-cancel" style="margin-top:1.5rem;">
-            ⚠️ Payment was cancelled. Your plan has not changed.
-        </div>
+        <div class="flash flash-cancel">⚠️ Thanh toán đã bị hủy. Gói dịch vụ của bạn không thay đổi.</div>
     @endif
 </section>
 
-<!-- Pricing Cards -->
+<!-- Cards -->
 <div class="cards-wrapper">
 
-    <!-- FREE -->
+    <!-- MIỄN PHÍ -->
     <div class="card">
         <div class="plan-icon">🆓</div>
-        <div class="plan-name">Forever Free</div>
-        <div class="plan-desc">Essential tools to get you started</div>
+        <div class="plan-name">Miễn Phí</div>
+        <div class="plan-desc">Các tính năng cơ bản cho mục đích sử dụng cá nhân</div>
 
         <div class="price-block">
-            <div class="price-amount free">Free</div>
-            <div class="price-period">No credit card required</div>
+            <div class="price-row">
+                <span class="price-amount free">0</span>
+                <span class="price-symbol">₫</span>
+            </div>
+            <div class="price-period">vĩnh viễn · không cần thẻ tín dụng</div>
         </div>
 
         <div class="divider"></div>
+        <div class="features-heading">Bao gồm những gì</div>
 
         <ul class="features-list">
-            <li><span class="check">✓</span> Expense &amp; income tracking</li>
-            <li><span class="check">✓</span> 1 wallet account</li>
-            <li><span class="check">✓</span> Basic categories</li>
-            <li><span class="check">✓</span> 7-day transaction history</li>
-            <li class="disabled"><span class="cross">✗</span> Multi-account support</li>
-            <li class="disabled"><span class="cross">✗</span> Advanced analytics</li>
-            <li class="disabled"><span class="cross">✗</span> Report exports</li>
-            <li class="disabled"><span class="cross">✗</span> Budget planning</li>
+            <li><span class="check">✓</span> Theo dõi cơ bản</li>
+            <li><span class="check">✓</span> 1 Tài khoản</li>
+            <li><span class="check">✓</span> Hỗ trợ tiêu chuẩn</li>
         </ul>
 
-        <a href="/login" class="btn btn-free">Get Started Free</a>
+        <a href="/login" class="btn btn-free">Bắt đầu miễn phí</a>
     </div>
 
-    <!-- MONTHLY (Featured) -->
+    <!-- CHUYÊN NGHIỆP (Monthly — Featured) -->
     <div class="card featured">
-        <div class="popular-badge">Most Popular</div>
+        <div class="popular-badge">Phổ biến nhất</div>
         <div class="plan-icon">🚀</div>
-        <div class="plan-name">Monthly Pro</div>
-        <div class="plan-desc">Full power, billed monthly</div>
+        <div class="plan-name">Chuyên nghiệp</div>
+        <div class="plan-desc">Các tính năng nâng cao dành cho người đam mê</div>
 
         <div class="price-block">
-            <div style="display:flex;align-items:baseline;gap:0.2rem;">
-                <span class="price-amount">
-                    <span class="price-currency">₫</span>{{ number_format(config('payos.plans.monthly.amount')) }}
-                </span>
+            <div class="price-row">
+                <span class="price-amount">{{ number_format(config('payos.plans.monthly.amount')) }}</span>
+                <span class="price-symbol">₫</span>
             </div>
-            <div class="price-period">per month · VND</div>
+            <div class="price-period">hàng tháng · VND</div>
         </div>
 
         <div class="divider"></div>
+        <div class="features-heading">Bao gồm những gì</div>
 
         <ul class="features-list">
-            <li><span class="check">✓</span> Everything in Free</li>
-            <li><span class="check">✓</span> Unlimited wallet accounts</li>
-            <li><span class="check">✓</span> Multi-currency support</li>
-            <li><span class="check">✓</span> Advanced analytics &amp; charts</li>
-            <li><span class="check">✓</span> Budget planning &amp; goals</li>
-            <li><span class="check">✓</span> CSV import &amp; export</li>
-            <li><span class="check">✓</span> Saving habit tracker</li>
-            <li><span class="check">✓</span> Priority support</li>
+            <li><span class="check">✓</span> Chế độ xem lịch</li>
+            <li><span class="check">✓</span> Trực quan hóa dữ liệu nâng cao</li>
+            <li><span class="check">✓</span> Lọc và sắp xếp</li>
+            <li><span class="check">✓</span> Phân tích theo thời gian</li>
+            <li><span class="check">✓</span> Thông tin dự đoán</li>
+            <li><span class="check">✓</span> Xuất báo cáo (PDF, CSV, Excel)</li>
         </ul>
 
-        <button class="btn btn-primary" onclick="buyPlan('monthly', this)">Buy Now — Monthly</button>
+        <button class="btn btn-primary" onclick="buyPlan('monthly', this)">Mua ngay — Hàng tháng</button>
         <div class="inline-error" id="err-monthly"></div>
     </div>
 
-    <!-- YEARLY -->
+    <!-- PRO HÀNG NĂM (Yearly) -->
     <div class="card">
         <div class="plan-icon">🏆</div>
-        <div class="plan-name">Yearly Pro</div>
-        <div class="plan-desc">Best value for power users</div>
+        <div class="plan-name">Pro Hàng Năm</div>
+        <div class="plan-desc">Giá trị tốt nhất cho người dùng chuyên sâu</div>
 
         <div class="price-block">
-            <div style="display:flex;align-items:baseline;gap:0.2rem;">
-                <span class="price-amount">
-                    <span class="price-currency">₫</span>{{ number_format(config('payos.plans.yearly.amount')) }}
-                </span>
+            <div class="price-row">
+                <span class="price-amount">{{ number_format(config('payos.plans.yearly.amount')) }}</span>
+                <span class="price-symbol">₫</span>
             </div>
-            <div class="price-period">per year · VND</div>
-            <div class="price-saving">
-                💰 Save ~{{ round(100 - (config('payos.plans.yearly.amount') / (config('payos.plans.monthly.amount') * 12)) * 100) }}% vs monthly
-            </div>
+            <div class="price-period">hàng năm · VND</div>
+            @php
+                $monthlyCost = config('payos.plans.monthly.amount') * 12;
+                $yearlyCost  = config('payos.plans.yearly.amount');
+                $saving      = $monthlyCost > 0 ? round(100 - ($yearlyCost / $monthlyCost) * 100) : 0;
+            @endphp
+            @if($saving > 0)
+                <div class="price-saving">💰 Tiết kiệm ~{{ $saving }}% so với gói tháng</div>
+            @endif
         </div>
 
         <div class="divider"></div>
+        <div class="features-heading">Bao gồm những gì</div>
 
         <ul class="features-list">
-            <li><span class="check">✓</span> Everything in Monthly Pro</li>
-            <li><span class="check">✓</span> 12 months for the price of ~{{ floor(config('payos.plans.yearly.amount') / config('payos.plans.monthly.amount')) }}</li>
-            <li><span class="check">✓</span> Early access to new features</li>
-            <li><span class="check">✓</span> Dedicated support channel</li>
-            <li><span class="check">✓</span> Team collaboration (coming soon)</li>
-            <li><span class="check">✓</span> API access (coming soon)</li>
-            <li><span class="check">✓</span> Custom report builder</li>
-            <li><span class="check">✓</span> Audit trail &amp; history</li>
+            <li><span class="check">✓</span> Tất cả tính năng của gói Pro hàng tháng</li>
+            <li><span class="check">✓</span> Giảm giá hàng năm</li>
         </ul>
 
-        <button class="btn btn-primary" style="background:linear-gradient(135deg,#0f766e,#0891b2);" onclick="buyPlan('yearly', this)">Buy Now — Yearly</button>
+        <button class="btn btn-teal" onclick="buyPlan('yearly', this)">Mua ngay — Hàng năm</button>
         <div class="inline-error" id="err-yearly"></div>
     </div>
 
 </div>
 
-<div class="faq-strip">
-    All payments are processed securely via <strong style="color:#e2e8f0;">PayOS / VietQR</strong>. &nbsp;
-    Questions? <a href="mailto:{{ config('mail.from.address', 'purchasevn@getkenka.com') }}">Contact us</a>
+<div class="footer-strip">
+    Tất cả thanh toán được xử lý an toàn qua <strong style="color:#e2e8f0;">PayOS / VietQR</strong>. &nbsp;
+    Câu hỏi? <a href="mailto:{{ config('mail.from.address', 'purchasevn@getkenka.com') }}">Liên hệ chúng tôi</a>
 </div>
 
 <script>
@@ -487,7 +403,7 @@
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.message || 'Failed to create payment link.');
+                throw new Error(data.message || 'Không thể tạo liên kết thanh toán.');
             }
 
             window.location.href = data.checkout_url;
