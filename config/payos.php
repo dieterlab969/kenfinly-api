@@ -13,7 +13,7 @@
  *   PAYOS_CHECKSUM_KEY   — HMAC checksum key for webhook verification
  *
  * Optional overrides:
- *   PAYOS_MONTHLY_AMOUNT — Monthly plan price in VND (default: 79 000)
+ *   PAYOS_MONTHLY_AMOUNT — Monthly plan price in VND (default: 50 000)
  *   PAYOS_YEARLY_AMOUNT  — Yearly plan price in VND  (default: 169 000)
  *   PAYOS_MONTHLY_DESC   — Short description sent to PayOS (max ~25 chars)
  *   PAYOS_YEARLY_DESC    — Short description sent to PayOS (max ~25 chars)
@@ -44,11 +44,26 @@ return [
     */
     'plans' => [
         'monthly' => [
-            'amount'      => (int) env('PAYOS_MONTHLY_AMOUNT', 79000),
+            // HOW IS THE CURRENCY DETERMINED?
+            // PayOS is a Vietnamese payment gateway and natively processes ONLY
+            // Vietnamese Đồng (VND). The `amount` field MUST be an integer
+            // in VND — no decimals, no other currencies. PayOS rejects
+            // fractional amounts and non-VND currencies outright.
+            //
+            // For international customers (USD), see config/paypal.php which
+            // holds the equivalent USD prices processed via PayPal instead.
+            //
+            // The `currency` key here is intentionally explicit so that any code
+            // reading plan config always has the currency alongside the amount,
+            // removing any ambiguity.
+            'currency'    => 'VND',
+            'amount'      => (int) env('PAYOS_MONTHLY_AMOUNT', 50000),
             'description' => env('PAYOS_MONTHLY_DESC', 'KenFinly Monthly'),
             'label'       => 'Monthly Pro',
         ],
         'yearly' => [
+            // See monthly comment above — same rules apply.
+            'currency'    => 'VND',
             'amount'      => (int) env('PAYOS_YEARLY_AMOUNT', 169000),
             'description' => env('PAYOS_YEARLY_DESC', 'KenFinly Yearly'),
             'label'       => 'Yearly Pro',

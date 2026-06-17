@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\AccountController;
@@ -176,6 +177,12 @@ ts', [\App\Http\Controllers\Api\SavingTracker\AchievementController::class, 'ind
 
 // Public webhook endpoint (no auth required)
 Route::post('/webhooks/payment', [PaymentController::class, 'webhook']);
+
+// ── Currency / Geo-detection Routes ──────────────────────────────────────
+// Guest-accessible: React SPA calls this on load to get prices + gateway hint.
+Route::get('/currency/detect', [CurrencyController::class, 'detect']);
+// Auth-required: save the user's explicit currency preference.
+Route::middleware('auth:api')->post('/currency/save', [CurrencyController::class, 'save']);
 
 // ── PayOS Payment Routes ──────────────────────────────────────────────────
 // Authenticated: create a hosted checkout link for a chosen plan.

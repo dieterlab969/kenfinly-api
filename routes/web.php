@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\BetaAccessController;
+use App\Services\CurrencyService;
 
 // Beta Access Routes (must be before middleware application)
 Route::get('/beta-access', [BetaAccessController::class, 'show'])->name('beta-access');
@@ -26,9 +28,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Pricing page — standalone Blade view.
-Route::get('/pricing', function () {
-    return view('pricing');
+// Pricing page — standalone Blade view with currency-aware pricing.
+Route::get('/pricing', function (Request $request, CurrencyService $currencyService) {
+    $currency       = $currencyService->detectUserCurrency($request);
+    $country        = $currencyService->detectCountryCode($request);
+    $defaultGateway = $currencyService->defaultGateway($currency);
+
+    return view('pricing', compact('currency', 'country', 'defaultGateway'));
 })->name('pricing');
 
 // ── Cart ──────────────────────────────────────────────────────────────────

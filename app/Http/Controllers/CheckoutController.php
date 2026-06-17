@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\User;
+use App\Services\CurrencyService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -37,11 +38,13 @@ class CheckoutController extends Controller
      * Show the One-Page Checkout.
      *
      * Optionally loads a plan into the cart from the `?plan=` query parameter.
+     * Detects the visitor's currency via CurrencyService and pre-selects the
+     * appropriate payment gateway (PayOS for VND, PayPal for USD).
      * Redirects to /pricing if the cart is empty after that.
      *
      * GET /checkout[?plan=monthly|yearly]
      */
-    public function index(Request $request): View|RedirectResponse
+    public function index(Request $request, CurrencyService $currencyService): View|RedirectResponse
     {
         $plan = $request->query('plan');
 
@@ -49,10 +52,10 @@ class CheckoutController extends Controller
             $this->addPlanToCart($plan);
         }
 
-        $cartItems   = \Cart::getContent();
-        $subTotal    = \Cart::getSubTotal();
-        $total       = \Cart::getTotal();
-        $coupon      = session('cart_coupon');
+        $cartItems = \Cart::getContent();
+        $subTotal  = \Cart::getSubTotal();
+        $total     = \Cart::getTotal();
+        $coupon    = session('cart_coupon');
 
         if ($cartItems->isEmpty()) {
             return redirect('/pricing')->with('info', 'Vui lòng chọn gói dịch vụ trước.');
@@ -62,7 +65,21 @@ class CheckoutController extends Controller
         $paypalMode    = config('paypal.mode', 'sandbox');
         $paypalEnabled = ! empty(config("paypal.{$paypalMode}.client_id"));
 
-        return view('checkout', compact('cartItems', 'subTotal', 'total', 'coupon', 'paypalEnabled'));
+        // Currency & gateway detection
+        $currency       = $currencyService->detectUserCurrency($request);
+        $defaultGateway = $currencyService->defaultGateway($currency);
+
+        // For USD visitors, surface the PayPal USD amount for the selected plan
+        $totalUsd = null;
+        if ($currency === 'USD' && ! $cartItems->isEmpty()) {
+            $planKey  = $cartItems->first()->attributes['plan'];
+            $totalUsd = config("paypal.plans.{$planKey}.amount_usd");
+        }
+
+        return view('checkout', compact(
+            'cartItems', 'subTotal', 'total', 'coupon',
+            'paypalEnabled', 'currency', 'defaultGateway', 'totalUsd'
+        ));
     }
 
     /**
