@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'beta.access' => \App\Http\Middleware\CheckBetaAccess::class,
             'halo.integrity' => \App\Http\Middleware\VerifyHaloPointLedgerIntegrity::class,
             'pomodoro.acl' => \App\Http\Middleware\ResolvePomodoroAcl::class,
+            'check.subscription' => \App\Http\Middleware\CheckSubscription::class,
         ]);
         // Apply middleware to ALL web routes
         $middleware->web(append: [

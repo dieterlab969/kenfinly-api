@@ -27,6 +27,13 @@ class UserObserver
             );
 
             app(HaloPointLedgerService::class)->createGenesisBlock($user);
+
+            // Grant a 7-day free trial on first registration.
+            $user->updateQuietly([
+                'subscription_status' => 'trial',
+                'subscription_plan'   => 'free',
+                'trial_ends_at'       => now()->addDays(7),
+            ]);
         });
     }
 

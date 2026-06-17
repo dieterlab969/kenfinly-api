@@ -26,7 +26,12 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// Exclude /docs/* from the SPA catch-all so Scramble can serve the API documentation UI.
+// Pricing page — served as a standalone Blade view (not handled by React SPA).
+Route::get('/pricing', function () {
+    return view('pricing');
+})->name('pricing');
+
+// Exclude /docs/* and /pricing from the SPA catch-all.
 Route::get('/{any}', function () {
     return view('welcome');
-})->where('any', '^(?!docs).*');
+})->where('any', '^(?!docs|pricing).*');

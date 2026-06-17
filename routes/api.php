@@ -37,6 +37,7 @@ use App\Http\Controllers\Api\PublicAnalyticsController;
 use App\Http\Controllers\Api\ConsentController;
 use App\Http\Controllers\Api\LogoController;
 use App\Http\Controllers\Api\PomodoroController;
+use App\Http\Controllers\Api\PayOSPaymentController;
 
 // Status / health endpoint (bypassed by CheckBetaAccess whitelist)
 Route::get('/status', function () {
@@ -175,6 +176,15 @@ ts', [\App\Http\Controllers\Api\SavingTracker\AchievementController::class, 'ind
 
 // Public webhook endpoint (no auth required)
 Route::post('/webhooks/payment', [PaymentController::class, 'webhook']);
+
+// ── PayOS Payment Routes ──────────────────────────────────────────────────
+// Authenticated: create a hosted checkout link for a chosen plan.
+Route::middleware('auth:api')->group(function () {
+    Route::post('/payment/payos/create', [PayOSPaymentController::class, 'createPaymentLink'])
+        ->middleware('throttle:10,1');
+});
+// Async webhook from PayOS — no auth, signature is verified internally.
+Route::post('/payment/payos-webhook', [PayOSPaymentController::class, 'webhook']);
 
 // Admin routes (Super Admin only)
 Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])->prefix('admin')->group(function () {

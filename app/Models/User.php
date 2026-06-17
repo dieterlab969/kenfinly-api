@@ -44,6 +44,10 @@ class User extends Authenticatable implements JWTSubject
         'current_streak',
         'longest_streak',
         'last_halo_date',
+        'subscription_status',
+        'subscription_plan',
+        'trial_ends_at',
+        'subscription_expires_at',
     ];
 
     /**
@@ -75,6 +79,8 @@ class User extends Authenticatable implements JWTSubject
             'hourly_rate' => 'integer',
             'current_streak' => 'integer',
             'longest_streak' => 'integer',
+            'trial_ends_at' => 'datetime',
+            'subscription_expires_at' => 'datetime',
         ];
     }
 
