@@ -264,6 +264,34 @@
             .cards-wrapper { gap: 1rem; }
             .card { width: 100%; max-width: 360px; }
         }
+
+        /* ── Auth-aware navbar ────────────────────────────────────────────── */
+        .nav-user-chip { display:flex; align-items:center; gap:.6rem; }
+        .nav-avatar { width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#4f46e5,#7c3aed); display:flex; align-items:center; justify-content:center; font-size:.85rem; font-weight:800; color:#fff; flex-shrink:0; }
+        .nav-username { font-size:.85rem; color:#e2e8f0; font-weight:600; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .btn-nav-dashboard { color:#818cf8; text-decoration:none; font-size:.82rem; font-weight:600; padding:.38rem .85rem; border-radius:8px; background:rgba(99,102,241,.12); border:1px solid rgba(99,102,241,.3); transition:all .2s; white-space:nowrap; }
+        .btn-nav-dashboard:hover { background:rgba(99,102,241,.22); color:#a5b4fc; }
+
+        /* ── Auth Modal ───────────────────────────────────────────────────── */
+        .modal-backdrop { position:fixed; inset:0; background:rgba(2,6,23,.78); backdrop-filter:blur(6px); z-index:200; display:flex; align-items:center; justify-content:center; padding:1rem; opacity:0; pointer-events:none; transition:opacity .22s; }
+        .modal-backdrop.open { opacity:1; pointer-events:all; }
+        .modal-box { background:#1e293b; border:1px solid rgba(99,102,241,.35); border-radius:22px; padding:2.4rem 2rem; max-width:420px; width:100%; text-align:center; position:relative; box-shadow:0 30px 70px rgba(0,0,0,.65); transform:scale(.94) translateY(14px); transition:transform .22s, opacity .22s; }
+        .modal-backdrop.open .modal-box { transform:scale(1) translateY(0); }
+        .modal-glow { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,rgba(79,70,229,.25),rgba(124,58,237,.25)); border:1px solid rgba(99,102,241,.3); display:flex; align-items:center; justify-content:center; font-size:2rem; margin:0 auto 1.2rem; }
+        .modal-title { font-size:1.2rem; font-weight:800; color:#e2e8f0; margin-bottom:.6rem; }
+        .modal-body { font-size:.87rem; color:#94a3b8; line-height:1.65; margin-bottom:1.7rem; }
+        .modal-actions { display:flex; flex-direction:column; gap:.65rem; }
+        .btn-modal-login { display:block; padding:.88rem; background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; font-size:.95rem; font-weight:700; border-radius:12px; text-decoration:none; box-shadow:0 4px 18px rgba(79,70,229,.4); transition:all .2s; }
+        .btn-modal-login:hover { background:linear-gradient(135deg,#4338ca,#6d28d9); transform:translateY(-1px); }
+        .btn-modal-register { display:block; padding:.82rem; background:rgba(99,102,241,.1); border:1px solid rgba(99,102,241,.3); color:#818cf8; font-size:.9rem; font-weight:600; border-radius:12px; text-decoration:none; transition:all .2s; }
+        .btn-modal-register:hover { background:rgba(99,102,241,.2); color:#a5b4fc; }
+        .modal-divider { display:flex; align-items:center; gap:.6rem; margin:.25rem 0; }
+        .modal-divider span { flex:1; height:1px; background:rgba(99,102,241,.15); }
+        .modal-divider em { font-size:.75rem; color:#475569; font-style:normal; }
+        .btn-modal-dismiss { margin-top:.4rem; background:none; border:none; color:#475569; font-size:.82rem; cursor:pointer; padding:.4rem .8rem; border-radius:6px; transition:color .2s; }
+        .btn-modal-dismiss:hover { color:#94a3b8; }
+        .modal-close-x { position:absolute; top:.9rem; right:.9rem; background:none; border:none; color:#475569; font-size:1rem; cursor:pointer; width:28px; height:28px; border-radius:6px; display:flex; align-items:center; justify-content:center; transition:all .2s; }
+        .modal-close-x:hover { color:#e2e8f0; background:rgba(255,255,255,.08); }
     </style>
 </head>
 <body>
@@ -327,7 +355,10 @@
         @else
             <span class="currency-pill">🇻🇳 VND</span>
         @endif
-        <a href="/login" class="btn-nav-login">Đăng nhập</a>
+        {{-- Auth area: JS replaces this with user chip when a valid JWT exists --}}
+        <div id="navAuthArea">
+            <a href="/SignIn" class="btn-nav-login" id="navLoginBtn">Đăng nhập</a>
+        </div>
     </div>
 </nav>
 
@@ -417,9 +448,9 @@
             <li><span class="check">✓</span> {{ $isUsd ? 'Export reports (PDF, CSV, Excel)' : 'Xuất báo cáo (PDF, CSV, Excel)' }}</li>
         </ul>
 
-        <a href="{{ $checkoutMonthly }}" class="btn btn-primary">
+        <button type="button" onclick="requireAuth('{{ addslashes($checkoutMonthly) }}')" class="btn btn-primary">
             {{ $isUsd ? 'Buy now — Monthly' : 'Mua ngay — Hàng tháng' }}
-        </a>
+        </button>
     </div>
 
     <!-- PRO HÀNG NĂM (Yearly) -->
@@ -452,9 +483,9 @@
             <li><span class="check">✓</span> {{ $isUsd ? 'Annual discount applied' : 'Giảm giá hàng năm' }}</li>
         </ul>
 
-        <a href="{{ $checkoutYearly }}" class="btn btn-teal">
+        <button type="button" onclick="requireAuth('{{ addslashes($checkoutYearly) }}')" class="btn btn-teal">
             {{ $isUsd ? 'Buy now — Annual' : 'Mua ngay — Hàng năm' }}
-        </a>
+        </button>
     </div>
 
 </div>
@@ -469,6 +500,174 @@
     @endif
     {{ $isUsd ? 'Questions?' : 'Câu hỏi?' }} <a href="mailto:{{ config('mail.from.address', 'purchasevn@getkenka.com') }}">{{ $isUsd ? 'Contact us' : 'Liên hệ chúng tôi' }}</a>
 </div>
+
+{{-- ── Auth Gate Modal ────────────────────────────────────────────────────── --}}
+{{-- Shown when a guest clicks "Buy Now". JS updates the login/register links  --}}
+{{-- with the intended checkout URL (?redirect_to=...) before opening.         --}}
+<div id="authModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+    <div class="modal-box">
+        <button class="modal-close-x" onclick="closeAuthModal()" aria-label="Đóng">✕</button>
+        <div class="modal-glow">🔐</div>
+        <h2 class="modal-title" id="authModalTitle">{{ $isUsd ? 'Sign in to continue' : 'Đăng nhập để tiếp tục' }}</h2>
+        <p class="modal-body">
+            {{ $isUsd
+                ? 'You need an account to purchase a plan and activate your Kenfinly subscription.'
+                : 'Bạn cần đăng nhập hoặc tạo tài khoản để mua gói dịch vụ và bắt đầu sử dụng Kenfinly.' }}
+        </p>
+        <div class="modal-actions">
+            <a id="modalLoginLink" href="/SignIn?redirect_to=/checkout" class="btn-modal-login">
+                {{ $isUsd ? 'Sign in' : 'Đăng nhập' }}
+            </a>
+            <div class="modal-divider"><span></span><em>{{ $isUsd ? 'or' : 'hoặc' }}</em><span></span></div>
+            <a id="modalRegisterLink" href="/SignUp?redirect_to=/checkout" class="btn-modal-register">
+                {{ $isUsd ? 'Create a new account' : 'Đăng ký tài khoản mới' }}
+            </a>
+            <button class="btn-modal-dismiss" onclick="closeAuthModal()">
+                {{ $isUsd ? 'Continue browsing' : 'Tiếp tục xem trang' }}
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    // ── JWT helpers ───────────────────────────────────────────────────────────
+    // Decode the payload section of a JWT. Returns null on any parse error.
+    function getJwtPayload(t) {
+        try {
+            const b64 = t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+            return JSON.parse(atob(b64));
+        } catch (e) { return null; }
+    }
+
+    /**
+     * Return { token, payload } if a valid, non-expired JWT is found in
+     * localStorage/sessionStorage.  Returns null and clears stale storage if
+     * the token is absent, malformed, or expired.
+     */
+    function getValidAuth() {
+        const t = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+        if (!t) return null;
+
+        const payload = getJwtPayload(t);
+        if (!payload) {
+            // Malformed token — remove to avoid confusion
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
+            return null;
+        }
+
+        // exp is in seconds; allow 30-second clock-skew buffer
+        if (payload.exp && (Date.now() / 1000) > (payload.exp - 30)) {
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
+            localStorage.removeItem('user');
+            return null;
+        }
+
+        return { token: t, payload };
+    }
+
+    // ── Navbar: show user chip when authenticated ─────────────────────────────
+    function initNavbar() {
+        const auth = getValidAuth();
+        const area = document.getElementById('navAuthArea');
+        if (!area || !auth) return;   // guest: leave "Đăng nhập" button as-is
+
+        // Read display name from the stored user object or JWT payload
+        let name = '', email = '';
+        try {
+            const stored = localStorage.getItem('user');
+            if (stored) {
+                const u = JSON.parse(stored);
+                name  = u.name  || u.full_name || '';
+                email = u.email || '';
+            }
+        } catch (e) {}
+
+        if (!name && auth.payload) {
+            name  = auth.payload.name  || '';
+            email = auth.payload.email || auth.payload.sub || '';
+        }
+
+        const displayName = name || email || 'Tài khoản';
+        const initial     = displayName.charAt(0).toUpperCase();
+        const dashLabel   = '{{ $isUsd ? "Dashboard →" : "Bảng điều khiển →" }}';
+
+        area.innerHTML =
+            '<div class="nav-user-chip">' +
+                '<div class="nav-avatar">' + initial + '</div>' +
+                '<span class="nav-username">' + escHtml(displayName) + '</span>' +
+                '<a href="/" class="btn-nav-dashboard">' + dashLabel + '</a>' +
+            '</div>';
+    }
+
+    function escHtml(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    // ── "Buy Now" auth gate ───────────────────────────────────────────────────
+    /**
+     * Called by every "Buy Now" button's onclick.
+     * If the user has a valid JWT  → navigate to the checkout URL immediately.
+     * If the user is a guest       → open the login modal, pre-wiring its links
+     *                                to redirect back to the intended checkout URL
+     *                                after the user authenticates.
+     */
+    window.requireAuth = function (url) {
+        if (getValidAuth()) {
+            window.location.href = url;
+        } else {
+            openAuthModal(url);
+        }
+    };
+
+    // ── Auth modal ────────────────────────────────────────────────────────────
+    const authModal = document.getElementById('authModal');
+
+    function openAuthModal(redirectUrl) {
+        const dest       = redirectUrl || '/checkout';
+        const encoded    = encodeURIComponent(dest);
+        const loginLink  = document.getElementById('modalLoginLink');
+        const regLink    = document.getElementById('modalRegisterLink');
+
+        if (loginLink)  loginLink.href  = '/SignIn?redirect_to=' + encoded;
+        if (regLink)    regLink.href    = '/SignUp?redirect_to=' + encoded;
+
+        authModal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    window.closeAuthModal = function () {
+        authModal.classList.remove('open');
+        document.body.style.overflow = '';
+    };
+
+    if (authModal) {
+        // Close on backdrop click
+        authModal.addEventListener('click', function (e) {
+            if (e.target === authModal) window.closeAuthModal();
+        });
+        // Close on Escape
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') window.closeAuthModal();
+        });
+    }
+
+    // ── Initialise on DOM ready ───────────────────────────────────────────────
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initNavbar);
+    } else {
+        initNavbar();
+    }
+}());
+</script>
 
 </body>
 </html>
