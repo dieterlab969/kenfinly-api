@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/TranslationContext';
@@ -21,6 +21,11 @@ const Register = () => {
     const { t } = useTranslation();
     const { enabled: recaptchaEnabled } = useRecaptchaConfig();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const searchParams   = new URLSearchParams(location.search);
+    const redirectParam  = searchParams.get('redirect');
+    const isCartRedirect = redirectParam === 'cart';
 
     useEffect(() => {
         if (user) {
@@ -71,8 +76,11 @@ const Register = () => {
             if (result.success) {
                 setSuccessMessage(result.message || t('auth.register_success'));
                 setTimeout(() => {
-                    navigate('/verification-pending', { 
-                        state: { user: result.user } 
+                    navigate('/verification-pending', {
+                        state: {
+                            user: result.user,
+                            redirect: redirectParam,
+                        }
                     });
                 }, 1200);
             } else {
@@ -131,6 +139,13 @@ const Register = () => {
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-4">
+                                {isCartRedirect && (
+                                    <div className="flex items-start gap-3 bg-indigo-50 border border-indigo-200 text-indigo-800 px-4 py-3 rounded-xl text-sm">
+                                        <span className="text-lg leading-none mt-0.5">🛒</span>
+                                        <span>Tạo tài khoản để hoàn tất đơn hàng của bạn. Sau khi xác thực email, bạn sẽ có thể thanh toán ngay.</span>
+                                    </div>
+                                )}
+
                                 {successMessage && (
                                     <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
                                         {successMessage}
@@ -225,7 +240,10 @@ const Register = () => {
 
                             <p className="text-center text-gray-600 text-sm mt-6">
                                 {t('auth.have_account')}{' '}
-                                <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                                <Link
+                                    to={isCartRedirect ? '/login?redirect=cart' : '/login'}
+                                    className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                                >
                                     {t('auth.login_here')}
                                 </Link>
                             </p>

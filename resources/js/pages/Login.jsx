@@ -19,6 +19,10 @@ const Login = () => {
     const location = useLocation();
     const successMessage = location.state?.message || '';
 
+    const searchParams  = new URLSearchParams(location.search);
+    const redirectParam = searchParams.get('redirect');
+    const isCartRedirect = redirectParam === 'cart';
+
     useEffect(() => {
         if (user) {
             navigate('/halo');
@@ -44,7 +48,11 @@ const Login = () => {
 
             const result = await login(email, password, recaptchaToken);
             if (result.success) {
-                navigate('/halo');
+                if (isCartRedirect) {
+                    window.location.href = '/cart';
+                } else {
+                    navigate('/halo');
+                }
             } else if (result.action === 'verify_email') {
                 navigate('/verification-pending', {
                     state: {
@@ -106,6 +114,13 @@ const Login = () => {
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-4">
+                                {isCartRedirect && (
+                                    <div className="flex items-start gap-3 bg-indigo-50 border border-indigo-200 text-indigo-800 px-4 py-3 rounded-xl text-sm">
+                                        <span className="text-lg leading-none mt-0.5">🛒</span>
+                                        <span>Vui lòng đăng nhập hoặc đăng ký tài khoản mới để hoàn tất đơn hàng của bạn.</span>
+                                    </div>
+                                )}
+
                                 {successMessage && (
                                     <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg text-sm">
                                         {successMessage}

@@ -83,6 +83,70 @@
 
         .btn-link { display:inline-block; color:#818cf8; text-decoration:none; font-size:.88rem; padding:.5rem .9rem; border-radius:8px; transition:all .2s; }
         .btn-link:hover { background:rgba(99,102,241,.12); }
+
+        /* ── Auth Modal ─────────────────────────────────────────────────── */
+        .modal-backdrop {
+            position:fixed; inset:0;
+            background:rgba(2,6,23,.75); backdrop-filter:blur(6px);
+            z-index:200; display:flex; align-items:center; justify-content:center;
+            padding:1rem; opacity:0; pointer-events:none;
+            transition:opacity .22s ease;
+        }
+        .modal-backdrop.open { opacity:1; pointer-events:all; }
+        .modal-box {
+            background:#1e293b;
+            border:1px solid rgba(99,102,241,.35);
+            border-radius:22px; padding:2.4rem 2rem;
+            max-width:420px; width:100%; text-align:center; position:relative;
+            box-shadow:0 30px 70px rgba(0,0,0,.65);
+            transform:scale(.94) translateY(14px);
+            transition:transform .22s ease, opacity .22s ease;
+        }
+        .modal-backdrop.open .modal-box { transform:scale(1) translateY(0); }
+        .modal-glow {
+            width:72px; height:72px; border-radius:50%;
+            background:linear-gradient(135deg,rgba(79,70,229,.25),rgba(124,58,237,.25));
+            border:1px solid rgba(99,102,241,.3);
+            display:flex; align-items:center; justify-content:center;
+            font-size:2rem; margin:0 auto 1.2rem;
+        }
+        .modal-title { font-size:1.25rem; font-weight:800; color:#e2e8f0; margin-bottom:.65rem; line-height:1.35; }
+        .modal-body  { font-size:.88rem; color:#94a3b8; line-height:1.65; margin-bottom:1.8rem; }
+        .modal-actions { display:flex; flex-direction:column; gap:.65rem; }
+        .btn-modal-login {
+            display:block; padding:.88rem;
+            background:linear-gradient(135deg,#4f46e5,#7c3aed);
+            color:#fff; font-size:.95rem; font-weight:700;
+            border-radius:12px; text-decoration:none;
+            box-shadow:0 4px 18px rgba(79,70,229,.4);
+            transition:all .2s;
+        }
+        .btn-modal-login:hover { background:linear-gradient(135deg,#4338ca,#6d28d9); transform:translateY(-1px); box-shadow:0 6px 22px rgba(79,70,229,.55); }
+        .btn-modal-register {
+            display:block; padding:.82rem;
+            background:rgba(99,102,241,.1); border:1px solid rgba(99,102,241,.3);
+            color:#818cf8; font-size:.9rem; font-weight:600;
+            border-radius:12px; text-decoration:none;
+            transition:all .2s;
+        }
+        .btn-modal-register:hover { background:rgba(99,102,241,.2); color:#a5b4fc; }
+        .btn-modal-dismiss {
+            margin-top:.5rem; background:none; border:none;
+            color:#475569; font-size:.82rem; cursor:pointer;
+            padding:.4rem .8rem; border-radius:6px; transition:color .2s;
+        }
+        .btn-modal-dismiss:hover { color:#94a3b8; }
+        .modal-close-x {
+            position:absolute; top:.9rem; right:.9rem;
+            background:none; border:none; color:#475569; font-size:1rem;
+            cursor:pointer; width:28px; height:28px; border-radius:6px;
+            display:flex; align-items:center; justify-content:center;
+            transition:all .2s; line-height:1;
+        }
+        .modal-close-x:hover { color:#e2e8f0; background:rgba(255,255,255,.08); }
+        .modal-divider { display:flex; align-items:center; gap:.6rem; margin:.3rem 0; }
+        .modal-divider span { flex:1; height:1px; background:rgba(99,102,241,.15); }
+        .modal-divider em { font-size:.75rem; color:#475569; font-style:normal; }
     </style>
 </head>
 <body>
@@ -210,25 +274,63 @@
     @endif
 </div>
 
+<!-- ── Auth Modal ──────────────────────────────────────────────────────── -->
+<div id="authModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+    <div class="modal-box">
+        <button class="modal-close-x" onclick="closeAuthModal()" aria-label="Đóng">✕</button>
+        <div class="modal-glow">🔐</div>
+        <h2 class="modal-title" id="authModalTitle">Đăng nhập để thanh toán</h2>
+        <p class="modal-body">
+            Bạn cần đăng nhập hoặc tạo tài khoản để thực hiện thanh toán và lưu trữ gói dịch vụ.
+        </p>
+        <div class="modal-actions">
+            <a href="/login?redirect=cart" class="btn-modal-login">Đăng nhập</a>
+            <div class="modal-divider"><span></span><em>hoặc</em><span></span></div>
+            <a href="/register?redirect=cart" class="btn-modal-register">Đăng ký tài khoản mới</a>
+            <button class="btn-modal-dismiss" onclick="closeAuthModal()">Tiếp tục xem giỏ hàng</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Inject JWT from localStorage into the hidden form field.
-    // If no token found, redirect to login on submit.
+    // ── Auth modal helpers ────────────────────────────────────────────────
+    const authModal = document.getElementById('authModal');
+
+    function openAuthModal() {
+        authModal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeAuthModal() {
+        authModal.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    // Close on backdrop click
+    authModal.addEventListener('click', function (e) {
+        if (e.target === authModal) closeAuthModal();
+    });
+    // Close on Escape
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeAuthModal();
+    });
+
+    // ── JWT injection + checkout guard ────────────────────────────────────
     const jwtField     = document.getElementById('jwtField');
-    const checkoutBtn  = document.getElementById('checkoutBtn');
     const checkoutForm = document.getElementById('checkoutForm');
 
     if (jwtField) {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
         jwtField.value = token;
+    }
 
-        if (checkoutForm) {
-            checkoutForm.addEventListener('submit', function (e) {
-                if (!jwtField.value) {
-                    e.preventDefault();
-                    window.location.href = '/login?redirect=cart';
-                }
-            });
-        }
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', function (e) {
+            const token = jwtField ? jwtField.value : '';
+            if (!token) {
+                e.preventDefault();
+                openAuthModal();
+            }
+        });
     }
 </script>
 </body>
