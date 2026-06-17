@@ -128,7 +128,7 @@ function LandingPage() {
                         </p>
                         <div className="flex flex-col sm:flex-row justify-center gap-4">
                             <Link
-                                to="/register"
+                                to="/SignUp"
                                 onClick={() => gtmTracking.trackHomeCTAClick('get_started')}
                                 aria-label="Start your free 14-day trial of Kenfinly"
                                 className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-blue-600"
@@ -137,7 +137,7 @@ function LandingPage() {
                                 <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
                             </Link>
                             <Link
-                                to="/login"
+                                to="/SignIn"
                                 onClick={() => gtmTracking.trackHomeCTAClick('sign_in')}
                                 aria-label="Sign in to your Kenfinly account"
                                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white rounded-lg text-lg font-semibold hover:bg-white hover:text-blue-600 transition-all focus:outline-none focus:ring-2 focus:ring-yellow-300 focus:ring-offset-2 focus:ring-offset-blue-600"
@@ -338,7 +338,7 @@ function LandingPage() {
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
                         <Link
-                            to="/register"
+                            to="/SignUp"
                             aria-label={t('landingpage.cta.get_started_free')}
                             className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
                         >

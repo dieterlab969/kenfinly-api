@@ -282,7 +282,7 @@ function AboutPage() {
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
                         <Link
-                            to="/register"
+                            to="/SignUp"
                             className="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
                             aria-label={t('aboutus.community.button_get_started')}
                         >

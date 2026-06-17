@@ -241,7 +241,7 @@ const Register = () => {
                             <p className="text-center text-gray-600 text-sm mt-6">
                                 {t('auth.have_account')}{' '}
                                 <Link
-                                    to={redirectTo ? `/login?redirect_to=${encodeURIComponent(redirectTo)}` : '/login'}
+                                    to={redirectTo ? `/SignIn?redirect_to=${encodeURIComponent(redirectTo)}` : '/SignIn'}
                                     className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
                                 >
                                     {t('auth.login_here')}

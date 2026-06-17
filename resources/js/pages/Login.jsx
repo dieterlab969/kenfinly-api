@@ -178,7 +178,7 @@ const Login = () => {
 
                             <p className="text-center text-gray-600 text-sm mt-6">
                                 {t('auth.no_account')}{' '}
-                                <Link to="/register" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
+                                <Link to="/SignUp" className="font-semibold text-blue-600 hover:text-blue-700 transition-colors">
                                     {t('auth.register_here')}
                                 </Link>
                             </p>

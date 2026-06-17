@@ -19,7 +19,7 @@ export default function VerificationPending() {
 
   useEffect(() => {
     if (!userEmail) {
-      navigate(source === 'login' ? '/login' : '/register');
+      navigate(source === 'login' ? '/SignIn' : '/SignUp');
     }
   }, [userEmail, navigate, source]);
 
@@ -55,8 +55,8 @@ export default function VerificationPending() {
 
   const handleBackToLogin = () => {
     const loginPath = redirectTo
-      ? `/login?redirect_to=${encodeURIComponent(redirectTo)}`
-      : '/login';
+      ? `/SignIn?redirect_to=${encodeURIComponent(redirectTo)}`
+      : '/SignIn';
     navigate(loginPath);
   };
 
