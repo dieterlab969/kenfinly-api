@@ -13,6 +13,7 @@
     ],
     "require": {
         "php": "^8.2",
+        "darryldecode/cart": "^4.2",
         "dedoc/scramble": "^0.13.27",
         "google/analytics-data": "^0.23.1",
         "intervention/image": "^3.11",

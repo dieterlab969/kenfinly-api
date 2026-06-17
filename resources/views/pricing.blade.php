@@ -331,8 +331,7 @@
             <li><span class="check">✓</span> Xuất báo cáo (PDF, CSV, Excel)</li>
         </ul>
 
-        <button class="btn btn-primary" onclick="buyPlan('monthly', this)">Mua ngay — Hàng tháng</button>
-        <div class="inline-error" id="err-monthly"></div>
+        <a href="/cart?plan=monthly" class="btn btn-primary">Mua ngay — Hàng tháng</a>
     </div>
 
     <!-- PRO HÀNG NĂM (Yearly) -->
@@ -365,8 +364,7 @@
             <li><span class="check">✓</span> Giảm giá hàng năm</li>
         </ul>
 
-        <button class="btn btn-teal" onclick="buyPlan('yearly', this)">Mua ngay — Hàng năm</button>
-        <div class="inline-error" id="err-yearly"></div>
+        <a href="/cart?plan=yearly" class="btn btn-teal">Mua ngay — Hàng năm</a>
     </div>
 
 </div>

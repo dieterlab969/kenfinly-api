@@ -20,4 +20,17 @@ return [
 
     'return_url' => env('PAYOS_RETURN_URL', env('APP_URL') . '/pricing?payment=success'),
     'cancel_url' => env('PAYOS_CANCEL_URL', env('APP_URL') . '/pricing?payment=cancelled'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Coupon Codes
+    |--------------------------------------------------------------------------
+    | Add promotion codes here. 'type' is 'percent' or 'fixed' (VND amount).
+    | 'value' is the discount amount (integer).
+    */
+    'coupons' => [
+        'KENFINLY10' => ['type' => 'percent', 'value' => 10,    'label' => 'Giảm 10%'],
+        'KENFINLY20' => ['type' => 'percent', 'value' => 20,    'label' => 'Giảm 20%'],
+        'WELCOME'    => ['type' => 'fixed',   'value' => 50000, 'label' => 'Giảm 50.000₫'],
+    ],
 ];

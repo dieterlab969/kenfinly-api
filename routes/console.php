@@ -14,3 +14,9 @@ Schedule::command('app:generate-sitemap')
     ->timezone('Asia/Ho_Chi_Minh')
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/sitemap.log'));
+
+// Expire pending orders whose 5-minute window has elapsed.
+Schedule::command('orders:expire')
+    ->everyMinute()
+    ->runInBackground()
+    ->appendOutputTo(storage_path('logs/orders-expire.log'));

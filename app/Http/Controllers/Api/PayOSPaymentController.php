@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use App\Models\PayosPaymentOrder;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -12,6 +13,10 @@ use PayOS\PayOS;
 
 /**
  * Handles PayOS hosted checkout payment links and async webhook processing.
+ *
+ * Two order sources are supported:
+ *  - orders              (cart-based checkout via CheckoutController)
+ *  - payos_payment_orders (direct "Buy Now" from pricing page)
  *
  * @tags PayOS Payments
  */
@@ -23,12 +28,10 @@ class PayOSPaymentController extends Controller
     }
 
     /**
-     * Create a PayOS payment link for the selected plan.
+     * Create a PayOS payment link for the selected plan (direct pricing-page flow).
      *
      * POST /api/payment/payos/create
      * Body: { "plan": "monthly"|"yearly" }
-     *
-     * Returns: { "checkout_url": "https://pay.payos.vn/..." }
      */
     public function createPaymentLink(Request $request): JsonResponse
     {
@@ -71,7 +74,6 @@ class PayOSPaymentController extends Controller
                 'user_id'    => $user->id,
                 'order_code' => $orderCode,
                 'plan'       => $plan,
-                'amount'     => $planConf['amount'],
             ]);
 
             return response()->json([
@@ -94,10 +96,11 @@ class PayOSPaymentController extends Controller
     /**
      * Handle asynchronous webhook notifications from PayOS.
      *
-     * POST /api/payment/payos-webhook  (excluded from CSRF)
+     * POST /api/payment/payos-webhook  (no auth — signature verified internally)
      *
-     * PayOS sends a signed payload; we verify the signature with PAYOS_CHECKSUM_KEY
-     * before trusting the data and updating the user's subscription.
+     * Lookup priority:
+     *  1. orders table              (cart-based flow)
+     *  2. payos_payment_orders table (direct pricing-page flow)
      */
     public function webhook(Request $request): JsonResponse
     {
@@ -121,19 +124,88 @@ class PayOSPaymentController extends Controller
         }
 
         $orderCode = $verifiedData->orderCode ?? null;
-        $code      = $verifiedData->code ?? null;
+        $code      = $verifiedData->code      ?? null;
 
         if (! $orderCode) {
             return response()->json(['message' => 'Missing order code'], 400);
         }
 
-        $order = PayosPaymentOrder::where('order_code', $orderCode)->first();
+        // ── 1. Try cart-based orders table first ──────────────────────────
+        $cartOrder = Order::where('order_code', $orderCode)->first();
+        if ($cartOrder) {
+            return $this->handleCartOrder($cartOrder, $code, $verifiedData);
+        }
+
+        // ── 2. Fall back to direct pricing-page orders ─────────────────────
+        $directOrder = PayosPaymentOrder::where('order_code', $orderCode)->first();
+        if ($directOrder) {
+            return $this->handleDirectOrder($directOrder, $code, $verifiedData);
+        }
+
+        Log::channel('single')->warning('PayOS webhook: order not found in either table', [
+            'order_code' => $orderCode,
+        ]);
+
+        return response()->json(['message' => 'Order not found'], 404);
+    }
+
+    /**
+     * Return the status of a cart-based order (polled by the order page JS).
+     *
+     * GET /api/orders/{orderCode}/status
+     */
+    public function orderStatus(string $orderCode): JsonResponse
+    {
+        $order = Order::where('order_code', $orderCode)->first();
 
         if (! $order) {
-            Log::channel('single')->warning('PayOS webhook: order not found', ['order_code' => $orderCode]);
             return response()->json(['message' => 'Order not found'], 404);
         }
 
+        // Auto-expire on read if the timer has passed
+        if ($order->status === 'pending' && $order->isExpired()) {
+            $order->update(['status' => 'expired']);
+        }
+
+        return response()->json([
+            'order_code' => $order->order_code,
+            'status'     => $order->status,
+            'plan'       => $order->plan,
+        ]);
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────
+
+    private function handleCartOrder(Order $order, ?string $code, mixed $verifiedData): JsonResponse
+    {
+        if ($order->status !== 'pending') {
+            return response()->json(['message' => 'Order already processed'], 200);
+        }
+
+        if ($code === '00') {
+            $this->activateSubscription($order->user, $order->plan);
+
+            $order->update(['status' => 'paid']);
+
+            Log::channel('single')->info('PayOS webhook: cart order paid', [
+                'user_id'    => $order->user_id,
+                'plan'       => $order->plan,
+                'order_code' => $order->order_code,
+            ]);
+        } else {
+            $order->update(['status' => 'expired']);
+
+            Log::channel('single')->info('PayOS webhook: cart order not successful', [
+                'order_code' => $order->order_code,
+                'code'       => $code,
+            ]);
+        }
+
+        return response()->json(['message' => 'Webhook processed']);
+    }
+
+    private function handleDirectOrder(PayosPaymentOrder $order, ?string $code, mixed $verifiedData): JsonResponse
+    {
         if ($order->status !== 'pending') {
             return response()->json(['message' => 'Order already processed'], 200);
         }
@@ -146,38 +218,30 @@ class PayOSPaymentController extends Controller
                 'payos_response' => $verifiedData,
             ]);
 
-            Log::channel('single')->info('PayOS webhook: subscription activated', [
+            Log::channel('single')->info('PayOS webhook: direct order paid', [
                 'user_id'    => $order->user_id,
                 'plan'       => $order->plan,
-                'order_code' => $orderCode,
+                'order_code' => $order->order_code,
             ]);
         } else {
             $order->update([
                 'status'         => 'failed',
                 'payos_response' => $verifiedData,
             ]);
-
-            Log::channel('single')->info('PayOS webhook: payment not successful', [
-                'order_code' => $orderCode,
-                'code'       => $code,
-            ]);
         }
 
         return response()->json(['message' => 'Webhook processed']);
     }
 
-    /**
-     * Activate the user's subscription for the given plan.
-     */
     private function activateSubscription(User $user, string $plan): void
     {
         $now    = now();
         $expiry = $plan === 'yearly' ? $now->copy()->addYear() : $now->copy()->addMonth();
 
         $user->update([
-            'subscription_status'   => 'active',
-            'subscription_plan'     => $plan,
-            'subscription_expires_at' => $expiry,
+            'subscription_status'    => 'active',
+            'subscription_plan'      => $plan,
+            'subscription_expires_at'=> $expiry,
         ]);
     }
 }

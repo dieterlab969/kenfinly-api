@@ -186,6 +186,9 @@ Route::middleware('auth:api')->group(function () {
 // Async webhook from PayOS — no auth, signature is verified internally.
 Route::post('/payment/payos-webhook', [PayOSPaymentController::class, 'webhook']);
 
+// Order status polling — used by the /order/{code} page countdown JS.
+Route::get('/orders/{orderCode}/status', [PayOSPaymentController::class, 'orderStatus']);
+
 // Admin routes (Super Admin only)
 Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])->prefix('admin')->group(function () {
     // Payment Gateway Management
