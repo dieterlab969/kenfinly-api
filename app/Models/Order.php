@@ -42,6 +42,7 @@ class Order extends Model
         'total_amount',
         'coupon_applied',
         'discount_amount',
+        'exchange_rate_used',
         'status',
         'gateway',
         'payment_reference',
@@ -52,10 +53,11 @@ class Order extends Model
 
     /** @var array<string, string> Attribute type casts. */
     protected $casts = [
-        'order_code'      => 'integer',
-        'total_amount'    => 'integer',
-        'discount_amount' => 'integer',
-        'expires_at'      => 'datetime',
+        'order_code'         => 'integer',
+        'total_amount'       => 'integer',
+        'discount_amount'    => 'integer',
+        'exchange_rate_used' => 'float',
+        'expires_at'         => 'datetime',
     ];
 
     /**
