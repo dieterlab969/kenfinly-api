@@ -7,13 +7,33 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
+/**
+ * Manages the shopping cart for plan purchases.
+ *
+ * Uses the `darryldecode/cart` package (stored in the PHP session) to hold
+ * a single subscription plan at a time. Supports optional coupon codes
+ * defined in `config/payos.php` that are applied as named CartConditions.
+ *
+ * Routes (defined in web.php):
+ *   GET  /cart           — show cart, optionally pre-loading a plan
+ *   POST /cart/clear     — empty the cart and redirect to /pricing
+ *   POST /cart/coupon    — apply a coupon code
+ *   POST /cart/coupon/remove — remove the active coupon
+ */
 class CartController extends Controller
 {
     /**
-     * Show the cart. If a ?plan= query param is present, add that plan
-     * to the cart first (replacing any existing item — only 1 plan at a time).
+     * Show the cart page.
+     *
+     * When a `?plan=monthly|yearly` query parameter is present the specified
+     * plan is loaded into the cart first (replacing any existing item — only
+     * one plan is allowed at a time). Cart contents, totals, conditions, and
+     * any active coupon are passed to the Blade view.
      *
      * GET /cart?plan=monthly|yearly
+     *
+     * @param  Request  $request  May contain a `plan` query parameter.
+     * @return View               Rendered `resources/views/cart.blade.php`.
      */
     public function index(Request $request): View
     {
@@ -33,9 +53,14 @@ class CartController extends Controller
     }
 
     /**
-     * Remove all items from the cart.
+     * Remove all items and conditions from the cart.
+     *
+     * Also clears the `cart_coupon` session key and redirects the user back
+     * to the pricing page with an informational flash message.
      *
      * POST /cart/clear
+     *
+     * @return RedirectResponse  Redirect to /pricing.
      */
     public function clear(): RedirectResponse
     {
@@ -47,9 +72,18 @@ class CartController extends Controller
     }
 
     /**
-     * Apply a coupon code as a cart condition.
+     * Apply a coupon code as a cart discount condition.
+     *
+     * Looks up the submitted code (case-insensitive, trimmed) in the
+     * `config/payos.coupons` map. If valid, any previously applied coupon
+     * is removed and the new condition is added. The active coupon label
+     * is stored in the session for display in the cart view.
      *
      * POST /cart/coupon
+     *
+     * @param  Request  $request  Form field: `coupon_code` (string).
+     * @return RedirectResponse   Back to cart with `coupon_success` or
+     *                            `coupon_error` flash message.
      */
     public function applyCoupon(Request $request): RedirectResponse
     {
@@ -82,9 +116,14 @@ class CartController extends Controller
     }
 
     /**
-     * Remove the active coupon condition.
+     * Remove the currently active coupon condition from the cart.
+     *
+     * Clears both the CartCondition named "coupon" and the `cart_coupon`
+     * session key, then redirects back with a flash confirmation.
      *
      * POST /cart/coupon/remove
+     *
+     * @return RedirectResponse  Back to cart with `coupon_removed` flash message.
      */
     public function removeCoupon(): RedirectResponse
     {
@@ -96,6 +135,16 @@ class CartController extends Controller
 
     // ─────────────────────────────────────────────────────────────────────────
 
+    /**
+     * Clear the cart and add the requested plan as the sole item.
+     *
+     * Plan details (label, amount) are sourced from `config/payos.plans`.
+     * The cart supports only a single plan at a time — any existing item,
+     * condition, and active coupon are removed before the new item is added.
+     *
+     * @param  string  $plan  "monthly" or "yearly".
+     * @return void
+     */
     private function addPlanToCart(string $plan): void
     {
         $planConf = config("payos.plans.{$plan}");

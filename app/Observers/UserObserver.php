@@ -7,11 +7,29 @@ use App\Models\User;
 use App\Services\HaloPointLedgerService;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Listens to Eloquent lifecycle events on the User model.
+ *
+ * Registered in AppServiceProvider (or via the #[ObservedBy] attribute on
+ * the User model). Currently handles the "created" event to bootstrap every
+ * new user account with sensible defaults in a single atomic transaction:
+ *
+ *  1. A default "My Wallet" account (USD, balance 0).
+ *  2. A Halo Point Ledger genesis block (immutable audit chain starting point).
+ *  3. A 7-day free trial subscription.
+ */
 class UserObserver
 {
     /**
      * Handle the User "created" event.
-     * Automatically create a default wallet for the new user.
+     *
+     * Runs inside a database transaction to ensure that a partial failure
+     * (e.g. ledger genesis creation throws) does not leave the user without
+     * a wallet or vice versa. Uses `updateQuietly` for the trial grant to
+     * avoid re-triggering this observer.
+     *
+     * @param  User  $user  The newly persisted user instance.
+     * @return void
      */
     public function created(User $user): void
     {
@@ -19,10 +37,10 @@ class UserObserver
             Account::firstOrCreate(
                 ['user_id' => $user->id, 'name' => 'My Wallet'],
                 [
-                    'balance' => 0.00,
+                    'balance'  => 0.00,
                     'currency' => 'USD',
-                    'icon' => '💰',
-                    'color' => '#3b82f6',
+                    'icon'     => '💰',
+                    'color'    => '#3b82f6',
                 ]
             );
 
@@ -39,6 +57,11 @@ class UserObserver
 
     /**
      * Handle the User "updated" event.
+     *
+     * Reserved for future logic (e.g. invalidating caches on profile changes).
+     *
+     * @param  User  $user  The user instance after the update.
+     * @return void
      */
     public function updated(User $user): void
     {
@@ -47,6 +70,11 @@ class UserObserver
 
     /**
      * Handle the User "deleted" event.
+     *
+     * Reserved for future cleanup logic (e.g. anonymising related records).
+     *
+     * @param  User  $user  The user instance that was soft- or hard-deleted.
+     * @return void
      */
     public function deleted(User $user): void
     {
@@ -54,7 +82,12 @@ class UserObserver
     }
 
     /**
-     * Handle the User "restored" event.
+     * Handle the User "restored" event (soft-delete restore).
+     *
+     * Reserved for future reactivation logic.
+     *
+     * @param  User  $user  The user instance that was restored.
+     * @return void
      */
     public function restored(User $user): void
     {
@@ -62,7 +95,12 @@ class UserObserver
     }
 
     /**
-     * Handle the User "force deleted" event.
+     * Handle the User "forceDeleted" event (permanent hard delete).
+     *
+     * Reserved for future permanent-deletion cleanup (e.g. GDPR erasure).
+     *
+     * @param  User  $user  The user instance that was permanently deleted.
+     * @return void
      */
     public function forceDeleted(User $user): void
     {

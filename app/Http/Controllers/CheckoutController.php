@@ -9,13 +9,40 @@ use Illuminate\View\View;
 use PayOS\PayOS;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * Handles the cart checkout flow for subscription plan purchases.
+ *
+ * This controller bridges the PHP session-based cart (darryldecode/cart) with
+ * the PayOS payment gateway. Authentication is performed via a JWT token that
+ * the React SPA writes into a hidden form field, allowing a standard HTML form
+ * POST from the Blade cart page to authenticate against the JWT API guard.
+ *
+ * Routes (defined in web.php):
+ *   POST /cart/checkout       — create order, call PayOS, redirect to order page
+ *   GET  /order/{order_code}  — display QR checkout page for a pending order
+ */
 class CheckoutController extends Controller
 {
     /**
-     * Process the cart and create a pending order.
-     * Called by the "Đặt hàng" form on the cart page.
+     * Process the cart and create a pending PayOS order.
+     *
+     * Step-by-step:
+     *  1. Authenticate the user via the `_jwt_token` hidden field.
+     *  2. Read the cart contents (must be non-empty).
+     *  3. Generate a unique numeric order code.
+     *  4. Call the PayOS SDK to obtain a hosted checkout URL and QR code.
+     *     On SDK failure the order is still persisted (for sandbox / no-creds
+     *     environments) but without checkout_url / qr_code values.
+     *  5. Persist an Order row with status "pending" and a 5-minute expiry.
+     *  6. Clear the cart and redirect to `/order/{order_code}`.
+     *
+     * Called by the "Đặt hàng" form on the cart Blade view.
      *
      * POST /cart/checkout
+     *
+     * @param  Request  $request  Form POST including `_jwt_token` hidden field.
+     * @return RedirectResponse   Redirect to /order/{order_code} on success,
+     *                            or back to /SignIn / /pricing on failure.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -23,19 +50,19 @@ class CheckoutController extends Controller
         $token = $request->input('_jwt_token');
 
         if (! $token) {
-            return redirect('/login?redirect=cart')
+            return redirect('/SignIn?redirect_to=/cart')
                 ->with('error', 'Vui lòng đăng nhập để tiếp tục.');
         }
 
         try {
             $user = auth('api')->setToken($token)->authenticate();
         } catch (\Exception $e) {
-            return redirect('/login?redirect=cart')
+            return redirect('/SignIn?redirect_to=/cart')
                 ->with('error', 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
         }
 
         if (! $user) {
-            return redirect('/login?redirect=cart');
+            return redirect('/SignIn?redirect_to=/cart');
         }
 
         // ── 2. Read cart contents ──────────────────────────────────────────
@@ -119,9 +146,17 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Display the QR checkout page for a specific order.
+     * Display the QR checkout page for a specific pending order.
+     *
+     * Performs lazy expiry: if the order is still "pending" but its
+     * `expires_at` has passed it is marked "expired" before the view renders,
+     * so the countdown timer and QR code are hidden immediately on refresh.
      *
      * GET /order/{order_code}
+     *
+     * @param  string  $orderCode  Numeric order code from the URL segment.
+     * @return View|RedirectResponse  Rendered `resources/views/order.blade.php`,
+     *                                or a 404 abort when the code is unknown.
      */
     public function show(string $orderCode): View|RedirectResponse
     {

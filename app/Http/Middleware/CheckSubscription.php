@@ -7,14 +7,38 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Blocks access to protected routes for users whose subscription
- * is revoked, expired (trial over without active plan), or not active.
+ * Guards API routes that require an active or in-trial subscription.
  *
- * Only enforces on Owner accounts — Editors/Viewers are covered by
- * workspace-level access granted by the account Owner.
+ * Enforcement logic:
+ *  - Super admins bypass all checks unconditionally.
+ *  - Owner accounts must be either within a free trial period OR hold an
+ *    active paid subscription. Expired trials and lapsed paid plans are
+ *    blocked and their `subscription_status` is updated to "expired" lazily
+ *    on the first request after the deadline.
+ *  - Editor / Viewer accounts are not subject to this middleware because
+ *    their access is governed by the workspace Owner's subscription.
+ *
+ * On failure, the middleware returns HTTP 402 with a structured JSON body
+ * including a `redirect` hint pointing to `/pricing`.
+ *
+ * Applied via the `check.subscription` middleware alias in
+ * `app/Http/Kernel.php` (or `bootstrap/app.php` in Laravel 12).
  */
 class CheckSubscription
 {
+    /**
+     * Handle an incoming request.
+     *
+     * Resolves the authenticated user, short-circuits for super admins, then
+     * evaluates the `subscription_status` field:
+     *  - "active"  → pass through unless `subscription_expires_at` is in the past.
+     *  - "trial"   → pass through unless `trial_ends_at` is in the past.
+     *  - anything else (expired, revoked, null) → 402 Payment Required.
+     *
+     * @param  Request  $request  The incoming HTTP request.
+     * @param  Closure  $next     The next middleware / controller handler.
+     * @return Response           The downstream response or a 402 JSON response.
+     */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
@@ -50,6 +74,15 @@ class CheckSubscription
         return $this->paymentRequired();
     }
 
+    /**
+     * Build a 402 Payment Required JSON response.
+     *
+     * The `code` field ("SUBSCRIPTION_REQUIRED") is intended for the React
+     * frontend to identify this specific error type and redirect the user to
+     * the pricing page automatically.
+     *
+     * @return Response  HTTP 402 JSON response with message, code, and redirect hint.
+     */
     private function paymentRequired(): Response
     {
         return response()->json([

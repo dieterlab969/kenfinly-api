@@ -18,10 +18,19 @@ use PayOS\PayOS;
  *  - orders              (cart-based checkout via CheckoutController)
  *  - payos_payment_orders (direct "Buy Now" from pricing page)
  *
+ * Webhook signature verification is performed by the PayOS PHP SDK using
+ * the PAYOS_CHECKSUM_KEY environment variable. Any payload whose HMAC does
+ * not match is rejected with HTTP 400.
+ *
  * @tags PayOS Payments
  */
 class PayOSPaymentController extends Controller
 {
+    /**
+     * Register middleware: only the payment-link creation endpoint requires
+     * an authenticated API user. The webhook and order-status endpoints are
+     * intentionally unauthenticated (called by PayOS servers / polling JS).
+     */
     public function __construct()
     {
         $this->middleware('auth:api')->only(['createPaymentLink']);
@@ -30,8 +39,15 @@ class PayOSPaymentController extends Controller
     /**
      * Create a PayOS payment link for the selected plan (direct pricing-page flow).
      *
+     * Validates the requested plan, calls the PayOS SDK to generate a hosted
+     * checkout URL, records a `payos_payment_orders` row with status "pending",
+     * and returns the checkout URL to the React frontend.
+     *
      * POST /api/payment/payos/create
-     * Body: { "plan": "monthly"|"yearly" }
+     *
+     * @param  Request  $request  JSON body: { "plan": "monthly"|"yearly" }
+     * @return JsonResponse       { checkout_url: string, order_code: int }
+     *                            or HTTP 500 on PayOS SDK failure.
      */
     public function createPaymentLink(Request $request): JsonResponse
     {
@@ -96,11 +112,17 @@ class PayOSPaymentController extends Controller
     /**
      * Handle asynchronous webhook notifications from PayOS.
      *
+     * PayOS calls this endpoint after a payment attempt completes (success or
+     * failure). The payload is verified via HMAC checksum before any state
+     * changes are made. Lookup order:
+     *  1. `orders` table              — cart-based checkout flow
+     *  2. `payos_payment_orders` table — direct pricing-page flow
+     *
      * POST /api/payment/payos-webhook  (no auth — signature verified internally)
      *
-     * Lookup priority:
-     *  1. orders table              (cart-based flow)
-     *  2. payos_payment_orders table (direct pricing-page flow)
+     * @param  Request  $request  Raw PayOS webhook payload.
+     * @return JsonResponse       HTTP 200 on success, 400 on bad signature / missing data,
+     *                            404 when the order_code is unknown.
      */
     public function webhook(Request $request): JsonResponse
     {
@@ -150,9 +172,15 @@ class PayOSPaymentController extends Controller
     }
 
     /**
-     * Return the status of a cart-based order (polled by the order page JS).
+     * Return the current status of a cart-based order (polled by the order page JS).
+     *
+     * Also performs lazy expiry: if the order is still "pending" but its
+     * `expires_at` has passed, it is flipped to "expired" on this read.
      *
      * GET /api/orders/{orderCode}/status
+     *
+     * @param  string  $orderCode  Numeric order code cast from the URL segment.
+     * @return JsonResponse        { order_code, status, plan } or HTTP 404.
      */
     public function orderStatus(string $orderCode): JsonResponse
     {
@@ -176,6 +204,19 @@ class PayOSPaymentController extends Controller
 
     // ── Private helpers ───────────────────────────────────────────────────
 
+    /**
+     * Process a verified PayOS webhook for a cart-based order.
+     *
+     * Marks the order "paid" and activates the user's subscription when
+     * PayOS returns code "00" (success). Any other code marks the order
+     * "expired" (cancelled / timed out on the PayOS side).
+     * Idempotent: already-processed orders return HTTP 200 without changes.
+     *
+     * @param  Order        $order        The matched cart order.
+     * @param  string|null  $code         PayOS result code ("00" = success).
+     * @param  mixed        $verifiedData Full verified webhook payload object.
+     * @return JsonResponse               HTTP 200 with a status message.
+     */
     private function handleCartOrder(Order $order, ?string $code, mixed $verifiedData): JsonResponse
     {
         if ($order->status !== 'pending') {
@@ -204,6 +245,19 @@ class PayOSPaymentController extends Controller
         return response()->json(['message' => 'Webhook processed']);
     }
 
+    /**
+     * Process a verified PayOS webhook for a direct pricing-page order.
+     *
+     * On success (code "00") the user's subscription is activated and the
+     * order row is updated to "completed" with the full verified response
+     * stored for audit purposes. On failure the row is set to "failed".
+     * Idempotent: already-processed orders return HTTP 200 without changes.
+     *
+     * @param  PayosPaymentOrder  $order        The matched direct payment order.
+     * @param  string|null        $code         PayOS result code ("00" = success).
+     * @param  mixed              $verifiedData Full verified webhook payload object.
+     * @return JsonResponse                     HTTP 200 with a status message.
+     */
     private function handleDirectOrder(PayosPaymentOrder $order, ?string $code, mixed $verifiedData): JsonResponse
     {
         if ($order->status !== 'pending') {
@@ -233,6 +287,17 @@ class PayOSPaymentController extends Controller
         return response()->json(['message' => 'Webhook processed']);
     }
 
+    /**
+     * Set the user's subscription to "active" for the given plan.
+     *
+     * Calculates the expiry date from the current moment:
+     *  - monthly → +1 month
+     *  - yearly  → +1 year
+     *
+     * @param  User    $user  The user whose subscription should be activated.
+     * @param  string  $plan  "monthly" or "yearly".
+     * @return void
+     */
     private function activateSubscription(User $user, string $plan): void
     {
         $now    = now();
