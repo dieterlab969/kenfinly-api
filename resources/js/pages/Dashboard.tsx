@@ -115,7 +115,7 @@ const Dashboard: React.FC = () => {
 
     const handleLogout = async (): Promise<void> => {
         await logout();
-        navigate('/login');
+        navigate('/SignIn');
     };
 
     const handleTransactionAdded = (newTransaction?: DashboardTransaction | Transaction): void => {

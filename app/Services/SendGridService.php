@@ -110,7 +110,7 @@ class SendGridService
         $htmlContent = View::make('emails.confirmation', [
             'name' => $name,
             'appName' => config('app.name', 'Kenfinly'),
-            'loginUrl' => env('FRONTEND_URL', env('APP_URL')) . '/login',
+            'loginUrl' => env('FRONTEND_URL', env('APP_URL')) . '/SignIn',
         ]);
 
         $this->sendEmail($to, $subject, $htmlContent);
