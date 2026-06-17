@@ -28,7 +28,17 @@ use Illuminate\Support\Facades\Log;
  *   POST /checkout                   — process order (PayOS or PayPal)
  *   GET  /checkout/paypal/capture    — capture PayPal order after buyer approval
  *   GET  /checkout/paypal/cancel     — handle PayPal cancellation
+ *   GET  /checkout/complete          — clear cart after confirmed payment, redirect to success
  *   GET  /order/{order_code}         — QR countdown page (PayOS orders)
+ *
+ * Cart lifecycle:
+ *   The cart (and cart_coupon session key) is intentionally NOT cleared at order
+ *   creation time. It is cleared only when payment is actually confirmed:
+ *     - PayPal: in paypalCapture() on COMPLETED status.
+ *     - PayOS:  the order page JS polls for 'paid' then redirects to /checkout/complete,
+ *               which clears the cart before forwarding to /pricing?payment=success.
+ *   This allows the user to navigate back to /checkout at any time without
+ *   losing their selected plan and coupon.
  */
 class CheckoutController extends Controller
 {
@@ -134,9 +144,27 @@ class CheckoutController extends Controller
                      ? $request->input('gateway')
                      : 'payos';
 
+        // ── 3. Replace any stale pending orders ──────────────────────────
+        // If this user already has a pending order created in the last 5 minutes,
+        // mark it 'cancelled' so there are no ghost orders sitting in the DB.
+        // This covers the case where the user went back to /checkout and resubmitted
+        // before the previous order's 5-minute countdown expired.
+        $stalePending = Order::where('user_id', $user->id)
+                             ->where('status', 'pending')
+                             ->where('created_at', '>=', now()->subMinutes(5))
+                             ->get();
+
+        foreach ($stalePending as $staleOrder) {
+            $staleOrder->update(['status' => 'cancelled']);
+            Log::channel('single')->info('Cancelled stale pending order before new checkout', [
+                'replaced_order_code' => $staleOrder->order_code,
+                'user_id'             => $user->id,
+            ]);
+        }
+
         $orderCode = (int) (time() . rand(10, 99));
 
-        // ── 3. Route to gateway ──────────────────────────────────────────
+        // ── 4. Route to gateway ──────────────────────────────────────────
         if ($gateway === 'paypal') {
             return $this->processPayPal($user, $plan, $total, $discount, $coupon, $orderCode);
         }
@@ -181,6 +209,11 @@ class CheckoutController extends Controller
             if (($response['status'] ?? '') === 'COMPLETED') {
                 $this->activateSubscription($order->user, $order->plan);
                 $order->update(['status' => 'paid']);
+
+                // Payment confirmed — now it is safe to clear the cart.
+                \Cart::clear();
+                \Cart::clearCartConditions();
+                session()->forget('cart_coupon');
 
                 Log::channel('single')->info('PayPal capture: order paid', [
                     'user_id'    => $order->user_id,
@@ -247,6 +280,24 @@ class CheckoutController extends Controller
         ]);
     }
 
+    /**
+     * Clear the cart after a confirmed PayOS payment and redirect to success.
+     *
+     * The order page's polling JS redirects here (instead of directly to
+     * /pricing) once it detects status === 'paid', allowing the server to
+     * clear the cart session before the user lands on the success screen.
+     *
+     * GET /checkout/complete
+     */
+    public function complete(): RedirectResponse
+    {
+        \Cart::clear();
+        \Cart::clearCartConditions();
+        session()->forget('cart_coupon');
+
+        return redirect('/pricing?payment=success');
+    }
+
     // ── Private helpers ───────────────────────────────────────────────────
 
     /**
@@ -301,9 +352,10 @@ class CheckoutController extends Controller
             'expires_at'        => now()->addMinutes(5),
         ]);
 
-        \Cart::clear();
-        \Cart::clearCartConditions();
-        session()->forget('cart_coupon');
+        // Cart is intentionally NOT cleared here. It is preserved so the user
+        // can navigate back to /checkout without losing their plan/coupon.
+        // It will be cleared when the order page JS detects payment and
+        // redirects to /checkout/complete.
 
         Log::channel('single')->info('Order created (PayOS)', [
             'user_id'    => $user->id,
@@ -384,9 +436,9 @@ class CheckoutController extends Controller
                 'expires_at'          => now()->addMinutes(30),
             ]);
 
-            \Cart::clear();
-            \Cart::clearCartConditions();
-            session()->forget('cart_coupon');
+            // Cart is intentionally NOT cleared here. It is preserved so the user
+            // can navigate back to /checkout without losing their plan/coupon.
+            // It will be cleared in paypalCapture() when PayPal confirms payment.
 
             Log::channel('single')->info('Order created (PayPal)', [
                 'user_id'             => $user->id,

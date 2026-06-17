@@ -13,10 +13,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * amounts after any coupon discount, and the PayOS QR / checkout URL.
  *
  * Lifecycle statuses:
- *  - pending  → created, awaiting PayOS payment confirmation
- *  - paid     → PayOS webhook confirmed successful payment
- *  - expired  → TTL of 5 minutes elapsed without payment (set by
- *               ExpireOldOrders command or lazily on read)
+ *  - pending   → created, awaiting payment confirmation
+ *  - paid      → payment confirmed (PayOS webhook or PayPal capture)
+ *  - expired   → TTL elapsed without payment (set by ExpireOldOrders command
+ *                or lazily on read in orderStatus / show)
+ *  - cancelled → user resubmitted checkout while this order was still pending;
+ *                replaced by a fresh order with a new 5-minute countdown
  *
  * @property int         $id
  * @property int         $user_id

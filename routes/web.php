@@ -53,6 +53,12 @@ Route::get('/checkout/paypal/cancel',      [\App\Http\Controllers\CheckoutContro
 // ── Order QR page ─────────────────────────────────────────────────────────
 Route::get('/order/{orderCode}',  [\App\Http\Controllers\CheckoutController::class, 'show'])->name('order.show');
 
+// ── Post-payment cart clean-up ─────────────────────────────────────────────
+// The PayOS order page JS redirects here on confirmed payment instead of going
+// directly to /pricing, so the cart session can be cleared server-side before
+// the user lands on the success screen.
+Route::get('/checkout/complete',  [\App\Http\Controllers\CheckoutController::class, 'complete'])->name('checkout.complete');
+
 // Exclude Blade-rendered paths from the SPA catch-all.
 Route::get('/{any}', function () {
     return view('welcome');
