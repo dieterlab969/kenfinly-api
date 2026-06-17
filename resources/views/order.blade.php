@@ -228,7 +228,7 @@
                 </div>
             </div>
 
-            <a href="/pricing" class="btn-back">← Quay lại bảng giá</a>
+            <a href="/checkout" class="btn-back">← Quay lại giỏ hàng</a>
         @endif
     </div>
 </div>
@@ -298,8 +298,9 @@
                 if (data.status === 'paid') {
                     clearInterval(timer);
                     clearInterval(pollTimer);
-                    // Redirect to success page
-                    window.location.href = '/pricing?payment=success';
+                    // Route through /checkout/complete?order=CODE so the server
+                    // can clear the cart and build the Thank You page data.
+                    window.location.href = '/checkout/complete?order=' + ORDER_CODE;
                 }
             } catch (e) {
                 // Network error — continue polling
