@@ -32,6 +32,10 @@ use Illuminate\Support\Facades\Log;
  */
 class CheckoutController extends Controller
 {
+    public function __construct(private readonly CurrencyService $currencyService)
+    {
+    }
+
     // ── Public route handlers ─────────────────────────────────────────────
 
     /**
@@ -314,23 +318,33 @@ class CheckoutController extends Controller
     /**
      * Create a PayPal order, persist our Order row, and redirect the buyer
      * to PayPal's approval page.
+     *
+     * The VND plan price (from PayOS config) is converted to USD using the
+     * live exchange rate fetched by CurrencyService::getLiveUsdToVndRate().
+     * The rate is locked into the order row so we can always reconstruct
+     * the exact amount charged regardless of future rate drift.
      */
     private function processPayPal(
         User $user, string $plan, int $total, int $discount, ?string $coupon, int $orderCode
     ): RedirectResponse {
-        $planConf  = config("paypal.plans.{$plan}");
-        $amountUsd = number_format($planConf['amount_usd'], 2, '.', '');
+        // Fetch the live USD→VND rate (cached 24 h, falls back to .env static)
+        $liveRate  = $this->currencyService->getLiveUsdToVndRate();
+
+        // Convert the VND cart total to USD using the locked live rate
+        $amountUsd = number_format(round($total / $liveRate, 2), 2, '.', '');
 
         try {
             $provider = new PayPalClient;
             $provider->setApiCredentials(config('paypal'));
             $provider->getAccessToken();
 
+            $planDescription = config("payos.plans.{$plan}.description", $plan);
+
             $response = $provider->createOrder([
                 'intent' => 'CAPTURE',
                 'purchase_units' => [[
                     'reference_id' => (string) $orderCode,
-                    'description'  => $planConf['description'],
+                    'description'  => $planDescription,
                     'amount'       => [
                         'currency_code' => 'USD',
                         'value'         => $amountUsd,
@@ -355,18 +369,19 @@ class CheckoutController extends Controller
             }
 
             Order::create([
-                'user_id'           => $user->id,
-                'order_code'        => $orderCode,
-                'plan'              => $plan,
-                'total_amount'      => $total,
-                'coupon_applied'    => $coupon,
-                'discount_amount'   => $discount,
-                'status'            => 'pending',
-                'gateway'           => 'paypal',
-                'payment_reference' => $paypalOrderId,
-                'checkout_url'      => $approveLink,
-                'qr_code'           => null,
-                'expires_at'        => now()->addMinutes(30),
+                'user_id'             => $user->id,
+                'order_code'          => $orderCode,
+                'plan'                => $plan,
+                'total_amount'        => $total,
+                'coupon_applied'      => $coupon,
+                'discount_amount'     => $discount,
+                'exchange_rate_used'  => $liveRate,
+                'status'              => 'pending',
+                'gateway'             => 'paypal',
+                'payment_reference'   => $paypalOrderId,
+                'checkout_url'        => $approveLink,
+                'qr_code'             => null,
+                'expires_at'          => now()->addMinutes(30),
             ]);
 
             \Cart::clear();
@@ -374,10 +389,12 @@ class CheckoutController extends Controller
             session()->forget('cart_coupon');
 
             Log::channel('single')->info('Order created (PayPal)', [
-                'user_id'         => $user->id,
-                'order_code'      => $orderCode,
-                'plan'            => $plan,
-                'paypal_order_id' => $paypalOrderId,
+                'user_id'             => $user->id,
+                'order_code'          => $orderCode,
+                'plan'                => $plan,
+                'paypal_order_id'     => $paypalOrderId,
+                'amount_usd'          => $amountUsd,
+                'exchange_rate_used'  => $liveRate,
             ]);
 
             return redirect($approveLink);

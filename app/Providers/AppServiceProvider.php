@@ -4,9 +4,6 @@ namespace App\Providers;
 
 use App\Models\User;
 use App\Observers\UserObserver;
-use Dedoc\Scramble\Scramble;
-use Dedoc\Scramble\Support\Generator\OpenApi;
-use Dedoc\Scramble\Support\Generator\SecurityScheme;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\URL;
 
@@ -21,25 +18,28 @@ class AppServiceProvider extends ServiceProvider
     {
         User::observe(UserObserver::class);
 
-        Scramble::afterOpenApiGenerated(function (OpenApi $openApi) {
-            $openApi->info->title = 'Kenfinly API';
-            $openApi->info->version = config('scramble.info.version', '1.0.0');
+        if (class_exists(\Dedoc\Scramble\Scramble::class)) {
+            \Dedoc\Scramble\Scramble::afterOpenApiGenerated(function (
+                \Dedoc\Scramble\Support\Generator\OpenApi $openApi
+            ) {
+                $openApi->info->title = 'Kenfinly API';
+                $openApi->info->version = config('scramble.info.version', '1.0.0');
 
-            $openApi->info->contact = [
-                'name' => 'Kenfinly Support',
-                'email' => 'support@kenfinly.com',
-            ];
+                $openApi->info->contact = [
+                    'name'  => 'Kenfinly Support',
+                    'email' => 'support@kenfinly.com',
+                ];
 
-            $openApi->info->license = [
-                'name' => 'Proprietary',
-            ];
+                $openApi->info->license = [
+                    'name' => 'Proprietary',
+                ];
 
-            $openApi->secure(
-                SecurityScheme::http('bearer')
-            );
-        });
-        User::observe(UserObserver::class);
-        // Always generate secure asset URLs, fully resolving the Mixed Content issue.
+                $openApi->secure(
+                    \Dedoc\Scramble\Support\Generator\SecurityScheme::http('bearer')
+                );
+            });
+        }
+
         if (config('app.env') === 'staging' || config('app.env') === 'production') {
             URL::forceScheme('https');
         }

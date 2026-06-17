@@ -47,16 +47,48 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Exchange Rate  (VND → USD)
+    | Static Fallback Exchange Rate  (VND → USD)
     |--------------------------------------------------------------------------
-    | A static rate used when no live-rate service is wired up.
-    | 1 USD ≈ 25 500 VND as of mid-2025; update CURRENCY_VND_TO_USD_RATE in
-    | your .env whenever the rate drifts significantly (±5%).
+    | Used ONLY when the live ExchangeRate-API fetch fails or times out.
+    | CurrencyService::getLiveUsdToVndRate() attempts a live fetch first,
+    | caches it for 24 hours, and only falls back to this value on error.
     |
-    | To integrate a live feed: override CurrencyService::getVndToUsdRate()
-    | to call your preferred exchange-rate API and cache the result.
+    | Update CURRENCY_VND_TO_USD_RATE in your .env if the live API becomes
+    | permanently unavailable and you need a temporary static safety net.
+    | 1 USD ≈ 25 500 VND as of mid-2025.
     */
     'vnd_to_usd_rate' => (float) env('CURRENCY_VND_TO_USD_RATE', 25500),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Live Exchange Rate API
+    |--------------------------------------------------------------------------
+    | URL of the free ExchangeRate-API endpoint that returns a JSON object
+    | with a `rates` key.  The service requires no API key for the open tier.
+    |
+    | Response shape expected:
+    |   { "result": "success", "rates": { "VND": 25450.0, ... } }
+    |
+    | Cache key : 'usd_vnd_rate'
+    | Cache TTL : 86 400 seconds (24 hours)
+    |
+    | If the fetch fails, CurrencyService falls back to `vnd_to_usd_rate`
+    | above WITHOUT caching, so the live fetch is retried next request.
+    */
+    'exchange_rate_api_url' => env(
+        'CURRENCY_EXCHANGE_RATE_API_URL',
+        'https://open.er-api.com/v6/latest/USD'
+    ),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Exchange Rate API HTTP Timeout (seconds)
+    |--------------------------------------------------------------------------
+    | Maximum seconds to wait for the exchange rate API before giving up and
+    | using the static fallback.  Keep this low (3–5 s) so a slow API does
+    | not delay the checkout page for the user.
+    */
+    'exchange_rate_timeout' => (int) env('CURRENCY_EXCHANGE_RATE_TIMEOUT', 5),
 
     /*
     |--------------------------------------------------------------------------

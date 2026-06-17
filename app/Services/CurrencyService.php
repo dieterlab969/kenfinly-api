@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Stevebauman\Location\Facades\Location;
 
@@ -19,10 +21,16 @@ use Stevebauman\Location\Facades\Location;
  *
  *   PayPal          →  processes ONLY US Dollars (USD)
  *                      Amounts are floats with 2 decimal places.
- *                      Config: config/paypal.php →  plans.*.amount_usd
+ *                      Conversion: live USD/VND rate (see getLiveUsdToVndRate())
  *
- * The two sets of plan prices are maintained independently. There is no
- * live conversion on the fly; each is the "correct" price for that market.
+ * LIVE EXCHANGE RATE
+ * ──────────────────
+ * getLiveUsdToVndRate() fetches the current USD→VND rate from the open
+ * ExchangeRate-API (no key required) and caches it for 24 hours.
+ * If the fetch fails or returns an invalid value, it falls back to the
+ * static CURRENCY_VND_TO_USD_RATE env variable so the checkout loop never
+ * breaks.  The fallback is intentionally NOT cached, meaning the live fetch
+ * is retried on every request until it succeeds.
  *
  * SESSION ARCHITECTURE
  * ─────────────────────
@@ -46,10 +54,85 @@ use Stevebauman\Location\Facades\Location;
  */
 class CurrencyService
 {
+    // ── Live exchange rate ────────────────────────────────────────────────
+
+    /**
+     * Fetch the live USD→VND exchange rate, cached for 24 hours.
+     *
+     * Strategy:
+     *  1. Return the cached value if present (Cache key: 'usd_vnd_rate').
+     *  2. Fetch from open.er-api.com/v6/latest/USD using Laravel's HTTP client.
+     *  3. On success → store in Cache for 86 400 s (24 h) and return.
+     *  4. On any failure → log a warning, return the static .env fallback
+     *     WITHOUT caching so the live fetch is retried on the next request.
+     *
+     * @return float  e.g. 25 450.0  (VND per 1 USD)
+     */
+    public function getLiveUsdToVndRate(): float
+    {
+        $fallback = (float) config('currency.vnd_to_usd_rate', 25500);
+        if ($fallback <= 0) {
+            $fallback = 25500;
+        }
+
+        try {
+            return Cache::remember('usd_vnd_rate', 86400, function () use ($fallback) {
+                $apiUrl = config(
+                    'currency.exchange_rate_api_url',
+                    'https://open.er-api.com/v6/latest/USD'
+                );
+
+                $response = Http::timeout(
+                    config('currency.exchange_rate_timeout', 5)
+                )->get($apiUrl);
+
+                if ($response->successful()) {
+                    $rate = (float) ($response->json('rates.VND') ?? 0);
+
+                    if ($rate > 0) {
+                        Log::info('CurrencyService: live USD→VND rate cached', [
+                            'rate'   => $rate,
+                            'source' => $apiUrl,
+                        ]);
+                        return $rate;
+                    }
+                }
+
+                // Throw so Cache::remember does NOT store this failed attempt
+                throw new \RuntimeException(
+                    'Exchange rate API returned no valid VND rate (status: ' .
+                    $response->status() . ')'
+                );
+            });
+        } catch (\Exception $e) {
+            Log::warning('CurrencyService: live rate unavailable, using static fallback', [
+                'error'    => $e->getMessage(),
+                'fallback' => $fallback,
+            ]);
+
+            return $fallback;
+        }
+    }
+
+    /**
+     * Bust the cached exchange rate.
+     *
+     * Call this from an admin action or Artisan command when you know the
+     * cached rate is stale and want the next request to re-fetch immediately.
+     */
+    public function forgetCachedRate(): void
+    {
+        Cache::forget('usd_vnd_rate');
+    }
+
     // ── Legacy static helpers (kept for backwards compatibility) ──────────
 
     /**
-     * Convert an amount between VND and USD using the configured exchange rate.
+     * Convert an amount between VND and USD.
+     *
+     * Uses the live cached rate for VND↔USD conversions so that display
+     * amounts on the pricing / checkout pages stay consistent with what
+     * the PayPal order will actually charge.
      *
      * @param  float   $amount
      * @param  string  $fromCurrency  "VND" | "USD"
@@ -62,7 +145,8 @@ class CurrencyService
             return $amount;
         }
 
-        $rate = (float) config('currency.vnd_to_usd_rate', 25500);
+        // Read from cache first; fall back to config if cache is empty
+        $rate = (float) (Cache::get('usd_vnd_rate') ?: config('currency.vnd_to_usd_rate', 25500));
         if ($rate <= 0) {
             $rate = 25500;
         }
@@ -220,17 +304,14 @@ class CurrencyService
     }
 
     /**
-     * Convert a VND integer amount to USD using the configured exchange rate.
+     * Convert a VND integer amount to USD using the live cached exchange rate.
      *
      * @param  int  $vnd
      * @return float  rounded to 2 decimal places
      */
     public function vndToUsd(int $vnd): float
     {
-        $rate = (float) config('currency.vnd_to_usd_rate', 25500);
-        if ($rate <= 0) {
-            $rate = 25500;
-        }
+        $rate = $this->getLiveUsdToVndRate();
 
         return round($vnd / $rate, 2);
     }
