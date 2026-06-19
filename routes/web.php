@@ -10,6 +10,22 @@ Route::get('/beta-access', [BetaAccessController::class, 'show'])->name('beta-ac
 Route::post('/beta-access', [BetaAccessController::class, 'verify'])->name('beta-access.verify');
 Route::post('/beta-access/logout', [BetaAccessController::class, 'logout'])->name('beta-access.logout');
 
+// PWA: Service worker — must be served from root scope with no-cache headers
+// (response()->make() is used instead of file() so headers aren't overridden)
+Route::get('/sw.js', function () {
+    return response()->make(
+        file_get_contents(public_path('sw.js')),
+        200,
+        [
+            'Content-Type'  => 'application/javascript; charset=utf-8',
+            'Cache-Control' => 'no-cache, no-store, must-revalidate',
+            'Pragma'        => 'no-cache',
+            'Expires'       => '0',
+            'Service-Worker-Allowed' => '/',
+        ]
+    );
+});
+
 // Health check route (whitelisted in middleware)
 Route::get('/health', function () {
     return response()->json([
