@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'halo.integrity' => \App\Http\Middleware\VerifyHaloPointLedgerIntegrity::class,
             'pomodoro.acl' => \App\Http\Middleware\ResolvePomodoroAcl::class,
             'check.subscription' => \App\Http\Middleware\CheckSubscription::class,
+            'wc.signature' => \App\Http\Middleware\VerifyWooCommerceSignature::class,
         ]);
         // Apply middleware to ALL web routes
         $middleware->web(append: [

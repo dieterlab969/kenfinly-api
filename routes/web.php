@@ -53,30 +53,9 @@ Route::get('/pricing', function (Request $request, CurrencyService $currencyServ
     return view('pricing', compact('currency', 'country', 'defaultGateway'));
 })->name('pricing');
 
-// ── Cart ──────────────────────────────────────────────────────────────────
-Route::get('/cart',               [\App\Http\Controllers\CartController::class,     'index'])->name('cart');
-Route::post('/cart/clear',        [\App\Http\Controllers\CartController::class,     'clear'])->name('cart.clear');
-Route::post('/cart/coupon',       [\App\Http\Controllers\CartController::class,     'applyCoupon'])->name('cart.coupon');
-Route::post('/cart/coupon/remove',[\App\Http\Controllers\CartController::class,     'removeCoupon'])->name('cart.coupon.remove');
-Route::post('/cart/checkout',     [\App\Http\Controllers\CheckoutController::class, 'store'])->name('cart.checkout');
-
-// ── One-Page Checkout ─────────────────────────────────────────────────────
-Route::get('/checkout',                    [\App\Http\Controllers\CheckoutController::class, 'index'])->name('checkout');
-Route::post('/checkout',                   [\App\Http\Controllers\CheckoutController::class, 'store'])->name('checkout.store');
-Route::get('/checkout/paypal/capture',     [\App\Http\Controllers\CheckoutController::class, 'paypalCapture'])->name('checkout.paypal.capture');
-Route::get('/checkout/paypal/cancel',      [\App\Http\Controllers\CheckoutController::class, 'paypalCancel'])->name('checkout.paypal.cancel');
-
-// ── Order QR page ─────────────────────────────────────────────────────────
-Route::get('/order/{orderCode}',  [\App\Http\Controllers\CheckoutController::class, 'show'])->name('order.show');
-
-// ── Post-payment clean-up & Thank You page ────────────────────────────────
-// The PayOS order page JS redirects to /checkout/complete?order={code} on
-// confirmed payment. The controller clears the cart, flashes order details,
-// then redirects to /checkout/thank-you for the final confirmation screen.
-Route::get('/checkout/complete',   [\App\Http\Controllers\CheckoutController::class, 'complete'])->name('checkout.complete');
-Route::get('/checkout/thank-you',  [\App\Http\Controllers\CheckoutController::class, 'thankYou'])->name('checkout.thank-you');
-
-// Exclude Blade-rendered paths from the SPA catch-all.
+// SPA catch-all — serves the React app for all non-Blade paths.
+// Checkout, cart, and order paths have been removed: WooCommerce on WordPress
+// owns the full checkout flow. Laravel is now a pure webhook consumer.
 Route::get('/{any}', function () {
     return view('welcome');
-})->where('any', '^(?!docs|pricing|cart|checkout|order).*');
+})->where('any', '^(?!docs|pricing).*');
