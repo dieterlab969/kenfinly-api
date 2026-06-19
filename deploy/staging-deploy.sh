@@ -8,7 +8,8 @@ cd "$APP_DIR"
 
 git fetch origin "$DEPLOY_BRANCH"
 git checkout "$DEPLOY_BRANCH"
-git pull --ff-only origin "$DEPLOY_BRANCH"
+# Force discard all local changes and sync directly with the GitHub branch
+git reset --hard origin/"$DEPLOY_BRANCH"
 
 php8.2 /usr/bin/composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
 
