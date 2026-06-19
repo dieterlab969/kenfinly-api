@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import Logo from '../assets/images/setting/logo.png'
+import DynamicLogo from '../components/DynamicLogo'
 import { Link, useNavigate } from 'react-router-dom'
 import NotificationIcon from '../assets/svg/notification-icon.svg'
 import dotsIcon from '../assets/svg/dots-icon.svg'
@@ -844,7 +844,7 @@ const Home: React.FC = () => {
               <div className="verify-number-top-content">
                 <div className="setting-header">
                   <div className="setting-left">
-                    <span><img src={Logo} alt="logo" /></span>
+                    <span><DynamicLogo /></span>
                     <span className="setting-txt">Dashboard</span>
                   </div>
                   <div className="setting-right">

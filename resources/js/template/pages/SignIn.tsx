@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import BackBtn from '../components/BackBtn';
-import Logo from '../assets/images/let-you-screen/logo.svg';
+import DynamicLogo from '../components/DynamicLogo';
 import { Link, useNavigate } from 'react-router-dom';
 
 interface LoginSuccessResponse {
@@ -69,7 +69,7 @@ const SignIn: React.FC = () => {
                   <BackBtn />
                 </header>
                 <div className="payfast-img_main">
-                  <img src={Logo} alt="logo" />
+                  <DynamicLogo />
                 </div>
               </div>
             </div>
