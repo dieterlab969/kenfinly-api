@@ -74,7 +74,7 @@ const Register: React.FC = () => {
   /** Redirect away if the user is already authenticated. */
   useEffect(() => {
     if (user) {
-      navigate('/halo');
+      navigate('/');
     }
   }, [user, navigate]);
 

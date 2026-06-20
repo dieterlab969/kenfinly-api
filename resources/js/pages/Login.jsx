@@ -25,7 +25,7 @@ const Login = () => {
 
     useEffect(() => {
         if (user) {
-            navigate('/halo');
+            navigate('/');
         }
     }, [user, navigate]);
 
@@ -51,7 +51,7 @@ const Login = () => {
                 if (redirectTo) {
                     window.location.href = redirectTo;
                 } else {
-                    navigate('/halo');
+                    navigate('/');
                 }
             } else if (result.action === 'verify_email') {
                 navigate('/verification-pending', {
