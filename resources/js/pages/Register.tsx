@@ -74,7 +74,17 @@ const Register: React.FC = () => {
   /** Redirect away if the user is already authenticated. */
   useEffect(() => {
     if (user) {
-      navigate('/');
+      // Check whether the URL contains a redirect parameter.
+      const redirectTo = searchParams.get('redirect_to');
+      if (redirectTo) {
+        // If a redirect parameter is present (WooCommerce-to-Laravel flow),
+        // perform the redirect and append the Laravel user ID.
+        // Example: https://store.kenfinly.com/checkout?laravel_user_id=42
+        window.location.href = `${redirectTo}?laravel_user_id=${user.id}`;
+      } else {
+        // 2. If no redirect parameter is provided, redirect to the default homepage
+         navigate('/');
+      }
     }
   }, [user, navigate]);
 
