@@ -2,11 +2,18 @@ import React, { useState } from "react";
 import BackBtn from '../components/BackBtn';
 import Logo from '../assets/images/let-you-screen/logo.svg';
 import personIcon from '../assets/svg/person-icon.svg';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+
+interface RegisteredUser {
+  email: string;
+  name?: string;
+  id?: number | string;
+}
 
 interface RegisterSuccessResponse {
   access_token?: string;
   message?: string;
+  user?: RegisteredUser;
 }
 
 interface RegisterErrorResponse {
@@ -22,6 +29,8 @@ const SignUp: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectTo = searchParams.get('redirect_to') ?? '';
 
   const handleSignUp = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
@@ -54,7 +63,13 @@ const SignUp: React.FC = () => {
         setError(firstError || 'Registration failed. Please try again.');
         return;
       }
-      navigate('/VerifyPhoneNumber');
+      const successData = data as RegisterSuccessResponse;
+      navigate('/verification-pending', {
+        state: {
+          user: successData.user ?? { email },
+          redirectTo,
+        },
+      });
     } catch {
       setError('Network error. Please try again.');
     } finally {
