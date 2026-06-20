@@ -172,21 +172,8 @@ const SignUp: React.FC = () => {
 
               {/* Cart-checkout context notice */}
               {isCartRedirect && (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '10px',
-                    background: '#eef2ff',
-                    border: '1px solid #c7d2fe',
-                    color: '#3730a3',
-                    padding: '12px 16px',
-                    borderRadius: '12px',
-                    fontSize: '13px',
-                    marginBottom: '12px',
-                  }}
-                >
-                  <span style={{ fontSize: '16px', lineHeight: 1, marginTop: '2px' }}>🛒</span>
+                <div className="auth-alert-info">
+                  <span className="auth-alert-info-icon">🛒</span>
                   <span>
                     Tạo tài khoản để hoàn tất đơn hàng của bạn. Sau khi xác thực email, bạn sẽ có thể thanh toán ngay.
                   </span>
@@ -195,34 +182,14 @@ const SignUp: React.FC = () => {
 
               {/* Success alert */}
               {successMessage && (
-                <div
-                  style={{
-                    background: '#f0fdf4',
-                    border: '1px solid #bbf7d0',
-                    color: '#15803d',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    marginBottom: '12px',
-                  }}
-                >
+                <div className="auth-alert-success">
                   {successMessage}
                 </div>
               )}
 
               {/* General / server error alert */}
               {errors.general && (
-                <div
-                  style={{
-                    background: '#fef2f2',
-                    border: '1px solid #fecaca',
-                    color: '#b91c1c',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    marginBottom: '12px',
-                  }}
-                >
+                <div className="auth-alert-danger">
                   {errors.general[0]}
                 </div>
               )}
@@ -247,13 +214,11 @@ const SignUp: React.FC = () => {
                   />
                 </div>
                 {errors.name && (
-                  <p style={{ color: '#ef4444', fontSize: '13px', margin: '4px 0 8px' }}>
-                    {errors.name[0]}
-                  </p>
+                  <p className="auth-field-error">{errors.name[0]}</p>
                 )}
 
                 {/* ── Email ── */}
-                <div className="mobile-form mt-16" style={{ flexDirection: 'column', gap: '0' }}>
+                <div className="mobile-form mobile-form-col mt-16">
                   <input
                     type="email"
                     id="email"
@@ -264,17 +229,14 @@ const SignUp: React.FC = () => {
                     onChange={handleChange}
                     autoComplete="email"
                     required
-                    style={{ width: '100%' }}
                   />
                 </div>
                 {errors.email && (
-                  <p style={{ color: '#ef4444', fontSize: '13px', margin: '4px 0 8px' }}>
-                    {errors.email[0]}
-                  </p>
+                  <p className="auth-field-error">{errors.email[0]}</p>
                 )}
 
                 {/* ── Password ── */}
-                <div className="mobile-form mt-16" style={{ flexDirection: 'column', gap: '0' }}>
+                <div className="mobile-form mobile-form-col mt-16">
                   <input
                     type="password"
                     id="password"
@@ -285,17 +247,14 @@ const SignUp: React.FC = () => {
                     onChange={handleChange}
                     autoComplete="new-password"
                     required
-                    style={{ width: '100%' }}
                   />
                 </div>
                 {errors.password && (
-                  <p style={{ color: '#ef4444', fontSize: '13px', margin: '4px 0 8px' }}>
-                    {errors.password[0]}
-                  </p>
+                  <p className="auth-field-error">{errors.password[0]}</p>
                 )}
 
                 {/* ── Confirm Password ── */}
-                <div className="mobile-form mt-16" style={{ flexDirection: 'column', gap: '0' }}>
+                <div className="mobile-form mobile-form-col mt-16">
                   <input
                     type="password"
                     id="passwordConfirmation"
@@ -306,7 +265,6 @@ const SignUp: React.FC = () => {
                     onChange={handleChange}
                     autoComplete="new-password"
                     required
-                    style={{ width: '100%' }}
                   />
                 </div>
 
@@ -314,15 +272,8 @@ const SignUp: React.FC = () => {
                 <div className="form-sign-in-password-btn mt-24">
                   <button
                     type="submit"
+                    className="auth-submit-btn"
                     disabled={loading}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      padding: 0,
-                      width: '100%',
-                      cursor: loading ? 'not-allowed' : 'pointer',
-                      opacity: loading ? 0.7 : 1,
-                    }}
                   >
                     {loading ? `${t('auth.sign_up')}…` : t('auth.sign_up')}
                   </button>
