@@ -38,7 +38,7 @@ use App\Http\Controllers\Api\PublicAnalyticsController;
 use App\Http\Controllers\Api\ConsentController;
 use App\Http\Controllers\Api\LogoController;
 use App\Http\Controllers\Api\PomodoroController;
-use App\Http\Controllers\Api\PayOSPaymentController;
+use App\Http\Controllers\Api\WooCommerceWebhookController;
 
 // Status / health endpoint (bypassed by CheckBetaAccess whitelist)
 Route::get('/status', function () {
@@ -184,21 +184,14 @@ Route::get('/currency/detect', [CurrencyController::class, 'detect']);
 // Auth-required: save the user's explicit currency preference.
 Route::middleware('auth:api')->post('/currency/save', [CurrencyController::class, 'save']);
 
-// ── PayOS Payment Routes ──────────────────────────────────────────────────
-// Authenticated: create a hosted checkout link for a chosen plan.
-Route::middleware('auth:api')->group(function () {
-    Route::post('/payment/payos/create', [PayOSPaymentController::class, 'createPaymentLink'])
-        ->middleware('throttle:10,1');
-});
-// Async webhook from PayOS — no auth, signature is verified internally.
-Route::post('/payment/payos-webhook', [PayOSPaymentController::class, 'webhook']);
-
-// ── PayPal Payment Routes ─────────────────────────────────────────────────
-// Async webhook from PayPal — no auth, verified by re-fetching order status.
-Route::post('/payment/paypal-webhook', [\App\Http\Controllers\Api\PayPalWebhookController::class, 'webhook']);
-
-// Order status polling — used by the /order/{code} page countdown JS.
-Route::get('/orders/{orderCode}/status', [PayOSPaymentController::class, 'orderStatus']);
+// ── WooCommerce Webhook ───────────────────────────────────────────────────
+// WordPress/WooCommerce calls this endpoint when a payment is completed.
+// The wc.signature middleware verifies the X-WC-Webhook-Signature HMAC
+// before the controller is reached. No JWT auth — this is a server-to-server call.
+Route::post(
+    '/v1/woocommerce-callback',
+    [WooCommerceWebhookController::class, 'handle']
+)->middleware(['wc.signature', 'throttle:60,1']);
 
 // Admin routes (Super Admin only)
 Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])->prefix('admin')->group(function () {

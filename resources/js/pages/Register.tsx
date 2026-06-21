@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import { useAuth } from '../../contexts/AuthContext';
-import { useTranslation } from '../../contexts/TranslationContext';
-import { useRecaptchaConfig } from '../../components/App';
-import BackBtn from '../components/BackBtn';
-import Logo from '../assets/images/let-you-screen/logo.svg';
-import personIcon from '../assets/svg/person-icon.svg';
+import { useAuth } from '../contexts/AuthContext';
+import { useTranslation } from '../contexts/TranslationContext';
+import { useRecaptchaConfig } from '../components/App';
+import BackBtn from '../template/components/BackBtn';
+import Logo from '../template/assets/images/let-you-screen/logo.svg';
+import personIcon from '../template/assets/svg/person-icon.svg';
 
 // ---------------------------------------------------------------------------
-// Types
+// TypeScript interfaces
 // ---------------------------------------------------------------------------
 
 interface FormData {
@@ -19,7 +19,7 @@ interface FormData {
   passwordConfirmation: string;
 }
 
-/** Per-field errors — string array so the first item is shown inline.
+/** Per-field errors use a string array so the first element is displayed.
  *  `general` holds API-level or network errors not tied to a specific field. */
 interface FormErrors {
   name?: string[];
@@ -28,6 +28,7 @@ interface FormErrors {
   general?: string[];
 }
 
+/** Shape returned by AuthContext.register() on success. */
 interface RegisterSuccessResult {
   success: true;
   user: unknown;
@@ -35,6 +36,7 @@ interface RegisterSuccessResult {
   message: string;
 }
 
+/** Shape returned by AuthContext.register() on validation failure (non-throw). */
 interface RegisterFailureResult {
   success: false;
   errors?: FormErrors;
@@ -47,7 +49,7 @@ type RegisterResult = RegisterSuccessResult | RegisterFailureResult;
 // Component
 // ---------------------------------------------------------------------------
 
-const SignUp: React.FC = () => {
+const Register: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -69,19 +71,24 @@ const SignUp: React.FC = () => {
   const redirectTo = searchParams.get('redirect_to') ?? '';
   const isCartRedirect = redirectTo === '/cart';
 
-  /** Redirect away if already authenticated. */
+  /** Redirect away if the user is already authenticated. */
   useEffect(() => {
     if (user) {
-      const target = searchParams.get('redirect_to');
-      if (target) {
-        window.location.href = `${target}?laravel_user_id=${user.id}`;
+      // Check whether the URL contains a redirect parameter.
+      const redirectTo = searchParams.get('redirect_to');
+      if (redirectTo) {
+        // If a redirect parameter is present (WooCommerce-to-Laravel flow),
+        // perform the redirect and append the Laravel user ID.
+        // Example: https://store.kenfinly.com/checkout?laravel_user_id=42
+        window.location.href = `${redirectTo}?laravel_user_id=${user.id}`;
       } else {
-        navigate('/');
+        // 2. If no redirect parameter is provided, redirect to the default homepage
+         navigate('/');
       }
     }
   }, [user, navigate]);
 
-  /** Update a single field and clear its inline error. */
+  /** Update a single formData field and clear its per-field error. */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -90,7 +97,7 @@ const SignUp: React.FC = () => {
     }
   };
 
-  /** reCAPTCHA → AuthContext.register() → navigate or show errors. */
+  /** Full submit handler: reCAPTCHA → API → navigate or show errors. */
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setErrors({});
@@ -131,7 +138,7 @@ const SignUp: React.FC = () => {
         if (result.errors) {
           setErrors(result.errors);
         } else {
-          setErrors({ general: [result.message || t('auth.register_error')] });
+          setErrors({ general: [t('auth.register_error')] });
         }
       }
     } catch {
@@ -167,13 +174,26 @@ const SignUp: React.FC = () => {
           {/* ── Main form area ── */}
           <div className="let-you-social-sec" id="sign-up-main">
             <div className="lets_you_in_box">
-              <h1 className="d-none">hidden</h1>
+              <h1 className="d-none">Sign Up</h1>
               <h2 className="lets_you_in_text">{t('auth.register')}</h2>
 
               {/* Cart-checkout context notice */}
               {isCartRedirect && (
-                <div className="auth-alert-info">
-                  <span className="auth-alert-info-icon">🛒</span>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '10px',
+                    background: '#eef2ff',
+                    border: '1px solid #c7d2fe',
+                    color: '#3730a3',
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    fontSize: '13px',
+                    marginBottom: '12px',
+                  }}
+                >
+                  <span style={{ fontSize: '16px', lineHeight: 1, marginTop: '2px' }}>🛒</span>
                   <span>
                     Tạo tài khoản để hoàn tất đơn hàng của bạn. Sau khi xác thực email, bạn sẽ có thể thanh toán ngay.
                   </span>
@@ -182,14 +202,34 @@ const SignUp: React.FC = () => {
 
               {/* Success alert */}
               {successMessage && (
-                <div className="auth-alert-success">
+                <div
+                  style={{
+                    background: '#f0fdf4',
+                    border: '1px solid #bbf7d0',
+                    color: '#15803d',
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    marginBottom: '12px',
+                  }}
+                >
                   {successMessage}
                 </div>
               )}
 
               {/* General / server error alert */}
               {errors.general && (
-                <div className="auth-alert-danger">
+                <div
+                  style={{
+                    background: '#fef2f2',
+                    border: '1px solid #fecaca',
+                    color: '#b91c1c',
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    marginBottom: '12px',
+                  }}
+                >
                   {errors.general[0]}
                 </div>
               )}
@@ -214,11 +254,16 @@ const SignUp: React.FC = () => {
                   />
                 </div>
                 {errors.name && (
-                  <p className="auth-field-error">{errors.name[0]}</p>
+                  <p style={{ color: '#ef4444', fontSize: '13px', margin: '4px 0 8px' }}>
+                    {errors.name[0]}
+                  </p>
                 )}
 
                 {/* ── Email ── */}
-                <div className="mobile-form mobile-form-col mt-16">
+                <div
+                  className="mobile-form mt-16"
+                  style={{ flexDirection: 'column', gap: '0' }}
+                >
                   <input
                     type="email"
                     id="email"
@@ -229,14 +274,20 @@ const SignUp: React.FC = () => {
                     onChange={handleChange}
                     autoComplete="email"
                     required
+                    style={{ width: '100%' }}
                   />
                 </div>
                 {errors.email && (
-                  <p className="auth-field-error">{errors.email[0]}</p>
+                  <p style={{ color: '#ef4444', fontSize: '13px', margin: '4px 0 8px' }}>
+                    {errors.email[0]}
+                  </p>
                 )}
 
                 {/* ── Password ── */}
-                <div className="mobile-form mobile-form-col mt-16">
+                <div
+                  className="mobile-form mt-16"
+                  style={{ flexDirection: 'column', gap: '0' }}
+                >
                   <input
                     type="password"
                     id="password"
@@ -247,14 +298,20 @@ const SignUp: React.FC = () => {
                     onChange={handleChange}
                     autoComplete="new-password"
                     required
+                    style={{ width: '100%' }}
                   />
                 </div>
                 {errors.password && (
-                  <p className="auth-field-error">{errors.password[0]}</p>
+                  <p style={{ color: '#ef4444', fontSize: '13px', margin: '4px 0 8px' }}>
+                    {errors.password[0]}
+                  </p>
                 )}
 
                 {/* ── Confirm Password ── */}
-                <div className="mobile-form mobile-form-col mt-16">
+                <div
+                  className="mobile-form mt-16"
+                  style={{ flexDirection: 'column', gap: '0' }}
+                >
                   <input
                     type="password"
                     id="passwordConfirmation"
@@ -265,6 +322,7 @@ const SignUp: React.FC = () => {
                     onChange={handleChange}
                     autoComplete="new-password"
                     required
+                    style={{ width: '100%' }}
                   />
                 </div>
 
@@ -272,18 +330,24 @@ const SignUp: React.FC = () => {
                 <div className="form-sign-in-password-btn mt-24">
                   <button
                     type="submit"
-                    className="auth-submit-btn"
                     disabled={loading}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      width: '100%',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      opacity: loading ? 0.7 : 1,
+                    }}
                   >
                     {loading ? `${t('auth.sign_up')}…` : t('auth.sign_up')}
                   </button>
                 </div>
-
               </form>
             </div>
           </div>
 
-          {/* ── Footer: sign-in link (forwards redirect_to so the flow is preserved) ── */}
+          {/* ── Footer: sign-in link ── */}
           <footer id="let-you-footer">
             <div className="block-footer">
               <p>
@@ -307,4 +371,4 @@ const SignUp: React.FC = () => {
   );
 };
 
-export default SignUp;
+export default Register;

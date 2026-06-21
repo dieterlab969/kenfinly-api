@@ -44,6 +44,10 @@ return [
         'enabled' => env('GA4_ENABLED', false),
         'property_id' => env('GOOGLE_ANALYTICS_PROPERTY_ID'),
         'credentials_path' => env('GOOGLE_ANALYTICS_CREDENTIALS_PATH')
-     ]
+     ],
+
+    'woocommerce' => [
+        'webhook_secret' => env('WOOCOMMERCE_WEBHOOK_SECRET'),
+    ],
 
 ];

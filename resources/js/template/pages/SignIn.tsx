@@ -78,13 +78,15 @@ const SignIn: React.FC = () => {
             <div className="lets_you_in_box">
               <h1 className="d-none">hidden</h1>
               <h2 className="lets_you_in_text">Sign In</h2>
+
               {error && (
-                <p style={{ color: '#ef4444', fontSize: '14px', textAlign: 'center', marginBottom: '12px' }}>
+                <div className="auth-alert-danger">
                   {error}
-                </p>
+                </div>
               )}
+
               <form onSubmit={handleSignIn}>
-                <div className="mobile-form mt-32" style={{ flexDirection: 'column', gap: '0' }}>
+                <div className="mobile-form mobile-form-col mt-32">
                   <input
                     type="email"
                     className="sign-in-custom-input"
@@ -93,10 +95,9 @@ const SignIn: React.FC = () => {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                     autoComplete="email"
                     required
-                    style={{ width: '100%' }}
                   />
                 </div>
-                <div className="mobile-form mt-16" style={{ flexDirection: 'column', gap: '0' }}>
+                <div className="mobile-form mobile-form-col mt-16">
                   <input
                     type="password"
                     className="sign-in-custom-input"
@@ -105,31 +106,24 @@ const SignIn: React.FC = () => {
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                     autoComplete="current-password"
                     required
-                    style={{ width: '100%' }}
                   />
                 </div>
                 <div className="form-sign-in-password-btn mt-24">
                   <button
                     type="submit"
+                    className="auth-submit-btn"
                     disabled={loading}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      padding: 0,
-                      width: '100%',
-                      cursor: loading ? 'not-allowed' : 'pointer',
-                      opacity: loading ? 0.7 : 1,
-                    }}
                   >
                     {loading ? 'Signing In…' : 'Sign In'}
                   </button>
                 </div>
               </form>
+
               <div className="or-section mt-32">
                 <p>or</p>
               </div>
-              <div className="mt-16" style={{ textAlign: 'center' }}>
-                <Link to="/ForgetPassword" style={{ color: '#7B51F1', fontSize: '14px' }}>
+              <div className="mt-16 text-center">
+                <Link to="/ForgetPassword" className="auth-forgot-link">
                   Forgot your password?
                 </Link>
               </div>

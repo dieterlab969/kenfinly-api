@@ -678,6 +678,75 @@ textarea {
 .form-details-sign-in span img {
     filter: var(--icon-filter);
 }
+/************************ Auth alert / feedback components ***************************/
+/* Info (cart-checkout context notice) */
+.auth-alert-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    color: #3730a3;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+.auth-alert-info-icon {
+    font-size: 16px;
+    line-height: 1;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+/* Success */
+.auth-alert-success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+/* Danger (general server errors + SignIn inline error) */
+.auth-alert-danger {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    text-align: center;
+}
+/* Inline per-field validation message */
+.auth-field-error {
+    color: #ef4444;
+    font-size: 13px;
+    margin: 4px 0 8px;
+}
+/* Submit button — invisible click target; parent .form-sign-in-password-btn owns the visual */
+.auth-submit-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    width: 100%;
+    cursor: pointer;
+}
+.auth-submit-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+/* Column-direction modifier for .mobile-form (single-input rows) */
+.mobile-form-col {
+    flex-direction: column;
+    gap: 0;
+}
+/* Forgot-password anchor */
+.auth-forgot-link {
+    color: #7B51F1;
+    font-size: 14px;
+}
 /************************ 7.Verify phone number screen CSS ***************************/
 .verify-number-bottom {
     border-radius: 24px 24px 0px 0px;
