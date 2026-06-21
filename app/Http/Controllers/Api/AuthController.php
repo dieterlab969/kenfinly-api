@@ -103,6 +103,12 @@ class AuthController extends Controller
 
         $user->assignRole('owner');
 
+        // MVP sprint: auto-verify email and activate the account immediately
+        // so users can log in right after registration without an email step.
+        $user->markEmailAsVerified();
+        $user->status = 'active';
+        $user->save();
+
         // Automatically enroll in Free plan
         $freePlan = SubscriptionPlan::where('name', 'Free')->first();
         if ($freePlan) {
@@ -116,42 +122,28 @@ class AuthController extends Controller
             ]);
         }
 
-        try {
-            $verification = $this->emailVerificationService->sendVerificationEmail($user);
+        // Issue a JWT token immediately so the frontend can authenticate
+        // subsequent requests without requiring a separate login step.
+        $token = auth('api')->login($user);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Registration successful! Please check your email to verify your account.',
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'status' => $user->status,
-                    'email_verified' => false,
-                ],
-                'verification_sent' => true,
-                'verification_expires_at' => $verification->expires_at,
-            ], 201);
-
-        } catch (\Exception $e) {
-            Log::error('Failed to send verification email during registration', [
-                'user_id' => $user->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Registration successful, but we could not send a verification email. Please contact support.',
-                'user' => [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'email' => $user->email,
-                    'status' => $user->status,
-                    'email_verified' => false,
-                ],
-                'verification_sent' => false,
-            ], 201);
-        }
+        return response()->json([
+            'success'       => true,
+            'message'       => 'Registration successful! Welcome to Kenfinly.',
+            'access_token'  => $token,
+            'token_type'    => 'bearer',
+            'expires_in'    => auth('api')->factory()->getTTL() * 60,
+            'user'          => [
+                'id'             => $user->id,
+                'name'           => $user->name,
+                'email'          => $user->email,
+                'status'         => $user->status,
+                'email_verified' => true,
+                'currency'       => $user->currency,
+                'country_code'   => $user->country_code,
+                'roles'          => $user->roles->pluck('name'),
+            ],
+            'verification_sent' => false,
+        ], 201);
     }
 
     /**
