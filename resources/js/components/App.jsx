@@ -4,10 +4,7 @@ import { AuthProvider } from '../contexts/AuthContext';
 import { LogoProvider } from '../contexts/LogoContext';
 import { TranslationProvider, useTranslation } from '../contexts/TranslationContext';
 import axios from 'axios';
-import Login from '../pages/Login';
-import Register from '../pages/Register';
 import VerifyEmail from '../pages/VerifyEmail';
-import VerificationPending from '../pages/VerificationPending';
 import ProtectedRoute from './ProtectedRoute';
 import SuperAdminRoute from './SuperAdminRoute';
 import AdminLogin from '../pages/admin/AdminLogin';
@@ -141,11 +138,8 @@ function App({ recaptchaEnabled = false }) {
                         <Route path="/textcase" element={<TextCaseConverter />} />
                         <Route path="/pomodoro" element={<PomodoroTimer />} />
                         <Route path="/pricing" element={<PricingPage />} />
-                        <Route path="/SignIn" element={<Login />} />
                         <Route path="/go-tieng-viet" element={<VietnameseTyping />} />
-                        <Route path="/SignUp" element={<Register />} />
                         <Route path="/verify-email" element={<VerifyEmail />} />
-                        <Route path="/verification-pending" element={<VerificationPending />} />
                         <Route
                             path="/dashboard"
                             element={<Navigate to="/" replace />}
