@@ -42,6 +42,13 @@ use Illuminate\Support\Facades\Log;
  * at 5,000+ daily visitors and ensures subscription activation is retried
  * automatically if the DB is briefly unavailable.
  *
+ * Logging
+ * ───────
+ * Every request — successful, duplicate, or malformed — is written to the
+ * dedicated `woocommerce` log channel (storage/logs/woocommerce-webhook.log).
+ * Each entry includes request headers, full payload, response status, and
+ * wall-clock execution time so issues can be diagnosed from logs alone.
+ *
  * Expected JSON payload
  * ─────────────────────
  * {
@@ -61,6 +68,13 @@ class WooCommerceWebhookController extends Controller
      */
     public function handle(Request $request): JsonResponse
     {
+        $startTime = microtime(true);
+
+        // ── 0. Structured request capture ─────────────────────────────────
+        // Log every inbound request before any processing so nothing is ever
+        // lost — even payloads that fail validation are preserved for audit.
+        $this->logIncomingRequest($request);
+
         $payload = $request->json()->all();
 
         // ── 1. Extract and validate required fields ───────────────────────
@@ -70,22 +84,30 @@ class WooCommerceWebhookController extends Controller
         $paymentMethod = (string) ($payload['payment_method'] ?? 'unknown');
 
         if (!$userId || !$planType || $wooOrderId === '') {
-            Log::warning('WooCommerce webhook: payload missing required fields', [
-                'received_keys' => array_keys($payload),
-                'ip'            => $request->ip(),
+            Log::channel('woocommerce')->warning('Payload missing required fields', [
+                'received_keys'    => array_keys($payload),
+                'ip'               => $request->ip(),
+                'execution_ms'     => $this->elapsedMs($startTime),
+                'response_status'  => 422,
             ]);
 
-            return response()->json(['error' => 'Missing required fields: user_id, plan_type, woo_order_id.'], 422);
+            return $this->respond(
+                ['error' => 'Missing required fields: user_id, plan_type, woo_order_id.'],
+                422,
+                $startTime,
+            );
         }
 
         // ── 2. Idempotency check ──────────────────────────────────────────
         // Return 200 immediately so WooCommerce stops retrying this delivery.
         if (ProcessedPayment::where('external_order_id', $wooOrderId)->exists()) {
-            Log::info('WooCommerce webhook: duplicate event — already processed, skipping', [
-                'woo_order_id' => $wooOrderId,
+            Log::channel('woocommerce')->info('Duplicate event — already processed, skipping', [
+                'woo_order_id'    => $wooOrderId,
+                'response_status' => 200,
+                'execution_ms'    => $this->elapsedMs($startTime),
             ]);
 
-            return response()->json(['status' => 'already_processed'], 200);
+            return $this->respond(['status' => 'already_processed'], 200, $startTime);
         }
 
         // ── 3. Record the payment (idempotency lock) ──────────────────────
@@ -96,7 +118,7 @@ class WooCommerceWebhookController extends Controller
             'payment_method'    => $paymentMethod,
         ]);
 
-        Log::info('WooCommerce webhook: new payment recorded', [
+        Log::channel('woocommerce')->info('New payment recorded', [
             'user_id'        => $userId,
             'plan_type'      => $planType,
             'woo_order_id'   => $wooOrderId,
@@ -104,12 +126,71 @@ class WooCommerceWebhookController extends Controller
         ]);
 
         // ── 4. Dispatch background job ────────────────────────────────────
-        ProcessPremiumActivation::dispatch(
-            (int) $userId,
-            $planType,
-            $wooOrderId,
-        );
+        try {
+            ProcessPremiumActivation::dispatch(
+                (int) $userId,
+                $planType,
+                $wooOrderId,
+            );
+        } catch (\Throwable $e) {
+            Log::channel('woocommerce')->error('Failed to dispatch ProcessPremiumActivation job', [
+                'user_id'      => $userId,
+                'woo_order_id' => $wooOrderId,
+                'error'        => $e->getMessage(),
+                'trace'        => $e->getTraceAsString(),
+            ]);
 
-        return response()->json(['status' => 'queued'], 200);
+            return $this->respond(
+                ['error' => 'Internal error — payment recorded but activation job failed to queue.'],
+                500,
+                $startTime,
+            );
+        }
+
+        return $this->respond(['status' => 'queued'], 200, $startTime);
+    }
+
+    // ── Private helpers ───────────────────────────────────────────────────
+
+    /**
+     * Write a structured log entry for the raw inbound request.
+     *
+     * Captures: all request headers, full JSON body, client IP, User-Agent,
+     * and the WC signature header value (truncated for readability).
+     */
+    private function logIncomingRequest(Request $request): void
+    {
+        $signature = $request->header('X-WC-Webhook-Signature', '');
+
+        Log::channel('woocommerce')->debug('Incoming webhook request', [
+            'ip'          => $request->ip(),
+            'method'      => $request->method(),
+            'path'        => $request->path(),
+            'user_agent'  => $request->userAgent(),
+            'signature'   => $signature ? substr($signature, 0, 16) . '…' : null,
+            'headers'     => collect($request->headers->all())
+                ->except(['authorization', 'cookie', 'x-wc-webhook-signature'])
+                ->toArray(),
+            'payload'     => $request->json()->all(),
+        ]);
+    }
+
+    /**
+     * Build a JSON response and log the final outcome (status + execution time).
+     */
+    private function respond(array $body, int $status, float $startTime): JsonResponse
+    {
+        Log::channel('woocommerce')->debug('Webhook response dispatched', [
+            'response_status' => $status,
+            'execution_ms'    => $this->elapsedMs($startTime),
+        ]);
+
+        return response()->json($body, $status);
+    }
+
+    /** Wall-clock milliseconds since $startTime. */
+    private function elapsedMs(float $startTime): int
+    {
+        return (int) round((microtime(true) - $startTime) * 1000);
     }
 }

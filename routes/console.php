@@ -15,8 +15,7 @@ Schedule::command('app:generate-sitemap')
     ->runInBackground()
     ->appendOutputTo(storage_path('logs/sitemap.log'));
 
-// Expire pending orders whose 5-minute window has elapsed.
-Schedule::command('orders:expire')
-    ->everyMinute()
-    ->runInBackground()
-    ->appendOutputTo(storage_path('logs/orders-expire.log'));
+// orders:expire — DISABLED. The orders/shopping_cart/payos_payment_orders tables
+// were dropped (migration 2026_06_19_000001) when checkout moved fully to WooCommerce.
+// Do not re-enable without restoring those tables first.
+// Schedule::command('orders:expire')->everyMinute();
