@@ -7,6 +7,9 @@ import type { ReactElement } from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DarkModeProvider } from "./components/DarkModeContext";
 import { TranslationProvider } from '../contexts/TranslationContext';
+import { AuthProvider } from '../contexts/AuthContext';
+import { LogoProvider } from '../contexts/LogoContext';
+import { RecaptchaConfigContext } from '../components/App';
 import Loader from "./components/Loader";
 import Splashscreen from "./pages/Splashscreen";
 import LetYouScreen from "./pages/LetYouScreen";
@@ -129,8 +132,13 @@ import InviteFriend from './pages/InviteFriend';
 import PersonalInfo from './pages/PersonalInfo';
 
 function App(): ReactElement {
+  const recaptchaEnabled = import.meta.env.VITE_RECAPTCHA_ENABLED === 'true';
+
   return (
+    <RecaptchaConfigContext.Provider value={{ enabled: recaptchaEnabled }}>
     <TranslationProvider>
+    <LogoProvider>
+    <AuthProvider>
     <DarkModeProvider>
       <BrowserRouter>
         <Loader />
@@ -257,7 +265,10 @@ function App(): ReactElement {
         </Routes>
       </BrowserRouter>
     </DarkModeProvider>
+    </AuthProvider>
+    </LogoProvider>
     </TranslationProvider>
+    </RecaptchaConfigContext.Provider>
   );
 }
 
