@@ -28,7 +28,16 @@ class CheckBetaAccess
         }
 
         // Define whitelisted paths for automation, health checks, and the
-        // beta-access gate itself (to prevent redirect loops)
+        // beta-access gate itself (to prevent redirect loops).
+        //
+        // IMPORTANT: OAuth callback landing pages (/auth/google/success and
+        // /auth/google/error) MUST be whitelisted. These are real browser
+        // redirects issued by the Laravel GoogleAuthController after the
+        // Google consent flow completes. The user has no beta cookie at that
+        // moment (they were in the middle of authenticating), so without this
+        // whitelist entry the middleware intercepts the redirect, discards the
+        // JWT token in the query string, and sends the user to /beta-access
+        // instead of the dashboard. See: docs/issues/GOOGLE_OAUTH_BETA_GATE_REDIRECT.md
         $whitelistedPaths = [
             '/api/*',
             '/health',
@@ -37,6 +46,8 @@ class CheckBetaAccess
             '/webhooks/*',
             '/beta-access',
             '/beta-access/*',
+            '/auth/google/success',
+            '/auth/google/error',
             '/sitemap.xml',
             '/robots.txt',
             '/favicon.ico',
