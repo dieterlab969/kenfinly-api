@@ -15,6 +15,7 @@ import Splashscreen from "./pages/Splashscreen";
 import LetYouScreen from "./pages/LetYouScreen";
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
+import GoogleAuthSuccess from './pages/GoogleAuthSuccess';
 import Home from './pages/Home';
 import VerifyPhoneNumber from './pages/VerifyPhoneNumber';
 import NotificationAllow from './pages/NotificationAllow';
@@ -147,6 +148,7 @@ function App(): ReactElement {
           <Route path="/LetYouScreen" element={<LetYouScreen />} />
           <Route path="/SignIn" element={<SignIn />} />
           <Route path="/SignUp" element={<SignUp />} />
+          <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
           <Route path="/Home" element={<Home />} />
           <Route path="/VerifyPhoneNumber" element={<VerifyPhoneNumber />} />
           <Route path="/NotificationAllow" element={<NotificationAllow />} />
