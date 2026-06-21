@@ -55,6 +55,12 @@ Route::get('/subscription-plans', [\App\Http\Controllers\Api\SubscriptionPlanCon
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::get('/settings/logos', [PublicLogoController::class, 'index']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+
+// ── Google One-Click OAuth ────────────────────────────────────────────────
+// /redirect  → sends browser to Google consent screen
+// /callback  → Google returns here; issues JWT then redirects to /auth/google/success
+Route::get('/v1/auth/google/redirect', [\App\Http\Controllers\Api\GoogleAuthController::class, 'redirect']);
+Route::get('/v1/auth/google/callback', [\App\Http\Controllers\Api\GoogleAuthController::class, 'callback']);
 Route::post('/waitlist', [\App\Http\Controllers\Api\WaitlistController::class, 'store']);
 Route::get('/auth/config', [AuthController::class, 'config']);
 Route::get('/settings/company', [PublicSettingsController::class, 'getCompanyInfo']);
