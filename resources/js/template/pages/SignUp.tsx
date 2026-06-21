@@ -128,10 +128,11 @@ const SignUp: React.FC = () => {
           });
         }, 1200);
       } else {
-        if (result.errors) {
-          setErrors(result.errors);
+        const failure = result as RegisterFailureResult;
+        if (failure.errors) {
+          setErrors(failure.errors);
         } else {
-          setErrors({ general: [result.message || t('auth.register_error')] });
+          setErrors({ general: [failure.message || t('auth.register_error')] });
         }
       }
     } catch {

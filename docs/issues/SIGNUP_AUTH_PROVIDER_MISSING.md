@@ -1,6 +1,6 @@
 # Issue: `useAuth must be used within an AuthProvider` on `/SignUp`
 
-**Status**: Open  
+**Status**: Resolved — 2026-06-21  
 **Severity**: High — blocks new user registration via the template entry point  
 **Reported**: 2026-06-20  
 
