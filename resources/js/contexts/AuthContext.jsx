@@ -157,9 +157,20 @@ export const AuthProvider = ({ children }) => {
         });
 
         if (response.data.success) {
+            // If the backend returned a token (MVP: email verification bypassed),
+            // store it and hydrate the user so the app is immediately authenticated.
+            if (response.data.access_token) {
+                const newToken = response.data.access_token;
+                localStorage.setItem('token', newToken);
+                setToken(newToken);
+                axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+                setUser(response.data.user);
+            }
+
             return {
                 success: true,
                 user: response.data.user,
+                token: response.data.access_token ?? null,
                 verification_sent: response.data.verification_sent,
                 message: response.data.message,
             };

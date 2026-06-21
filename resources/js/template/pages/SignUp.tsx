@@ -119,14 +119,14 @@ const SignUp: React.FC = () => {
 
       if (result.success) {
         setSuccessMessage(result.message || t('auth.register_success'));
+        // Token already stored in AuthContext — go straight to the app.
         setTimeout(() => {
-          navigate('/verification-pending', {
-            state: {
-              user: result.user,
-              redirectTo,
-            },
-          });
-        }, 1200);
+          if (redirectTo) {
+            window.location.href = `${redirectTo}?laravel_user_id=${(result.user as any)?.id ?? ''}`;
+          } else {
+            navigate('/Home');
+          }
+        }, 800);
       } else {
         const failure = result as RegisterFailureResult;
         if (failure.errors) {
