@@ -5,6 +5,7 @@ import { LogoProvider } from '../contexts/LogoContext';
 import { TranslationProvider, useTranslation } from '../contexts/TranslationContext';
 import axios from 'axios';
 import VerifyEmail from '../pages/VerifyEmail';
+import GoogleAuthSuccess from '../template/pages/GoogleAuthSuccess';
 import ProtectedRoute from './ProtectedRoute';
 import SuperAdminRoute from './SuperAdminRoute';
 import AdminLogin from '../pages/admin/AdminLogin';
@@ -140,6 +141,7 @@ function App({ recaptchaEnabled = false }) {
                         <Route path="/pricing" element={<PricingPage />} />
                         <Route path="/go-tieng-viet" element={<VietnameseTyping />} />
                         <Route path="/verify-email" element={<VerifyEmail />} />
+                        <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
                         <Route
                             path="/dashboard"
                             element={<Navigate to="/" replace />}
