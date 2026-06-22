@@ -54,6 +54,8 @@ class CheckBetaAccess
             '/privacy-policy',
             '/dieu-khoan-dich-vu',
             '/terms-of-service',
+            '/huong-dan-xoa-du-lieu',
+            '/data-deletion-instructions',
             '/sitemap.xml',
             '/robots.txt',
             '/favicon.ico',
