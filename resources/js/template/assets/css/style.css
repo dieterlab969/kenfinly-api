@@ -63,6 +63,21 @@ Primary use:  Online Payment App
 Background:#ffffff,#7B51F1,#F5F5F5   
 Content:#5A5C5E,#121212      
 -------------------------------------------------------------------*/
+/************************ 0.Theme Variables (Light / Dark) ********/
+:root {
+    --primary-color:   #ffffff;
+    --text-color:      #121212;
+    --sub-text-color:  #5A5C5E;
+    --border-color:    #E8E8E8;
+    --card-color:      #F5F5F5;
+}
+html.dark {
+    --primary-color:   #121212;
+    --text-color:      #ffffff;
+    --sub-text-color:  #9E9E9E;
+    --border-color:    #2C2C2C;
+    --card-color:      #1E1E1E;
+}
 /************************ 1.Default CSS ***************************/
 html {
     scroll-behavior: smooth;
@@ -349,7 +364,7 @@ textarea {
     margin-right: auto !important;
     margin-top: 40px !important;
 }
-.onboarding-slider .carousel-indicators [data-bs-target] {
+.onboarding-slider .carousel-indicators button {
     margin-right: 8px;
     margin-left: 0 !important;
 }
