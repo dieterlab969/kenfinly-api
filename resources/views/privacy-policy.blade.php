@@ -302,7 +302,7 @@
                 </p>
                 <p>
                     Nếu bạn có bất kỳ câu hỏi nào về chính sách này, vui lòng liên hệ chúng tôi tại
-                    <strong>hoangphan@kenka.com.vn</strong>.
+                    <strong>phanvuhoang@gmail.com</strong>.
                 </p>
             </div>
 
@@ -436,7 +436,7 @@
                         <div class="step-num">2</div>
                         <p>
                             <strong>Yêu cầu xóa qua email:</strong><br>
-                            Gửi email đến <a href="mailto:hoangphan@kenka.com.vn">hoangphan@kenka.com.vn</a>
+                            Gửi email đến <a href="mailto:phanvuhoang@gmail.com">phanvuhoang@gmail.com</a>
                             với tiêu đề <em>"Yêu cầu xóa tài khoản Kenfinly"</em> kèm địa chỉ email
                             tài khoản. Chúng tôi sẽ xử lý trong vòng <strong>7 ngày làm việc</strong>
                             và gửi xác nhận khi hoàn tất.
@@ -506,7 +506,7 @@
                 <p>Mọi thắc mắc về chính sách bảo mật, vui lòng liên hệ chúng tôi:</p>
                 <ul class="policy-list">
                     <li><strong>Công ty:</strong>&nbsp;Getkenka Ltd — Mã số thuế: 0318304909</li>
-                    <li><strong>Email bảo mật:</strong>&nbsp;<a href="mailto:hoangphan@kenka.com.vn" style="color:var(--blue)">hoangphan@kenka.com.vn</a></li>
+                    <li><strong>Email bảo mật:</strong>&nbsp;<a href="mailto:phanvuhoang@gmail.com" style="color:var(--blue)">phanvuhoang@gmail.com</a></li>
                     <li><strong>Email hỗ trợ:</strong>&nbsp;<a href="mailto:purchasevn@getkenka.com" style="color:var(--blue)">purchasevn@getkenka.com</a></li>
                     <li><strong>Điện thoại:</strong>&nbsp;+84 0941 069 969</li>
                     <li><strong>Địa chỉ:</strong>&nbsp;Tầng 2, 81 CMT8, Phường Bến Thành, Quận 1, TP.HCM</li>
@@ -520,7 +520,7 @@
             <p style="margin-top:6px;">
                 <a href="/">Trang chủ</a> &nbsp;·&nbsp;
                 <a href="/pricing">Bảng giá</a> &nbsp;·&nbsp;
-                <a href="mailto:hoangphan@kenka.com.vn">Liên hệ</a>
+                <a href="mailto:phanvuhoang@gmail.com">Liên hệ</a>
             </p>
         </div>
     </div>
