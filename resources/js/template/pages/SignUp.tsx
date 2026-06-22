@@ -18,6 +18,16 @@ const GoogleLogo: React.FC = () => (
   </svg>
 );
 
+// ── Facebook "f" logo SVG (official brand colour #1877F2) ──────────────────
+const FacebookLogo: React.FC = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      fill="#1877F2"
+      d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.883v2.27h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"
+    />
+  </svg>
+);
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -66,8 +76,9 @@ const SignUp: React.FC = () => {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading]             = useState<boolean>(false);
   const [googleLoading, setGoogleLoading] = useState<boolean>(false);
+  const [fbLoading, setFbLoading]         = useState<boolean>(false);
 
   const { executeRecaptcha } = useGoogleReCaptcha();
   const { register, user } = useAuth();
@@ -210,33 +221,43 @@ const SignUp: React.FC = () => {
               <button
                 type="button"
                 onClick={() => { setGoogleLoading(true); window.location.href = '/api/v1/auth/google/redirect'; }}
-                disabled={googleLoading || loading}
+                disabled={googleLoading || fbLoading || loading}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '10px',
-                  width: '100%',
-                  padding: '11px 16px',
-                  marginTop: '8px',
-                  background: '#fff',
-                  border: '1.5px solid #d1d5db',
-                  borderRadius: '10px',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: '#374151',
-                  cursor: (googleLoading || loading) ? 'not-allowed' : 'pointer',
-                  opacity: (googleLoading || loading) ? 0.7 : 1,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  gap: '10px', width: '100%', padding: '11px 16px', marginTop: '8px',
+                  background: '#fff', border: '1.5px solid #d1d5db', borderRadius: '10px',
+                  fontSize: '14px', fontWeight: 600, color: '#374151',
+                  cursor: (googleLoading || fbLoading || loading) ? 'not-allowed' : 'pointer',
+                  opacity: (googleLoading || fbLoading || loading) ? 0.7 : 1,
                   transition: 'border-color 0.15s',
                 }}
               >
                 {googleLoading ? (
                   <span style={{ fontSize: '13px' }}>Redirecting to Google…</span>
                 ) : (
-                  <>
-                    <GoogleLogo />
-                    Continue with Google
-                  </>
+                  <><GoogleLogo />Continue with Google</>
+                )}
+              </button>
+
+              {/* ── Facebook One-Click Registration ── */}
+              <button
+                type="button"
+                onClick={() => { setFbLoading(true); window.location.href = '/api/v1/auth/facebook/redirect'; }}
+                disabled={googleLoading || fbLoading || loading}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  gap: '10px', width: '100%', padding: '11px 16px', marginTop: '10px',
+                  background: '#fff', border: '1.5px solid #d1d5db', borderRadius: '10px',
+                  fontSize: '14px', fontWeight: 600, color: '#374151',
+                  cursor: (googleLoading || fbLoading || loading) ? 'not-allowed' : 'pointer',
+                  opacity: (googleLoading || fbLoading || loading) ? 0.7 : 1,
+                  transition: 'border-color 0.15s',
+                }}
+              >
+                {fbLoading ? (
+                  <span style={{ fontSize: '13px' }}>Redirecting to Facebook…</span>
+                ) : (
+                  <><FacebookLogo />Continue with Facebook</>
                 )}
               </button>
 
