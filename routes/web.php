@@ -44,6 +44,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Privacy Policy — public Blade page (no auth middleware).
+// Also accessible at /privacy-policy for Facebook App Review bots.
+Route::get('/chinh-sach-bao-mat', fn () => view('privacy-policy'))->name('privacy-policy');
+Route::get('/privacy-policy',     fn () => view('privacy-policy'));
+
 // Pricing page — standalone Blade view with currency-aware pricing.
 Route::get('/pricing', function (Request $request, CurrencyService $currencyService) {
     $currency       = $currencyService->detectUserCurrency($request);
