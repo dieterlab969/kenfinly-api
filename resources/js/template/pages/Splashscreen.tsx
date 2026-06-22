@@ -59,8 +59,8 @@ const Splashscreen: React.FC = () => {
                                                 <div id="splash-screen-page">
                                                         <div className="splash-screen-content">
                                                                 <img className="logo_img" src={logo} alt="logo" />
-                                                                <h1 className="payfast-txt mt-16"><span>Pay</span>Fast</h1>
-                                                                <p className="payfast-title mt-16">Every transaction is special</p>
+                                                                <h1 className="payfast-txt mt-16"><span>Ken</span>Finly</h1>
+                                                                <p className="payfast-title mt-16">Every transaction matters</p>
                                                         </div>
                                                 </div>
                                         </div>
