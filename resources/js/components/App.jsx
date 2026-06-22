@@ -32,7 +32,6 @@ import SavingHabitTracker from '../pages/public/SavingHabitTracker';
 import PlanSelection from './subscription/PlanSelection';
 import CheckoutForm from './subscription/CheckoutForm';
 import VietnameseTyping from "../pages/public/VietnameseTyping";
-import QuotationPage from '../pages/public/QuotationPage';
 
 export const RecaptchaConfigContext = createContext({ enabled: false });
 
@@ -136,7 +135,6 @@ function App({ recaptchaEnabled = false }) {
                         <Route path="/blog" element={<BlogPage />} />
                         <Route path="/blog/:slug" element={<BlogPostPage />} />
                         <Route path="/about" element={<AboutPage />} />
-                        <Route path="/quotation" element={<QuotationPage />} />
                         <Route path="/textcase" element={<TextCaseConverter />} />
                         <Route path="/pomodoro" element={<PomodoroTimer />} />
                         <Route path="/pricing" element={<PricingPage />} />
