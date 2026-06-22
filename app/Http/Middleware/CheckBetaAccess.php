@@ -50,6 +50,8 @@ class CheckBetaAccess
             '/auth/google/error',
             '/auth/facebook/success',
             '/auth/facebook/error',
+            '/chinh-sach-bao-mat',
+            '/privacy-policy',
             '/sitemap.xml',
             '/robots.txt',
             '/favicon.ico',
