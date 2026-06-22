@@ -1,7 +1,7 @@
 # Session Persistence — User Gets Logged Out on Browser Close
 
 **Date:** 2026-06-22  
-**Severity:** High — Người dùng bị đăng xuất mỗi lần đóng tab/trình duyệt hoặc sau khoảng 1 giờ không dùng, dù đã đăng nhập đúng. Gây trải nghiệm tệ và làm người dùng hiểu lầm rằng app bị lỗi.  
+**Severity:** High — Users were logged out every time they closed a tab or browser, or after ~1 hour of inactivity, despite having explicitly signed in. This caused significant UX friction and led users to believe the app was broken.  
 **Status:** ✅ Fixed  
 **Affected areas:** `AuthContext.jsx`, `api.js`, `config/jwt.php`, `.env`
 
@@ -9,61 +9,61 @@
 
 ## 1. Executive Summary
 
-Người dùng báo cáo bị logout sau mỗi lần đóng trình duyệt hoặc để app không dùng trong 1–2 giờ. Sau điều tra, token **đã được lưu vào `localStorage`** đúng cách — không phải lỗi storage. Vấn đề thực sự là **JWT TTL chỉ 60 phút** và **không có cơ chế tự động refresh token**. Khi token hết hạn, `fetchUser()` trả về 401 và hàm `logout()` được gọi ngay lập tức, xóa sạch phiên làm việc — trong khi `JWT_REFRESH_TTL` 2 tuần vẫn đang còn hiệu lực nhưng không bao giờ được tận dụng.
+Users reported being logged out every time they closed the browser or left the app idle for 1–2 hours. Investigation revealed the token **was already correctly persisted in `localStorage`** — the storage layer was not the problem. The real issues were a **JWT TTL of only 60 minutes** and **no automatic token refresh mechanism**. When the token expired, `fetchUser()` received a 401 and immediately called `logout()`, wiping the session — even though the `JWT_REFRESH_TTL` (14-day window) was still active but never utilized.
 
 ---
 
-## 2. Context và Architecture
+## 2. Context & Architecture
 
 ```
-Người dùng đăng nhập
+User logs in
         │
         ▼
 AuthContext.jsx → POST /api/auth/login
         │
-        ├── Nhận về: access_token (JWT, TTL 60 phút)
+        ├── Receives: access_token (JWT, TTL 60 min)
         ├── localStorage.setItem('token', token)
         ├── axios.defaults.headers.common['Authorization'] = Bearer token
         └── setUser(response.data.user)
 
-Lần sau mở app / reload trang:
+Next time the app opens / page reloads:
         │
         ▼
 AuthContext.jsx → useEffect([token]) → fetchUser()
         │
         ▼
-GET /api/auth/me  ← Bearer token (có thể đã hết hạn)
+GET /api/auth/me  ← Bearer token (may be expired)
         │
-        ├── 200 OK  → setUser()  → ✅ Logged in
-        └── 401     → logout()   → ❌ Bị xóa token → Màn hình đăng nhập
+        ├── 200 OK  → setUser()  → ✅ Stays logged in
+        └── 401     → logout()   → ❌ Token cleared → Login screen
 ```
 
-| Layer | Chi tiết |
+| Layer | Details |
 |---|---|
-| **Frontend storage** | JWT lưu trong `localStorage['token']`. Đúng — không mất khi đóng tab. |
-| **Backend JWT driver** | `tymon/jwt-auth`, guard `api`, stateless. |
-| **Access token TTL** | 60 phút (default `config/jwt.php`, không set trong `.env`). |
-| **Refresh token TTL** | 20,160 phút (14 ngày, default). |
-| **Refresh endpoint** | `POST /api/auth/refresh` — tồn tại trong `AuthController`, có route, **chưa bao giờ được gọi tự động**. |
+| **Frontend storage** | JWT stored in `localStorage['token']`. Correct — survives tab/browser close. |
+| **Backend JWT driver** | `tymon/jwt-auth`, `api` guard, stateless mode. |
+| **Access token TTL** | 60 minutes (default in `config/jwt.php`, not overridden in `.env`). |
+| **Refresh token TTL** | 20,160 minutes (14 days, default). |
+| **Refresh endpoint** | `POST /api/auth/refresh` — existed in `AuthController` with a registered route, but **was never called automatically** by the frontend. |
 
 ---
 
 ## 3. Root Causes
 
-### 3.1 JWT TTL quá ngắn (Critical)
+### 3.1 JWT TTL Was Too Short (Critical)
 
 `config/jwt.php`:
 ```php
-'ttl' => env('JWT_TTL', 60),  // 60 phút
+'ttl' => env('JWT_TTL', 60),  // 60 minutes
 ```
 
-Không có `JWT_TTL` trong `.env` → dùng mặc định 60 phút. Người dùng đăng nhập lúc 8h sáng, đến 9h quay lại trình duyệt (tab đã mở sẵn hoặc vừa mở lại) → token hết hạn → bị logout.
+No `JWT_TTL` entry in `.env` → falls back to the 60-minute default. A user who logs in at 8 AM and returns to the app at 9:10 AM (same tab, or a freshly opened one) would find their token expired and be forced to log in again.
 
 ---
 
-### 3.2 Không có cơ chế refresh token tự động (Critical)
+### 3.2 No Automatic Token Refresh (Critical)
 
-`AuthContext.jsx` trước fix — `fetchUser()`:
+`AuthContext.jsx` before the fix — `fetchUser()`:
 ```javascript
 const fetchUser = async () => {
     try {
@@ -71,70 +71,70 @@ const fetchUser = async () => {
         if (response.data.success) setUser(response.data.user);
     } catch (error) {
         console.error('Failed to fetch user:', error);
-        logout();  // ← Bất kỳ lỗi nào, kể cả 401 do token hết hạn, đều logout ngay
+        logout();  // ← Any error, including a 401 from an expired token, triggers immediate logout
     } finally {
         setLoading(false);
     }
 };
 ```
 
-`api.js` trước fix — response interceptor:
+`api.js` before the fix — response interceptor:
 ```javascript
 api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
             localStorage.removeItem('token');
-            window.location.href = '/SignIn';  // ← Redirect ngay, không thử refresh
+            window.location.href = '/SignIn';  // ← Hard redirect on 401, no refresh attempt
         }
         return Promise.reject(error);
     }
 );
 ```
 
-`POST /api/auth/refresh` — endpoint có sẵn nhưng **không bao giờ được gọi tự động** từ frontend. `JWT_REFRESH_TTL` 14 ngày bị lãng phí hoàn toàn.
+`POST /api/auth/refresh` was a fully working endpoint that was **never called automatically**. The 14-day `JWT_REFRESH_TTL` window was completely wasted.
 
 ---
 
-### 3.3 Dọn dẹp localStorage không nhất quán (Minor)
+### 3.3 Inconsistent localStorage Cleanup (Minor)
 
-`api.js` xóa `localStorage.removeItem('user')` khi 401, nhưng `AuthContext.jsx` không lưu key `user` vào localStorage (user state chỉ ở React memory). Tạo ra sự không nhất quán giữa hai layer.
+`api.js` removed `localStorage.removeItem('user')` on 401, but `AuthContext.jsx` never stored a `user` key in localStorage to begin with (user state lived only in React memory). This created a silent inconsistency between the two layers.
 
 ---
 
-## 4. Phân tích tác động
+## 4. Impact Analysis
 
-| Tình huống | Hành vi trước fix | Hành vi sau fix |
+| Scenario | Before fix | After fix |
 |---|---|---|
-| Mở lại tab sau < 60 phút | ✅ Vẫn đăng nhập | ✅ Vẫn đăng nhập |
-| Mở lại tab sau 1–6 giờ | ❌ Bị logout | ✅ Token tự refresh, giữ session |
-| Mở lại sau 1–7 ngày | ❌ Bị logout | ✅ Token tự refresh |
-| Mở lại sau 7–30 ngày | ❌ Bị logout | ✅ Token tự refresh (trong refresh window) |
-| Mở lại sau > 30 ngày | ❌ Bị logout | ✅ Bị logout đúng (bảo mật) |
-| API call giữa chừng bị 401 | ❌ Redirect /SignIn ngay | ✅ Refresh ngầm, retry, user không thấy gì |
-| Nhiều API call đồng thời cùng 401 | ❌ Multiple redirect | ✅ Queue, chỉ gọi refresh 1 lần |
-| Logout chủ động | ✅ Xóa token | ✅ Xóa token |
+| Return to app within 60 minutes | ✅ Stays logged in | ✅ Stays logged in |
+| Return to app after 1–6 hours | ❌ Logged out | ✅ Token silently refreshed |
+| Return to app after 1–7 days | ❌ Logged out | ✅ Token silently refreshed |
+| Return to app after 7–30 days | ❌ Logged out | ✅ Token silently refreshed (within refresh window) |
+| Return to app after 30+ days | ❌ Logged out | ✅ Logged out correctly (security boundary) |
+| Mid-session API call returns 401 | ❌ Redirect to /SignIn immediately | ✅ Refresh in background, retry, user sees nothing |
+| Multiple concurrent API calls all return 401 | ❌ Multiple redirects | ✅ Queued — refresh called exactly once |
+| Explicit logout | ✅ Token cleared | ✅ Token cleared + server blacklist |
 
 ---
 
-## 5. Giải pháp đã áp dụng
+## 5. Solution Applied
 
-### 5.1 Kéo dài JWT TTL — `.env`
+### 5.1 Extend JWT Lifetime — `.env`
 
 ```dotenv
-JWT_TTL=10080          # 7 ngày (7 × 24 × 60 = 10,080 phút)
-JWT_REFRESH_TTL=43200  # 30 ngày (30 × 24 × 60 = 43,200 phút)
+JWT_TTL=10080          # 7 days  (7 × 24 × 60 = 10,080 minutes)
+JWT_REFRESH_TTL=43200  # 30 days (30 × 24 × 60 = 43,200 minutes)
 ```
 
-Cập nhật cả `.env.example` để document cho môi trường mới.
+Also updated `.env.example` to document these values for new environments.
 
-**Lý do chọn 7 ngày:** Cân bằng giữa UX (không bị logout mỗi ngày) và bảo mật (token bị đánh cắp có TTL giới hạn). Với ứng dụng tài chính cá nhân, 7 ngày là mức hợp lý — ngắn hơn so với banking apps (30 ngày), dài hơn so với default (1 giờ).
+**Rationale for 7 days:** Balances UX (no daily re-logins) with security (bounded exposure window if a token is stolen). For a personal finance app, 7 days is a reasonable middle ground — shorter than typical banking apps (30 days), much longer than the broken default (1 hour).
 
 ---
 
-### 5.2 Refresh interceptor trong `api.js`
+### 5.2 Refresh Interceptor in `api.js`
 
-Thêm logic refresh thông minh vào response interceptor của axios instance dùng chung:
+Added a smart refresh layer to the shared axios instance's response interceptor:
 
 ```javascript
 let isRefreshing = false;
@@ -145,7 +145,7 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // Tránh vòng lặp vô tận: nếu chính refresh call bị 401 → logout hẳn
+        // Prevent infinite loop: if the refresh call itself returns 401, bail out
         if (error.response?.status === 401 && originalRequest.url?.includes('/auth/refresh')) {
             clearTokens();
             window.location.href = '/SignIn';
@@ -153,7 +153,7 @@ api.interceptors.response.use(
         }
 
         if (error.response?.status === 401 && !originalRequest._retry) {
-            // Queue các request 401 đồng thời, chỉ gọi refresh 1 lần
+            // Queue concurrent 401s — only call refresh once
             if (isRefreshing) {
                 return new Promise((resolve, reject) => {
                     failedQueue.push({ resolve, reject });
@@ -171,7 +171,7 @@ api.interceptors.response.use(
                 saveToken(data.access_token);
                 processQueue(null, data.access_token);
                 originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
-                return api(originalRequest);  // Replay original request
+                return api(originalRequest);  // Replay the original request transparently
             } catch (refreshError) {
                 processQueue(refreshError, null);
                 clearTokens();
@@ -189,9 +189,9 @@ api.interceptors.response.use(
 
 ---
 
-### 5.3 Silent refresh trong `AuthContext.jsx` — `fetchUser()`
+### 5.3 Silent Refresh in `AuthContext.jsx` — `fetchUser()`
 
-Thay vì `catch → logout()` ngay, thêm tầng thử refresh trước:
+Instead of `catch → logout()` immediately, attempt a token refresh first:
 
 ```javascript
 const fetchUser = async () => {
@@ -211,16 +211,16 @@ const fetchUser = async () => {
                     const retryResponse = await axios.get('/api/auth/me');
                     if (retryResponse.data.success) {
                         setUser(retryResponse.data.user);
-                        return;  // ✅ Refresh thành công — không logout
+                        return;  // ✅ Refresh succeeded — do not logout
                     }
                 }
             } catch {
-                // Refresh window hết hạn → fall through to logout
+                // Refresh window expired or network error → fall through to logout
             }
         } else {
             console.error('Failed to fetch user:', error);
         }
-        logout();  // Chỉ logout khi refresh thực sự thất bại
+        logout();  // Only called when refresh genuinely fails
     } finally {
         setLoading(false);
     }
@@ -229,68 +229,69 @@ const fetchUser = async () => {
 
 ---
 
-## 6. Files đã thay đổi
+## 6. Files Changed
 
-| File | Loại thay đổi | Mô tả |
+| File | Change type | Description |
 |---|---|---|
-| `.env` | Cấu hình | Thêm `JWT_TTL=10080`, `JWT_REFRESH_TTL=43200` |
-| `.env.example` | Cấu hình | Document JWT TTL defaults |
-| `resources/js/utils/api.js` | Frontend | Thêm refresh interceptor với queue |
-| `resources/js/contexts/AuthContext.jsx` | Frontend | `fetchUser()` thử refresh trước khi logout |
+| `.env` | Config | Added `JWT_TTL=10080` and `JWT_REFRESH_TTL=43200` |
+| `.env.example` | Config | Documented JWT TTL defaults for new environments |
+| `resources/js/utils/api.js` | Frontend | Added refresh interceptor with concurrent-request queue |
+| `resources/js/contexts/AuthContext.jsx` | Frontend | `fetchUser()` now attempts refresh before triggering logout |
 
 ---
 
-## 7. Kiến trúc luồng xác thực sau fix
+## 7. Auth Flow After the Fix
 
 ```
-App khởi động / Reload trang
+App starts / Page reloads
           │
           ▼
-AuthContext.jsx đọc localStorage['token']
+AuthContext.jsx reads localStorage['token']
           │
-    ┌─────┴─────┐
-  Có token    Không có token
+    ┌─────┴──────┐
+  Token found   No token
     │               │
     ▼               ▼
-fetchUser()    setLoading(false) → Màn hình đăng nhập
+fetchUser()    setLoading(false) → Login screen shown
     │
-    ├── 200 OK → setUser() → ✅ Vào app
+    ├── 200 OK → setUser() → ✅ Into the app
     │
-    └── 401 (expired) → Thử refresh
+    └── 401 (expired) → Attempt silent refresh
               │
-              ├── Refresh OK → setUser() → ✅ Vào app (trong suốt)
+              ├── Refresh OK → setUser() → ✅ Into the app (transparent to user)
               │
-              └── Refresh fail → logout() → Màn hình đăng nhập
+              └── Refresh fails → logout() → Login screen shown
 
-─────────────────────────────────────────────────────────
-Trong khi đang dùng app — bất kỳ API call nào qua api.js
+─────────────────────────────────────────────────────────────────
+During active use — any API call routed through api.js
           │
           └── 401 → api.js interceptor
                     │
-                    ├── Queue concurrent requests
-                    ├── POST /auth/refresh (1 lần)
-                    ├── Replay all queued requests → ✅ Trong suốt
-                    └── Refresh fail → clearTokens → /SignIn
+                    ├── Queue concurrent failing requests
+                    ├── POST /auth/refresh (called once)
+                    ├── Replay all queued requests → ✅ Transparent to user
+                    └── Refresh fails → clearTokens() → /SignIn
 ```
 
 ---
 
-## 8. Bảo mật
+## 8. Security Considerations
 
-- **Không lưu credentials** (email/password) ở bất kỳ đâu — chỉ lưu JWT opaque token.
-- **JWT blacklist** vẫn được bật (`JWT_BLACKLIST_ENABLED=true`) — token bị revoke khi gọi `POST /api/auth/logout`.
-- **Refresh token endpoint** (`/api/auth/refresh`) chỉ chấp nhận token hợp lệ chưa bị blacklist, trong cửa sổ `JWT_REFRESH_TTL`.
-- **Logout chủ động** vẫn gọi `POST /api/auth/logout` để blacklist token phía server trước khi xóa localStorage.
-- **Token hết hạn tuyệt đối** sau 30 ngày không dùng — bắt buộc đăng nhập lại.
+- **No credentials stored locally** — only the opaque JWT string. Email/password never touches localStorage.
+- **JWT blacklist is still active** (`JWT_BLACKLIST_ENABLED=true`) — tokens are invalidated server-side on explicit `POST /api/auth/logout`.
+- **Refresh endpoint** (`POST /api/auth/refresh`) only accepts tokens that are within the `JWT_REFRESH_TTL` window and have not been blacklisted.
+- **Explicit logout** still calls the server logout endpoint to blacklist the token before clearing localStorage — stolen tokens become invalid immediately.
+- **Hard session expiry** after 30 days of inactivity — re-authentication is always required after this window.
 
 ---
 
-## 9. Các vấn đề liên quan / Không nằm trong scope
+## 9. Related / Out of Scope
 
-| Vấn đề | Status |
+| Item | Status |
 |---|---|
-| Token refresh khi tab bị background nhiều giờ | ✅ Xử lý bởi fetchUser() refresh logic khi tab được focus lại |
-| Multiple tabs cùng lúc refresh | ✅ Xử lý bởi queue mechanism trong api.js |
-| Token rotation sau mỗi refresh | ⚠️ Không trong scope — tymon/jwt-auth mặc định trả token mới mỗi lần refresh, đã hoạt động đúng |
-| Proactive refresh trước khi hết hạn (e.g. 5 phút trước expire) | ❌ Không implement — chỉ refresh khi nhận 401 thực sự (reactive). Đủ cho use case hiện tại. |
-| Remember me / Stay logged in checkbox | ❌ Không trong scope |
+| Refresh when the tab has been backgrounded for many hours | ✅ Handled — `fetchUser()` refresh logic fires when the tab is focused again |
+| Multiple tabs refreshing simultaneously | ✅ Handled — queue mechanism in `api.js` ensures only one refresh call |
+| Token rotation after every refresh | ✅ Working — `tymon/jwt-auth` issues a new token on each refresh by default |
+| Proactive refresh before expiry (e.g. 5 minutes before TTL) | ❌ Not implemented — reactive (on 401) is sufficient for the current use case |
+| "Remember me" / "Stay signed in" checkbox | ❌ Out of scope |
+| Refresh token stored separately from access token | ❌ Out of scope — `tymon/jwt-auth` uses a single token model |
