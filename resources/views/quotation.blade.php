@@ -411,6 +411,7 @@
         <h1>Bảng Phân Tích Yêu Cầu &amp; Ước Tính Tiến Độ Chuẩn</h1>
         <p>Dự án: Hệ thống Quản lý Sự kiện &amp; Phòng họp Thông minh (Mini E-Cabinet)</p>
         <p class="hero-sub">Kiến trúc khuyến nghị: Laravel Backend (Cung cấp API) + React Frontend (Web App)</p>
+        <p class="hero-sub" style="margin-top:8px;font-size:12px;opacity:0.7;">Cập nhật lúc 23:41 ngày 22/06/2026</p>
     </div>
 
     {{-- Main content --}}
