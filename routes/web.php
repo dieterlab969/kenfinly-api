@@ -57,6 +57,9 @@ Route::get('/terms-of-service',   fn () => view('terms-of-service'));
 Route::get('/huong-dan-xoa-du-lieu', fn () => view('data-deletion-instructions'))->name('data-deletion');
 Route::get('/data-deletion-instructions', fn () => view('data-deletion-instructions'));
 
+// Quotation / project analysis — public Blade page (no auth middleware).
+Route::get('/quotation', fn () => view('quotation'))->name('quotation');
+
 // Pricing page — standalone Blade view with currency-aware pricing.
 Route::get('/pricing', function (Request $request, CurrencyService $currencyService) {
     $currency       = $currencyService->detectUserCurrency($request);
