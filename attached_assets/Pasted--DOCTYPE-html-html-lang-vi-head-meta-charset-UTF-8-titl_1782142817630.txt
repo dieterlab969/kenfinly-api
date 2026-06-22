@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Bảng Phân Tích Yêu Cầu và Ước Tính Tiến Độ Dự Án</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #2d3748;
+            margin: 40px;
+            padding: 0;
+        }
+        h1 {
+            font-size: 22pt;
+            color: #1a365d;
+            text-align: center;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 12pt;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        h2 {
+            font-size: 15pt;
+            color: #2b6cb0;
+            border-left: 4px solid #2b6cb0;
+            padding-left: 10px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        h3 {
+            font-size: 12pt;
+            color: #2d3748;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        p {
+            margin-bottom: 12px;
+            text-align: justify;
+        }
+        ul, ol {
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            margin-bottom: 25px;
+            font-size: 10.5pt;
+        }
+        th, td {
+            border: 1px solid #cbd5e0;
+            padding: 12px;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #1a365d;
+            font-weight: bold;
+        }
+        tr:nth-child(even) td {
+            background-color: #fcfdfd;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .font-bold {
+            font-weight: bold;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            background-color: #e2e8f0;
+            color: #4a5568;
+            border-radius: 4px;
+            font-size: 9pt;
+            font-weight: bold;
+        }
+        .badge-high { background-color: #fed7d7; color: #c53030; }
+        .badge-med { background-color: #feebc8; color: #c05621; }
+        .note-box {
+            background-color: #ebf8ff;
+            border-left: 4px solid #3182ce;
+            padding: 15px;
+            margin-bottom: 25px;
+            font-size: 11pt;
+            border-radius: 0 4px 4px 0;
+        }
+        .highlight-text {
+            color: #c53030;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>BẢNG PHÂN TÍCH YÊU CẦU & ƯỚC TÍNH TIẾN ĐỘ CHUẨN</h1>
+    <div class="subtitle">
+        Dự án: Hệ thống Quản lý Sự kiện & Phòng họp Thông minh (Mini E-Cabinet)<br>
+        Kiến trúc khuyến nghị cho các bên thầu: Laravel Backend (Cung cấp API) + React Frontend (Web App)
+    </div>
+
+    <div class="note-box">
+        <strong>⚠️ ĐÁNH GIÁ TỔNG QUAN TỪ CHUYÊN GIA (RỦI RO CAO - DỄ LỖ VÌ SỤP TIẾN ĐỘ):</strong><br>
+        Hệ thống này qua 6 màn hình chi tiết đã lộ diện là một con <strong>Web App Quản lý Điều hành chuyên sâu</strong> chứ không dừng lại ở mức hiển thị thông tin. Khối lượng màn hình Frontend cực kỳ đồ sộ (riêng trang My Account mở ra hơn 7 trang độc lập) kết hợp logic Backend đa tầng. Nếu một cá nhân tự nhận làm trong 4 tuần thì 99% sẽ vỡ trận hoặc chịu lỗ nặng vì fix bug. Tiến độ an toàn cho một đội ngũ phát triển chuyên nghiệp phải từ <strong>6 đến 8 tuần</strong>.
+    </div>
+
+    <h2>1. Bóc Tách Phạm Vi Công Việc Toàn Diện (Scope of Work)</h2>
+    
+    <h3>Phân hệ 1: Giao diện Đại biểu & Trung tâm điều hướng (My Account)</h3>
+    <ul>
+        <li><strong>Trang chủ & Chi tiết sự kiện:</strong> Tự động phân loại sự kiện (Đang diễn ra, Sắp diễn ra, Đã kết thúc) bằng logic so sánh thời gian thực; Hệ thống Menu 9 Tabs tại trang chi tiết (Lịch trình, Diễn giả, Tài liệu, Hỏi đáp, Khảo sát...) kèm bộ đếm số lượng động.</li>
+        <li><strong>Trang cá nhân quản trị & điều hướng (My Account):</strong> Dashboard thu nhỏ hiển thị thông tin profile cá nhân, Role quyền hạn (Admin/Đại biểu). Gom các lối tắt dẫn tới các phân hệ độc lập: Lịch trình, Đại biểu & Diễn giả, Kho tài liệu PDF, Cài đặt tài khoản.</li>
+        <li><strong>Phân hệ tương tác trực tiếp:</strong> Module hiển thị mã QR cá nhân để quét check-in; Tính năng Hỏi đáp & Khảo sát trực tuyến (Form thu thập dữ liệu và đồng bộ trạng thái).</li>
+    </ul>
+
+    <h3>Phân hệ 2: Giao diện Quản trị cuộc họp nâng cao (Admin Dashboard)</h3>
+    <ul>
+        <li><strong>Quản lý cuộc họp (Mini E-Cabinet):</strong> Giao diện danh sách các phiên họp/cuộc họp con thuộc sự kiện cha; Hiển thị Badge thời gian (Tháng/Ngày) trực quan; Quản lý mã định danh cuộc họp (Mã nội bộ).</li>
+        <li><strong>Bộ lọc & Tìm kiếm đa trường:</strong> Ô tìm kiếm tự do theo 4 trường (Tên, mã, chủ trì, phòng họp); Lọc theo sự kiện cha (Dropdown); Thanh tab lọc nhanh theo trạng thái cuộc họp (Tất cả, Đang diễn ra, Sắp diễn ra, Đã kết thúc, Đã hủy) kèm bộ đếm số lượng; Tính năng reset bộ lọc nhanh một chạm.</li>
+        <li><strong>Logic tính toán & Nghiệp vụ nâng cao:</strong> Tự động tính toán tỉ lệ % chuyên cần/điểm danh của đại biểu trong từng phiên họp; Quản lý cấu trúc dữ liệu đa tầng (Sự kiện > Phiên họp > Mục chương trình & Tài liệu đính kèm); Liên kết file Ghi âm và tính năng hiển thị Báo cáo tóm tắt AI.</li>
+    </ul>
+
+    <h2>2. Kế Hoạch Triển Khai Thực Tế Cho Một Đội Ngũ (Ước Tính 6 - 8 Tuần)</h2>
+    <p>Để đảm bảo bàn giao sản phẩm chạy mượt mà tại hội trường lớn mà không bị sập tải hay lỗi layout, tiến độ chuẩn cần được phân bổ như sau:</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 20%;">Giai đoạn</th>
+                <th style="width: 50%;">Đầu mục công việc chi tiết</th>
+                <th style="width: 15%;" class="text-center">Mức độ khó</th>
+                <th style="width: 15%;" class="text-center">Thời gian</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="font-bold">Giai đoạn 1<br>(Tuần 1 - 2)</td>
+                <td>
+                    - Thiết kế Database chi tiết (Relationships: Events, Meetings, Users, Agendas, Documents).<br>
+                    - Cài đặt Base Source Code Laravel, cấu hình bảo mật Auth JWT, phân quyền Role (Admin/Đại biểu).<br>
+                    - Hoàn thiện toàn bộ API CRUD Sự kiện, Cuộc họp, và API bộ lọc nâng cao đa trường.
+                </td>
+                <td class="text-center"><span class="badge badge-med">Trung bình</span></td>
+                <td class="text-center font-bold">12 ngày công</td>
+            </tr>
+            <tr>
+                <td class="font-bold">Giai đoạn 2<br>(Tuần 3 - 4)</td>
+                <td>
+                    - Xây dựng Base Source React Frontend, thiết kế hệ thống Component dùng chung (Card, Button, Badge).<br>
+                    - Code giao diện Trang chủ Đại biểu, Trang chi tiết sự kiện (Hệ thống 9 Tabs) và Trang cá nhân điều hướng (My Account).<br>
+                    - Quản lý State phức tạp cho các bộ lọc phía Client.
+                </td>
+                <td class="text-center"><span class="badge badge-high">Cao</span></td>
+                <td class="text-center font-bold">12 ngày công</td>
+            </tr>
+            <tr>
+                <td class="font-bold">Giai đoạn 3<br>(Tuần 5 - 6)</td>
+                <td>
+                    - Code màn hình Admin: Quản lý cuộc họp, Form tạo mới cuộc họp, tích hợp bộ lọc nâng cao.<br>
+                    - Ghép nối API (Integration) toàn bộ phân hệ Đại biểu và Admin.<br>
+                    - Triển khai giải pháp thay thế Websocket bằng cơ chế HTTP Short Polling cho mục "Thông báo" và "Hỏi đáp".
+                </td>
+                <td class="text-center"><span class="badge badge-high">Cao</span></td>
+                <td class="text-center font-bold">12 ngày công</td>
+            </tr>
+            <tr>
+                <td class="font-bold">Giai đoạn 4<br>(Tuần 7 - 8)</td>
+                <td>
+                    - <span class="highlight-text">Kiểm thử chức năng (Functional Testing):</span> Khảo sát, tính % chuyên cần, tìm kiếm lọc nâng cao.<br>
+                    - <span class="highlight-text">Tối ưu Responsive Thiết bị:</span> Ép giao diện chạy mượt trên các dòng Mobile của Đại biểu.<br>
+                    - Sửa lỗi hệ thống (Bug fixing), tối ưu câu lệnh SQL, chạy thử nghiệm (Staging) và nghiệm thu bàn giao.
+                </td>
+                <td class="text-center"><span class="badge-high badge">Rất cao</span></td>
+                <td class="text-center font-bold">12 ngày công<br><small>(Dành riêng cho Test & Fix)</small></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>3. Khuyến Nghị Cho Khách Hàng (Dùng để đàm phán thầu)</h2>
+    <ul>
+        <li><strong>Về cơ chế thông báo và tương tác:</strong> Do yêu cầu tối ưu hóa chi phí hạ tầng và tránh rủi ro nghẽn mạng tại hội trường, các tính năng liên quan đến "Thông báo Realtime" hay "Hỏi đáp" nên được thống nhất triển khai theo cơ chế cập nhật tự động giãn cách (HTTP Polling) thay vì Websocket liên tục.</li>
+        <li><strong>Về các tính năng nâng cao (AI, Ghi âm):</strong> Để đảm bảo tiến độ bàn giao đúng hạn, trong giai đoạn 1 chỉ nên làm ở mức cấu hình đính kèm file ghi âm thông thường và hiển thị Mockup kết quả báo cáo AI. Phần tích hợp API AI tóm tắt tự động cần tách thành một giai đoạn riêng biệt để tránh đẩy chi phí gói thầu lên quá cao.</li>
+    </ul>
+
+</body>
+</html>
