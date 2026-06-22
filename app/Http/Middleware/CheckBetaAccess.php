@@ -52,6 +52,8 @@ class CheckBetaAccess
             '/auth/facebook/error',
             '/chinh-sach-bao-mat',
             '/privacy-policy',
+            '/dieu-khoan-dich-vu',
+            '/terms-of-service',
             '/sitemap.xml',
             '/robots.txt',
             '/favicon.ico',
