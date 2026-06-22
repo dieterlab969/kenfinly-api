@@ -53,6 +53,10 @@ Route::get('/privacy-policy',     fn () => view('privacy-policy'));
 Route::get('/dieu-khoan-dich-vu', fn () => view('terms-of-service'))->name('terms-of-service');
 Route::get('/terms-of-service',   fn () => view('terms-of-service'));
 
+// Data Deletion Instructions — required by Meta/Facebook App Review.
+Route::get('/huong-dan-xoa-du-lieu', fn () => view('data-deletion-instructions'))->name('data-deletion');
+Route::get('/data-deletion-instructions', fn () => view('data-deletion-instructions'));
+
 // Pricing page — standalone Blade view with currency-aware pricing.
 Route::get('/pricing', function (Request $request, CurrencyService $currencyService) {
     $currency       = $currencyService->detectUserCurrency($request);
