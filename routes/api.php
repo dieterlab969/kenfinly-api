@@ -61,6 +61,12 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 // /callback  → Google returns here; issues JWT then redirects to /auth/google/success
 Route::get('/v1/auth/google/redirect', [\App\Http\Controllers\Api\GoogleAuthController::class, 'redirect']);
 Route::get('/v1/auth/google/callback', [\App\Http\Controllers\Api\GoogleAuthController::class, 'callback']);
+
+// ── Facebook One-Click OAuth ──────────────────────────────────────────────
+// /redirect  → sends browser to Facebook OAuth dialog
+// /callback  → Facebook returns here; issues JWT then redirects to /auth/facebook/success
+Route::get('/v1/auth/facebook/redirect', [\App\Http\Controllers\Api\FacebookAuthController::class, 'redirect']);
+Route::get('/v1/auth/facebook/callback', [\App\Http\Controllers\Api\FacebookAuthController::class, 'callback']);
 Route::post('/waitlist', [\App\Http\Controllers\Api\WaitlistController::class, 'store']);
 Route::get('/auth/config', [AuthController::class, 'config']);
 Route::get('/settings/company', [PublicSettingsController::class, 'getCompanyInfo']);

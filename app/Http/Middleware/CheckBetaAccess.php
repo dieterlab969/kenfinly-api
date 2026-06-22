@@ -48,6 +48,8 @@ class CheckBetaAccess
             '/beta-access/*',
             '/auth/google/success',
             '/auth/google/error',
+            '/auth/facebook/success',
+            '/auth/facebook/error',
             '/sitemap.xml',
             '/robots.txt',
             '/favicon.ico',

@@ -16,6 +16,7 @@ import LetYouScreen from "./pages/LetYouScreen";
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import GoogleAuthSuccess from './pages/GoogleAuthSuccess';
+import FacebookAuthSuccess from './pages/FacebookAuthSuccess';
 import Home from './pages/Home';
 import VerifyPhoneNumber from './pages/VerifyPhoneNumber';
 import NotificationAllow from './pages/NotificationAllow';
@@ -149,6 +150,7 @@ function App(): ReactElement {
           <Route path="/SignIn" element={<SignIn />} />
           <Route path="/SignUp" element={<SignUp />} />
           <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
+          <Route path="/auth/facebook/success" element={<FacebookAuthSuccess />} />
           <Route path="/Home" element={<Home />} />
           <Route path="/VerifyPhoneNumber" element={<VerifyPhoneNumber />} />
           <Route path="/NotificationAllow" element={<NotificationAllow />} />
