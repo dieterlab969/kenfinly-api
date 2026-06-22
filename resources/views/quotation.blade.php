@@ -526,63 +526,72 @@
                             <tr>
                                 <td class="phase-cell">
                                     Giai đoạn 1
-                                    <small>Tuần 1 – 2</small>
+                                    <small>Tuần 1</small>
                                 </td>
                                 <td>
                                     <ul class="work-list">
                                         <li>Thiết kế Database chi tiết (Relationships: Events, Meetings, Users, Agendas, Documents).</li>
                                         <li>Cài đặt Base Source Code Laravel, cấu hình bảo mật Auth JWT, phân quyền Role (Admin / Đại biểu).</li>
-                                        <li>Hoàn thiện toàn bộ API CRUD Sự kiện, Cuộc họp, và API bộ lọc nâng cao đa trường.</li>
+                                        <li>Hoàn thiện API CRUD Sự kiện, Cuộc họp và bộ lọc tìm kiếm đa trường.</li>
                                     </ul>
                                 </td>
                                 <td class="center"><span class="badge badge-med">Trung bình</span></td>
-                                <td class="center"><strong>12 ngày công</strong></td>
+                                <td class="center"><strong>8 ngày công</strong></td>
                             </tr>
                             <tr>
                                 <td class="phase-cell">
                                     Giai đoạn 2
-                                    <small>Tuần 3 – 4</small>
+                                    <small>Tuần 2 – 3</small>
                                 </td>
                                 <td>
                                     <ul class="work-list">
-                                        <li>Xây dựng Base Source React Frontend, thiết kế hệ thống Component dùng chung (Card, Button, Badge).</li>
-                                        <li>Code giao diện Trang chủ Đại biểu, Trang chi tiết sự kiện (Hệ thống 9 Tabs) và Trang cá nhân điều hướng (My Account).</li>
-                                        <li>Quản lý State phức tạp cho các bộ lọc phía Client.</li>
+                                        <li>Xây dựng Base Source React Frontend.</li>
+                                        <li>Thiết kế hệ thống Component dùng chung (Card, Button, Badge).</li>
+                                        <li>Code giao diện Trang chủ Đại biểu.</li>
+                                        <li>Code Trang Chi tiết Sự kiện (9 Tabs).</li>
+                                        <li>Code Trang My Account.</li>
+                                        <li>Quản lý State và bộ lọc phía Client.</li>
                                     </ul>
                                 </td>
                                 <td class="center"><span class="badge badge-high">Cao</span></td>
-                                <td class="center"><strong>12 ngày công</strong></td>
+                                <td class="center"><strong>9 ngày công</strong></td>
                             </tr>
                             <tr>
                                 <td class="phase-cell">
                                     Giai đoạn 3
-                                    <small>Tuần 5 – 6</small>
+                                    <small>Tuần 4</small>
                                 </td>
                                 <td>
                                     <ul class="work-list">
-                                        <li>Code màn hình Admin: Quản lý cuộc họp, Form tạo mới cuộc họp, tích hợp bộ lọc nâng cao.</li>
-                                        <li>Ghép nối API (Integration) toàn bộ phân hệ Đại biểu và Admin.</li>
-                                        <li>Triển khai giải pháp thay thế Websocket bằng cơ chế HTTP Short Polling cho mục "Thông báo" và "Hỏi đáp".</li>
+                                        <li>Code màn hình Admin Dashboard.</li>
+                                        <li>Quản lý cuộc họp và Form tạo mới cuộc họp.</li>
+                                        <li>Tích hợp bộ lọc nâng cao.</li>
+                                        <li>Ghép nối API toàn bộ phân hệ Đại biểu và Admin.</li>
+                                        <li>Triển khai HTTP Short Polling cho Thông báo và Hỏi đáp.</li>
                                     </ul>
                                 </td>
                                 <td class="center"><span class="badge badge-high">Cao</span></td>
-                                <td class="center"><strong>12 ngày công</strong></td>
+                                <td class="center"><strong>8 ngày công</strong></td>
                             </tr>
                             <tr>
                                 <td class="phase-cell">
                                     Giai đoạn 4
-                                    <small>Tuần 7 – 8</small>
+                                    <small>Tuần 5 – 6</small>
                                 </td>
                                 <td>
                                     <ul class="work-list">
-                                        <li class="text-critical">Kiểm thử chức năng (Functional Testing): Khảo sát, tính % chuyên cần, tìm kiếm lọc nâng cao.</li>
-                                        <li class="text-critical">Tối ưu Responsive Thiết bị: Ép giao diện chạy mượt trên các dòng Mobile của Đại biểu.</li>
-                                        <li>Sửa lỗi hệ thống (Bug fixing), tối ưu câu lệnh SQL, chạy thử nghiệm (Staging) và nghiệm thu bàn giao.</li>
+                                        <li class="text-critical">Kiểm thử chức năng.</li>
+                                        <li class="text-critical">Kiểm thử luồng Khảo sát, Hỏi đáp, Chuyên cần.</li>
+                                        <li class="text-critical">Responsive Mobile.</li>
+                                        <li>Bug Fixing.</li>
+                                        <li>SQL Optimization.</li>
+                                        <li>Staging Deployment.</li>
+                                        <li>Nghiệm thu bàn giao.</li>
                                     </ul>
                                 </td>
                                 <td class="center"><span class="badge badge-vhigh">Rất cao</span></td>
                                 <td class="center">
-                                    <strong>12 ngày công</strong>
+                                    <strong>10 ngày công</strong>
                                     <br><small style="color:#64748b;font-size:11px">(Dành riêng Test &amp; Fix)</small>
                                 </td>
                             </tr>
@@ -591,7 +600,7 @@
                             <tr>
                                 <td colspan="2"><strong>Tổng cộng</strong></td>
                                 <td class="center"><span class="badge badge-vhigh">Rất cao</span></td>
-                                <td class="center"><strong>48 ngày công</strong></td>
+                                <td class="center"><strong>35 ngày công</strong></td>
                             </tr>
                         </tfoot>
                     </table>
