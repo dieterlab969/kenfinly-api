@@ -88,7 +88,30 @@ export const AuthProvider = ({ children }) => {
                 setUser(response.data.user);
             }
         } catch (error) {
-            console.error('Failed to fetch user:', error);
+            // On 401 try a silent token refresh before giving up.
+            // tymon/jwt-auth accepts expired tokens within the JWT_REFRESH_TTL window.
+            if (error.response?.status === 401) {
+                try {
+                    const refreshResponse = await axios.post('/api/auth/refresh');
+                    if (refreshResponse.data?.access_token) {
+                        const newToken = refreshResponse.data.access_token;
+                        localStorage.setItem('token', newToken);
+                        setToken(newToken);
+                        axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+
+                        // Retry fetching the user profile with the fresh token
+                        const retryResponse = await axios.get('/api/auth/me');
+                        if (retryResponse.data.success) {
+                            setUser(retryResponse.data.user);
+                            return; // success — skip the logout below
+                        }
+                    }
+                } catch {
+                    // Refresh window expired or network error — fall through to logout
+                }
+            } else {
+                console.error('Failed to fetch user:', error);
+            }
             logout();
         } finally {
             setLoading(false);
