@@ -49,6 +49,10 @@ Route::get('/', function () {
 Route::get('/chinh-sach-bao-mat', fn () => view('privacy-policy'))->name('privacy-policy');
 Route::get('/privacy-policy',     fn () => view('privacy-policy'));
 
+// Terms of Service — public Blade page (no auth middleware).
+Route::get('/dieu-khoan-dich-vu', fn () => view('terms-of-service'))->name('terms-of-service');
+Route::get('/terms-of-service',   fn () => view('terms-of-service'));
+
 // Pricing page — standalone Blade view with currency-aware pricing.
 Route::get('/pricing', function (Request $request, CurrencyService $currencyService) {
     $currency       = $currencyService->detectUserCurrency($request);
