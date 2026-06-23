@@ -26,6 +26,7 @@ import setting19 from '../assets/images/setting/setting19.svg'
 import setting20 from '../assets/images/setting/setting20.svg'
 import setting21 from '../assets/images/setting/setting21.svg'
 import setting22 from '../assets/images/setting/setting22.svg'
+import settingWallet from '../assets/images/setting/setting-wallet.svg'
 import { useDarkMode } from './DarkModeContext.tsx';
 
 
@@ -116,6 +117,7 @@ const Setting: React.FC = () => {
                             <li className="border-0"><Link to="/PieChart">Pie Chart</Link></li>
                         </ul>
                     </div>
+                    <SettingOption to="/WalletManagement" icon={settingWallet} title="Wallets & Accounts" />
                     <SettingOption to="/BankAndCard" icon={setting4} title="Banks & Cards" />
                     <SettingOption to="/Payment" icon={setting5} title="Payment Methods" />
                     <SettingOption to="/AutomaticPayment" icon={setting6} title="Automatic Payments" />
