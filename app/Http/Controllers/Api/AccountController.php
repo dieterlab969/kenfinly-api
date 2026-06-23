@@ -55,11 +55,13 @@ class AccountController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'name'     => 'required|string|max:255',
-            'balance'  => 'required|numeric',
-            'currency' => 'nullable|string|max:3',
-            'icon'     => 'nullable|string|max:50',
-            'color'    => 'nullable|string|max:7',
+            'name'         => 'required|string|max:255',
+            'balance'      => 'required|numeric',
+            'currency'     => 'nullable|string|max:3',
+            'icon'         => 'nullable|string|max:50',
+            'color'        => 'nullable|string|max:7',
+            'bank_name'    => 'nullable|string|max:100',
+            'account_type' => 'nullable|string|in:wallet,bank,savings,credit_card,investment',
         ]);
 
         if ($validator->fails()) {
@@ -72,12 +74,14 @@ class AccountController extends Controller
         $user = auth('api')->user();
 
         $account = Account::create([
-            'user_id'  => $user->id,
-            'name'     => $request->name,
-            'balance'  => $request->balance ?? 0,
-            'currency' => $request->currency ?? 'USD',
-            'icon'     => $request->icon,
-            'color'    => $request->color,
+            'user_id'      => $user->id,
+            'name'         => $request->name,
+            'balance'      => $request->balance ?? 0,
+            'currency'     => $request->currency ?? 'USD',
+            'icon'         => $request->icon,
+            'color'        => $request->color,
+            'bank_name'    => $request->bank_name,
+            'account_type' => $request->account_type ?? 'wallet',
         ]);
 
         return response()->json([
@@ -136,11 +140,13 @@ class AccountController extends Controller
     public function update(Request $request, int $id): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'name'     => 'sometimes|required|string|max:255',
-            'balance'  => 'sometimes|required|numeric',
-            'currency' => 'nullable|string|max:3',
-            'icon'     => 'nullable|string|max:50',
-            'color'    => 'nullable|string|max:7',
+            'name'         => 'sometimes|required|string|max:255',
+            'balance'      => 'sometimes|required|numeric',
+            'currency'     => 'nullable|string|max:3',
+            'icon'         => 'nullable|string|max:50',
+            'color'        => 'nullable|string|max:7',
+            'bank_name'    => 'nullable|string|max:100',
+            'account_type' => 'nullable|string|in:wallet,bank,savings,credit_card,investment',
         ]);
 
         if ($validator->fails()) {
