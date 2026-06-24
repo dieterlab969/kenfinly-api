@@ -75,8 +75,6 @@ class AccountModelTest extends TestCase
             'currency',
             'icon',
             'color',
-            'bank_name',
-            'account_type',
         ];
 
         $this->assertEquals($expected, $account->getFillable());
@@ -113,22 +111,18 @@ class AccountModelTest extends TestCase
         Account::where('user_id', $user->id)->delete();
 
         $account = Account::create([
-            'user_id'      => $user->id,
-            'name'         => 'Savings',
-            'balance'      => 500.00,
-            'currency'     => 'VND',
-            'icon'         => '💰',
-            'color'        => '#3b82f6',
-            'bank_name'    => 'Vietcombank',
-            'account_type' => 'savings',
+            'user_id'  => $user->id,
+            'name'     => 'Savings',
+            'balance'  => 500.00,
+            'currency' => 'VND',
+            'icon'     => '💰',
+            'color'    => '#3b82f6',
         ]);
 
         $this->assertDatabaseHas('accounts', [
-            'user_id'      => $user->id,
-            'name'         => 'Savings',
-            'currency'     => 'VND',
-            'bank_name'    => 'Vietcombank',
-            'account_type' => 'savings',
+            'user_id'  => $user->id,
+            'name'     => 'Savings',
+            'currency' => 'VND',
         ]);
         $this->assertNotNull($account->id);
     }
@@ -457,17 +451,13 @@ class AccountModelTest extends TestCase
         $user    = $this->makeUser();
         Account::where('user_id', $user->id)->delete();
         $account = $this->makeAccount($user, [
-            'icon'         => '🏦',
-            'color'        => '#6366f1',
-            'bank_name'    => 'BIDV',
-            'account_type' => 'bank',
+            'icon'  => '💰',
+            'color' => '#6366f1',
         ]);
 
         $account->refresh();
 
-        $this->assertEquals('🏦',    $account->icon);
+        $this->assertEquals('💰',      $account->icon);
         $this->assertEquals('#6366f1', $account->color);
-        $this->assertEquals('BIDV',    $account->bank_name);
-        $this->assertEquals('bank',    $account->account_type);
     }
 }

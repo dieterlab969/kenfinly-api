@@ -21,8 +21,6 @@ class Account extends Model
         'currency',
         'icon',
         'color',
-        'bank_name',
-        'account_type',
     ];
 
     protected $casts = [

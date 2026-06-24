@@ -5,29 +5,25 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Extend the accounts table with two optional metadata columns:
+ * Ensure the accounts table has an account_type column for compatibility.
+ * Defaults to 'wallet' — the only type used in the standalone wallet model.
  *
- *  bank_name    — the institution name (e.g. "Vietcombank", "BIDV"). Nullable
- *                 so that cash-wallet and non-bank accounts are not forced to fill it.
- *
- *  account_type — the category of the account. Allowed values:
- *                 wallet | bank | savings | credit_card | investment
- *                 Defaults to "wallet" so that existing rows are unchanged.
+ * Note: bank_name was removed as part of the YAGNI simplification; the Account
+ * entity is a standalone wallet and carries no bank-specific metadata.
  */
 return new class extends Migration
 {
     public function up(): void
     {
         Schema::table('accounts', function (Blueprint $table) {
-            $table->string('bank_name', 100)->nullable()->after('color');
-            $table->string('account_type', 30)->default('wallet')->after('bank_name');
+            $table->string('account_type', 30)->default('wallet')->after('color');
         });
     }
 
     public function down(): void
     {
         Schema::table('accounts', function (Blueprint $table) {
-            $table->dropColumn(['bank_name', 'account_type']);
+            $table->dropColumn('account_type');
         });
     }
 };

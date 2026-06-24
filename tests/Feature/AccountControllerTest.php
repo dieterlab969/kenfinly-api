@@ -129,13 +129,11 @@ class AccountControllerTest extends TestCase
         $user = $this->makeUser();
 
         $payload = [
-            'name'         => 'Holiday Fund',
-            'balance'      => 1000.50,
-            'currency'     => 'USD',
-            'icon'         => '🏖️',
-            'color'        => '#f59e0b',
-            'bank_name'    => 'Chase',
-            'account_type' => 'savings',
+            'name'     => 'Holiday Fund',
+            'balance'  => 1000.50,
+            'currency' => 'USD',
+            'icon'     => '🏖️',
+            'color'    => '#f59e0b',
         ];
 
         $this->actingAs($user, 'api')
@@ -170,17 +168,6 @@ class AccountControllerTest extends TestCase
             ->postJson('/api/accounts', ['name' => 'Quick Wallet', 'balance' => 0])
             ->assertCreated()
             ->assertJson(['account' => ['currency' => 'USD']]);
-    }
-
-    /** @test */
-    public function store_defaults_account_type_to_wallet_when_not_provided(): void
-    {
-        $user = $this->makeUser();
-
-        $this->actingAs($user, 'api')
-            ->postJson('/api/accounts', ['name' => 'Quick Wallet', 'balance' => 0])
-            ->assertCreated()
-            ->assertJson(['account' => ['account_type' => 'wallet']]);
     }
 
     /** @test */
@@ -226,50 +213,6 @@ class AccountControllerTest extends TestCase
             ->postJson('/api/accounts', ['name' => str_repeat('a', 256), 'balance' => 0])
             ->assertUnprocessable()
             ->assertJsonStructure(['errors' => ['name']]);
-    }
-
-    /** @test */
-    public function store_rejects_invalid_account_type(): void
-    {
-        $user = $this->makeUser();
-
-        $this->actingAs($user, 'api')
-            ->postJson('/api/accounts', [
-                'name'         => 'Bad Type',
-                'balance'      => 0,
-                'account_type' => 'not_a_real_type',
-            ])
-            ->assertUnprocessable()
-            ->assertJsonStructure(['errors' => ['account_type']]);
-    }
-
-    /**
-     * @test
-     * @dataProvider validAccountTypeProvider
-     */
-    public function store_accepts_all_valid_account_types(string $type): void
-    {
-        $user = $this->makeUser();
-
-        $this->actingAs($user, 'api')
-            ->postJson('/api/accounts', [
-                'name'         => "My {$type} Account",
-                'balance'      => 0,
-                'account_type' => $type,
-            ])
-            ->assertCreated()
-            ->assertJson(['account' => ['account_type' => $type]]);
-    }
-
-    public static function validAccountTypeProvider(): array
-    {
-        return [
-            'wallet'      => ['wallet'],
-            'bank'        => ['bank'],
-            'savings'     => ['savings'],
-            'credit_card' => ['credit_card'],
-            'investment'  => ['investment'],
-        ];
     }
 
     /** @test */
@@ -402,19 +345,6 @@ class AccountControllerTest extends TestCase
     }
 
     /** @test */
-    public function update_rejects_invalid_account_type(): void
-    {
-        $user = $this->makeUser();
-        Account::where('user_id', $user->id)->delete();
-        $account = $this->makeAccount($user);
-
-        $this->actingAs($user, 'api')
-            ->putJson("/api/accounts/{$account->id}", ['account_type' => 'invalid'])
-            ->assertUnprocessable()
-            ->assertJsonStructure(['errors' => ['account_type']]);
-    }
-
-    /** @test */
     public function update_rejects_empty_name_when_name_is_provided(): void
     {
         $user = $this->makeUser();
@@ -437,27 +367,6 @@ class AccountControllerTest extends TestCase
         $this->actingAs($user, 'api')
             ->putJson("/api/accounts/{$account->id}", ['name' => 'Hijacked'])
             ->assertNotFound();
-    }
-
-    /** @test */
-    public function update_can_set_bank_name_and_account_type(): void
-    {
-        $user = $this->makeUser();
-        Account::where('user_id', $user->id)->delete();
-        $account = $this->makeAccount($user);
-
-        $this->actingAs($user, 'api')
-            ->putJson("/api/accounts/{$account->id}", [
-                'bank_name'    => 'Vietcombank',
-                'account_type' => 'bank',
-            ])
-            ->assertOk()
-            ->assertJson([
-                'account' => [
-                    'bank_name'    => 'Vietcombank',
-                    'account_type' => 'bank',
-                ],
-            ]);
     }
 
     // ── destroy ───────────────────────────────────────────────────────────
