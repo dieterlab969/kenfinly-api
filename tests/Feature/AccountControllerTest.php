@@ -160,14 +160,61 @@ class AccountControllerTest extends TestCase
     }
 
     /** @test */
-    public function store_defaults_currency_to_usd_when_not_provided(): void
+    public function store_defaults_currency_to_usd_when_not_provided_and_locale_is_en(): void
     {
         $user = $this->makeUser();
+        $this->app->setLocale('en');
 
         $this->actingAs($user, 'api')
             ->postJson('/api/accounts', ['name' => 'Quick Wallet', 'balance' => 0])
             ->assertCreated()
             ->assertJson(['account' => ['currency' => 'USD']]);
+    }
+
+    /** @test */
+    public function store_defaults_currency_based_on_current_locale_vi_maps_to_vnd(): void
+    {
+        $user = $this->makeUser();
+        $this->app->setLocale('vi');
+
+        $this->actingAs($user, 'api')
+            ->postJson('/api/accounts', ['name' => 'Ví của tôi', 'balance' => 0])
+            ->assertCreated()
+            ->assertJson(['account' => ['currency' => 'VND']]);
+
+        $this->assertDatabaseHas('accounts', [
+            'user_id'  => $user->id,
+            'name'     => 'Ví của tôi',
+            'currency' => 'VND',
+        ]);
+    }
+
+    /** @test */
+    public function store_falls_back_to_usd_when_locale_is_not_in_the_map(): void
+    {
+        $user = $this->makeUser();
+        $this->app->setLocale('ja'); // Japanese — not in locale_currency_map
+
+        $this->actingAs($user, 'api')
+            ->postJson('/api/accounts', ['name' => 'Unknown Locale Wallet', 'balance' => 0])
+            ->assertCreated()
+            ->assertJson(['account' => ['currency' => 'USD']]);
+    }
+
+    /** @test */
+    public function store_uses_explicitly_provided_currency_over_locale_default(): void
+    {
+        $user = $this->makeUser();
+        $this->app->setLocale('en'); // locale says USD, but request overrides
+
+        $this->actingAs($user, 'api')
+            ->postJson('/api/accounts', [
+                'name'     => 'Override Wallet',
+                'balance'  => 0,
+                'currency' => 'VND',
+            ])
+            ->assertCreated()
+            ->assertJson(['account' => ['currency' => 'VND']]);
     }
 
     /** @test */

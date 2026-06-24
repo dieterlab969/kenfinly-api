@@ -16,6 +16,25 @@ use Illuminate\Support\Facades\Validator;
 class AccountController extends Controller
 {
     /**
+     * Resolve the default currency for a new account.
+     *
+     * Reads the application's current locale (set by LocalizationMiddleware
+     * or the user's language preference) and maps it to a currency code via
+     * the `currency.locale_currency_map` config entry.
+     *
+     * Falls back to 'USD' when the locale is not present in the map.
+     *
+     * @return string ISO-4217 currency code, e.g. 'USD' or 'VND'.
+     */
+    private function defaultCurrencyForLocale(): string
+    {
+        $locale = app()->getLocale();
+        $map    = config('currency.locale_currency_map', []);
+
+        return $map[$locale] ?? 'USD';
+    }
+
+    /**
      * List all accounts for the authenticated user.
      *
      * Returns every account owned by the current user together with a
@@ -75,7 +94,7 @@ class AccountController extends Controller
             'user_id'  => $user->id,
             'name'     => $request->name,
             'balance'  => $request->balance ?? 0,
-            'currency' => $request->currency ?? 'USD',
+            'currency' => $request->currency ?? $this->defaultCurrencyForLocale(),
             'icon'     => $request->icon,
             'color'    => $request->color,
         ]);
