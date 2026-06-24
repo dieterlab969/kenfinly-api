@@ -129,8 +129,11 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/commitments/{commitment}/complete', [CommitmentController::class, 'complete']);
         Route::post('/commitments/{commitment}/kill', [CommitmentController::class, 'kill']);
 
-        // Categories
-        Route::get('/categories', [CategoryController::class, 'index']);
+        // Categories — GET (tree), POST/PUT/DELETE (user-owned only; 403 for system)
+        Route::get('/categories',              [CategoryController::class, 'index']);
+        Route::post('/categories',             [CategoryController::class, 'store']);
+        Route::put('/categories/{category}',   [CategoryController::class, 'update']);
+        Route::delete('/categories/{category}',[CategoryController::class, 'destroy']);
 
         // Accounts
         Route::apiResource('accounts', AccountController::class);

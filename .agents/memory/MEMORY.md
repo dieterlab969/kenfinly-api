@@ -1,9 +1,4 @@
-- [Halo dashboard architecture](halo-dashboard.md) — /halo is a separate protected route; HaloLayout wraps HaloDashboard; CSS lives in resources/css/halo.css (imported via app.css)
-- [JWT soft auth mode](jwt-soft-auth.md) — auth:api middleware never returns 401 for missing tokens; user resolves to null; tests must assert 401 OR 422, not hard 401
-- [Photo upload field name](photo-upload.md) — POST /api/transactions/{id}/photos uses field `photo` (singular, not `photos`); intervention/image must be installed for this route to work
-- [Language model required field](language-model.md) — Language::create() requires `native_name` (NOT NULL); always include name, native_name, code, is_active, is_default
-- [AddTransactionModal defaultType](add-transaction-modal.md) — accepts optional `defaultType` prop; useEffect resets type on open; added to support FAB income/expense pre-selection
-- [Halo Invisible Design](halo-invisible-design.md) — 12 PM threshold logic, auto-close, halo_histories table, frontend start_time+duration pattern.
-- [Scramble docs routing](scramble-docs-routing.md) — /docs/* must be excluded from SPA catch-all in web.php; use where('any', '^(?!docs).*') on the catch-all route
-- [TSX migration & template integration](tsx-migration.md) — Payfast eWallet template at resources/js/template/; entry is app.tsx; Bootstrap JS kept via npm bootstrap package; shell-quote blocks concurrently (removed); react-flags-select IS installable
-- [DB cart storage (darryldecode/cart)](db-cart-storage.md) — Cart uses DatabaseCartStorage; session key = session()->getId(); base64+serialize for Postgres safety; cart_session_key on orders for stale-order scoping
+- [Category management schema](category-schema.md) — categories has user_id (nullable=system) + is_system; policy guards update/delete
+- [Auth register flow](auth-register.md) — register auto-verifies email (MVP mode); verification_expires_at NOT in response
+- [Route group structure](route-groups.md) — user API routes live inside auth:api → halo.integrity nesting; URL is /api/<resource> (no v1 prefix in this group)
+- [Frontend build requirement](frontend-build.md) — PHP serves pre-compiled Vite bundle; must run npm run build after any TSX/JSX changes

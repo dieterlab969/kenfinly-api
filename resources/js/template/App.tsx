@@ -114,6 +114,7 @@ import SaveAsDraft from './pages/SaveAsDraft';
 import CustomerScreen from './pages/CustomerScreen';
 import BankAndCard from './pages/BankAndCard';
 import WalletManagement from './pages/WalletManagement';
+import CategoryManagement from './pages/CategoryManagement';
 import ContactUs from './pages/ContactUs';
 import Subscription from './pages/Subscription';
 import Security from './pages/Security';
@@ -249,6 +250,7 @@ function App(): ReactElement {
           <Route path="/CustomerScreen" element={<CustomerScreen />} />
           <Route path="/BankAndCard" element={<BankAndCard />} />
           <Route path="/WalletManagement" element={<WalletManagement />} />
+          <Route path="/CategoryManagement" element={<CategoryManagement />} />
           <Route path="/ContactUs" element={<ContactUs />} />
           <Route path="/Subscription" element={<Subscription />} />
           <Route path="/Security" element={<Security />} />

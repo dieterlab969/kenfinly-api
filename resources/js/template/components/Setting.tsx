@@ -113,6 +113,7 @@ const Setting: React.FC = () => {
                         </ul>
                     </div>
                     <SettingOption to="/WalletManagement" icon={settingWallet} title="Wallets & Accounts" />
+                    <SettingOption to="/CategoryManagement" icon={setting3} title="Categories" />
                     <SettingOption to="/BankAndCard" icon={setting4} title="Banks & Cards" />
                     <SettingOption to="/Payment" icon={setting5} title="Payment Methods" />
                     <SettingOption to="/AutomaticPayment" icon={setting6} title="Automatic Payments" />
