@@ -68,10 +68,10 @@ const COLOR_PRESETS: string[] = [
 ];
 
 const SORT_OPTIONS: { value: string; label: string }[] = [
-  { value: 'name_asc',  label: 'Name A → Z' },
-  { value: 'name_desc', label: 'Name Z → A' },
-  { value: 'type',      label: 'Type' },
   { value: 'system_first', label: 'System first' },
+  { value: 'name_asc',     label: 'Name A → Z' },
+  { value: 'name_desc',    label: 'Name Z → A' },
+  { value: 'type',         label: 'By type' },
 ];
 
 const EMPTY_FORM: CategoryForm = {
@@ -97,14 +97,14 @@ function flattenTree(tree: Category[]): Category[] {
 }
 
 function sortTree(tree: Category[], key: string): Category[] {
-  const sorted = [...tree];
+  const arr = [...tree];
   switch (key) {
-    case 'name_asc':       sorted.sort((a, b) => a.name.localeCompare(b.name)); break;
-    case 'name_desc':      sorted.sort((a, b) => b.name.localeCompare(a.name)); break;
-    case 'type':           sorted.sort((a, b) => a.type.localeCompare(b.type)); break;
-    case 'system_first':   sorted.sort((a, b) => (b.is_system ? 1 : 0) - (a.is_system ? 1 : 0)); break;
+    case 'name_asc':     return arr.sort((a, b) => a.name.localeCompare(b.name));
+    case 'name_desc':    return arr.sort((a, b) => b.name.localeCompare(a.name));
+    case 'type':         return arr.sort((a, b) => a.type.localeCompare(b.type));
+    case 'system_first': return arr.sort((a, b) => (b.is_system ? 1 : 0) - (a.is_system ? 1 : 0));
+    default:             return arr;
   }
-  return sorted;
 }
 
 function isValidHex(hex: string): boolean {
@@ -112,45 +112,13 @@ function isValidHex(hex: string): boolean {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Sub-components
-// ─────────────────────────────────────────────────────────────────────────────
-
-const SystemBadge: React.FC = () => (
-  <span style={{
-    display: 'inline-flex', alignItems: 'center', gap: 3,
-    fontSize: 10, fontWeight: 700, letterSpacing: '0.4px',
-    color: 'var(--sub-text-color)',
-    background: 'rgba(108,61,230,0.08)',
-    border: '1px solid rgba(108,61,230,0.18)',
-    borderRadius: 6, padding: '2px 7px',
-    userSelect: 'none',
-  }}>
-    🔒 System
-  </span>
-);
-
-const TypeBadge: React.FC<{ type: 'expense' | 'income' }> = ({ type }) => (
-  <span style={{
-    display: 'inline-block',
-    fontSize: 10, fontWeight: 700, letterSpacing: '0.4px',
-    color: type === 'income' ? '#4ADE80' : '#F97316',
-    background: type === 'income' ? 'rgba(74,222,128,0.1)' : 'rgba(249,115,22,0.1)',
-    border: `1px solid ${type === 'income' ? 'rgba(74,222,128,0.25)' : 'rgba(249,115,22,0.25)'}`,
-    borderRadius: 6, padding: '2px 7px',
-    userSelect: 'none',
-  }}>
-    {type === 'income' ? '↑ Income' : '↓ Expense'}
-  </span>
-);
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Main component
 // ─────────────────────────────────────────────────────────────────────────────
 
 const CategoryManagement: React.FC = () => {
   // ── Data ────────────────────────────────────────────────────────────────────
-  const [tree,    setTree]    = useState<Category[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [tree,     setTree]    = useState<Category[]>([]);
+  const [loading,  setLoading] = useState<boolean>(true);
   const [errorMsg, setErrorMsg] = useState<string>('');
 
   // ── List UI ─────────────────────────────────────────────────────────────────
@@ -165,7 +133,7 @@ const CategoryManagement: React.FC = () => {
   const [form,      setForm]      = useState<CategoryForm>(EMPTY_FORM);
   const [editingId, setEditingId] = useState<number | null>(null);
 
-  // ── Form state ──────────────────────────────────────────────────────────────
+  // ── Form feedback ───────────────────────────────────────────────────────────
   const [formErrors,   setFormErrors]   = useState<ApiValidationErrors>({});
   const [formGenError, setFormGenError] = useState<string>('');
   const [saving,       setSaving]       = useState<boolean>(false);
@@ -196,17 +164,14 @@ const CategoryManagement: React.FC = () => {
 
   const flat = useMemo<Category[]>(() => flattenTree(tree), [tree]);
 
-  /** Top-level parents only (for the "parent" dropdown in the form) */
   const topLevelOptions = useMemo<Category[]>(
     () => flat.filter((c) => c.parent_id === null),
     [flat],
   );
 
-  /** Visible tree after search + type filter + sort */
   const displayedTree = useMemo<Category[]>(() => {
     const q = search.trim().toLowerCase();
     let filtered = tree;
-
     if (typeFilter !== 'all') {
       filtered = filtered.filter((c) => c.type === typeFilter);
     }
@@ -220,7 +185,7 @@ const CategoryManagement: React.FC = () => {
     return sortTree(filtered, sortKey);
   }, [tree, search, typeFilter, sortKey]);
 
-  // ─── Navigation ─────────────────────────────────────────────────────────────
+  // ─── Navigation helpers ──────────────────────────────────────────────────────
 
   const showPageMsg = (type: PageMessage['type'], text: string): void => {
     setPageMsg({ type, text });
@@ -260,26 +225,22 @@ const CategoryManagement: React.FC = () => {
     setView('edit');
   };
 
-  const toggleCollapse = (id: number): void => {
+  const toggleCollapse = (id: number): void =>
     setCollapsed((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
-  };
 
-  // ─── Create ──────────────────────────────────────────────────────────────────
+  // ─── CRUD handlers ────────────────────────────────────────────────────────────
 
   const handleCreate = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setSaving(true);
     setFormErrors({});
     setFormGenError('');
-
     const resolvedColor = form.customColor && isValidHex(form.customColor)
-      ? form.customColor
-      : form.color;
-
+      ? form.customColor : form.color;
     try {
       await api.post('/categories', {
         name:      form.name,
@@ -304,19 +265,14 @@ const CategoryManagement: React.FC = () => {
     }
   };
 
-  // ─── Update ──────────────────────────────────────────────────────────────────
-
   const handleUpdate = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     if (!editingId) return;
     setSaving(true);
     setFormErrors({});
     setFormGenError('');
-
     const resolvedColor = form.customColor && isValidHex(form.customColor)
-      ? form.customColor
-      : form.color;
-
+      ? form.customColor : form.color;
     try {
       await api.put(`/categories/${editingId}`, {
         name:      form.name,
@@ -329,8 +285,8 @@ const CategoryManagement: React.FC = () => {
       goToList();
       await fetchCategories();
     } catch (err: unknown) {
-      const ax = err as { response?: { data?: { errors?: ApiValidationErrors; message?: string; status?: number } } };
-      if (ax.response?.data?.status === 403 || (ax as { response?: { status?: number } }).response?.status === 403) {
+      const ax = err as { response?: { status?: number; data?: { errors?: ApiValidationErrors; message?: string } } };
+      if (ax.response?.status === 403) {
         setFormGenError('You cannot edit a system category.');
       } else {
         const errs = ax.response?.data?.errors ?? {};
@@ -344,8 +300,6 @@ const CategoryManagement: React.FC = () => {
       setSaving(false);
     }
   };
-
-  // ─── Delete ──────────────────────────────────────────────────────────────────
 
   const handleDelete = async (id: number): Promise<void> => {
     setDeleting(true);
@@ -363,17 +317,19 @@ const CategoryManagement: React.FC = () => {
     }
   };
 
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Shared form atoms
-  // ─────────────────────────────────────────────────────────────────────────────
+  // ─── Shared form atoms ────────────────────────────────────────────────────────
 
   const updateForm = (patch: Partial<CategoryForm>): void =>
     setForm((prev) => ({ ...prev, ...patch }));
 
+  const effectiveColor = form.customColor && isValidHex(form.customColor)
+    ? form.customColor
+    : form.color;
+
   const iconPickerRow = (): React.ReactNode => (
-    <div className="mb-3">
-      <p style={{ color: 'var(--sub-text-color)', fontSize: 13, marginBottom: 8 }}>Icon</p>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+    <div className="personal-name mb-3">
+      <label style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>Icon</label>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
         {ICON_PRESETS.map((ic) => (
           <button
             key={ic}
@@ -381,7 +337,7 @@ const CategoryManagement: React.FC = () => {
             onClick={() => updateForm({ icon: ic })}
             style={{
               width: 40, height: 40, borderRadius: 10,
-              border: `1px solid ${form.icon === ic ? 'var(--primary-color, #6C3DE6)' : 'var(--sub-bg-color)'}`,
+              border: `1px solid ${form.icon === ic ? 'var(--primary-color, #6C3DE6)' : 'rgba(108,61,230,0.15)'}`,
               background: form.icon === ic ? 'rgba(108,61,230,0.12)' : 'var(--sub-bg-color)',
               fontSize: 20, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -398,9 +354,9 @@ const CategoryManagement: React.FC = () => {
   );
 
   const colorPickerRow = (): React.ReactNode => (
-    <div className="mb-3">
-      <p style={{ color: 'var(--sub-text-color)', fontSize: 13, marginBottom: 8 }}>Color</p>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+    <div className="personal-name mb-3">
+      <label style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>Color</label>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8, marginBottom: 10 }}>
         {COLOR_PRESETS.map((c) => (
           <button
             key={c}
@@ -409,7 +365,7 @@ const CategoryManagement: React.FC = () => {
             style={{
               width: 28, height: 28, borderRadius: '50%',
               background: c, border: 'none', cursor: 'pointer',
-              outline: (form.customColor ? form.customColor : form.color) === c ? `3px solid ${c}` : 'none',
+              outline: form.color === c && !form.customColor ? `3px solid ${c}` : 'none',
               outlineOffset: 2,
               transform: form.color === c && !form.customColor ? 'scale(1.15)' : 'scale(1)',
               transition: 'transform 0.12s',
@@ -420,255 +376,213 @@ const CategoryManagement: React.FC = () => {
       </div>
       <input
         type="text"
-        className="form-control"
+        className="px-0"
         placeholder="#RRGGBB  — custom hex"
         value={form.customColor}
         onChange={(e) => updateForm({ customColor: e.target.value })}
-        style={{ fontSize: 13, maxWidth: 200 }}
+        style={{ maxWidth: 200, fontSize: 13 }}
       />
       {form.customColor && !isValidHex(form.customColor) && (
-        <p style={{ color: '#F87171', fontSize: 12, marginTop: 4 }}>
+        <p style={{ color: '#EF4444', fontSize: 12, marginTop: 4 }}>
           Must be a valid hex colour (e.g. #FF6B35)
         </p>
       )}
     </div>
   );
 
-  const effectiveColor = form.customColor && isValidHex(form.customColor)
-    ? form.customColor
-    : form.color;
-
   const previewChip = (): React.ReactNode => (
-    <div style={{
-      display: 'flex', alignItems: 'center', gap: 12,
-      padding: '12px 16px',
-      background: 'var(--sub-bg-color)',
-      borderRadius: 14, marginBottom: 20,
-      border: '1px solid var(--border-color, rgba(108,61,230,0.12))',
-    }}>
-      <div style={{
-        width: 44, height: 44, borderRadius: 12,
-        background: effectiveColor ? `${effectiveColor}22` : 'rgba(108,61,230,0.12)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24,
-      }}>
+    <div
+      className="transfer-first"
+      style={{ marginBottom: 20, pointerEvents: 'none' }}
+    >
+      <div
+        className="bank-img"
+        style={{
+          background: effectiveColor ? `${effectiveColor}22` : 'rgba(108,61,230,0.12)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 26, flexShrink: 0,
+        }}
+      >
         {form.icon}
       </div>
-      <div>
-        <p style={{ fontWeight: 700, margin: 0, color: 'var(--text-color)' }}>
-          {form.name || 'Category Name'}
-        </p>
-        <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
-          <TypeBadge type={form.type} />
+      <div className="bank-details" style={{ flex: 1, minWidth: 0 }}>
+        <h2 style={{ marginBottom: 2 }}>{form.name || 'Category Name'}</h2>
+        <div className="bank-card">
+          <span
+            style={{
+              color: form.type === 'income' ? '#4ADE80' : '#F97316',
+              fontSize: 12, fontWeight: 600,
+              background: form.type === 'income' ? 'rgba(74,222,128,0.15)' : 'rgba(249,115,22,0.15)',
+              padding: '1px 7px', borderRadius: 20,
+            }}
+          >
+            {form.type === 'income' ? '↑ Income' : '↓ Expense'}
+          </span>
         </div>
       </div>
-      <div style={{
-        marginLeft: 'auto', width: 14, height: 14, borderRadius: '50%',
-        background: effectiveColor,
-      }} />
+      <div className="bank-active-sec">
+        <div style={{ width: 16, height: 16, borderRadius: '50%', background: effectiveColor }} />
+      </div>
     </div>
   );
 
   const fieldError = (field: string): React.ReactNode =>
     formErrors[field] ? (
-      <p style={{ color: '#F87171', fontSize: 12, marginTop: 4 }}>
+      <div className="invalid-feedback d-block" style={{ fontSize: 12 }}>
         {formErrors[field][0]}
-      </p>
+      </div>
     ) : null;
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Shared form UI (used by both Add and Edit views)
+  // Header title map (drives the top bar text for all views)
   // ─────────────────────────────────────────────────────────────────────────────
 
-  const renderForm = (isEdit: boolean): React.ReactNode => (
-    <div className="body-main-sec">
-      <div className="header-nav-fixed" style={{ paddingBottom: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-          <button
-            type="button"
-            onClick={goToList}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
-            aria-label="Back"
-          >
-            <img src={BackBtnIcon} alt="back" style={{ width: 28 }} />
-          </button>
-          <h1 className="title" style={{ margin: 0 }}>
-            {isEdit ? 'Edit Category' : 'New Category'}
-          </h1>
-        </div>
-      </div>
+  const headerTitle: Record<PageView, string> = {
+    list: 'Categories',
+    add:  'New Category',
+    edit: 'Edit Category',
+  };
 
-      <div style={{ padding: '0 20px 100px' }}>
-        {previewChip()}
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Category row (list view)
+  // ─────────────────────────────────────────────────────────────────────────────
 
-        {formGenError && (
-          <div style={{
-            background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)',
-            borderRadius: 12, padding: '10px 14px', marginBottom: 16,
-            color: '#F87171', fontSize: 13,
-          }}>
-            {formGenError}
-          </div>
-        )}
+  const renderCategoryRow = (cat: Category, isChild = false): React.ReactNode => {
+    const isConfirming = confirmDeleteId === cat.id;
 
-        <form onSubmit={isEdit ? handleUpdate : handleCreate}>
-          {/* Name */}
-          <div className="mb-3">
-            <label style={{ fontSize: 13, color: 'var(--sub-text-color)', marginBottom: 6, display: 'block' }}>
-              Name <span style={{ color: '#F87171' }}>*</span>
-            </label>
-            <input
-              className="form-control"
-              type="text"
-              placeholder="e.g. Coffee & Tea"
-              value={form.name}
-              onChange={(e) => updateForm({ name: e.target.value })}
-              required
-              maxLength={255}
-            />
-            {fieldError('name')}
-          </div>
-
-          {/* Type */}
-          <div className="mb-3">
-            <p style={{ color: 'var(--sub-text-color)', fontSize: 13, marginBottom: 8 }}>
-              Type <span style={{ color: '#F87171' }}>*</span>
-            </p>
-            <div style={{ display: 'flex', gap: 10 }}>
-              {(['expense', 'income'] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => updateForm({ type: t })}
-                  style={{
-                    flex: 1, padding: '10px 0', borderRadius: 12, fontSize: 14, fontWeight: 700,
-                    border: form.type === t
-                      ? `2px solid ${t === 'income' ? '#4ADE80' : '#F97316'}`
-                      : '2px solid var(--sub-bg-color)',
-                    background: form.type === t
-                      ? (t === 'income' ? 'rgba(74,222,128,0.12)' : 'rgba(249,115,22,0.12)')
-                      : 'var(--sub-bg-color)',
-                    color: form.type === t
-                      ? (t === 'income' ? '#4ADE80' : '#F97316')
-                      : 'var(--sub-text-color)',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {t === 'income' ? '↑ Income' : '↓ Expense'}
-                </button>
-              ))}
-            </div>
-            {fieldError('type')}
-          </div>
-
-          {/* Parent */}
-          <div className="mb-3">
-            <label style={{ fontSize: 13, color: 'var(--sub-text-color)', marginBottom: 6, display: 'block' }}>
-              Parent Category <span style={{ color: 'var(--sub-text-color)', fontWeight: 400 }}>(optional)</span>
-            </label>
-            <select
-              className="form-control"
-              value={form.parent_id}
-              onChange={(e) => updateForm({ parent_id: e.target.value })}
-              style={{ fontSize: 14 }}
-            >
-              <option value="">— No parent (top-level) —</option>
-              {topLevelOptions
-                .filter((c) => c.id !== editingId)
-                .map((c) => (
-                  <option key={c.id} value={String(c.id)}>
-                    {c.icon} {c.name}
-                  </option>
-                ))}
-            </select>
-            {fieldError('parent_id')}
-          </div>
-
-          {/* Icon */}
-          {iconPickerRow()}
-
-          {/* Color */}
-          {colorPickerRow()}
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={saving || (!!form.customColor && !isValidHex(form.customColor))}
-            className="btn"
+    if (isConfirming) {
+      return (
+        <div key={cat.id}>
+          <div
+            className="transfer-first"
             style={{
-              width: '100%', padding: '14px 0',
-              background: saving ? 'rgba(108,61,230,0.5)' : 'linear-gradient(135deg,#6C3DE6,#9966FF)',
-              color: '#fff', fontWeight: 700, fontSize: 16, borderRadius: 16,
-              border: 'none', cursor: saving ? 'not-allowed' : 'pointer',
-              marginTop: 8,
+              background: '#FEF2F2', flexWrap: 'wrap', gap: 8,
+              paddingLeft: isChild ? 36 : undefined,
+              borderLeft: isChild ? `3px solid ${cat.color || '#6B7280'}44` : undefined,
+              marginLeft: isChild ? 12 : undefined,
             }}
           >
-            {saving ? '⏳ Saving…' : isEdit ? 'Save Changes' : 'Create Category'}
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // Category row
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  const renderCategoryRow = (
-    cat: Category,
-    isChild = false,
-  ): React.ReactNode => {
-    const isDeleteConfirming = confirmDeleteId === cat.id;
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ color: '#991B1B', fontWeight: 600, marginBottom: 2, fontSize: 14 }}>
+                Delete &ldquo;{cat.name}&rdquo;?
+              </p>
+              {cat.children?.length ? (
+                <p style={{ color: '#B91C1C', fontSize: 12, marginBottom: 0 }}>
+                  ⚠️ Also removes {cat.children.length} sub-categor{cat.children.length === 1 ? 'y' : 'ies'}.
+                </p>
+              ) : (
+                <p style={{ color: '#B91C1C', fontSize: 12, marginBottom: 0 }}>This cannot be undone.</p>
+              )}
+              {deleteError && (
+                <p style={{ color: '#EF4444', fontSize: 12, marginTop: 4, marginBottom: 0 }}>{deleteError}</p>
+              )}
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+              <button
+                type="button"
+                onClick={() => { setConfirmDeleteId(null); setDeleteError(''); }}
+                disabled={deleting}
+                style={{
+                  fontSize: 13, fontWeight: 600, padding: '5px 14px',
+                  borderRadius: 8, border: '1px solid #D1D5DB',
+                  background: '#fff', color: '#374151', cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleDelete(cat.id)}
+                disabled={deleting}
+                style={{
+                  fontSize: 13, fontWeight: 600, padding: '5px 14px',
+                  borderRadius: 8, border: 'none',
+                  background: '#EF4444', color: '#fff', cursor: 'pointer',
+                  opacity: deleting ? 0.6 : 1,
+                }}
+              >
+                {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div key={cat.id}>
+        {/* Main row */}
         <div
-          className="send-money-contact-tab"
+          className="transfer-first"
           style={{
-            paddingLeft: isChild ? 36 : 16,
-            borderLeft: isChild ? `3px solid ${cat.color || '#6B7280'}33` : 'none',
-            marginLeft: isChild ? 16 : 0,
-            borderRadius: isChild ? '0 12px 12px 0' : undefined,
-            position: 'relative',
+            paddingLeft: isChild ? 36 : undefined,
+            borderLeft: isChild ? `3px solid ${cat.color || '#6B7280'}44` : undefined,
+            marginLeft: isChild ? 12 : undefined,
           }}
         >
-          {/* Icon avatar */}
+          {/* Icon */}
           <div
             className="bank-img"
             style={{
               background: cat.color ? `${cat.color}22` : 'rgba(108,61,230,0.12)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 22, flexShrink: 0, width: 44, height: 44, borderRadius: 12,
+              fontSize: 22, flexShrink: 0,
             }}
           >
             {cat.icon || '📁'}
           </div>
 
-          {/* Details */}
-          <div className="contact-details" style={{ flex: 1, minWidth: 0 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 3 }}>{cat.name}</h3>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-              <TypeBadge type={cat.type} />
-              {cat.is_system && <SystemBadge />}
-              {cat.children?.length ? (
+          {/* Name + badges */}
+          <div className="bank-details" style={{ flex: 1, minWidth: 0 }}>
+            <h2 style={{ marginBottom: 2 }}>{cat.name}</h2>
+            <div className="bank-card" style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+              <span
+                style={{
+                  color: cat.type === 'income' ? '#4ADE80' : '#F97316',
+                  fontSize: 11, fontWeight: 700,
+                  background: cat.type === 'income' ? 'rgba(74,222,128,0.12)' : 'rgba(249,115,22,0.12)',
+                  padding: '1px 7px', borderRadius: 20,
+                }}
+              >
+                {cat.type === 'income' ? '↑ Income' : '↓ Expense'}
+              </span>
+              {cat.is_system && (
+                <span
+                  style={{
+                    fontSize: 10, fontWeight: 700, letterSpacing: '0.4px',
+                    color: 'var(--sub-text-color)',
+                    background: 'rgba(108,61,230,0.08)',
+                    border: '1px solid rgba(108,61,230,0.18)',
+                    borderRadius: 6, padding: '1px 6px',
+                    userSelect: 'none',
+                  }}
+                >
+                  🔒 System
+                </span>
+              )}
+              {!isChild && cat.children?.length ? (
                 <span style={{ fontSize: 11, color: 'var(--sub-text-color)' }}>
-                  {cat.children.length} sub-categor{cat.children.length === 1 ? 'y' : 'ies'}
+                  {cat.children.length} sub
                 </span>
               ) : null}
             </div>
           </div>
 
           {/* Actions */}
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-            {/* Collapse toggle for parents with children */}
+          <div
+            className="bank-active-sec"
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}
+          >
+            {/* Collapse toggle */}
             {!isChild && cat.children?.length ? (
               <button
                 type="button"
                 onClick={() => toggleCollapse(cat.id)}
                 style={{
                   background: 'none', border: 'none', cursor: 'pointer',
-                  fontSize: 16, padding: 4,
+                  fontSize: 14, padding: 0, color: 'var(--sub-text-color)',
                   transform: collapsed.has(cat.id) ? 'rotate(-90deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s',
+                  transition: 'transform 0.2s', lineHeight: 1,
                 }}
                 aria-label={collapsed.has(cat.id) ? 'Expand' : 'Collapse'}
               >
@@ -676,274 +590,413 @@ const CategoryManagement: React.FC = () => {
               </button>
             ) : null}
 
-            {/* Edit / Delete (user-owned only) */}
+            {/* Edit / Delete — user-owned categories only */}
             {!cat.is_system ? (
-              <>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                 <button
-                  type="button"
+                  className="btn btn-link p-0"
                   onClick={() => openEdit(cat)}
-                  style={{
-                    background: 'rgba(108,61,230,0.1)', border: 'none', borderRadius: 8,
-                    width: 32, height: 32, cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}
-                  aria-label="Edit"
                   title="Edit category"
+                  style={{ lineHeight: 1 }}
                 >
-                  <img src={purpleEditIcon} alt="edit" style={{ width: 16 }} />
+                  <img src={purpleEditIcon} alt="edit" style={{ width: 18, height: 18 }} />
                 </button>
                 <button
-                  type="button"
+                  className="btn btn-link p-0"
                   onClick={() => { setConfirmDeleteId(cat.id); setDeleteError(''); }}
-                  style={{
-                    background: 'rgba(239,68,68,0.1)', border: 'none', borderRadius: 8,
-                    width: 32, height: 32, cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 15,
-                  }}
-                  aria-label="Delete"
                   title="Delete category"
+                  style={{ lineHeight: 1 }}
                 >
-                  🗑️
+                  <span style={{ color: '#EF4444', fontSize: 16 }}>✕</span>
                 </button>
-              </>
-            ) : (
-              <span style={{ fontSize: 13, color: 'var(--sub-text-color)', paddingRight: 4 }}>
-                —
-              </span>
-            )}
+              </div>
+            ) : null}
           </div>
         </div>
 
-        {/* Inline delete confirm */}
-        {isDeleteConfirming && (
-          <div style={{
-            background: 'rgba(239,68,68,0.07)',
-            border: '1px solid rgba(239,68,68,0.25)',
-            borderRadius: 12, padding: '12px 16px', margin: '4px 0 4px 16px',
-          }}>
-            <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 6, color: 'var(--text-color)' }}>
-              Delete "{cat.name}"?
-            </p>
-            {cat.children?.length ? (
-              <p style={{ fontSize: 12, color: '#FBBF24', marginBottom: 8 }}>
-                ⚠️ This will also remove its {cat.children.length} sub-categor{cat.children.length === 1 ? 'y' : 'ies'}.
-              </p>
-            ) : null}
-            {deleteError && (
-              <p style={{ fontSize: 12, color: '#F87171', marginBottom: 8 }}>{deleteError}</p>
-            )}
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button
-                type="button"
-                onClick={() => handleDelete(cat.id)}
-                disabled={deleting}
-                style={{
-                  background: '#EF4444', color: '#fff', border: 'none',
-                  borderRadius: 10, padding: '8px 20px', fontWeight: 700,
-                  fontSize: 13, cursor: deleting ? 'not-allowed' : 'pointer',
-                  opacity: deleting ? 0.6 : 1,
-                }}
-              >
-                {deleting ? 'Deleting…' : 'Yes, Delete'}
-              </button>
-              <button
-                type="button"
-                onClick={() => { setConfirmDeleteId(null); setDeleteError(''); }}
-                style={{
-                  background: 'var(--sub-bg-color)', color: 'var(--text-color)',
-                  border: 'none', borderRadius: 10, padding: '8px 20px',
-                  fontWeight: 600, fontSize: 13, cursor: 'pointer',
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Children */}
-        {!isChild && !collapsed.has(cat.id) && cat.children?.map((child) =>
-          renderCategoryRow(child, true),
+        {/* Children — collapsed by user toggle */}
+        {!isChild && !collapsed.has(cat.id) && cat.children?.map(
+          (child) => renderCategoryRow(child, true),
         )}
       </div>
     );
   };
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // List view
+  // Shared form view (add + edit)
   // ─────────────────────────────────────────────────────────────────────────────
 
-  const renderList = (): React.ReactNode => (
-    <div className="body-main-sec">
-      {/* Header */}
-      <div className="header-nav-fixed">
-        <BackBtn BackBtnIcon={BackBtnIcon} />
-        <h1 className="title">Categories</h1>
+  const renderForm = (isEdit: boolean): React.ReactNode => (
+    <>
+      {formGenError && (
+        <div style={{
+          padding: '10px 14px', background: '#FEE2E2',
+          border: '1px solid #FECACA', borderRadius: 10,
+          color: '#991B1B', fontSize: 13, marginBottom: 16,
+        }}>
+          {formGenError}
+        </div>
+      )}
 
-        {/* Search */}
-        <div className="search-bar" style={{ marginTop: 10 }}>
-          <img src={SearchIcon} alt="search" />
+      {previewChip()}
+
+      <form onSubmit={isEdit ? (e) => void handleUpdate(e) : (e) => void handleCreate(e)} noValidate>
+
+        {/* Name */}
+        <div className="personal-name mt-0 mb-3">
+          <label htmlFor="cat-name" style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
+            Category Name <span style={{ color: '#EF4444' }}>*</span>
+          </label>
           <input
+            id="cat-name"
             type="text"
-            placeholder="Search categories…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="search-bar-input"
+            className={`px-0${formErrors.name ? ' is-invalid' : ''}`}
+            value={form.name}
+            onChange={(e) => updateForm({ name: e.target.value })}
+            placeholder="e.g. Coffee & Tea"
+            maxLength={255}
           />
-          {search && (
-            <button
-              type="button"
-              onClick={() => setSearch('')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, padding: 4 }}
-              aria-label="Clear search"
-            >
-              ✕
-            </button>
-          )}
+          {fieldError('name')}
         </div>
 
-        {/* Type filter tabs */}
-        <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-          {(['all', 'expense', 'income'] as TypeFilter[]).map((t) => (
-            <button
-              key={t}
-              type="button"
-              onClick={() => setTypeFilter(t)}
-              style={{
-                flex: 1, padding: '8px 0', borderRadius: 10, fontSize: 13, fontWeight: 700,
-                border: typeFilter === t ? '2px solid var(--primary-color, #6C3DE6)' : '2px solid var(--sub-bg-color)',
-                background: typeFilter === t ? 'rgba(108,61,230,0.12)' : 'var(--sub-bg-color)',
-                color: typeFilter === t ? 'var(--primary-color, #6C3DE6)' : 'var(--sub-text-color)',
-                cursor: 'pointer',
-              }}
-            >
-              {t === 'all' ? 'All' : t === 'income' ? '↑ Income' : '↓ Expense'}
-            </button>
-          ))}
-        </div>
-
-        {/* Sort */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
-          <span style={{ fontSize: 12, color: 'var(--sub-text-color)', whiteSpace: 'nowrap' }}>Sort:</span>
-          <select
-            value={sortKey}
-            onChange={(e) => setSortKey(e.target.value)}
-            className="form-control"
-            style={{ fontSize: 12, padding: '4px 8px' }}
-          >
-            {SORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
+        {/* Type */}
+        <div className="personal-name mb-3">
+          <label style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
+            Type <span style={{ color: '#EF4444' }}>*</span>
+          </label>
+          <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+            {(['expense', 'income'] as const).map((t) => (
+              <button
+                key={t}
+                type="button"
+                onClick={() => updateForm({ type: t })}
+                style={{
+                  flex: 1, padding: '10px 0', borderRadius: 10,
+                  fontSize: 14, fontWeight: 700,
+                  border: form.type === t
+                    ? `2px solid ${t === 'income' ? '#4ADE80' : '#F97316'}`
+                    : '2px solid rgba(108,61,230,0.15)',
+                  background: form.type === t
+                    ? (t === 'income' ? 'rgba(74,222,128,0.12)' : 'rgba(249,115,22,0.12)')
+                    : 'var(--sub-bg-color)',
+                  color: form.type === t
+                    ? (t === 'income' ? '#4ADE80' : '#F97316')
+                    : 'var(--sub-text-color)',
+                  cursor: 'pointer',
+                }}
+              >
+                {t === 'income' ? '↑ Income' : '↓ Expense'}
+              </button>
             ))}
+          </div>
+          {fieldError('type')}
+        </div>
+
+        {/* Parent */}
+        <div className="personal-name mb-3">
+          <label htmlFor="cat-parent" style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
+            Parent Category
+            <span style={{ color: 'var(--sub-text-color)', fontWeight: 400, fontSize: 12 }}> (optional)</span>
+          </label>
+          <select
+            id="cat-parent"
+            className="px-0"
+            value={form.parent_id}
+            onChange={(e) => updateForm({ parent_id: e.target.value })}
+            style={{
+              background: 'var(--sub-bg-color)', color: 'var(--text-color)',
+              border: 0, borderBottom: '2px solid var(--sub-bg-color)',
+              width: '100%', fontSize: 14, paddingBottom: 4,
+            }}
+          >
+            <option value="">— No parent (top-level) —</option>
+            {topLevelOptions
+              .filter((c) => c.id !== editingId)
+              .map((c) => (
+                <option key={c.id} value={String(c.id)}>
+                  {c.icon} {c.name}
+                </option>
+              ))}
           </select>
+          {fieldError('parent_id')}
         </div>
-      </div>
 
-      {/* Page flash */}
-      {pageMsg && (
-        <div style={{
-          margin: '8px 16px',
-          padding: '10px 14px',
-          borderRadius: 12,
-          background: pageMsg.type === 'success' ? 'rgba(74,222,128,0.1)' : 'rgba(248,113,113,0.1)',
-          border: `1px solid ${pageMsg.type === 'success' ? 'rgba(74,222,128,0.3)' : 'rgba(248,113,113,0.3)'}`,
-          color: pageMsg.type === 'success' ? '#4ADE80' : '#F87171',
-          fontSize: 13, fontWeight: 600,
-        }}>
-          {pageMsg.type === 'success' ? '✓' : '✕'} {pageMsg.text}
+        {/* Icon picker */}
+        {iconPickerRow()}
+
+        {/* Color picker */}
+        {colorPickerRow()}
+
+        {/* Submit */}
+        <div className="verify-number-btn" style={{ marginTop: 8 }}>
+          <button
+            type="submit"
+            disabled={saving || (!!form.customColor && !isValidHex(form.customColor))}
+          >
+            {saving
+              ? (isEdit ? 'Saving…' : 'Creating…')
+              : (isEdit ? 'Save Changes' : 'Create Category')}
+          </button>
         </div>
-      )}
-
-      {/* Stats strip */}
-      {!loading && !errorMsg && (
-        <div style={{
-          display: 'flex', gap: 10, padding: '8px 16px',
-          overflowX: 'auto',
-        }}>
-          {[
-            { label: 'Total', count: flat.length, color: '#6C3DE6' },
-            { label: 'Expense', count: flat.filter((c) => c.type === 'expense').length, color: '#F97316' },
-            { label: 'Income',  count: flat.filter((c) => c.type === 'income').length,  color: '#4ADE80' },
-            { label: 'Custom',  count: flat.filter((c) => !c.is_system).length,          color: '#06B6D4' },
-          ].map((s) => (
-            <div key={s.label} style={{
-              flexShrink: 0,
-              background: 'var(--sub-bg-color)',
-              border: `1px solid ${s.color}33`,
-              borderRadius: 12, padding: '8px 16px',
-              textAlign: 'center',
-            }}>
-              <p style={{ fontSize: 18, fontWeight: 800, color: s.color, margin: 0 }}>{s.count}</p>
-              <p style={{ fontSize: 11, color: 'var(--sub-text-color)', margin: 0 }}>{s.label}</p>
-            </div>
-          ))}
+        <div style={{ textAlign: 'center', marginTop: 14 }}>
+          <button
+            type="button"
+            onClick={goToList}
+            disabled={saving}
+            style={{
+              background: 'none', border: 'none',
+              color: 'var(--sub-text-color)', fontSize: 14,
+              cursor: 'pointer', padding: '8px 0',
+            }}
+          >
+            Cancel
+          </button>
         </div>
-      )}
-
-      {/* Body */}
-      <div className="body-main" style={{ paddingBottom: 100 }}>
-        {loading && (
-          <div style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--sub-text-color)' }}>
-            Loading categories…
-          </div>
-        )}
-
-        {!loading && errorMsg && (
-          <div style={{
-            margin: 16, padding: '14px 16px', borderRadius: 12,
-            background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)',
-            color: '#F87171', fontSize: 14,
-          }}>
-            {errorMsg}
-            <button
-              type="button"
-              onClick={() => void fetchCategories()}
-              style={{ marginLeft: 12, fontWeight: 700, background: 'none', border: 'none', color: '#F87171', cursor: 'pointer' }}
-            >
-              Try again
-            </button>
-          </div>
-        )}
-
-        {!loading && !errorMsg && displayedTree.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <p style={{ fontSize: 40, marginBottom: 12 }}>🗂️</p>
-            <p style={{ color: 'var(--sub-text-color)', fontSize: 14 }}>
-              {search || typeFilter !== 'all' ? 'No categories match your filter.' : 'No categories yet.'}
-            </p>
-          </div>
-        )}
-
-        {!loading && !errorMsg && displayedTree.map((cat) => renderCategoryRow(cat))}
-      </div>
-
-      {/* FAB — add custom category */}
-      <div
-        style={{
-          position: 'fixed', bottom: 90, right: 20,
-          width: 56, height: 56, borderRadius: '50%',
-          background: 'linear-gradient(135deg,#6C3DE6,#9966FF)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 4px 20px rgba(108,61,230,0.45)',
-          cursor: 'pointer', zIndex: 100,
-        }}
-        onClick={openAdd}
-        role="button"
-        aria-label="Add category"
-        title="Add custom category"
-      >
-        <img src={faqPlus} alt="add" style={{ width: 28, filter: 'brightness(10)' }} />
-      </div>
-    </div>
+      </form>
+    </>
   );
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // Root
+  // Root render — single unified layout skeleton (matches WalletManagement.tsx)
   // ─────────────────────────────────────────────────────────────────────────────
 
-  if (view === 'add')  return <>{renderForm(false)}</>;
-  if (view === 'edit') return <>{renderForm(true)}</>;
-  return <>{renderList()}</>;
+  return (
+    <div>
+      <div className="site-content">
+        <div className="verify-number-main">
+
+          {/* ── TOP BAR ──────────────────────────────────────────────────────── */}
+          <div className="verify-number-top">
+            <div className="container">
+              <div className="verify-number-top-content">
+                {/* Back button */}
+                <div className="back-btn">
+                  {view !== 'list' ? (
+                    <button
+                      type="button"
+                      onClick={goToList}
+                      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', lineHeight: 1 }}
+                    >
+                      <img src={BackBtnIcon} alt="back" />
+                    </button>
+                  ) : (
+                    <BackBtn />
+                  )}
+                </div>
+                {/* Title */}
+                <div className="header-title">
+                  <p>{headerTitle[view]}</p>
+                </div>
+              </div>
+
+              {/* Search + sort — list view only */}
+              {view === 'list' && (
+                <div className="contact-search">
+                  <div className="input-group contact-searchbar">
+                    <div className="search-icon">
+                      <img src={SearchIcon} alt="search-icon" />
+                    </div>
+                    <div className="seach-bar" style={{ flex: 1 }}>
+                      <input
+                        type="search"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search categories…"
+                        className="form-control search-text"
+                      />
+                    </div>
+                    <div className="dropdown">
+                      <button
+                        className="btn btn-sm btn-link p-0 dropdown-toggle"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        style={{ color: 'rgba(255,255,255,0.64)', fontSize: 12 }}
+                      >
+                        Sort
+                      </button>
+                      <ul className="dropdown-menu dropdown-menu-end">
+                        {SORT_OPTIONS.map((opt) => (
+                          <li key={opt.value}>
+                            <button
+                              className={`dropdown-item${sortKey === opt.value ? ' active' : ''}`}
+                              onClick={() => setSortKey(opt.value)}
+                            >
+                              {opt.label}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ── BODY ─────────────────────────────────────────────────────────── */}
+          <div className="verify-number-bottom" id="category-management-main">
+            <div className="verify-number-bottom-wrap">
+              <div className="verify-number-content">
+                <h1 className="d-none">Categories</h1>
+
+                {/* Page flash message */}
+                {pageMsg && (
+                  <div style={{
+                    padding: '10px 16px', borderRadius: 10, marginBottom: 16,
+                    fontSize: 14, fontWeight: 500,
+                    background: pageMsg.type === 'success' ? '#DCFCE7' : '#FEE2E2',
+                    color:      pageMsg.type === 'success' ? '#166534' : '#991B1B',
+                    border:     `1px solid ${pageMsg.type === 'success' ? '#BBF7D0' : '#FECACA'}`,
+                  }}>
+                    {pageMsg.text}
+                  </div>
+                )}
+
+                {/* ══════════════════════════════════════════════════════════
+                    LIST VIEW
+                ══════════════════════════════════════════════════════════ */}
+                {view === 'list' && (
+                  <>
+                    {/* Type filter tabs */}
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                      {(['all', 'expense', 'income'] as TypeFilter[]).map((t) => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setTypeFilter(t)}
+                          style={{
+                            flex: 1, padding: '7px 0', borderRadius: 10,
+                            fontSize: 12, fontWeight: 700,
+                            border: typeFilter === t
+                              ? '2px solid var(--primary-color, #6C3DE6)'
+                              : '2px solid rgba(108,61,230,0.15)',
+                            background: typeFilter === t
+                              ? 'rgba(108,61,230,0.12)'
+                              : 'var(--sub-bg-color)',
+                            color: typeFilter === t
+                              ? 'var(--primary-color, #6C3DE6)'
+                              : 'var(--sub-text-color)',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          {t === 'all' ? 'All' : t === 'income' ? '↑ Income' : '↓ Expense'}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Stats strip */}
+                    {!loading && !errorMsg && (
+                      <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto' }}>
+                        {[
+                          { label: 'Total',   count: flat.length,                            color: '#6C3DE6' },
+                          { label: 'Expense', count: flat.filter((c) => c.type === 'expense').length, color: '#F97316' },
+                          { label: 'Income',  count: flat.filter((c) => c.type === 'income').length,  color: '#4ADE80' },
+                          { label: 'Custom',  count: flat.filter((c) => !c.is_system).length,         color: '#06B6D4' },
+                        ].map((s) => (
+                          <div key={s.label} style={{
+                            flexShrink: 0, minWidth: 64,
+                            border: `1px solid ${s.color}33`, borderRadius: 12,
+                            padding: '8px 12px', textAlign: 'center',
+                            background: 'var(--sub-bg-color)',
+                          }}>
+                            <p style={{ fontSize: 18, fontWeight: 800, color: s.color, margin: 0 }}>{s.count}</p>
+                            <p style={{ fontSize: 10, color: 'var(--sub-text-color)', margin: 0 }}>{s.label}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Loading */}
+                    {loading && (
+                      <div className="text-center py-5">
+                        <div
+                          className="spinner-border"
+                          role="status"
+                          style={{ color: 'var(--primary-color, #6C3DE6)', width: 40, height: 40 }}
+                        >
+                          <span className="visually-hidden">Loading…</span>
+                        </div>
+                        <p style={{ color: 'var(--sub-text-color)', marginTop: 12, fontSize: 14 }}>
+                          Loading categories…
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Fetch error */}
+                    {!loading && errorMsg && (
+                      <div className="text-center py-5">
+                        <p style={{ color: '#EF4444', fontSize: 15, marginBottom: 12 }}>{errorMsg}</p>
+                        <div className="verify-number-btn" style={{ display: 'inline-block' }}>
+                          <a
+                            href="#"
+                            onClick={(e) => { e.preventDefault(); void fetchCategories(); }}
+                          >
+                            Try Again
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Empty state */}
+                    {!loading && !errorMsg && displayedTree.length === 0 && (
+                      <div className="text-center py-5">
+                        <p style={{ fontSize: 40, marginBottom: 8 }}>🗂️</p>
+                        <p style={{ color: 'var(--text-color)', fontSize: 16, fontWeight: 700, marginBottom: 4 }}>
+                          {search || typeFilter !== 'all' ? 'No categories match your filter.' : 'No categories yet.'}
+                        </p>
+                        {search && (
+                          <button
+                            className="btn btn-link p-0"
+                            style={{ fontSize: 14 }}
+                            onClick={() => setSearch('')}
+                          >
+                            Clear search
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Category rows */}
+                    {!loading && !errorMsg && displayedTree.length > 0 && (
+                      <div className="transfer-to-bank">
+                        {displayedTree.map((cat) => renderCategoryRow(cat))}
+                      </div>
+                    )}
+
+                    {/* Add new category CTA */}
+                    {!loading && !errorMsg && (
+                      <div className="verify-number-btn" style={{ marginTop: 24 }}>
+                        <a
+                          href="#"
+                          onClick={(e) => { e.preventDefault(); openAdd(); }}
+                        >
+                          <span><img src={faqPlus} alt="plus-icon" /></span>
+                          Add Custom Category
+                        </a>
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {/* ══════════════════════════════════════════════════════════
+                    ADD VIEW
+                ══════════════════════════════════════════════════════════ */}
+                {view === 'add' && renderForm(false)}
+
+                {/* ══════════════════════════════════════════════════════════
+                    EDIT VIEW
+                ══════════════════════════════════════════════════════════ */}
+                {view === 'edit' && renderForm(true)}
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default CategoryManagement;
