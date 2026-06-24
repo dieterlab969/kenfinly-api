@@ -3,28 +3,38 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreAccountRequest;
+use App\Http\Requests\UpdateAccountRequest;
+use App\Http\Resources\AccountResource;
 use App\Models\Account;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 /**
- * Manage financial accounts belonging to the authenticated user.
+ * Manage financial accounts (wallets) belonging to the authenticated user.
+ *
+ * OWNERSHIP MODEL
+ * ───────────────
+ * Every query scopes to `user_id = auth()->id()`.  Passing a valid account ID
+ * that belongs to another user returns 404 — we intentionally do not reveal
+ * whether the resource exists at all (IDOR prevention).
+ *
+ * BALANCE POLICY
+ * ──────────────
+ * - `store()` accepts an opening balance once (CreateWalletPayload contract).
+ * - `update()` explicitly strips `balance` from the validated payload via
+ *   UpdateAccountRequest — the field is not in its rules.
+ * - Any post-creation balance change must flow through POST /api/transactions.
  *
  * @tags Accounts
  */
 class AccountController extends Controller
 {
+    // ── Helpers ───────────────────────────────────────────────────────────
+
     /**
-     * Resolve the default currency for a new account.
-     *
-     * Reads the application's current locale (set by LocalizationMiddleware
-     * or the user's language preference) and maps it to a currency code via
-     * the `currency.locale_currency_map` config entry.
-     *
-     * Falls back to 'USD' when the locale is not present in the map.
-     *
-     * @return string ISO-4217 currency code, e.g. 'USD' or 'VND'.
+     * Resolve the default currency for a new account based on the current
+     * application locale (set by LocalizationMiddleware or user preference).
+     * Falls back to 'USD' when the locale has no mapped currency.
      */
     private function defaultCurrencyForLocale(): string
     {
@@ -34,182 +44,159 @@ class AccountController extends Controller
         return $map[$locale] ?? 'USD';
     }
 
+    // ── index ─────────────────────────────────────────────────────────────
+
     /**
-     * List all accounts for the authenticated user.
+     * List all accounts owned by the authenticated user.
      *
-     * Returns every account owned by the current user together with a
-     * transaction count derived from the related transactions table.
+     * Includes a `transactions_count` for each account so the frontend can
+     * disable the Delete button when transactions exist.
+     *
+     * GET /api/accounts
      *
      * @return JsonResponse
+     * @response 200 { "success": true, "accounts": [ ...AccountResource ] }
      */
     public function index(): JsonResponse
     {
-        $user = auth('api')->user();
-
-        $accounts = Account::where('user_id', $user->id)
+        $accounts = Account::where('user_id', auth('api')->id())
             ->withCount('transactions')
+            ->orderBy('name')
             ->get();
 
         return response()->json([
-            'success' => true,
-            'accounts' => $accounts,
+            'success'  => true,
+            'accounts' => AccountResource::collection($accounts),
         ]);
     }
 
+    // ── store ─────────────────────────────────────────────────────────────
+
     /**
-     * Create a new account.
+     * Create a new account for the authenticated user.
      *
-     * @param  Request  $request
+     * `balance` in the request body is the *opening balance* — the only
+     * moment a balance figure is accepted as direct input.
+     *
+     * POST /api/accounts
+     *
+     * @param  StoreAccountRequest  $request
      * @return JsonResponse
-     *
-     * @bodyParam name string required Display name for the account. Example: "My Wallet"
-     * @bodyParam balance numeric required Opening balance. Example: 1000000
-     * @bodyParam currency string ISO-4217 currency code (max 3 chars). Example: VND
-     * @bodyParam icon string Emoji or icon identifier (max 50 chars). Example: 💰
-     * @bodyParam color string Hex colour for the account card (max 7 chars). Example: #4ade80
-     *
-     * @response 201 {"success": true, "message": "Account created successfully", "account": {"id": 1, "name": "My Wallet", "balance": 1000000, "currency": "VND"}}
-     * @response 422 {"success": false, "errors": {"name": ["The name field is required."]}}
+     * @response 201 { "success": true, "message": "...", "account": AccountResource }
+     * @response 422 { "success": false, "message": "Validation failed.", "errors": {} }
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreAccountRequest $request): JsonResponse
     {
-        $validator = Validator::make($request->all(), [
-            'name'     => 'required|string|max:255',
-            'balance'  => 'required|numeric',
-            'currency' => 'nullable|string|max:3',
-            'icon'     => 'nullable|string|max:50',
-            'color'    => 'nullable|string|max:7',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors'  => $validator->errors(),
-            ], 422);
-        }
-
         $user = auth('api')->user();
 
         $account = Account::create([
-            'user_id'  => $user->id,
-            'name'     => $request->name,
-            'balance'  => $request->balance ?? 0,
-            'currency' => $request->currency ?? $this->defaultCurrencyForLocale(),
-            'icon'     => $request->icon,
-            'color'    => $request->color,
+            'user_id'      => $user->id,
+            'name'         => $request->validated('name'),
+            'balance'      => $request->validated('balance'),
+            'currency'     => $request->validated('currency') ?? $this->defaultCurrencyForLocale(),
+            'icon'         => $request->validated('icon'),
+            'color'        => $request->validated('color'),
+            'account_type' => $request->validated('account_type', 'wallet'),
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Account created successfully',
-            'account' => $account,
+            'account' => new AccountResource($account),
         ], 201);
     }
 
+    // ── show ──────────────────────────────────────────────────────────────
+
     /**
-     * Get details of a single account.
+     * Show a single account belonging to the authenticated user.
      *
-     * Returns the account along with its transaction count.
-     * The account must belong to the authenticated user.
+     * Returns 404 for accounts that belong to other users (IDOR prevention —
+     * we do not reveal whether the account ID exists at all).
      *
-     * @param  int  $id  Account ID
+     * GET /api/accounts/{id}
+     *
+     * @param  int  $id
      * @return JsonResponse
-     *
-     * @response 200 {"success": true, "account": {"id": 1, "name": "My Wallet", "balance": 1000000}}
-     * @response 404 {"message": "No query results for model [App\\Models\\Account]"}
+     * @response 200 { "success": true, "account": AccountResource }
+     * @response 404
      */
     public function show(int $id): JsonResponse
     {
-        $user = auth('api')->user();
-
         $account = Account::where('id', $id)
-            ->where('user_id', $user->id)
+            ->where('user_id', auth('api')->id())
             ->withCount('transactions')
             ->firstOrFail();
 
         return response()->json([
             'success' => true,
-            'account' => $account,
+            'account' => new AccountResource($account),
         ]);
     }
 
+    // ── update ────────────────────────────────────────────────────────────
+
     /**
-     * Update an existing account.
+     * Update metadata fields of an account.
      *
-     * All fields are optional — only the fields provided will be changed.
+     * `balance` is intentionally blocked at two layers:
+     *   1. UpdateAccountRequest — no `balance` rule, so it is never validated.
+     *   2. `$request->only([...])` — only whitelisted keys reach the model.
      *
-     * @param  Request  $request
-     * @param  int  $id  Account ID
+     * PUT /api/accounts/{id}
+     *
+     * @param  UpdateAccountRequest  $request
+     * @param  int  $id
      * @return JsonResponse
-     *
-     * @bodyParam name string Display name for the account. Example: Savings
-     * @bodyParam balance numeric Current balance. Example: 500000
-     * @bodyParam currency string ISO-4217 currency code. Example: USD
-     * @bodyParam icon string Emoji or icon identifier. Example: 🏦
-     * @bodyParam color string Hex colour. Example: #818cf8
-     *
-     * @response 200 {"success": true, "message": "Account updated successfully", "account": {"id": 1}}
-     * @response 422 {"success": false, "errors": {}}
-     * @response 404 {"message": "No query results for model [App\\Models\\Account]"}
+     * @response 200 { "success": true, "message": "...", "account": AccountResource }
+     * @response 422 { "success": false, "message": "Validation failed.", "errors": {} }
+     * @response 404
      */
-    public function update(Request $request, int $id): JsonResponse
+    public function update(UpdateAccountRequest $request, int $id): JsonResponse
     {
-        // NOTE: `balance` is intentionally excluded from both the validation rules
-        // and the update payload. After creation the balance is read-only from the
-        // perspective of direct editing; it is driven entirely by transactions.
-        // Use the "Adjust Balance" flow (POST /transactions) to change it.
-        $validator = Validator::make($request->all(), [
-            'name'     => 'sometimes|required|string|max:255',
-            'currency' => 'nullable|string|max:3',
-            'icon'     => 'nullable|string|max:50',
-            'color'    => 'nullable|string|max:7',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors'  => $validator->errors(),
-            ], 422);
-        }
-
-        $user = auth('api')->user();
-
         $account = Account::where('id', $id)
-            ->where('user_id', $user->id)
+            ->where('user_id', auth('api')->id())
             ->firstOrFail();
 
-        // Only allowed metadata fields — never touches `balance`
-        $account->update($request->only(['name', 'currency', 'icon', 'color']));
+        // Whitelist prevents any `balance` key (or other unlisted field) from
+        // reaching the model even if the client sends it anyway.
+        $account->update(
+            $request->only(['name', 'currency', 'icon', 'color', 'account_type'])
+        );
 
         return response()->json([
             'success' => true,
             'message' => 'Account updated successfully',
-            'account' => $account,
+            'account' => new AccountResource($account->fresh()),
         ]);
     }
+
+    // ── destroy ───────────────────────────────────────────────────────────
 
     /**
      * Delete an account.
      *
-     * Accounts that still have transactions attached cannot be deleted.
-     * Remove all transactions first, or archive the account instead.
+     * Deletion is blocked at two independent layers:
+     *   1. Application layer (this method) — returns HTTP 400 with a message.
+     *   2. Database layer — the FK on transactions.account_id is RESTRICT, so
+     *      even a direct DB DELETE cannot silently cascade-delete transaction
+     *      history.
      *
-     * @param  int  $id  Account ID
+     * DELETE /api/accounts/{id}
+     *
+     * @param  int  $id
      * @return JsonResponse
-     *
-     * @response 200 {"success": true, "message": "Account deleted successfully"}
-     * @response 400 {"success": false, "message": "Cannot delete account with existing transactions"}
-     * @response 404 {"message": "No query results for model [App\\Models\\Account]"}
+     * @response 200 { "success": true, "message": "Account deleted successfully" }
+     * @response 400 { "success": false, "message": "Cannot delete account with existing transactions" }
+     * @response 404
      */
     public function destroy(int $id): JsonResponse
     {
-        $user = auth('api')->user();
-
         $account = Account::where('id', $id)
-            ->where('user_id', $user->id)
+            ->where('user_id', auth('api')->id())
             ->firstOrFail();
 
-        if ($account->transactions()->count() > 0) {
+        if ($account->hasTransactions()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Cannot delete account with existing transactions',
