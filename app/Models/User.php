@@ -81,6 +81,9 @@ class User extends Authenticatable implements JWTSubject
         'subscription_expires_at',
         'country_code',
         'currency',
+        'phone',
+        'date_of_birth',
+        'gender',
     ];
 
     /**
@@ -109,6 +112,7 @@ class User extends Authenticatable implements JWTSubject
             'rate_updated_at'          => 'datetime',
             'hourly_rate_locked_until' => 'datetime',
             'last_halo_date'           => 'date',
+            'date_of_birth'            => 'date',
             'hourly_rate'              => 'integer',
             'current_streak'           => 'integer',
             'longest_streak'           => 'integer',
