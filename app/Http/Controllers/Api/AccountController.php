@@ -154,9 +154,12 @@ class AccountController extends Controller
      */
     public function update(Request $request, int $id): JsonResponse
     {
+        // NOTE: `balance` is intentionally excluded from both the validation rules
+        // and the update payload. After creation the balance is read-only from the
+        // perspective of direct editing; it is driven entirely by transactions.
+        // Use the "Adjust Balance" flow (POST /transactions) to change it.
         $validator = Validator::make($request->all(), [
             'name'     => 'sometimes|required|string|max:255',
-            'balance'  => 'sometimes|required|numeric',
             'currency' => 'nullable|string|max:3',
             'icon'     => 'nullable|string|max:50',
             'color'    => 'nullable|string|max:7',
@@ -175,7 +178,8 @@ class AccountController extends Controller
             ->where('user_id', $user->id)
             ->firstOrFail();
 
-        $account->update($request->all());
+        // Only allowed metadata fields — never touches `balance`
+        $account->update($request->only(['name', 'currency', 'icon', 'color']));
 
         return response()->json([
             'success' => true,
