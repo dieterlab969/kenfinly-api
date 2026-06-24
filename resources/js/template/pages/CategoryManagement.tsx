@@ -959,7 +959,7 @@ const CategoryManagement: React.FC = () => {
 
                     {/* Category rows */}
                     {!loading && !errorMsg && displayedTree.length > 0 && (
-                      <div className="transfer-to-bank">
+                      <div className="transfer-to-bank category-list-scrollable">
                         {displayedTree.map((cat) => renderCategoryRow(cat))}
                       </div>
                     )}
