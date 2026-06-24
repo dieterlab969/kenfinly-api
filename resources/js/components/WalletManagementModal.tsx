@@ -6,31 +6,65 @@ import {
 import api from '../utils/api';
 import { useTranslation } from '../contexts/TranslationContext';
 
+// ─── Domain Types ─────────────────────────────────────────────────────────────
+
+export interface Account {
+    id: number;
+    name: string;
+    balance: number;
+    currency: string;
+    icon: string;
+    color: string;
+}
+
+type FormErrors = Partial<Record<keyof Omit<Account, 'id'>, string>>;
+
+type ToastType = 'success' | 'error';
+
+interface Toast {
+    type: ToastType;
+    message: string;
+}
+
+type ModalView = 'list' | 'create' | 'edit';
+
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const ICON_OPTIONS = ['💰', '🏦', '💳', '💵', '🪙', '🏧', '💎', '🛍️', '🎯', '🚀'];
+const ICON_OPTIONS: string[] = ['💰', '🏦', '💳', '💵', '🪙', '🏧', '💎', '🛍️', '🎯', '🚀'];
 
-const COLOR_OPTIONS = [
+const COLOR_OPTIONS: string[] = [
     '#3b82f6', '#6366f1', '#8b5cf6', '#ec4899',
     '#ef4444', '#f97316', '#f59e0b', '#10b981',
     '#14b8a6', '#06b6d4', '#64748b', '#1e293b',
 ];
 
-const CURRENCY_OPTIONS = ['USD', 'VND', 'EUR', 'JPY', 'GBP', 'KRW', 'SGD', 'AUD'];
+const CURRENCY_OPTIONS: string[] = ['USD', 'VND', 'EUR', 'JPY', 'GBP', 'KRW', 'SGD', 'AUD'];
 
-const EMPTY_FORM = { name: '', balance: '', currency: 'USD', icon: '💰', color: '#3b82f6' };
+type FormState = Omit<Account, 'id'> & { balance: string };
 
-const formatBalance = (amount, currency = 'USD') => {
+const EMPTY_FORM: FormState = { name: '', balance: '', currency: 'USD', icon: '💰', color: '#3b82f6' };
+
+const formatBalance = (amount: number | string, currency: string = 'USD'): string => {
     const num = parseFloat(String(amount)) || 0;
     if (currency === 'VND') {
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
     }
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(num);
+    try {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(num);
+    } catch {
+        return `${currency} ${num.toFixed(2)}`;
+    }
 };
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// ─── FormField ────────────────────────────────────────────────────────────────
 
-const FormField = ({ label, error, children }) => (
+interface FormFieldProps {
+    label: string;
+    error?: string;
+    children: React.ReactNode;
+}
+
+const FormField: React.FC<FormFieldProps> = ({ label, error, children }) => (
     <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
         {children}
@@ -38,7 +72,15 @@ const FormField = ({ label, error, children }) => (
     </div>
 );
 
-const ColorSwatch = ({ color, selected, onClick }) => (
+// ─── ColorSwatch ──────────────────────────────────────────────────────────────
+
+interface ColorSwatchProps {
+    color: string;
+    selected: boolean;
+    onClick: (color: string) => void;
+}
+
+const ColorSwatch: React.FC<ColorSwatchProps> = ({ color, selected, onClick }) => (
     <button
         type="button"
         onClick={() => onClick(color)}
@@ -48,11 +90,21 @@ const ColorSwatch = ({ color, selected, onClick }) => (
     />
 );
 
-// ─── Delete Confirmation Dialog ───────────────────────────────────────────────
+// ─── DeleteConfirmDialog ──────────────────────────────────────────────────────
 
-const DeleteConfirmDialog = ({ wallet, onConfirm, onCancel, deleting }) => (
+interface DeleteConfirmDialogProps {
+    wallet: Account;
+    onConfirm: () => void;
+    onCancel: () => void;
+    deleting: boolean;
+}
+
+const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({ wallet, onConfirm, onCancel, deleting }) => (
     <div className="fixed inset-0 z-60 flex items-center justify-center p-4">
-        <div className="absolute inset-0 bg-black/60" onClick={!deleting ? onCancel : undefined} />
+        <div
+            className="absolute inset-0 bg-black/60"
+            onClick={!deleting ? onCancel : undefined}
+        />
         <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-center w-14 h-14 rounded-full bg-red-100 mx-auto mb-4">
                 <Trash2 className="w-7 h-7 text-red-600" />
@@ -80,23 +132,31 @@ const DeleteConfirmDialog = ({ wallet, onConfirm, onCancel, deleting }) => (
                     disabled={deleting}
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-xl transition-colors disabled:opacity-50"
                 >
-                    {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                    {deleting ? 'Deleting…' : 'Delete'}
+                    {deleting
+                        ? <><Loader2 className="w-4 h-4 animate-spin" />Deleting…</>
+                        : <><Trash2 className="w-4 h-4" />Delete</>
+                    }
                 </button>
             </div>
         </div>
     </div>
 );
 
-// ─── Wallet Card ──────────────────────────────────────────────────────────────
+// ─── WalletCard ───────────────────────────────────────────────────────────────
 
-const WalletCard = ({ wallet, onEdit, onDelete }) => (
+interface WalletCardProps {
+    wallet: Account;
+    onEdit: (wallet: Account) => void;
+    onDelete: (wallet: Account) => void;
+}
+
+const WalletCard: React.FC<WalletCardProps> = ({ wallet, onEdit, onDelete }) => (
     <div className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all bg-white">
         <div
             className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 shadow-sm"
-            style={{ backgroundColor: wallet.color || '#3b82f6' }}
+            style={{ backgroundColor: wallet.color }}
         >
-            {wallet.icon || '💰'}
+            {wallet.icon}
         </div>
         <div className="flex-1 min-w-0">
             <p className="font-semibold text-gray-900 truncate">{wallet.name}</p>
@@ -104,7 +164,7 @@ const WalletCard = ({ wallet, onEdit, onDelete }) => (
                 {formatBalance(wallet.balance, wallet.currency)}
             </p>
             <span className="inline-block text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full mt-1">
-                {wallet.currency || 'USD'}
+                {wallet.currency}
             </span>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0">
@@ -126,41 +186,67 @@ const WalletCard = ({ wallet, onEdit, onDelete }) => (
     </div>
 );
 
-// ─── Wallet Form (Create / Edit) ──────────────────────────────────────────────
+// ─── WalletForm (Create / Edit) ───────────────────────────────────────────────
 
-const WalletForm = ({ initial, onSave, onCancel }) => {
-    const isEdit = Boolean(initial?.id);
-    const [form, setForm] = useState(initial ? {
-        name: initial.name || '',
-        balance: initial.balance !== undefined ? String(initial.balance) : '',
-        currency: initial.currency || 'USD',
-        icon: initial.icon || '💰',
-        color: initial.color || '#3b82f6',
-    } : EMPTY_FORM);
-    const [errors, setErrors] = useState({});
-    const [saving, setSaving] = useState(false);
-    const [apiError, setApiError] = useState('');
+interface WalletFormProps {
+    initial: Account | null;
+    onSave: (saved: Account, action: 'created' | 'updated') => void;
+    onCancel: () => void;
+}
 
-    const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }));
-    const setDirect = (field, value) => setForm(f => ({ ...f, [field]: value }));
+const WalletForm: React.FC<WalletFormProps> = ({ initial, onSave, onCancel }) => {
+    const isEdit = initial !== null;
 
-    const validate = () => {
-        const e = {};
-        if (!form.name.trim()) e.name = 'Wallet name is required.';
-        else if (form.name.trim().length > 255) e.name = 'Name must be 255 characters or less.';
-        if (form.balance === '' || form.balance === undefined) {
+    const [form, setForm] = useState<FormState>(
+        initial
+            ? {
+                  name: initial.name,
+                  balance: String(initial.balance),
+                  currency: initial.currency,
+                  icon: initial.icon,
+                  color: initial.color,
+              }
+            : EMPTY_FORM,
+    );
+    const [errors, setErrors] = useState<FormErrors>({});
+    const [saving, setSaving] = useState<boolean>(false);
+    const [apiError, setApiError] = useState<string>('');
+
+    const setField =
+        (field: keyof FormState) =>
+        (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+            setForm(prev => ({ ...prev, [field]: e.target.value }));
+        };
+
+    const setDirect = (field: keyof FormState, value: string): void => {
+        setForm(prev => ({ ...prev, [field]: value }));
+    };
+
+    const validate = (): FormErrors => {
+        const e: FormErrors = {};
+        if (!form.name.trim()) {
+            e.name = 'Wallet name is required.';
+        } else if (form.name.trim().length > 255) {
+            e.name = 'Name must be 255 characters or less.';
+        }
+        if (form.balance === '') {
             e.balance = 'Balance is required.';
         } else if (isNaN(Number(form.balance))) {
             e.balance = 'Balance must be a number.';
         }
-        if (form.currency && form.currency.length > 3) e.currency = 'Currency code must be 3 characters max.';
+        if (form.currency && form.currency.length > 3) {
+            e.currency = 'Currency code must be 3 characters max.';
+        }
         return e;
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();
         const errs = validate();
-        if (Object.keys(errs).length) { setErrors(errs); return; }
+        if (Object.keys(errs).length > 0) {
+            setErrors(errs);
+            return;
+        }
 
         setSaving(true);
         setApiError('');
@@ -168,26 +254,31 @@ const WalletForm = ({ initial, onSave, onCancel }) => {
             const payload = {
                 name: form.name.trim(),
                 balance: Number(form.balance),
-                currency: form.currency || 'USD',
-                icon: form.icon || '💰',
-                color: form.color || '#3b82f6',
+                currency: form.currency,
+                icon: form.icon,
+                color: form.color,
             };
-            let response;
-            if (isEdit) {
-                response = await api.put(`/accounts/${initial.id}`, payload);
-                onSave(response.data.account, 'updated');
+
+            if (isEdit && initial) {
+                const res = await api.put(`/accounts/${initial.id}`, payload);
+                onSave(res.data.account as Account, 'updated');
             } else {
-                response = await api.post('/accounts', payload);
-                onSave(response.data.account, 'created');
+                const res = await api.post('/accounts', payload);
+                onSave(res.data.account as Account, 'created');
             }
-        } catch (err) {
-            const serverErrors = err.response?.data?.errors;
+        } catch (err: unknown) {
+            const axiosErr = err as { response?: { data?: { errors?: Record<string, string[]>; message?: string } } };
+            const serverErrors = axiosErr.response?.data?.errors;
             if (serverErrors) {
-                const mapped = {};
-                Object.entries(serverErrors).forEach(([k, msgs]) => { mapped[k] = msgs[0]; });
+                const mapped: FormErrors = {};
+                (Object.entries(serverErrors) as [string, string[]][]).forEach(([k, msgs]) => {
+                    if (k in EMPTY_FORM) {
+                        (mapped as Record<string, string>)[k] = msgs[0];
+                    }
+                });
                 setErrors(mapped);
             } else {
-                setApiError(err.response?.data?.message || 'An error occurred. Please try again.');
+                setApiError(axiosErr.response?.data?.message ?? 'An error occurred. Please try again.');
             }
         } finally {
             setSaving(false);
@@ -202,11 +293,13 @@ const WalletForm = ({ initial, onSave, onCancel }) => {
                     <input
                         type="text"
                         value={form.name}
-                        onChange={set('name')}
+                        onChange={setField('name')}
                         placeholder="e.g. My Wallet, Savings"
                         maxLength={255}
                         className={`w-full px-3 py-2.5 border rounded-xl text-sm outline-none transition-colors ${
-                            errors.name ? 'border-red-400 bg-red-50 focus:border-red-500' : 'border-gray-200 focus:border-blue-500 bg-white'
+                            errors.name
+                                ? 'border-red-400 bg-red-50 focus:border-red-500'
+                                : 'border-gray-200 focus:border-blue-500 bg-white'
                         }`}
                     />
                 </FormField>
@@ -216,11 +309,13 @@ const WalletForm = ({ initial, onSave, onCancel }) => {
                     <input
                         type="number"
                         value={form.balance}
-                        onChange={set('balance')}
+                        onChange={setField('balance')}
                         placeholder="0"
                         step="any"
                         className={`w-full px-3 py-2.5 border rounded-xl text-sm outline-none transition-colors ${
-                            errors.balance ? 'border-red-400 bg-red-50 focus:border-red-500' : 'border-gray-200 focus:border-blue-500 bg-white'
+                            errors.balance
+                                ? 'border-red-400 bg-red-50 focus:border-red-500'
+                                : 'border-gray-200 focus:border-blue-500 bg-white'
                         }`}
                     />
                 </FormField>
@@ -229,7 +324,7 @@ const WalletForm = ({ initial, onSave, onCancel }) => {
                 <FormField label="Currency" error={errors.currency}>
                     <select
                         value={form.currency}
-                        onChange={set('currency')}
+                        onChange={setField('currency')}
                         className="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-500 bg-white transition-colors"
                     >
                         {CURRENCY_OPTIONS.map(c => (
@@ -266,13 +361,13 @@ const WalletForm = ({ initial, onSave, onCancel }) => {
                                 key={color}
                                 color={color}
                                 selected={form.color === color}
-                                onClick={(c) => setDirect('color', c)}
+                                onClick={c => setDirect('color', c)}
                             />
                         ))}
                     </div>
                 </FormField>
 
-                {/* Preview */}
+                {/* Live preview */}
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
                     <div
                         className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-sm flex-shrink-0"
@@ -283,12 +378,12 @@ const WalletForm = ({ initial, onSave, onCancel }) => {
                     <div>
                         <p className="text-sm font-semibold text-gray-800">{form.name || 'Wallet Name'}</p>
                         <p className="text-xs text-gray-500">
-                            {formatBalance(form.balance || 0, form.currency)} · {form.currency}
+                            {formatBalance(form.balance || '0', form.currency)} · {form.currency}
                         </p>
                     </div>
                 </div>
 
-                {/* API error */}
+                {/* API-level error */}
                 {apiError && (
                     <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
                         <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -325,28 +420,43 @@ const WalletForm = ({ initial, onSave, onCancel }) => {
 
 // ─── Main Modal ───────────────────────────────────────────────────────────────
 
-const WalletManagementModal = ({ isOpen, onClose, onWalletsChanged }) => {
-    const { t } = useTranslation();
+interface WalletManagementModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onWalletsChanged?: () => void;
+}
 
-    // 'list' | 'create' | 'edit'
-    const [view, setView] = useState('list');
-    const [wallets, setWallets] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [editingWallet, setEditingWallet] = useState(null);
-    const [deletingWallet, setDeletingWallet] = useState(null);
-    const [deleteInProgress, setDeleteInProgress] = useState(false);
-    const [toast, setToast] = useState(null); // { type: 'success'|'error', message: string }
+const VIEW_TITLES: Record<ModalView, string> = {
+    list: 'My Wallets',
+    create: 'New Wallet',
+    edit: 'Edit Wallet',
+};
 
-    const showToast = useCallback((type, message) => {
+const WalletManagementModal: React.FC<WalletManagementModalProps> = ({
+    isOpen,
+    onClose,
+    onWalletsChanged,
+}) => {
+    useTranslation();
+
+    const [view, setView] = useState<ModalView>('list');
+    const [wallets, setWallets] = useState<Account[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [editingWallet, setEditingWallet] = useState<Account | null>(null);
+    const [deletingWallet, setDeletingWallet] = useState<Account | null>(null);
+    const [deleteInProgress, setDeleteInProgress] = useState<boolean>(false);
+    const [toast, setToast] = useState<Toast | null>(null);
+
+    const showToast = useCallback((type: ToastType, message: string): void => {
         setToast({ type, message });
         setTimeout(() => setToast(null), 4000);
     }, []);
 
-    const fetchWallets = useCallback(async () => {
+    const fetchWallets = useCallback(async (): Promise<void> => {
         setLoading(true);
         try {
             const res = await api.get('/accounts');
-            setWallets(res.data.accounts || []);
+            setWallets((res.data.accounts ?? []) as Account[]);
         } catch {
             showToast('error', 'Failed to load wallets. Please try again.');
         } finally {
@@ -357,37 +467,40 @@ const WalletManagementModal = ({ isOpen, onClose, onWalletsChanged }) => {
     useEffect(() => {
         if (isOpen) {
             setView('list');
-            fetchWallets();
+            void fetchWallets();
         }
     }, [isOpen, fetchWallets]);
 
-    // Close on Escape
+    // Keyboard: Escape closes sub-views first, then the modal
     useEffect(() => {
-        const onKey = (e) => {
-            if (e.key === 'Escape') {
-                if (deletingWallet) { setDeletingWallet(null); return; }
-                if (view !== 'list') { setView('list'); return; }
-                onClose();
-            }
+        const onKey = (e: KeyboardEvent): void => {
+            if (e.key !== 'Escape') return;
+            if (deletingWallet) { setDeletingWallet(null); return; }
+            if (view !== 'list') { goToList(); return; }
+            onClose();
         };
         if (isOpen) window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
     }, [isOpen, view, deletingWallet, onClose]);
 
-    const handleFormSave = (savedWallet, action) => {
+    const goToList = (): void => {
+        setView('list');
+        setEditingWallet(null);
+    };
+
+    const handleFormSave = (savedWallet: Account, action: 'created' | 'updated'): void => {
         if (action === 'created') {
             setWallets(prev => [...prev, savedWallet]);
             showToast('success', `"${savedWallet.name}" created successfully!`);
         } else {
-            setWallets(prev => prev.map(w => w.id === savedWallet.id ? savedWallet : w));
+            setWallets(prev => prev.map(w => (w.id === savedWallet.id ? savedWallet : w)));
             showToast('success', `"${savedWallet.name}" updated successfully!`);
         }
-        setView('list');
-        setEditingWallet(null);
+        goToList();
         onWalletsChanged?.();
     };
 
-    const handleDeleteConfirm = async () => {
+    const handleDeleteConfirm = async (): Promise<void> => {
         if (!deletingWallet) return;
         setDeleteInProgress(true);
         try {
@@ -395,29 +508,21 @@ const WalletManagementModal = ({ isOpen, onClose, onWalletsChanged }) => {
             setWallets(prev => prev.filter(w => w.id !== deletingWallet.id));
             showToast('success', `"${deletingWallet.name}" deleted successfully!`);
             onWalletsChanged?.();
-        } catch (err) {
-            const msg = err.response?.data?.message || 'Failed to delete. Please try again.';
-            showToast('error', msg);
+        } catch (err: unknown) {
+            const axiosErr = err as { response?: { data?: { message?: string } } };
+            showToast('error', axiosErr.response?.data?.message ?? 'Failed to delete. Please try again.');
         } finally {
             setDeleteInProgress(false);
             setDeletingWallet(null);
         }
     };
 
-    const startEdit = (wallet) => {
+    const startEdit = (wallet: Account): void => {
         setEditingWallet(wallet);
         setView('edit');
     };
 
-    const goToList = () => {
-        setView('list');
-        setEditingWallet(null);
-    };
-
     if (!isOpen) return null;
-
-    // ── Header title & back logic per view ────────────────────────────────
-    const titles = { list: 'My Wallets', create: 'New Wallet', edit: 'Edit Wallet' };
 
     return (
         <>
@@ -425,7 +530,7 @@ const WalletManagementModal = ({ isOpen, onClose, onWalletsChanged }) => {
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                 <div
                     className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                    onClick={() => { if (!deleteInProgress) onClose(); }}
+                    onClick={!deleteInProgress ? onClose : undefined}
                 />
 
                 {/* Panel */}
@@ -443,7 +548,7 @@ const WalletManagementModal = ({ isOpen, onClose, onWalletsChanged }) => {
                         )}
                         <div className="flex items-center gap-2 flex-1">
                             <Wallet className="w-5 h-5 text-blue-600" />
-                            <h2 className="text-lg font-bold text-gray-900">{titles[view]}</h2>
+                            <h2 className="text-lg font-bold text-gray-900">{VIEW_TITLES[view]}</h2>
                         </div>
                         {view === 'list' && (
                             <button
@@ -462,13 +567,15 @@ const WalletManagementModal = ({ isOpen, onClose, onWalletsChanged }) => {
                         </button>
                     </div>
 
-                    {/* Toast notification */}
+                    {/* Toast */}
                     {toast && (
-                        <div className={`flex items-center gap-2 mx-6 mt-4 px-4 py-3 rounded-xl text-sm font-medium flex-shrink-0 ${
-                            toast.type === 'success'
-                                ? 'bg-green-50 border border-green-200 text-green-800'
-                                : 'bg-red-50 border border-red-200 text-red-800'
-                        }`}>
+                        <div
+                            className={`flex items-center gap-2 mx-6 mt-4 px-4 py-3 rounded-xl text-sm font-medium flex-shrink-0 ${
+                                toast.type === 'success'
+                                    ? 'bg-green-50 border border-green-200 text-green-800'
+                                    : 'bg-red-50 border border-red-200 text-red-800'
+                            }`}
+                        >
                             {toast.type === 'success'
                                 ? <CheckCircle className="w-4 h-4 flex-shrink-0 text-green-600" />
                                 : <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-600" />
@@ -480,7 +587,7 @@ const WalletManagementModal = ({ isOpen, onClose, onWalletsChanged }) => {
                     {/* Body */}
                     <div className="flex-1 overflow-y-auto">
 
-                        {/* ── LIST VIEW ── */}
+                        {/* LIST */}
                         {view === 'list' && (
                             <div className="p-6">
                                 {loading ? (
@@ -493,7 +600,9 @@ const WalletManagementModal = ({ isOpen, onClose, onWalletsChanged }) => {
                                             <Wallet className="w-8 h-8 text-blue-400" />
                                         </div>
                                         <p className="text-gray-600 font-medium mb-1">No wallets yet</p>
-                                        <p className="text-sm text-gray-400 mb-5">Create your first wallet to start tracking.</p>
+                                        <p className="text-sm text-gray-400 mb-5">
+                                            Create your first wallet to start tracking.
+                                        </p>
                                         <button
                                             onClick={() => setView('create')}
                                             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-xl shadow-sm transition-all"
@@ -520,7 +629,7 @@ const WalletManagementModal = ({ isOpen, onClose, onWalletsChanged }) => {
                             </div>
                         )}
 
-                        {/* ── CREATE VIEW ── */}
+                        {/* CREATE */}
                         {view === 'create' && (
                             <div className="p-6">
                                 <WalletForm
@@ -531,7 +640,7 @@ const WalletManagementModal = ({ isOpen, onClose, onWalletsChanged }) => {
                             </div>
                         )}
 
-                        {/* ── EDIT VIEW ── */}
+                        {/* EDIT */}
                         {view === 'edit' && editingWallet && (
                             <div className="p-6">
                                 <WalletForm
@@ -545,11 +654,11 @@ const WalletManagementModal = ({ isOpen, onClose, onWalletsChanged }) => {
                 </div>
             </div>
 
-            {/* Delete Confirmation Dialog (rendered above main modal) */}
+            {/* Delete confirmation (layered above modal) */}
             {deletingWallet && (
                 <DeleteConfirmDialog
                     wallet={deletingWallet}
-                    onConfirm={handleDeleteConfirm}
+                    onConfirm={() => void handleDeleteConfirm()}
                     onCancel={() => setDeletingWallet(null)}
                     deleting={deleteInProgress}
                 />
