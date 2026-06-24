@@ -362,15 +362,11 @@ const WalletManagement: React.FC = () => {
                 {!loading && errorMsg && (
                   <div className="text-center py-5">
                     <p style={{ color: '#EF4444', fontSize: 15, marginBottom: 12 }}>{errorMsg}</p>
-                    <button
-                      className="verify-number-btn"
-                      onClick={fetchAccounts}
-                      style={{ display: 'inline-block' }}
-                    >
+                    <div className="verify-number-btn" style={{ display: 'inline-block' }}>
                       <a href="#" onClick={(e) => { e.preventDefault(); fetchAccounts(); }}>
                         Try Again
                       </a>
-                    </button>
+                    </div>
                   </div>
                 )}
 
