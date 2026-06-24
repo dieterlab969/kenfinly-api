@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTranslation } from '../contexts/TranslationContext';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Wallet, Settings, User, CreditCard } from 'lucide-react';
+import WalletManagementModal from '../components/WalletManagementModal';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import api from '../utils/api';
@@ -92,6 +93,7 @@ const Dashboard: React.FC = () => {
     const [selectedTransactionId, setSelectedTransactionId] = useState<number | null>(null);
     const [showDetailModal, setShowDetailModal] = useState<boolean>(false);
     const [showEditModal, setShowEditModal] = useState<boolean>(false);
+    const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
 
     useEffect(() => {
         fetchDashboardData();
@@ -196,6 +198,13 @@ const Dashboard: React.FC = () => {
                             <span className="text-sm text-gray-700">
                                 {t('nav.welcome')}, <span className="font-medium">{user?.name}</span>
                             </span>
+                            <button
+                                onClick={() => setShowWalletModal(true)}
+                                className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                                title="Manage Wallets"
+                            >
+                                <Wallet className="w-5 h-5" />
+                            </button>
                             <button
                                 onClick={() => setShowPaymentModal(true)}
                                 className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
@@ -404,6 +413,12 @@ const Dashboard: React.FC = () => {
                 }}
                 transactionId={selectedTransactionId}
                 onUpdate={handleTransactionAdded}
+            />
+
+            <WalletManagementModal
+                isOpen={showWalletModal}
+                onClose={() => setShowWalletModal(false)}
+                onWalletsChanged={() => fetchDashboardData(false)}
             />
         </div>
     );
