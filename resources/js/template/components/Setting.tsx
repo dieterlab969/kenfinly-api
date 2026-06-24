@@ -28,7 +28,6 @@ import setting21 from '../assets/images/setting/setting21.svg'
 import setting22 from '../assets/images/setting/setting22.svg'
 import settingWallet from '../assets/images/setting/setting-wallet.svg'
 import { useDarkMode } from './DarkModeContext.tsx';
-import WalletManagementModal from '../../components/WalletManagementModal';
 
 
 interface SettingOptionProps {
@@ -36,15 +35,9 @@ interface SettingOptionProps {
     icon: string;
     title: string;
     subtitle?: string;
-    isLanguage?: boolean;
 }
 
-const SettingOption: React.FC<SettingOptionProps> = ({
-    to,
-    icon,
-    title,
-    subtitle,
-}) => (
+const SettingOption: React.FC<SettingOptionProps> = ({ to, icon, title, subtitle }) => (
     <Link to={to} className="send-money-contact-tab setting-border">
         <div className="setting-icon">
             <img src={icon} alt="setting-icon" />
@@ -63,40 +56,9 @@ const SettingOption: React.FC<SettingOptionProps> = ({
     </Link>
 );
 
-interface SettingButtonProps {
-    icon: string;
-    title: string;
-    subtitle?: string;
-    onClick: () => void;
-}
-
-const SettingButton: React.FC<SettingButtonProps> = ({ icon, title, subtitle, onClick }) => (
-    <button
-        type="button"
-        onClick={onClick}
-        className="send-money-contact-tab setting-border w-full text-left"
-    >
-        <div className="setting-icon">
-            <img src={icon} alt="setting-icon" />
-        </div>
-        <div className="setting-title">
-            <h3>{title}</h3>
-        </div>
-        <div className="contact-star">
-            <div className="star-favourite">
-                {subtitle && <span className="setting-lanuage">{subtitle}</span>}
-                <span>
-                    <img src={rightIcon} alt="right-icon" />
-                </span>
-            </div>
-        </div>
-    </button>
-);
-
 const Setting: React.FC = () => {
     const { isDarkMode, toggleDarkMode } = useDarkMode();
     const [isChartOpen, setIsChartOpen] = useState<boolean>(false);
-    const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
 
     return (
         <div>
@@ -150,11 +112,7 @@ const Setting: React.FC = () => {
                             <li className="border-0"><Link to="/PieChart">Pie Chart</Link></li>
                         </ul>
                     </div>
-                    <SettingButton
-                        icon={settingWallet}
-                        title="Wallets & Accounts"
-                        onClick={() => setShowWalletModal(true)}
-                    />
+                    <SettingOption to="/WalletManagement" icon={settingWallet} title="Wallets & Accounts" />
                     <SettingOption to="/BankAndCard" icon={setting4} title="Banks & Cards" />
                     <SettingOption to="/Payment" icon={setting5} title="Payment Methods" />
                     <SettingOption to="/AutomaticPayment" icon={setting6} title="Automatic Payments" />
@@ -210,11 +168,6 @@ const Setting: React.FC = () => {
                     </div>
                 </div>
             </div>
-
-            <WalletManagementModal
-                isOpen={showWalletModal}
-                onClose={() => setShowWalletModal(false)}
-            />
         </div>
     );
 };
