@@ -28,6 +28,7 @@ import setting21 from '../assets/images/setting/setting21.svg'
 import setting22 from '../assets/images/setting/setting22.svg'
 import settingWallet from '../assets/images/setting/setting-wallet.svg'
 import { useDarkMode } from './DarkModeContext.tsx';
+import WalletManagementModal from '../../components/WalletManagementModal';
 
 
 interface SettingOptionProps {
@@ -62,9 +63,41 @@ const SettingOption: React.FC<SettingOptionProps> = ({
     </Link>
 );
 
+interface SettingButtonProps {
+    icon: string;
+    title: string;
+    subtitle?: string;
+    onClick: () => void;
+}
+
+const SettingButton: React.FC<SettingButtonProps> = ({ icon, title, subtitle, onClick }) => (
+    <button
+        type="button"
+        onClick={onClick}
+        className="send-money-contact-tab setting-border w-full text-left"
+    >
+        <div className="setting-icon">
+            <img src={icon} alt="setting-icon" />
+        </div>
+        <div className="setting-title">
+            <h3>{title}</h3>
+        </div>
+        <div className="contact-star">
+            <div className="star-favourite">
+                {subtitle && <span className="setting-lanuage">{subtitle}</span>}
+                <span>
+                    <img src={rightIcon} alt="right-icon" />
+                </span>
+            </div>
+        </div>
+    </button>
+);
+
 const Setting: React.FC = () => {
     const { isDarkMode, toggleDarkMode } = useDarkMode();
     const [isChartOpen, setIsChartOpen] = useState<boolean>(false);
+    const [showWalletModal, setShowWalletModal] = useState<boolean>(false);
+
     return (
         <div>
             <div className="setting-bottom-sec">
@@ -117,7 +150,11 @@ const Setting: React.FC = () => {
                             <li className="border-0"><Link to="/PieChart">Pie Chart</Link></li>
                         </ul>
                     </div>
-                    <SettingOption to="/WalletManagement" icon={settingWallet} title="Wallets & Accounts" />
+                    <SettingButton
+                        icon={settingWallet}
+                        title="Wallets & Accounts"
+                        onClick={() => setShowWalletModal(true)}
+                    />
                     <SettingOption to="/BankAndCard" icon={setting4} title="Banks & Cards" />
                     <SettingOption to="/Payment" icon={setting5} title="Payment Methods" />
                     <SettingOption to="/AutomaticPayment" icon={setting6} title="Automatic Payments" />
@@ -158,7 +195,6 @@ const Setting: React.FC = () => {
                     <SettingOption to="/InviteFriend" icon={setting20} title="Invite Friends" />
                     <SettingOption to="/DeleteDeactivateAccount" icon={setting21} title="Delete or Deactivate Account" />
 
-
                     <div className="send-money-contact-tab setting-border border-0" data-bs-toggle="offcanvas" data-bs-target="#offcanvasBottom">
                         <div className="setting-icon pay-bill-img bg-2">
                             <img src={setting22} alt="setting-icon" />
@@ -172,14 +208,15 @@ const Setting: React.FC = () => {
                             </div>
                         </div>
                     </div>
-
-
-
                 </div>
-
             </div>
-        </div>
-    )
-}
 
-export default Setting
+            <WalletManagementModal
+                isOpen={showWalletModal}
+                onClose={() => setShowWalletModal(false)}
+            />
+        </div>
+    );
+};
+
+export default Setting;
