@@ -92,6 +92,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Locale → Currency Map
+    |--------------------------------------------------------------------------
+    | Maps BCP-47 / ISO 639-1 language locale codes to their canonical
+    | currency code.  Used by AccountController when creating a new wallet
+    | without an explicit currency — the app's current locale (set by
+    | LocalizationMiddleware or the user's language preference) determines
+    | the sensible default.
+    |
+    | Lookup: app()->getLocale() → currency code → fallback 'USD'.
+    |
+    | Add more locales here as new markets are supported:
+    |   'ja' => 'JPY', 'ko' => 'KRW', 'de' => 'EUR', etc.
+    */
+    'locale_currency_map' => [
+        'vi' => 'VND',
+        'en' => 'USD',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Session Cache TTL (minutes)
     |--------------------------------------------------------------------------
     | How long the detected currency is kept in the session without re-querying

@@ -68,6 +68,22 @@ class Account extends Model
     }
 
     /**
+     * Calculate the true balance of this account from its transaction history.
+     *
+     * Sums all income transactions and subtracts all expense transactions.
+     * Useful for reconciling the stored balance against the actual transaction ledger.
+     *
+     * @return float The computed balance (income minus expenses).
+     */
+    public function calculateBalance(): float
+    {
+        $income  = (float) $this->transactions()->where('type', 'income')->sum('amount');
+        $expense = (float) $this->transactions()->where('type', 'expense')->sum('amount');
+
+        return $income - $expense;
+    }
+
+    /**
      * Check if a user is a participant in this account.
      *
      * @param int $userId The ID of the user to check.
