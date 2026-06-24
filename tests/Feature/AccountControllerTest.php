@@ -12,9 +12,16 @@ use Tests\TestCase;
 /**
  * Feature tests for AccountController (wallet CRUD API).
  *
- * Covers authentication guards, full CRUD lifecycle, input validation,
- * ownership isolation, and business-rule enforcement (e.g. cannot delete
- * an account that still has transactions).
+ * Covers:
+ *  - Authentication guards on every endpoint
+ *  - Full CRUD lifecycle (store / show / update / destroy)
+ *  - Input validation via StoreAccountRequest and UpdateAccountRequest
+ *  - Ownership isolation (multi-tenant security)
+ *  - Business-rule enforcement (balance immutability on update, delete guard)
+ *  - API Resource shape (all expected fields present)
+ *  - account_type field validation and persistence
+ *  - Color hex format validation
+ *  - Currency ISO-4217 length validation
  */
 class AccountControllerTest extends TestCase
 {
@@ -110,6 +117,36 @@ class AccountControllerTest extends TestCase
 
         $accountData = $response->json('accounts.0');
         $this->assertArrayHasKey('transactions_count', $accountData);
+    }
+
+    /** @test */
+    public function index_response_includes_all_expected_fields_per_account(): void
+    {
+        $user = $this->makeUser();
+        Account::where('user_id', $user->id)->delete();
+        $this->makeAccount($user, [
+            'name'         => 'Field Check',
+            'account_type' => 'savings',
+            'icon'         => '🏦',
+            'color'        => '#3b82f6',
+        ]);
+
+        $response = $this->actingAs($user, 'api')
+            ->getJson('/api/accounts')
+            ->assertOk();
+
+        $account = $response->json('accounts.0');
+
+        $requiredFields = [
+            'id', 'user_id', 'name', 'balance', 'currency',
+            'icon', 'color', 'account_type', 'transactions_count',
+        ];
+
+        foreach ($requiredFields as $field) {
+            $this->assertArrayHasKey($field, $account, "Expected field '{$field}' missing from account response.");
+        }
+
+        $this->assertEquals('savings', $account['account_type']);
     }
 
     // ── store ─────────────────────────────────────────────────────────────
@@ -277,6 +314,88 @@ class AccountControllerTest extends TestCase
             ->assertJsonStructure(['errors' => ['currency']]);
     }
 
+    /** @test */
+    public function store_rejects_currency_shorter_than_3_characters(): void
+    {
+        $user = $this->makeUser();
+
+        $this->actingAs($user, 'api')
+            ->postJson('/api/accounts', [
+                'name'     => 'Test',
+                'balance'  => 0,
+                'currency' => 'US',   // ISO 4217 requires exactly 3 characters
+            ])
+            ->assertUnprocessable()
+            ->assertJsonStructure(['errors' => ['currency']]);
+    }
+
+    /** @test */
+    public function store_rejects_invalid_hex_color(): void
+    {
+        $user = $this->makeUser();
+
+        $this->actingAs($user, 'api')
+            ->postJson('/api/accounts', [
+                'name'    => 'Color Test',
+                'balance' => 0,
+                'color'   => 'not-a-color',   // must be #rrggbb or #rgb
+            ])
+            ->assertUnprocessable()
+            ->assertJsonStructure(['errors' => ['color']]);
+    }
+
+    /** @test */
+    public function store_accepts_valid_account_type(): void
+    {
+        $user = $this->makeUser();
+
+        $this->actingAs($user, 'api')
+            ->postJson('/api/accounts', [
+                'name'         => 'Investment Portfolio',
+                'balance'      => 5000.00,
+                'currency'     => 'USD',
+                'account_type' => 'investment',
+            ])
+            ->assertCreated()
+            ->assertJson([
+                'success' => true,
+                'account' => ['account_type' => 'investment'],
+            ]);
+
+        $this->assertDatabaseHas('accounts', [
+            'user_id'      => $user->id,
+            'name'         => 'Investment Portfolio',
+            'account_type' => 'investment',
+        ]);
+    }
+
+    /** @test */
+    public function store_rejects_invalid_account_type(): void
+    {
+        $user = $this->makeUser();
+
+        $this->actingAs($user, 'api')
+            ->postJson('/api/accounts', [
+                'name'         => 'Bad Type Wallet',
+                'balance'      => 0,
+                'account_type' => 'piggy_bank',   // not in the allowed enum
+            ])
+            ->assertUnprocessable()
+            ->assertJsonStructure(['errors' => ['account_type']]);
+    }
+
+    /** @test */
+    public function store_defaults_account_type_to_wallet_when_omitted(): void
+    {
+        $user = $this->makeUser();
+
+        $response = $this->actingAs($user, 'api')
+            ->postJson('/api/accounts', ['name' => 'Simple Wallet', 'balance' => 0])
+            ->assertCreated();
+
+        $this->assertEquals('wallet', $response->json('account.account_type'));
+    }
+
     // ── show ──────────────────────────────────────────────────────────────
 
     /** @test */
@@ -391,6 +510,46 @@ class AccountControllerTest extends TestCase
         ]);
     }
 
+    /**
+     * CRITICAL — balance immutability on update.
+     *
+     * Sending `balance` in a PUT request must not mutate the stored balance.
+     * This is enforced at two layers:
+     *   1. UpdateAccountRequest — no `balance` validation rule
+     *   2. Controller  — only whitelisted keys reach Account::update()
+     *
+     * @test
+     */
+    public function update_ignores_balance_field_even_when_explicitly_sent(): void
+    {
+        $user = $this->makeUser();
+        Account::where('user_id', $user->id)->delete();
+        $account = $this->makeAccount($user, [
+            'name'    => 'Protected Wallet',
+            'balance' => 1000.00,
+        ]);
+
+        $this->actingAs($user, 'api')
+            ->putJson("/api/accounts/{$account->id}", [
+                'name'    => 'Protected Wallet Renamed',
+                'balance' => 99999.00,   // attacker tries to inflate balance
+            ])
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        // Balance must remain at original value — the write was silently ignored
+        $this->assertDatabaseHas('accounts', [
+            'id'      => $account->id,
+            'name'    => 'Protected Wallet Renamed',
+            'balance' => '1000.00',
+        ]);
+
+        $this->assertDatabaseMissing('accounts', [
+            'id'      => $account->id,
+            'balance' => '99999.00',
+        ]);
+    }
+
     /** @test */
     public function update_rejects_empty_name_when_name_is_provided(): void
     {
@@ -402,6 +561,50 @@ class AccountControllerTest extends TestCase
             ->putJson("/api/accounts/{$account->id}", ['name' => ''])
             ->assertUnprocessable()
             ->assertJsonStructure(['errors' => ['name']]);
+    }
+
+    /** @test */
+    public function update_rejects_invalid_hex_color(): void
+    {
+        $user = $this->makeUser();
+        Account::where('user_id', $user->id)->delete();
+        $account = $this->makeAccount($user);
+
+        $this->actingAs($user, 'api')
+            ->putJson("/api/accounts/{$account->id}", ['color' => 'red'])
+            ->assertUnprocessable()
+            ->assertJsonStructure(['errors' => ['color']]);
+    }
+
+    /** @test */
+    public function update_rejects_invalid_account_type(): void
+    {
+        $user = $this->makeUser();
+        Account::where('user_id', $user->id)->delete();
+        $account = $this->makeAccount($user);
+
+        $this->actingAs($user, 'api')
+            ->putJson("/api/accounts/{$account->id}", ['account_type' => 'unknown'])
+            ->assertUnprocessable()
+            ->assertJsonStructure(['errors' => ['account_type']]);
+    }
+
+    /** @test */
+    public function update_can_change_account_type(): void
+    {
+        $user = $this->makeUser();
+        Account::where('user_id', $user->id)->delete();
+        $account = $this->makeAccount($user, ['account_type' => 'wallet']);
+
+        $this->actingAs($user, 'api')
+            ->putJson("/api/accounts/{$account->id}", ['account_type' => 'savings'])
+            ->assertOk()
+            ->assertJson(['account' => ['account_type' => 'savings']]);
+
+        $this->assertDatabaseHas('accounts', [
+            'id'           => $account->id,
+            'account_type' => 'savings',
+        ]);
     }
 
     /** @test */

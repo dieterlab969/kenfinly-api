@@ -75,6 +75,7 @@ class AccountModelTest extends TestCase
             'currency',
             'icon',
             'color',
+            'account_type',   // added: wallet|bank|savings|credit_card|investment
         ];
 
         $this->assertEquals($expected, $account->getFillable());
