@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import BackBtn from '../components/BackBtn.tsx';
 import ContactUsImg from '../assets/images/main-img/contact-us-img.png';
 import CallIcon from '../assets/svg/call-icon.svg';
@@ -21,9 +21,35 @@ const XSocialSVG: React.FC = () => (
     </svg>
 );
 
-// ─── Scoped styles (new atoms only; no override of existing design-system classes) ──
+// ─── Scoped styles ────────────────────────────────────────────────────────────
+// This <style> tag is removed from the DOM automatically when the component
+// unmounts, so none of these overrides leak to other pages.
 
 const STYLES = `
+    /* ── Scroll fix ──────────────────────────────────────────────────────────
+       The global stylesheet chains  html → body → .site-content  all at
+       height:100%, locking the document to viewport height and silently
+       clipping anything below the fold.
+       useEffect adds .contact-us-page to <body> on mount and removes it on
+       unmount — so these rules are only active on this page and never bleed
+       into other routes. */
+    body.contact-us-page {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow-y: auto !important;
+    }
+    body.contact-us-page .site-content {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow-y: visible !important;
+    }
+    body.contact-us-page .verify-number-main,
+    body.contact-us-page .verify-number-bottom,
+    body.contact-us-page #contact-us-main {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
     /* Primary email badge */
     .cu-primary-badge {
         display: inline-block;
@@ -123,6 +149,11 @@ const SocialItem: React.FC<SocialItemProps> = ({ href, bgClass, label, icon }) =
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const ContactUs: React.FC = () => {
+    useEffect(() => {
+        document.body.classList.add('contact-us-page');
+        return () => document.body.classList.remove('contact-us-page');
+    }, []);
+
     return (
         <div>
             <style>{STYLES}</style>
