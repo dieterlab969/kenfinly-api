@@ -175,11 +175,11 @@ const Setting: React.FC = () => {
 
         {/* ── Settings list ── */}
         <div className="setting-bottom">
-          <SettingOption to="/AllContact"     icon={setting1}      title="All Contact" />
-          <SettingOption to="/CustomerScreen" icon={setting2}      title="Customers" />
+          {/* <SettingOption to="/AllContact"     icon={setting1}      title="All Contact" /> */}
+          {/* <SettingOption to="/CustomerScreen" icon={setting2}      title="Customers" /> */}
 
-          {/* Chart accordion */}
-          <div className="Char-content">
+          {/* Chart accordion — hidden temporarily */}
+          {/* <div className="Char-content">
             <div
               className="send-money-contact-tab"
               onClick={() => setIsChartOpen(!isChartOpen)}
@@ -205,15 +205,15 @@ const Setting: React.FC = () => {
               <li><Link to="/LineChart">Line Chart</Link></li>
               <li className="border-0"><Link to="/PieChart">Pie Chart</Link></li>
             </ul>
-          </div>
+          </div> */}
 
           <SettingOption to="/WalletManagement"        icon={settingWallet} title="Wallets & Accounts" />
           <SettingOption to="/CategoryManagement"      icon={setting3}      title="Categories" />
-          <SettingOption to="/BankAndCard"             icon={setting4}      title="Banks & Cards" />
-          <SettingOption to="/Payment"                 icon={setting5}      title="Payment Methods" />
-          <SettingOption to="/AutomaticPayment"        icon={setting6}      title="Automatic Payments" />
+          {/* <SettingOption to="/BankAndCard"             icon={setting4}      title="Banks & Cards" /> */}
+          {/* <SettingOption to="/Payment"                 icon={setting5}      title="Payment Methods" /> */}
+          {/* <SettingOption to="/AutomaticPayment"        icon={setting6}      title="Automatic Payments" /> */}
           <SettingOption to="/Subscription"            icon={setting7}      title="Subscriptions" />
-          <SettingOption to="/Invoicing"               icon={setting8}      title="Invoice Settings" />
+          {/* <SettingOption to="/Invoicing"               icon={setting8}      title="Invoice Settings" /> */}
 
           <div className="setting-center-border" />
 
@@ -225,8 +225,8 @@ const Setting: React.FC = () => {
           <SettingOption to="/Currency"                icon={setting14}     title="Currency" subtitle="USD" />
           <SettingOption to="/Faq"                     icon={setting15}     title="FAQs" />
           <SettingOption to="/DataPrivacy"             icon={setting16}     title="Data & Privacy Policy" />
-          <SettingOption to="/AboutUs"                 icon={setting17}     title="About PayFast" subtitle="v2.0.2" />
-          <SettingOption to="/Feedback"                icon={setting18}     title="Send Feedback" />
+          {/* <SettingOption to="/AboutUs"                 icon={setting17}     title="About PayFast" subtitle="v2.0.2" /> */}
+          {/* <SettingOption to="/Feedback"                icon={setting18}     title="Send Feedback" /> */}
           <SettingOption to="/ContactUs"               icon={setting19}     title="Contact Us" />
 
           {/* Dark mode toggle */}
@@ -255,7 +255,7 @@ const Setting: React.FC = () => {
             </div>
           </div>
 
-          <SettingOption to="/InviteFriend"            icon={setting20}     title="Invite Friends" />
+          {/* <SettingOption to="/InviteFriend"            icon={setting20}     title="Invite Friends" /> */}
           <SettingOption to="/DeleteDeactivateAccount" icon={setting21}     title="Delete or Deactivate Account" />
 
           {/* Logout */}
