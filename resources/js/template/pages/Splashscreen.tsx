@@ -92,7 +92,7 @@ const Splashscreen: React.FC = () => {
                                                                                                                                 Next
                                                                                                                         </Link>
                                                                                                                 ) : (
-                                                                                                                        <Link to="/LetYouScreen" className="w-100">
+                                                                                                                        <Link to="/SignIn" className="w-100">
                                                                                                                                 Get started
                                                                                                                         </Link>
                                                                                                                 )}
