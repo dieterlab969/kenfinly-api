@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AvatarUploadRequest;
+use App\Services\AvatarUploadService;
 use App\Services\ProfileUpdateService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -13,22 +16,21 @@ use Illuminate\Validation\Rule;
  * Authenticated user profile management.
  *
  * Endpoints:
- *  GET  /api/profile  – return the current user's profile
- *  PUT  /api/profile  – partially update the current user's profile
+ *  GET  /api/profile         – return the current user's full profile
+ *  PUT  /api/profile         – partially update profile fields
+ *  POST /api/profile/avatar  – upload and replace the profile avatar
  *
  * @tags Profile
  */
 class ProfileController extends Controller
 {
     public function __construct(
-        private readonly ProfileUpdateService $profileUpdateService
+        private readonly ProfileUpdateService $profileUpdateService,
+        private readonly AvatarUploadService  $avatarUploadService,
     ) {}
 
     // ── GET /api/profile ─────────────────────────────────────────────────────
 
-    /**
-     * Return the authenticated user's profile.
-     */
     public function show(): JsonResponse
     {
         $user = auth('api')->user();
@@ -42,17 +44,6 @@ class ProfileController extends Controller
 
     // ── PUT /api/profile ─────────────────────────────────────────────────────
 
-    /**
-     * Partially update the authenticated user's profile.
-     *
-     * Only the fields present in the request body are written. All fields are
-     * optional; at least one must be provided for a meaningful request.
-     *
-     * Email changes:
-     *  - Validated for uniqueness (ignoring the current user's own row).
-     *  - Trigger a reset of `email_verified_at` so the new address must be
-     *    re-verified before the account is considered active again.
-     */
     public function update(Request $request): JsonResponse
     {
         $user = auth('api')->user();
@@ -89,7 +80,6 @@ class ProfileController extends Controller
             ], 422);
         }
 
-        // Build the partial payload: only keys the caller actually sent.
         $fields = ['name', 'email', 'phone', 'address', 'date_of_birth', 'gender'];
         $data   = [];
         foreach ($fields as $field) {
@@ -108,6 +98,43 @@ class ProfileController extends Controller
         ]);
     }
 
+    // ── POST /api/profile/avatar ──────────────────────────────────────────────
+
+    /**
+     * Upload, resize, compress, and store a new avatar for the authenticated user.
+     *
+     * Accepts multipart/form-data with an `avatar` field.
+     * Constraints: JPEG / PNG / WebP, max 2 MB.
+     * The old avatar is automatically deleted before the new one is stored.
+     */
+    public function uploadAvatar(AvatarUploadRequest $request): JsonResponse
+    {
+        $user = auth('api')->user();
+
+        try {
+            $avatarUrl = $this->avatarUploadService->upload($user, $request->file('avatar'));
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Avatar upload failed. Please try again.',
+            ], 500);
+        }
+
+        $user->refresh()->load('roles', 'language');
+
+        return response()->json([
+            'success'    => true,
+            'message'    => 'Avatar uploaded successfully.',
+            'avatar_url' => $avatarUrl,
+            'profile'    => $this->formatProfile($user),
+        ]);
+    }
+
     // ── Shared formatter ──────────────────────────────────────────────────────
 
     private function formatProfile($user): array
@@ -122,7 +149,7 @@ class ProfileController extends Controller
                                     ? $user->date_of_birth->format('Y-m-d')
                                     : null,
             'gender'            => $user->gender,
-            'avatar'            => $user->avatar,
+            'avatar'            => $this->resolveAvatarUrl($user->avatar),
             'email_verified'    => $user->isEmailVerified(),
             'email_verified_at' => $user->email_verified_at,
             'status'            => $user->status,
@@ -131,5 +158,25 @@ class ProfileController extends Controller
             'created_at'        => $user->created_at,
             'updated_at'        => $user->updated_at,
         ];
+    }
+
+    /**
+     * Resolve the avatar field to a fully qualified public URL.
+     *
+     * - null / empty  → null
+     * - http(s) URL   → returned as-is  (OAuth avatars from Google / Facebook)
+     * - relative path → prefixed with the public storage URL
+     */
+    private function resolveAvatarUrl(?string $avatar): ?string
+    {
+        if (blank($avatar)) {
+            return null;
+        }
+
+        if (str_starts_with($avatar, 'http')) {
+            return $avatar;
+        }
+
+        return Storage::disk('public')->url($avatar);
     }
 }

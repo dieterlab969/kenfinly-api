@@ -149,6 +149,7 @@ Route::middleware('auth:api')->group(function () {
         // User Profile
         Route::get('/profile', [ProfileController::class, 'show']);
         Route::put('/profile', [ProfileController::class, 'update']);
+        Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar']);
 
         // CSV Import & Export
         Route::post('/csv/import', [CsvController::class, 'import']);
