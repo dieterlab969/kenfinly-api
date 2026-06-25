@@ -32,13 +32,47 @@ The original stub contained items tied to features that do not exist in Kenfinly
 
 | Column | Default | Description |
 |---|---|---|
-| `notify_new_transaction` | `true` | A transaction is recorded on the user's account |
+| `notify_new_transaction` | `true` | A transaction is recorded on the user's account (see detailed breakdown below) |
 | `notify_budget_alert` | `true` | A budget threshold is approaching or exceeded |
 | `notify_large_transaction` | `true` | An unusually large transaction is detected |
 | `notify_savings_milestone` | `true` | A saving-habit streak or milestone is reached |
 | `notify_account_invite` | `true` | Another user invites the current user to collaborate |
 | `notify_subscription` | `true` | Subscription renewal reminder or payment confirmation |
 | `notify_weekly_summary` | `false` | Weekly email digest (opt-in; higher frequency) |
+
+### `notify_new_transaction` — Detailed Purpose
+
+This toggle controls whether the user receives a notification whenever a balance
+change is recorded on any account they have access to. In Kenfinly this covers
+two distinct scenarios:
+
+#### 1. Recurring / Automatic Transactions
+
+Kenfinly allows users to schedule repeating transactions — for example:
+> *"Deduct 150,000 VND for Netflix every month on the 5th."*
+
+When the scheduled date arrives, the system automatically generates the
+transaction entry. With `notify_new_transaction` enabled, the user immediately
+receives a push or email alert such as:
+> *"A new recurring transaction has been recorded: −150,000 VND (Netflix subscription)."*
+
+This keeps users aware of automatic debits without having to open the app and
+manually check their balance, reducing the risk of overlooking scheduled costs.
+
+#### 2. Shared / Collaborative Accounts
+
+Kenfinly supports multi-user account collaboration (see `notify_account_invite`).
+When two or more people — such as a couple managing a shared household budget —
+link to the same account, any transaction that one participant records is
+immediately visible to all other participants.
+
+With `notify_new_transaction` enabled, every collaborator on the account
+receives a real-time alert when a new entry is added by any other member:
+> *"Your partner recorded a new transaction: −200,000 VND (Groceries) on Household Fund."*
+
+This ensures all account members stay aligned on the shared cash flow without
+needing to manually sync or ask each other — a critical feature for transparent,
+collaborative financial management.
 
 ---
 
