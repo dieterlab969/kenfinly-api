@@ -1,9 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import BackBtn from '../components/BackBtn.tsx';
 import ProfileImg from '../assets/images/personal-info/profile-img.png';
 import CameraIconImg from '../assets/svg/camera-icon.svg';
 import EditIcon from '../assets/svg/edit-icon.svg';
 import api from '../../utils/api.js';
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+const MAX_AVATAR_BYTES  = 2 * 1024 * 1024; // 2 MB
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,14 +41,14 @@ interface FieldErrors {
   gender?: string;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// ─── Options / lookups ────────────────────────────────────────────────────────
 
 const GENDER_OPTIONS = [
-  { value: '',                   label: 'Select gender' },
-  { value: 'male',               label: 'Male' },
-  { value: 'female',             label: 'Female' },
-  { value: 'other',              label: 'Other' },
-  { value: 'prefer_not_to_say',  label: 'Prefer not to say' },
+  { value: '',                  label: 'Select gender' },
+  { value: 'male',              label: 'Male' },
+  { value: 'female',            label: 'Female' },
+  { value: 'other',             label: 'Other' },
+  { value: 'prefer_not_to_say', label: 'Prefer not to say' },
 ];
 
 const GENDER_LABELS: Record<string, string> = {
@@ -52,6 +57,8 @@ const GENDER_LABELS: Record<string, string> = {
   other:             'Other',
   prefer_not_to_say: 'Prefer not to say',
 };
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function formatDisplayDate(iso: string | null): string {
   if (!iso) return '';
@@ -91,16 +98,30 @@ function validateForm(form: FormState): FieldErrors {
   return errors;
 }
 
+/**
+ * Client-side avatar file validation before sending to the server.
+ * Returns an error message string, or null if valid.
+ */
+function validateAvatarFile(file: File): string | null {
+  if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+    return 'Please select a JPEG, PNG, or WebP image.';
+  }
+  if (file.size > MAX_AVATAR_BYTES) {
+    return 'Image must be smaller than 2 MB.';
+  }
+  return null;
+}
+
 // ─── Spinner ──────────────────────────────────────────────────────────────────
 
 const Spinner: React.FC<{ small?: boolean }> = ({ small }) => (
   <span
     style={{
       display: 'inline-block',
-      width:  small ? 14 : 20,
-      height: small ? 14 : 20,
-      border: `2px solid #e5e7eb`,
-      borderTop: `2px solid #6366f1`,
+      width:   small ? 14 : 20,
+      height:  small ? 14 : 20,
+      border: '2px solid #e5e7eb',
+      borderTop: '2px solid #6366f1',
       borderRadius: '50%',
       animation: 'pi-spin 0.7s linear infinite',
     }}
@@ -108,26 +129,103 @@ const Spinner: React.FC<{ small?: boolean }> = ({ small }) => (
   />
 );
 
+// ─── Scoped styles ────────────────────────────────────────────────────────────
+
+const STYLES = `
+  @keyframes pi-spin    { to { transform: rotate(360deg); } }
+  @keyframes pi-shimmer { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+  .personal-field-value {
+    flex: 1; font-size: 14px; color: #374151;
+    padding: 2px 0; word-break: break-word;
+  }
+  .personal-edit-btn {
+    background: none; border: none; padding: 4px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px; transition: background 0.15s; flex-shrink: 0;
+  }
+  .personal-edit-btn:hover { background: #f3f4f6; }
+  .personal-field-input {
+    width: 100%; border: 1px solid #d1d5db; border-radius: 6px;
+    padding: 6px 10px; font-size: 14px; color: #111827; outline: none;
+    transition: border-color 0.15s; background: #fff; box-sizing: border-box;
+  }
+  .personal-field-input:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,.12); }
+  .personal-field-input.error { border-color: #ef4444; }
+  .personal-field-select {
+    width: 100%; border: 1px solid #d1d5db; border-radius: 6px;
+    padding: 6px 10px; font-size: 14px; color: #111827; outline: none;
+    background: #fff; box-sizing: border-box; cursor: pointer;
+  }
+  .personal-field-select:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,.12); }
+  .pi-alert-success {
+    background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d;
+    border-radius: 8px; padding: 10px 14px; font-size: 14px;
+    margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+  }
+  .pi-alert-error {
+    background: #fef2f2; border: 1px solid #fecaca; color: #dc2626;
+    border-radius: 8px; padding: 10px 14px; font-size: 14px; margin-bottom: 12px;
+  }
+  .personal-name { align-items: flex-start; }
+
+  /* Avatar upload overlay */
+  .avatar-upload-wrap { position: relative; display: inline-block; }
+  .avatar-upload-wrap .avatar-overlay {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: rgba(0,0,0,.35);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity .2s;
+    pointer-events: none;
+  }
+  .avatar-upload-wrap:hover .avatar-overlay { opacity: 1; }
+  .avatar-upload-input { display: none; }
+  .avatar-camera-btn {
+    position: absolute; bottom: 0; right: 0;
+    background: #6366f1; border: 2px solid #fff; border-radius: 50%;
+    width: 32px; height: 32px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s; padding: 0;
+  }
+  .avatar-camera-btn:hover  { background: #4f46e5; }
+  .avatar-camera-btn:disabled { background: #a5b4fc; cursor: not-allowed; }
+  .avatar-uploading-ring {
+    width: 100%; height: 100%; border-radius: 50%;
+    border: 3px solid #6366f1; border-top-color: transparent;
+    animation: pi-spin .7s linear infinite;
+  }
+`;
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const PersonalInfo: React.FC = () => {
-  const [profile, setProfile]           = useState<Profile | null>(null);
-  const [form, setForm]                 = useState<FormState>({ name: '', phone: '', date_of_birth: '', gender: '' });
-  const [editingFields, setEditingFields] = useState<Set<EditableField>>(new Set());
-  const [fieldErrors, setFieldErrors]   = useState<FieldErrors>({});
-  const [loading, setLoading]           = useState(true);
-  const [saving, setSaving]             = useState(false);
-  const [fetchError, setFetchError]     = useState('');
-  const [successMsg, setSuccessMsg]     = useState('');
-  const [saveError, setSaveError]       = useState('');
-  const successTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Profile data
+  const [profile,        setProfile]        = useState<Profile | null>(null);
+  const [form,           setForm]           = useState<FormState>({ name: '', phone: '', date_of_birth: '', gender: '' });
 
-  // ── Fetch profile on mount ─────────────────────────────────────────────────
+  // Field editing
+  const [editingFields,  setEditingFields]  = useState<Set<EditableField>>(new Set());
+  const [fieldErrors,    setFieldErrors]    = useState<FieldErrors>({});
+
+  // Loading / save states
+  const [loading,        setLoading]        = useState(true);
+  const [saving,         setSaving]         = useState(false);
+  const [fetchError,     setFetchError]     = useState('');
+  const [successMsg,     setSuccessMsg]     = useState('');
+  const [saveError,      setSaveError]      = useState('');
+
+  // Avatar upload states
+  const [avatarPreview,  setAvatarPreview]  = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError,    setAvatarError]    = useState('');
+
+  const successTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fileInputRef  = useRef<HTMLInputElement>(null);
+
+  // ── Fetch profile on mount ───────────────────────────────────────────────
   useEffect(() => {
     fetchProfile();
-    return () => {
-      if (successTimer.current) clearTimeout(successTimer.current);
-    };
+    return () => { if (successTimer.current) clearTimeout(successTimer.current); };
   }, []);
 
   async function fetchProfile() {
@@ -136,33 +234,93 @@ const PersonalInfo: React.FC = () => {
     try {
       const res = await api.get('/profile');
       const p: Profile = res.data.profile;
-      setProfile(p);
-      setForm({
-        name:          p.name          ?? '',
-        phone:         p.phone         ?? '',
-        date_of_birth: p.date_of_birth ?? '',
-        gender:        p.gender        ?? '',
-      });
+      applyProfile(p);
     } catch (err: any) {
-      setFetchError(
-        err.response?.data?.message
-          ?? 'Unable to load your profile. Please try again.'
-      );
+      setFetchError(err.response?.data?.message ?? 'Unable to load your profile. Please try again.');
     } finally {
       setLoading(false);
     }
   }
 
-  // ── Field toggle helpers ───────────────────────────────────────────────────
+  function applyProfile(p: Profile) {
+    setProfile(p);
+    setForm({
+      name:          p.name          ?? '',
+      phone:         p.phone         ?? '',
+      date_of_birth: p.date_of_birth ?? '',
+      gender:        p.gender        ?? '',
+    });
+    setAvatarPreview(null); // clear local preview — use server value
+  }
+
+  // ── Avatar upload ────────────────────────────────────────────────────────
+  const handleAvatarChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset input so the same file can be re-selected after an error
+    if (fileInputRef.current) fileInputRef.current.value = '';
+
+    // Client-side validation
+    const validationError = validateAvatarFile(file);
+    if (validationError) {
+      setAvatarError(validationError);
+      return;
+    }
+
+    // Optimistic local preview
+    const objectUrl = URL.createObjectURL(file);
+    setAvatarPreview(objectUrl);
+    setAvatarError('');
+    setAvatarUploading(true);
+
+    const formData = new FormData();
+    formData.append('avatar', file);
+
+    try {
+      const res = await api.post('/profile/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      const updatedProfile: Profile = res.data.profile;
+      applyProfile(updatedProfile);
+
+      // Update localStorage cache so Setting.tsx stays in sync
+      try {
+        const cached = JSON.parse(localStorage.getItem('user') ?? '{}');
+        localStorage.setItem('user', JSON.stringify({
+          ...cached,
+          avatar: updatedProfile.avatar,
+          name:   updatedProfile.name,
+          email:  updatedProfile.email,
+        }));
+      } catch { /* ignore */ }
+
+      setSuccessMsg('Avatar updated successfully.');
+      successTimer.current = setTimeout(() => setSuccessMsg(''), 4000);
+    } catch (err: any) {
+      // Revert preview on failure
+      setAvatarPreview(null);
+      URL.revokeObjectURL(objectUrl);
+
+      if (err.response?.status === 422) {
+        const msgs = err.response.data?.errors?.avatar;
+        setAvatarError(Array.isArray(msgs) ? msgs[0] : 'Invalid file. Please try a different image.');
+      } else {
+        setAvatarError(err.response?.data?.message ?? 'Upload failed. Please try again.');
+      }
+    } finally {
+      setAvatarUploading(false);
+    }
+  }, []);
+
+  // ── Field editing helpers ────────────────────────────────────────────────
   function toggleEdit(field: EditableField) {
     setEditingFields(prev => {
       const next = new Set(prev);
       if (next.has(field)) {
         next.delete(field);
-        // revert draft to saved value
-        if (profile) {
-          setForm(f => ({ ...f, [field]: (profile as any)[field] ?? '' }));
-        }
+        if (profile) setForm(f => ({ ...f, [field]: (profile as any)[field] ?? '' }));
         setFieldErrors(e => { const n = { ...e }; delete n[field]; return n; });
       } else {
         next.add(field);
@@ -173,14 +331,6 @@ const PersonalInfo: React.FC = () => {
     setSuccessMsg('');
   }
 
-  function cancelEdit(field: EditableField) {
-    if (profile) {
-      setForm(f => ({ ...f, [field]: (profile as any)[field] ?? '' }));
-    }
-    setEditingFields(prev => { const n = new Set(prev); n.delete(field); return n; });
-    setFieldErrors(e => { const n = { ...e }; delete n[field]; return n; });
-  }
-
   function handleChange(field: EditableField, value: string) {
     setForm(f => ({ ...f, [field]: value }));
     if (fieldErrors[field]) {
@@ -188,13 +338,12 @@ const PersonalInfo: React.FC = () => {
     }
   }
 
-  // ── Save ───────────────────────────────────────────────────────────────────
+  // ── Save profile fields ──────────────────────────────────────────────────
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (editingFields.size === 0) return;
 
     const errors = validateForm(form);
-    // Only surface errors for fields that are currently being edited
     const relevantErrors: FieldErrors = {};
     (Object.keys(errors) as EditableField[]).forEach(k => {
       if (editingFields.has(k)) relevantErrors[k] = errors[k];
@@ -208,7 +357,6 @@ const PersonalInfo: React.FC = () => {
     setSaveError('');
     setSuccessMsg('');
 
-    // Build payload with only the edited fields
     const payload: Partial<FormState> = {};
     editingFields.forEach(field => {
       payload[field] = form[field] || undefined as any;
@@ -216,14 +364,7 @@ const PersonalInfo: React.FC = () => {
 
     try {
       const res = await api.put('/profile', payload);
-      const updated: Profile = res.data.profile;
-      setProfile(updated);
-      setForm({
-        name:          updated.name          ?? '',
-        phone:         updated.phone         ?? '',
-        date_of_birth: updated.date_of_birth ?? '',
-        gender:        updated.gender        ?? '',
-      });
+      applyProfile(res.data.profile);
       setEditingFields(new Set());
       setFieldErrors({});
       setSuccessMsg('Profile updated successfully.');
@@ -237,17 +378,14 @@ const PersonalInfo: React.FC = () => {
         });
         setFieldErrors(mapped);
       } else {
-        setSaveError(
-          err.response?.data?.message ?? 'Failed to save changes. Please try again.'
-        );
+        setSaveError(err.response?.data?.message ?? 'Failed to save changes. Please try again.');
       }
     } finally {
       setSaving(false);
     }
   }
 
-  // ── Render helpers ─────────────────────────────────────────────────────────
-
+  // ── Render field helper ──────────────────────────────────────────────────
   function renderField(opts: {
     field: EditableField;
     label: string;
@@ -266,9 +404,7 @@ const PersonalInfo: React.FC = () => {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
             {inputEl}
             {error && (
-              <span style={{ color: '#ef4444', fontSize: 12, marginTop: 2 }}>
-                {error}
-              </span>
+              <span style={{ color: '#ef4444', fontSize: 12, marginTop: 2 }}>{error}</span>
             )}
           </div>
         ) : (
@@ -283,24 +419,23 @@ const PersonalInfo: React.FC = () => {
           aria-label={isEditing ? `Cancel editing ${label}` : `Edit ${label}`}
           title={isEditing ? 'Cancel' : 'Edit'}
         >
-          {isEditing ? (
-            <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 500 }}>✕</span>
-          ) : (
-            <img src={EditIcon} alt="edit" className="custom-icon-edit" />
-          )}
+          {isEditing
+            ? <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 500 }}>✕</span>
+            : <img src={EditIcon} alt="edit" className="custom-icon-edit" />}
         </button>
       </div>
     );
   }
 
-  // ── Loading skeleton ───────────────────────────────────────────────────────
+  // ── Derived values ───────────────────────────────────────────────────────
+  const resolvedAvatar = avatarPreview ?? profile?.avatar ?? null;
+  const hasEdits       = editingFields.size > 0;
+
+  // ── Loading skeleton ─────────────────────────────────────────────────────
   if (loading) {
     return (
       <div>
-        <style>{`
-          @keyframes pi-spin { to { transform: rotate(360deg); } }
-          @keyframes pi-shimmer { 0%,100%{opacity:.4} 50%{opacity:1} }
-        `}</style>
+        <style>{STYLES}</style>
         <div className="site-content">
           <div className="verify-number-main">
             <div className="verify-number-top">
@@ -320,7 +455,7 @@ const PersonalInfo: React.FC = () => {
                     </div>
                     {[...Array(5)].map((_, i) => (
                       <div key={i} className={`personal-name ${i > 0 ? 'mt-16' : ''}`}
-                        style={{ animation: 'pi-shimmer 1.4s ease infinite', animationDelay: `${i * 0.1}s` }}>
+                        style={{ animation: `pi-shimmer 1.4s ease infinite ${i * 0.1}s` }}>
                         <div style={{ height: 12, width: 80, background: '#e5e7eb', borderRadius: 4 }} />
                         <div style={{ height: 16, flex: 1, background: '#f3f4f6', borderRadius: 4, margin: '0 12px' }} />
                       </div>
@@ -335,7 +470,7 @@ const PersonalInfo: React.FC = () => {
     );
   }
 
-  // ── Fetch error state ──────────────────────────────────────────────────────
+  // ── Fetch error state ────────────────────────────────────────────────────
   if (fetchError) {
     return (
       <div>
@@ -374,76 +509,10 @@ const PersonalInfo: React.FC = () => {
     );
   }
 
-  // ── Main render ────────────────────────────────────────────────────────────
-  const avatarSrc = profile?.avatar ?? ProfileImg;
-  const hasEdits  = editingFields.size > 0;
-
+  // ── Main render ──────────────────────────────────────────────────────────
   return (
     <div>
-      <style>{`
-        @keyframes pi-spin { to { transform: rotate(360deg); } }
-        .personal-field-value {
-          flex: 1;
-          font-size: 14px;
-          color: #374151;
-          padding: 2px 0;
-          word-break: break-word;
-        }
-        .personal-edit-btn {
-          background: none;
-          border: none;
-          padding: 4px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 4px;
-          transition: background 0.15s;
-          flex-shrink: 0;
-        }
-        .personal-edit-btn:hover { background: #f3f4f6; }
-        .personal-field-input {
-          width: 100%;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          padding: 6px 10px;
-          font-size: 14px;
-          color: #111827;
-          outline: none;
-          transition: border-color 0.15s;
-          background: #fff;
-          box-sizing: border-box;
-        }
-        .personal-field-input:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.12); }
-        .personal-field-input.error { border-color: #ef4444; }
-        .personal-field-select {
-          width: 100%;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          padding: 6px 10px;
-          font-size: 14px;
-          color: #111827;
-          outline: none;
-          background: #fff;
-          box-sizing: border-box;
-          cursor: pointer;
-        }
-        .personal-field-select:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,0.12); }
-        .pi-alert-success {
-          background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d;
-          border-radius: 8px; padding: 10px 14px; font-size: 14px;
-          margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
-        }
-        .pi-alert-error {
-          background: #fef2f2; border: 1px solid #fecaca; color: #dc2626;
-          border-radius: 8px; padding: 10px 14px; font-size: 14px;
-          margin-bottom: 12px;
-        }
-        .pi-email-note {
-          font-size: 11px; color: #9ca3af; margin-top: 4px;
-        }
-        .personal-name { align-items: flex-start; }
-      `}</style>
+      <style>{STYLES}</style>
 
       <div className="site-content">
         <div className="verify-number-main">
@@ -466,37 +535,76 @@ const PersonalInfo: React.FC = () => {
 
                 <div className="personal-info-main">
 
-                  {/* ── Avatar ── */}
+                  {/* ── Avatar upload ── */}
                   <div className="profile-edit-first">
                     <div className="profile-edit-img">
-                      <img
-                        src={avatarSrc}
-                        alt="Profile"
-                        className="profile-pic"
-                        onError={(e) => { (e.target as HTMLImageElement).src = ProfileImg; }}
+
+                      {/* Hidden file input */}
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        id="imageInput"
+                        className="avatar-upload-input"
+                        accept="image/jpeg,image/jpg,image/png,image/webp"
+                        onChange={handleAvatarChange}
+                        disabled={avatarUploading}
+                        aria-label="Upload profile photo"
                       />
-                      <div className="image-input">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          id="imageInput"
-                          className="file-upload"
-                          disabled
-                          title="Avatar upload coming soon"
-                        />
+
+                      {/* Avatar with upload overlay */}
+                      <div className="avatar-upload-wrap">
+                        {avatarUploading ? (
+                          <div
+                            className="profile-pic"
+                            style={{
+                              width: '100%', height: '100%', borderRadius: '50%',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              background: '#f3f4f6',
+                            }}
+                          >
+                            <div className="avatar-uploading-ring" style={{ width: 40, height: 40 }} />
+                          </div>
+                        ) : (
+                          <>
+                            <img
+                              src={resolvedAvatar ?? ProfileImg}
+                              alt="Profile"
+                              className="profile-pic"
+                              onError={(e) => { (e.target as HTMLImageElement).src = ProfileImg; }}
+                            />
+                            <div className="avatar-overlay">
+                              <span style={{ color: '#fff', fontSize: 12, fontWeight: 600 }}>Change</span>
+                            </div>
+                          </>
+                        )}
+
+                        {/* Camera button */}
                         <label
                           htmlFor="imageInput"
-                          className="image-button"
-                          style={{ opacity: 0.6, cursor: 'default' }}
-                          title="Avatar upload coming soon"
+                          className="avatar-camera-btn"
+                          title={avatarUploading ? 'Uploading…' : 'Change profile photo'}
+                          style={{ cursor: avatarUploading ? 'not-allowed' : 'pointer' }}
                         >
-                          <img src={CameraIconImg} alt="camera-icon" className="upload-button" />
+                          {avatarUploading
+                            ? <div className="avatar-uploading-ring" style={{ width: 16, height: 16, borderWidth: 2 }} />
+                            : <img src={CameraIconImg} alt="upload" style={{ width: 16, height: 16 }} />
+                          }
                         </label>
                       </div>
+
+                      {/* Avatar-specific error */}
+                      {avatarError && (
+                        <p style={{
+                          color: '#dc2626', fontSize: 11, textAlign: 'center',
+                          marginTop: 6, maxWidth: 160,
+                        }}>
+                          {avatarError}
+                        </p>
+                      )}
                     </div>
                   </div>
 
-                  {/* ── Alerts ── */}
+                  {/* ── Global alerts ── */}
                   {successMsg && (
                     <div className="pi-alert-success" role="status">
                       <span>✓</span> {successMsg}
@@ -506,7 +614,7 @@ const PersonalInfo: React.FC = () => {
                     <div className="pi-alert-error" role="alert">{saveError}</div>
                   )}
 
-                  {/* ── Form ── */}
+                  {/* ── Profile form ── */}
                   <form className="personal-info-form mt-24" onSubmit={handleSave} noValidate>
 
                     {/* Name */}
@@ -541,7 +649,7 @@ const PersonalInfo: React.FC = () => {
                       </span>
                       <span
                         style={{ width: 28, flexShrink: 0, color: '#9ca3af', fontSize: 11 }}
-                        title="Email cannot be changed"
+                        title="Email cannot be changed here"
                       >
                         🔒
                       </span>
@@ -602,19 +710,18 @@ const PersonalInfo: React.FC = () => {
                       ),
                     })}
 
-                    {/* ── Submit ── */}
+                    {/* ── Save / Cancel ── */}
                     <div className="verify-number-btn" style={{ marginTop: 24 }}>
                       <button
                         type="submit"
                         disabled={saving || !hasEdits}
                         style={{
-                          opacity:    (!hasEdits || saving) ? 0.6 : 1,
-                          cursor:     (!hasEdits || saving) ? 'not-allowed' : 'pointer',
-                          display:    'flex',
-                          alignItems: 'center',
+                          opacity:        (!hasEdits || saving) ? 0.6 : 1,
+                          cursor:         (!hasEdits || saving) ? 'not-allowed' : 'pointer',
+                          display:        'flex',
+                          alignItems:     'center',
                           justifyContent: 'center',
-                          gap: 8,
-                          width: '100%',
+                          gap: 8, width: '100%',
                         }}
                       >
                         {saving && <Spinner small />}
