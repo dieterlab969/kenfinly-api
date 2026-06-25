@@ -37,6 +37,14 @@ class LanguageController extends Controller
             $language = Language::getDefault();
         }
 
+        if (!$language) {
+            return response()->json([
+                'success' => true,
+                'language' => null,
+                'translations' => (object)[],
+            ]);
+        }
+
         $translations = Translation::where('language_id', $language->id)
             ->pluck('value', 'key');
 

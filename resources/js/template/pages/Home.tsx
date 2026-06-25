@@ -551,7 +551,7 @@ const S: HomeStyleMap = {
     fontWeight: 700,
     fontSize: '15px',
     color: '#121212',
-    fontFamily: 'Poppins, sans-serif',
+    fontFamily: 'Satoshi, sans-serif',
   },
   row: { display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' },
   dot: (color: string): React.CSSProperties => ({
@@ -1222,7 +1222,7 @@ const Home: React.FC = () => {
                     style={{
                       flex: 1, border: 'none', outline: 'none',
                       fontSize: '28px', fontWeight: 800, padding: '12px 0',
-                      background: 'transparent', color: '#121212', fontFamily: 'Poppins, sans-serif',
+                      background: 'transparent', color: '#121212', fontFamily: 'Satoshi, sans-serif',
                     }}
                   />
                   <span style={{ fontSize: '22px', fontWeight: 700, color: '#9ca3af' }}>đ</span>
