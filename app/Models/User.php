@@ -85,6 +85,11 @@ class User extends Authenticatable implements JWTSubject
         'date_of_birth',
         'gender',
         'address',
+        'is_2fa_enabled',
+        'is_biometric_enabled',
+        'login_notifications_enabled',
+        'security_alerts_enabled',
+        'pin_hash',
     ];
 
     /**
@@ -117,8 +122,12 @@ class User extends Authenticatable implements JWTSubject
             'hourly_rate'              => 'integer',
             'current_streak'           => 'integer',
             'longest_streak'           => 'integer',
-            'trial_ends_at'            => 'datetime',
-            'subscription_expires_at'  => 'datetime',
+            'trial_ends_at'                  => 'datetime',
+            'subscription_expires_at'        => 'datetime',
+            'is_2fa_enabled'                 => 'boolean',
+            'is_biometric_enabled'           => 'boolean',
+            'login_notifications_enabled'    => 'boolean',
+            'security_alerts_enabled'        => 'boolean',
         ];
     }
 
