@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import BackBtn from '../components/BackBtn.tsx';
 import ContactUsImg from '../assets/images/main-img/contact-us-img.png';
 import CallIcon from '../assets/svg/call-icon.svg';
@@ -21,9 +21,40 @@ const XSocialSVG: React.FC = () => (
     </svg>
 );
 
-// ─── Scoped styles (new atoms only; no override of existing design-system classes) ──
+// ─── Scoped styles ────────────────────────────────────────────────────────────
+// This <style> tag is removed from the DOM automatically when the component
+// unmounts, so none of these overrides leak to other pages.
 
 const STYLES = `
+    /* ── Scroll fix ──────────────────────────────────────────────────────────
+       The global stylesheet chains  html → body → .site-content  all at
+       height:100%, which locks the document to viewport height and silently
+       clips anything below the fold.  Overrides below break that chain while
+       this page is mounted; !important beats the cascade without needing a
+       more-specific selector. */
+    html {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow-y: auto !important;
+    }
+    body {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow-y: auto !important;
+    }
+    .site-content {
+        height: auto !important;
+        min-height: 100% !important;
+        overflow-y: visible !important;
+    }
+    /* Ensure the purple bg wrapper and white card never clip their children */
+    .verify-number-main,
+    .verify-number-bottom,
+    #contact-us-main {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
     /* Primary email badge */
     .cu-primary-badge {
         display: inline-block;
@@ -123,6 +154,50 @@ const SocialItem: React.FC<SocialItemProps> = ({ href, bgClass, label, icon }) =
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const ContactUs: React.FC = () => {
+    useEffect(() => {
+        const html = document.documentElement;
+        const body = document.body;
+        const siteContent = document.querySelector('.site-content') as HTMLElement | null;
+
+        const prev = {
+            htmlHeight: html.style.height,
+            htmlMinHeight: html.style.minHeight,
+            htmlOverflow: html.style.overflowY,
+            bodyHeight: body.style.height,
+            bodyMinHeight: body.style.minHeight,
+            bodyOverflow: body.style.overflowY,
+            scHeight: siteContent?.style.height ?? '',
+            scMinHeight: siteContent?.style.minHeight ?? '',
+            scOverflow: siteContent?.style.overflowY ?? '',
+        };
+
+        html.style.height = 'auto';
+        html.style.minHeight = '100%';
+        html.style.overflowY = 'auto';
+        body.style.height = 'auto';
+        body.style.minHeight = '100%';
+        body.style.overflowY = 'auto';
+        if (siteContent) {
+            siteContent.style.height = 'auto';
+            siteContent.style.minHeight = '100%';
+            siteContent.style.overflowY = 'visible';
+        }
+
+        return () => {
+            html.style.height = prev.htmlHeight;
+            html.style.minHeight = prev.htmlMinHeight;
+            html.style.overflowY = prev.htmlOverflow;
+            body.style.height = prev.bodyHeight;
+            body.style.minHeight = prev.bodyMinHeight;
+            body.style.overflowY = prev.bodyOverflow;
+            if (siteContent) {
+                siteContent.style.height = prev.scHeight;
+                siteContent.style.minHeight = prev.scMinHeight;
+                siteContent.style.overflowY = prev.scOverflow;
+            }
+        };
+    }, []);
+
     return (
         <div>
             <style>{STYLES}</style>
