@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\HaloTransactionController;
 use App\Http\Controllers\Api\HourlyRateController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\UserPreferenceController;
+use App\Http\Controllers\Api\NotificationSettingController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AccountManagementController;
 use App\Http\Controllers\Admin\UserManagementController;
@@ -160,6 +161,10 @@ Route::middleware('auth:api')->group(function () {
         // Marketing Preferences
         Route::get('/user/preferences/marketing',  [UserPreferenceController::class, 'show']);
         Route::put('/user/preferences/marketing',  [UserPreferenceController::class, 'update']);
+
+        // Notification Settings
+        Route::get('/user/notification-settings', [NotificationSettingController::class, 'show']);
+        Route::put('/user/notification-settings', [NotificationSettingController::class, 'update']);
 
         // Security settings (toggle states)
         Route::get('/v1/user/security-settings',  [\App\Http\Controllers\Api\SecuritySettingsController::class, 'show']);
