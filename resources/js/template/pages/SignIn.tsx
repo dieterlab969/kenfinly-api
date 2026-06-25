@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { useRecaptchaConfig } from '../../components/App';
 import BackBtn from '../components/BackBtn';
 import Logo from '../assets/images/let-you-screen/logo.svg';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -18,7 +20,6 @@ interface LoginErrorResponse {
   errors?: Record<string, string[]>;
 }
 
-// ── Google "G" logo SVG (official colours, no external dependency) ─────────
 const GoogleLogo: React.FC = () => (
   <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
     <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
@@ -28,7 +29,6 @@ const GoogleLogo: React.FC = () => (
   </svg>
 );
 
-// ── Facebook "f" logo SVG (official brand colour #1877F2) ──────────────────
 const FacebookLogo: React.FC = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
     <path
@@ -48,7 +48,9 @@ const SignIn: React.FC = () => {
   const navigate  = useNavigate();
   const location  = useLocation();
 
-  // Show error passed back from the Google callback (e.g. oauth_failed)
+  const { executeRecaptcha } = useGoogleReCaptcha();
+  const { enabled: recaptchaEnabled } = useRecaptchaConfig();
+
   const searchParams = new URLSearchParams(location.search);
   const urlError = searchParams.get('error');
 
@@ -56,15 +58,36 @@ const SignIn: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
     try {
+      let recaptchaToken: string | null = null;
+
+      if (recaptchaEnabled) {
+        if (!executeRecaptcha) {
+          setError('Security check not loaded. Please refresh the page.');
+          setLoading(false);
+          return;
+        }
+        recaptchaToken = await executeRecaptcha('login');
+      }
+
+      const body: Record<string, string> = { email, password };
+      if (recaptchaToken) {
+        body['g-recaptcha-response'] = recaptchaToken;
+      }
+
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(body),
       });
       const data: LoginSuccessResponse | LoginErrorResponse = await response.json();
       if (!response.ok) {
-        setError((data as LoginErrorResponse).message || 'Login failed. Please check your credentials.');
+        const errData = data as LoginErrorResponse;
+        const firstFieldError = errData.errors
+          ? Object.values(errData.errors)[0]?.[0]
+          : null;
+        setError(firstFieldError || errData.message || 'Login failed. Please check your credentials.');
         return;
       }
       const { access_token, user } = data as LoginSuccessResponse;
@@ -121,7 +144,6 @@ const SignIn: React.FC = () => {
                 <div className="auth-alert-danger">{displayError}</div>
               )}
 
-              {/* ── Google One-Click ── */}
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
@@ -144,7 +166,6 @@ const SignIn: React.FC = () => {
                 )}
               </button>
 
-              {/* ── Facebook One-Click ── */}
               <button
                 type="button"
                 onClick={handleFacebookSignIn}

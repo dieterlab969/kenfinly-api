@@ -2,3 +2,6 @@
 - [Auth register flow](auth-register.md) — register auto-verifies email (MVP mode); verification_expires_at NOT in response
 - [Route group structure](route-groups.md) — user API routes live inside auth:api → halo.integrity nesting; URL is /api/<resource> (no v1 prefix in this group)
 - [Frontend build requirement](frontend-build.md) — PHP serves pre-compiled Vite bundle; must run npm run build after any TSX/JSX changes
+- [reCAPTCHA setup](recaptcha-setup.md) — env var names, provider location, and how to enable the setting
+- [LanguageController null-guard](language-controller-null.md) — getTranslations() must guard against null language before accessing id
+- [Design DNA fonts](design-dna-fonts.md) — Satoshi for UI/body, Poppins only for large display numbers (balance, hero headings)
