@@ -28,29 +28,24 @@ const XSocialSVG: React.FC = () => (
 const STYLES = `
     /* ── Scroll fix ──────────────────────────────────────────────────────────
        The global stylesheet chains  html → body → .site-content  all at
-       height:100%, which locks the document to viewport height and silently
-       clips anything below the fold.  Overrides below break that chain while
-       this page is mounted; !important beats the cascade without needing a
-       more-specific selector. */
-    html {
+       height:100%, locking the document to viewport height and silently
+       clipping anything below the fold.
+       useEffect adds .contact-us-page to <body> on mount and removes it on
+       unmount — so these rules are only active on this page and never bleed
+       into other routes. */
+    body.contact-us-page {
         height: auto !important;
         min-height: 100% !important;
         overflow-y: auto !important;
     }
-    body {
-        height: auto !important;
-        min-height: 100% !important;
-        overflow-y: auto !important;
-    }
-    .site-content {
+    body.contact-us-page .site-content {
         height: auto !important;
         min-height: 100% !important;
         overflow-y: visible !important;
     }
-    /* Ensure the purple bg wrapper and white card never clip their children */
-    .verify-number-main,
-    .verify-number-bottom,
-    #contact-us-main {
+    body.contact-us-page .verify-number-main,
+    body.contact-us-page .verify-number-bottom,
+    body.contact-us-page #contact-us-main {
         overflow: visible !important;
         height: auto !important;
     }
@@ -155,47 +150,8 @@ const SocialItem: React.FC<SocialItemProps> = ({ href, bgClass, label, icon }) =
 
 const ContactUs: React.FC = () => {
     useEffect(() => {
-        const html = document.documentElement;
-        const body = document.body;
-        const siteContent = document.querySelector('.site-content') as HTMLElement | null;
-
-        const prev = {
-            htmlHeight: html.style.height,
-            htmlMinHeight: html.style.minHeight,
-            htmlOverflow: html.style.overflowY,
-            bodyHeight: body.style.height,
-            bodyMinHeight: body.style.minHeight,
-            bodyOverflow: body.style.overflowY,
-            scHeight: siteContent?.style.height ?? '',
-            scMinHeight: siteContent?.style.minHeight ?? '',
-            scOverflow: siteContent?.style.overflowY ?? '',
-        };
-
-        html.style.height = 'auto';
-        html.style.minHeight = '100%';
-        html.style.overflowY = 'auto';
-        body.style.height = 'auto';
-        body.style.minHeight = '100%';
-        body.style.overflowY = 'auto';
-        if (siteContent) {
-            siteContent.style.height = 'auto';
-            siteContent.style.minHeight = '100%';
-            siteContent.style.overflowY = 'visible';
-        }
-
-        return () => {
-            html.style.height = prev.htmlHeight;
-            html.style.minHeight = prev.htmlMinHeight;
-            html.style.overflowY = prev.htmlOverflow;
-            body.style.height = prev.bodyHeight;
-            body.style.minHeight = prev.bodyMinHeight;
-            body.style.overflowY = prev.bodyOverflow;
-            if (siteContent) {
-                siteContent.style.height = prev.scHeight;
-                siteContent.style.minHeight = prev.scMinHeight;
-                siteContent.style.overflowY = prev.scOverflow;
-            }
-        };
+        document.body.classList.add('contact-us-page');
+        return () => document.body.classList.remove('contact-us-page');
     }, []);
 
     return (
