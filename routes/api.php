@@ -96,6 +96,11 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::post('/auth/refresh', [AuthController::class, 'refresh']);
 
+    // Security — change-password and change-pin live outside halo.integrity
+    // so they can always be reached even when the integrity check would block.
+    Route::put('/v1/user/change-password', [\App\Http\Controllers\Api\SecuritySettingsController::class, 'changePassword']);
+    Route::post('/v1/user/change-pin',     [\App\Http\Controllers\Api\SecuritySettingsController::class, 'changePin']);
+
     Route::middleware('halo.integrity')->group(function () {
         Route::get('/auth/me', [AuthController::class, 'me']);
 
@@ -150,6 +155,10 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/profile', [ProfileController::class, 'show']);
         Route::put('/profile', [ProfileController::class, 'update']);
         Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar']);
+
+        // Security settings (toggle states)
+        Route::get('/v1/user/security-settings',  [\App\Http\Controllers\Api\SecuritySettingsController::class, 'show']);
+        Route::put('/v1/user/security-settings',  [\App\Http\Controllers\Api\SecuritySettingsController::class, 'update']);
 
         // CSV Import & Export
         Route::post('/csv/import', [CsvController::class, 'import']);
