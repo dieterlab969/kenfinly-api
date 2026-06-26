@@ -14,6 +14,7 @@ import EditTransactionModal from '../../components/EditTransactionModal'
 import { processImageForUpload, validateImageFile, formatFileSize } from '../../utils/imageCompression'
 import { useTranslation } from 'react-i18next'
 import Offcanvas from 'react-bootstrap/Offcanvas'
+import { useSecureLogout } from '../hooks/useSecureLogout'
 
 type ApiAmount = string | number | null | undefined
 type TransactionType = 'income' | 'expense'
@@ -630,11 +631,14 @@ const MonthCol: React.FC<{
 const Home: React.FC = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { logout } = useSecureLogout()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [user, setUser] = useState<UserProfile | null>(() => getStoredUser())
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false)
+  const [logoutLoading, setLogoutLoading] = useState(false)
   const [fabOpen, setFabOpen] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [transactionType, setTransactionType] = useState<TransactionType>('expense')
@@ -727,6 +731,28 @@ const Home: React.FC = () => {
       if (state.drawerOpen) setIsDrawerOpen(true)
     } catch { /* sessionStorage unavailable or JSON malformed — safe to ignore */ }
   }, [])
+
+  // ── Logout confirmation drawer ────────────────────────────────────────────
+  // Setting.tsx dispatches 'kenfinly:open-logout'. We close the settings drawer
+  // first so the logout sheet slides up cleanly over the plain Home screen.
+  useEffect(() => {
+    const handler = () => {
+      setIsDrawerOpen(false)
+      setIsLogoutOpen(true)
+    }
+    window.addEventListener('kenfinly:open-logout', handler)
+    return () => window.removeEventListener('kenfinly:open-logout', handler)
+  }, [])
+
+  const handleConfirmLogout = async () => {
+    setLogoutLoading(true)
+    try {
+      await logout()
+    } catch {
+      // logout() never throws — this branch is a safety net only
+      setLogoutLoading(false)
+    }
+  }
 
   const totalBalance = useMemo(() => (
     dashboardData?.accounts?.reduce((sum, account) => sum + toNumber(account.balance), 0) ?? 0
@@ -1141,8 +1167,21 @@ const Home: React.FC = () => {
           </ul>
         </div>
 
-        <div className="offcanvas offcanvas-bottom logout-main" id="offcanvasBottom">
-          <button type="button" className="text-reset" data-bs-dismiss="offcanvas" aria-label="Close">
+        {/* ── Logout confirmation sheet (react-bootstrap — no vanilla JS timing issues) ── */}
+        <Offcanvas
+          show={isLogoutOpen}
+          onHide={() => { if (!logoutLoading) setIsLogoutOpen(false) }}
+          placement="bottom"
+          className="logout-main"
+        >
+          <button
+            type="button"
+            className="text-reset"
+            onClick={() => { if (!logoutLoading) setIsLogoutOpen(false) }}
+            disabled={logoutLoading}
+            aria-label="Close"
+            style={{ background: 'none', border: 'none', cursor: logoutLoading ? 'not-allowed' : 'pointer' }}
+          >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="16" viewBox="0 0 24 16" fill="none">
               <g>
                 <path d="M22 8L12 13L2 8" stroke="#F2EEFE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1150,15 +1189,47 @@ const Home: React.FC = () => {
               </g>
             </svg>
           </button>
-          <div className="offcanvas-body small">
+          <Offcanvas.Body className="small">
             <h2 className="logout-text-pop mt-12">{t('Logout')}</h2>
             <p className="sm-txt mt-16">{t('Are you sure you want to log out?')}</p>
             <div className="logout-button-main mt-32">
-              <button className="logout-cancel" data-bs-dismiss="offcanvas" aria-label="Close">{t('Cancel')}</button>
-              <button className="logout-cancel yes-logot" onClick={() => navigate('/')}>{t('Confirm')}</button>
+              <button
+                className="logout-cancel"
+                onClick={() => setIsLogoutOpen(false)}
+                disabled={logoutLoading}
+                aria-label="Cancel"
+              >
+                {t('Cancel')}
+              </button>
+              <button
+                className="logout-cancel yes-logot"
+                onClick={handleConfirmLogout}
+                disabled={logoutLoading}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  opacity: logoutLoading ? 0.75 : 1,
+                  cursor: logoutLoading ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {logoutLoading && (
+                  <span style={{
+                    width: 14, height: 14,
+                    border: '2px solid rgba(255,255,255,0.4)',
+                    borderTopColor: '#fff',
+                    borderRadius: '50%',
+                    display: 'inline-block',
+                    animation: 'ks-spin 0.75s linear infinite',
+                  }} />
+                )}
+                {logoutLoading ? t('Logging out…') : t('Confirm')}
+              </button>
             </div>
-          </div>
-        </div>
+          </Offcanvas.Body>
+        </Offcanvas>
+        {/* Spinner keyframe for logout button */}
+        <style>{`@keyframes ks-spin { to { transform: rotate(360deg); } }`}</style>
       </div>
 
       {showModal && (

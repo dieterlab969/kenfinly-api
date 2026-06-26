@@ -103,6 +103,10 @@ Route::middleware('auth:api')->group(function () {
     Route::put('/v1/user/change-password', [\App\Http\Controllers\Api\SecuritySettingsController::class, 'changePassword']);
     Route::post('/v1/user/change-pin',     [\App\Http\Controllers\Api\SecuritySettingsController::class, 'changePin']);
 
+    // User account self-service: deactivation and scheduled deletion
+    Route::post('/v1/user/deactivate', [\App\Http\Controllers\Api\UserAccountController::class, 'deactivate']);
+    Route::delete('/v1/user/account',  [\App\Http\Controllers\Api\UserAccountController::class, 'scheduleDelete']);
+
     Route::middleware('halo.integrity')->group(function () {
         Route::get('/auth/me', [AuthController::class, 'me']);
 
