@@ -3,6 +3,7 @@ import { Offcanvas } from 'bootstrap';
 import BackBtn from '../components/BackBtn.tsx';
 import { useSecuritySettings, ToggleKey } from '../hooks/useSecuritySettings.ts';
 import api from '../../utils/api.js';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -216,6 +217,7 @@ const PinRow: React.FC<PinRowProps> = ({ value, onChange, groupId, isInvalid, di
 // ─── Security page ────────────────────────────────────────────────────────────
 
 const Security: React.FC = () => {
+  const { t } = useTranslation();
   const {
     settings, loading, fetchError,
     savingToggles, toggleError, refetch, updateToggle,
@@ -252,7 +254,7 @@ const Security: React.FC = () => {
     setPwError('');
     try {
       await api.put('/v1/user/change-password', pwForm);
-      setPwSuccess('Password changed. Logging you out…');
+      setPwSuccess(t('Password changed. Logging you out…'));
       setTimeout(() => {
         getCanvas(passwordCanvasRef)?.hide();
         localStorage.removeItem('token');
@@ -266,7 +268,7 @@ const Security: React.FC = () => {
         Object.keys(raw).forEach(k => { mapped[k] = Array.isArray(raw[k]) ? raw[k][0] : raw[k]; });
         setPwErrors(mapped);
       } else {
-        setPwError(err.response?.data?.message ?? 'Failed to change password. Please try again.');
+        setPwError(err.response?.data?.message ?? t('Failed to change password. Please try again.'));
       }
     } finally {
       setPwSaving(false);
@@ -295,9 +297,9 @@ const Security: React.FC = () => {
   async function handlePinSubmit(e: React.FormEvent) {
     e.preventDefault();
     const errs: Record<string, string> = {};
-    if (settings?.has_pin && currentPin.trim().length < 6) errs.current_pin  = 'Please enter your 6-digit current PIN.';
-    if (newPin.trim().length < 6)                          errs.new_pin      = 'New PIN must be exactly 6 digits.';
-    if (confirmPin.trim() !== newPin.trim())               errs.confirm_pin  = 'PINs do not match.';
+    if (settings?.has_pin && currentPin.trim().length < 6) errs.current_pin  = t('Please enter your 6-digit current PIN.');
+    if (newPin.trim().length < 6)                          errs.new_pin      = t('New PIN must be exactly 6 digits.');
+    if (confirmPin.trim() !== newPin.trim())               errs.confirm_pin  = t('PINs do not match.');
     if (Object.keys(errs).length) { setPinErrors(errs); return; }
 
     setPinSaving(true);
@@ -319,7 +321,7 @@ const Security: React.FC = () => {
         Object.keys(raw).forEach(k => { mapped[k] = Array.isArray(raw[k]) ? raw[k][0] : raw[k]; });
         setPinErrors(mapped);
       } else {
-        setPinError(err.response?.data?.message ?? 'Failed to save PIN. Please try again.');
+        setPinError(err.response?.data?.message ?? t('Failed to save PIN. Please try again.'));
       }
     } finally {
       setPinSaving(false);
@@ -356,8 +358,8 @@ const Security: React.FC = () => {
         </button>
 
         <div className="offcanvas-body small">
-          <h2 className="logout-text-pop mt-12">Change Password</h2>
-          <p className="sm-txt mt-16">Enter your current password, then choose a strong new password.</p>
+          <h2 className="logout-text-pop mt-12">{t('Change Password')}</h2>
+          <p className="sm-txt mt-16">{t('Enter your current password, then choose a strong new password.')}</p>
 
           {pwSuccess && (
             <div className="sec-alert-success mt-16" role="status">
@@ -386,7 +388,7 @@ const Security: React.FC = () => {
                   autoComplete="current-password"
                   disabled={pwSaving}
                 />
-                <label htmlFor="sec-current-pw">Current Password</label>
+                <label htmlFor="sec-current-pw">{t('Current Password')}</label>
                 {pwErrors.current_password && (
                   <div className="invalid-feedback">{pwErrors.current_password}</div>
                 )}
@@ -407,7 +409,7 @@ const Security: React.FC = () => {
                   autoComplete="new-password"
                   disabled={pwSaving}
                 />
-                <label htmlFor="sec-new-pw">New Password</label>
+                <label htmlFor="sec-new-pw">{t('New Password')}</label>
                 {pwErrors.new_password && (
                   <div className="invalid-feedback">{pwErrors.new_password}</div>
                 )}
@@ -428,7 +430,7 @@ const Security: React.FC = () => {
                   autoComplete="new-password"
                   disabled={pwSaving}
                 />
-                <label htmlFor="sec-confirm-pw">Confirm New Password</label>
+                <label htmlFor="sec-confirm-pw">{t('Confirm New Password')}</label>
                 {pwErrors.new_password_confirmation && (
                   <div className="invalid-feedback">{pwErrors.new_password_confirmation}</div>
                 )}
@@ -442,7 +444,7 @@ const Security: React.FC = () => {
                   data-bs-dismiss="offcanvas"
                   disabled={pwSaving}
                 >
-                  Cancel
+                  {t('Cancel')}
                 </button>
                 <button
                   type="submit"
@@ -451,7 +453,7 @@ const Security: React.FC = () => {
                   style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}
                 >
                   {pwSaving && <Spinner />}
-                  {pwSaving ? 'Saving…' : 'Save Password'}
+                  {pwSaving ? t('Saving…') : t('Save Password')}
                 </button>
               </div>
 
@@ -475,12 +477,12 @@ const Security: React.FC = () => {
 
         <div className="offcanvas-body small">
           <h2 className="logout-text-pop mt-12">
-            {settings?.has_pin ? 'Change PIN' : 'Set a PIN'}
+            {settings?.has_pin ? t('Change PIN') : t('Set a PIN')}
           </h2>
           <p className="sm-txt mt-16">
             {settings?.has_pin
-              ? 'Enter your current PIN then choose a new 6-digit PIN.'
-              : 'Add a 6-digit PIN to make your account more secure.'}
+              ? t('Enter your current PIN then choose a new 6-digit PIN.')
+              : t('Add a 6-digit PIN to make your account more secure.')}
           </p>
 
           {pinSuccess && (
@@ -498,7 +500,7 @@ const Security: React.FC = () => {
               {/* Current PIN (only when user already has a PIN) */}
               {settings?.has_pin && (
                 <div className="mt-24">
-                  <p className="sm-txt" style={{ fontWeight: 600, marginBottom: 10 }}>Current PIN</p>
+                  <p className="sm-txt" style={{ fontWeight: 600, marginBottom: 10 }}>{t('Current PIN')}</p>
                   <PinRow
                     groupId="sec-current-pin"
                     value={currentPin}
@@ -516,7 +518,7 @@ const Security: React.FC = () => {
 
               {/* New PIN */}
               <div className="mt-24">
-                <p className="sm-txt" style={{ fontWeight: 600, marginBottom: 10 }}>New PIN</p>
+                <p className="sm-txt" style={{ fontWeight: 600, marginBottom: 10 }}>{t('New PIN')}</p>
                 <PinRow
                   groupId="sec-new-pin"
                   value={newPin}
@@ -533,7 +535,7 @@ const Security: React.FC = () => {
 
               {/* Confirm PIN */}
               <div className="mt-24">
-                <p className="sm-txt" style={{ fontWeight: 600, marginBottom: 10 }}>Confirm PIN</p>
+                <p className="sm-txt" style={{ fontWeight: 600, marginBottom: 10 }}>{t('Confirm PIN')}</p>
                 <PinRow
                   groupId="sec-confirm-pin"
                   value={confirmPin}
@@ -556,7 +558,7 @@ const Security: React.FC = () => {
                   data-bs-dismiss="offcanvas"
                   disabled={pinSaving}
                 >
-                  Cancel
+                  {t('Cancel')}
                 </button>
                 <button
                   type="submit"
@@ -565,7 +567,7 @@ const Security: React.FC = () => {
                   style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}
                 >
                   {pinSaving && <Spinner />}
-                  {pinSaving ? 'Saving…' : settings?.has_pin ? 'Change PIN' : 'Set PIN'}
+                  {pinSaving ? t('Saving…') : settings?.has_pin ? t('Change PIN') : t('Set PIN')}
                 </button>
               </div>
 
@@ -585,7 +587,7 @@ const Security: React.FC = () => {
             <div className="container">
               <div className="verify-number-top-content">
                 <div className="back-btn"><BackBtn /></div>
-                <div className="header-title"><p>Security</p></div>
+                <div className="header-title"><p>{t('Security')}</p></div>
               </div>
             </div>
           </div>
@@ -618,7 +620,7 @@ const Security: React.FC = () => {
                         border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600,
                       }}
                     >
-                      Try Again
+                      {t('Try Again')}
                     </button>
                   </div>
                 )}
@@ -636,8 +638,8 @@ const Security: React.FC = () => {
                     <div className="notification-option-wrap">
                       <ToggleRow
                         id="toggle-2fa"
-                        label="Two-Factor Authentication"
-                        description="Require a verification code at login"
+                        label={t('Two-Factor Authentication')}
+                        description={t('Require a verification code at login')}
                         checked={settings.is_2fa_enabled}
                         disabled={savingToggles.has('is_2fa_enabled')}
                         saving={savingToggles.has('is_2fa_enabled')}
@@ -649,8 +651,8 @@ const Security: React.FC = () => {
                     <div className="notification-option-wrap">
                       <ToggleRow
                         id="toggle-biometric"
-                        label="Biometric Login"
-                        description="Use Face ID or fingerprint to sign in"
+                        label={t('Biometric Login')}
+                        description={t('Use Face ID or fingerprint to sign in')}
                         checked={settings.is_biometric_enabled}
                         disabled={savingToggles.has('is_biometric_enabled')}
                         saving={savingToggles.has('is_biometric_enabled')}
@@ -662,8 +664,8 @@ const Security: React.FC = () => {
                     <div className="notification-option-wrap">
                       <ToggleRow
                         id="toggle-login-notif"
-                        label="Login Notifications"
-                        description="Get notified whenever your account is accessed"
+                        label={t('Login Notifications')}
+                        description={t('Get notified whenever your account is accessed')}
                         checked={settings.login_notifications_enabled}
                         disabled={savingToggles.has('login_notifications_enabled')}
                         saving={savingToggles.has('login_notifications_enabled')}
@@ -675,8 +677,8 @@ const Security: React.FC = () => {
                     <div className="notification-option-wrap border-0">
                       <ToggleRow
                         id="toggle-security-alerts"
-                        label="Security &amp; Marketing Alerts"
-                        description="Receive emails about account security and offers"
+                        label={t('Security & Marketing Alerts')}
+                        description={t('Receive emails about account security and offers')}
                         checked={settings.security_alerts_enabled}
                         disabled={savingToggles.has('security_alerts_enabled')}
                         saving={savingToggles.has('security_alerts_enabled')}
@@ -688,13 +690,13 @@ const Security: React.FC = () => {
                     {/* Action buttons — paid-button2 pattern (BillPaid.tsx / TransferBank1.tsx) */}
                     <div className="paid-button2 mt-16">
                       <button type="button" onClick={openPasswordCanvas}>
-                        Change Password
+                        {t('Change Password')}
                       </button>
                     </div>
 
                     <div className="paid-button2 mt-16">
                       <button type="button" onClick={openPinCanvas}>
-                        {settings.has_pin ? 'Change PIN' : 'Set PIN'}
+                        {settings.has_pin ? t('Change PIN') : t('Set PIN')}
                       </button>
                     </div>
 

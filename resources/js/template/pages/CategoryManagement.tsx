@@ -10,6 +10,7 @@ import SearchIcon from '../assets/svg/search-icon.svg';
 import faqPlus from '../assets/svg/faq-plus.svg';
 import purpleEditIcon from '../assets/svg/purple-edit-icon.svg';
 import api from '../../utils/api';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Domain types
@@ -116,6 +117,7 @@ function isValidHex(hex: string): boolean {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const CategoryManagement: React.FC = () => {
+  const { t } = useTranslation();
   // ── Data ────────────────────────────────────────────────────────────────────
   const [tree,     setTree]    = useState<Category[]>([]);
   const [loading,  setLoading] = useState<boolean>(true);
@@ -328,7 +330,7 @@ const CategoryManagement: React.FC = () => {
 
   const iconPickerRow = (): React.ReactNode => (
     <div className="personal-name mb-3">
-      <label style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>Icon</label>
+      <label style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>{t('Icon')}</label>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
         {ICON_PRESETS.map((ic) => (
           <button
@@ -355,7 +357,7 @@ const CategoryManagement: React.FC = () => {
 
   const colorPickerRow = (): React.ReactNode => (
     <div className="personal-name mb-3">
-      <label style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>Color</label>
+      <label style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>{t('Color')}</label>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8, marginBottom: 10 }}>
         {COLOR_PRESETS.map((c) => (
           <button
@@ -438,9 +440,9 @@ const CategoryManagement: React.FC = () => {
   // ─────────────────────────────────────────────────────────────────────────────
 
   const headerTitle: Record<PageView, string> = {
-    list: 'Categories',
-    add:  'New Category',
-    edit: 'Edit Category',
+    list: t('Categories'),
+    add:  t('New Category'),
+    edit: t('Edit Category'),
   };
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -468,10 +470,12 @@ const CategoryManagement: React.FC = () => {
               </p>
               {cat.children?.length ? (
                 <p style={{ color: '#B91C1C', fontSize: 12, marginBottom: 0 }}>
-                  ⚠️ Also removes {cat.children.length} sub-categor{cat.children.length === 1 ? 'y' : 'ies'}.
+                  {cat.children.length === 1
+                    ? t('⚠️ Also removes 1 sub-category.')
+                    : t('⚠️ Also removes {{count}} sub-categories.').replace('{{count}}', String(cat.children.length))}
                 </p>
               ) : (
-                <p style={{ color: '#B91C1C', fontSize: 12, marginBottom: 0 }}>This cannot be undone.</p>
+                <p style={{ color: '#B91C1C', fontSize: 12, marginBottom: 0 }}>{t('This cannot be undone.')}</p>
               )}
               {deleteError && (
                 <p style={{ color: '#EF4444', fontSize: 12, marginTop: 4, marginBottom: 0 }}>{deleteError}</p>
@@ -488,7 +492,7 @@ const CategoryManagement: React.FC = () => {
                   background: '#fff', color: '#374151', cursor: 'pointer',
                 }}
               >
-                Cancel
+                {t('Cancel')}
               </button>
               <button
                 type="button"
@@ -501,7 +505,7 @@ const CategoryManagement: React.FC = () => {
                   opacity: deleting ? 0.6 : 1,
                 }}
               >
-                {deleting ? 'Deleting…' : 'Delete'}
+                {deleting ? t('Deleting…') : t('Delete')}
               </button>
             </div>
           </div>
@@ -544,7 +548,7 @@ const CategoryManagement: React.FC = () => {
                   padding: '1px 7px', borderRadius: 20,
                 }}
               >
-                {cat.type === 'income' ? '↑ Income' : '↓ Expense'}
+                {cat.type === 'income' ? t('↑ Income') : t('↓ Expense')}
               </span>
               {cat.is_system && (
                 <span
@@ -557,7 +561,7 @@ const CategoryManagement: React.FC = () => {
                     userSelect: 'none',
                   }}
                 >
-                  🔒 System
+                  {t('🔒 System')}
                 </span>
               )}
               {!isChild && cat.children?.length ? (
@@ -584,7 +588,7 @@ const CategoryManagement: React.FC = () => {
                   transform: collapsed.has(cat.id) ? 'rotate(-90deg)' : 'rotate(0deg)',
                   transition: 'transform 0.2s', lineHeight: 1,
                 }}
-                aria-label={collapsed.has(cat.id) ? 'Expand' : 'Collapse'}
+                aria-label={collapsed.has(cat.id) ? t('Expand') : t('Collapse')}
               >
                 ▾
               </button>
@@ -596,7 +600,7 @@ const CategoryManagement: React.FC = () => {
                 <button
                   className="btn btn-link p-0"
                   onClick={() => openEdit(cat)}
-                  title="Edit category"
+                  title={t('Edit category')}
                   style={{ lineHeight: 1 }}
                 >
                   <img src={purpleEditIcon} alt="edit" style={{ width: 18, height: 18 }} />
@@ -604,7 +608,7 @@ const CategoryManagement: React.FC = () => {
                 <button
                   className="btn btn-link p-0"
                   onClick={() => { setConfirmDeleteId(cat.id); setDeleteError(''); }}
-                  title="Delete category"
+                  title={t('Delete category')}
                   style={{ lineHeight: 1 }}
                 >
                   <span style={{ color: '#EF4444', fontSize: 16 }}>✕</span>
@@ -645,7 +649,7 @@ const CategoryManagement: React.FC = () => {
         {/* Name */}
         <div className="personal-name mt-0 mb-3">
           <label htmlFor="cat-name" style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
-            Category Name <span style={{ color: '#EF4444' }}>*</span>
+            {t('Category Name')} <span style={{ color: '#EF4444' }}>*</span>
           </label>
           <input
             id="cat-name"
@@ -653,7 +657,7 @@ const CategoryManagement: React.FC = () => {
             className={`px-0${formErrors.name ? ' is-invalid' : ''}`}
             value={form.name}
             onChange={(e) => updateForm({ name: e.target.value })}
-            placeholder="e.g. Coffee & Tea"
+            placeholder={t('e.g. Coffee & Tea')}
             maxLength={255}
           />
           {fieldError('name')}
@@ -662,30 +666,30 @@ const CategoryManagement: React.FC = () => {
         {/* Type */}
         <div className="personal-name mb-3">
           <label style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
-            Type <span style={{ color: '#EF4444' }}>*</span>
+            {t('Type')} <span style={{ color: '#EF4444' }}>*</span>
           </label>
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
-            {(['expense', 'income'] as const).map((t) => (
+            {(['expense', 'income'] as const).map((typ) => (
               <button
-                key={t}
+                key={typ}
                 type="button"
-                onClick={() => updateForm({ type: t })}
+                onClick={() => updateForm({ type: typ })}
                 style={{
                   flex: 1, padding: '10px 0', borderRadius: 10,
                   fontSize: 14, fontWeight: 700,
-                  border: form.type === t
-                    ? `2px solid ${t === 'income' ? '#4ADE80' : '#F97316'}`
+                  border: form.type === typ
+                    ? `2px solid ${typ === 'income' ? '#4ADE80' : '#F97316'}`
                     : '2px solid rgba(108,61,230,0.15)',
-                  background: form.type === t
-                    ? (t === 'income' ? 'rgba(74,222,128,0.12)' : 'rgba(249,115,22,0.12)')
+                  background: form.type === typ
+                    ? (typ === 'income' ? 'rgba(74,222,128,0.12)' : 'rgba(249,115,22,0.12)')
                     : 'var(--sub-bg-color)',
-                  color: form.type === t
-                    ? (t === 'income' ? '#4ADE80' : '#F97316')
+                  color: form.type === typ
+                    ? (typ === 'income' ? '#4ADE80' : '#F97316')
                     : 'var(--sub-text-color)',
                   cursor: 'pointer',
                 }}
               >
-                {t === 'income' ? '↑ Income' : '↓ Expense'}
+                {typ === 'income' ? t('↑ Income') : t('↓ Expense')}
               </button>
             ))}
           </div>
@@ -695,8 +699,8 @@ const CategoryManagement: React.FC = () => {
         {/* Parent */}
         <div className="personal-name mb-3">
           <label htmlFor="cat-parent" style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
-            Parent Category
-            <span style={{ color: 'var(--sub-text-color)', fontWeight: 400, fontSize: 12 }}> (optional)</span>
+            {t('Parent Category')}
+            <span style={{ color: 'var(--sub-text-color)', fontWeight: 400, fontSize: 12 }}> {t('(optional)')}</span>
           </label>
           <select
             id="cat-parent"
@@ -709,7 +713,7 @@ const CategoryManagement: React.FC = () => {
               width: '100%', fontSize: 14, paddingBottom: 4,
             }}
           >
-            <option value="">— No parent (top-level) —</option>
+            <option value="">{t('— No parent (top-level) —')}</option>
             {topLevelOptions
               .filter((c) => c.id !== editingId)
               .map((c) => (
@@ -734,8 +738,8 @@ const CategoryManagement: React.FC = () => {
             disabled={saving || (!!form.customColor && !isValidHex(form.customColor))}
           >
             {saving
-              ? (isEdit ? 'Saving…' : 'Creating…')
-              : (isEdit ? 'Save Changes' : 'Create Category')}
+              ? (isEdit ? t('Saving…') : t('Creating…'))
+              : (isEdit ? t('Save Changes') : t('Create Category'))}
           </button>
         </div>
         <div style={{ textAlign: 'center', marginTop: 14 }}>
@@ -749,7 +753,7 @@ const CategoryManagement: React.FC = () => {
               cursor: 'pointer', padding: '8px 0',
             }}
           >
-            Cancel
+            {t('Cancel')}
           </button>
         </div>
       </form>
@@ -801,7 +805,7 @@ const CategoryManagement: React.FC = () => {
                         type="search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search categories…"
+                        placeholder={t('Search categories…')}
                         className="form-control search-text"
                       />
                     </div>
@@ -813,7 +817,7 @@ const CategoryManagement: React.FC = () => {
                         aria-expanded="false"
                         style={{ color: 'rgba(255,255,255,0.64)', fontSize: 12 }}
                       >
-                        Sort
+                        {t('Sort')}
                       </button>
                       <ul className="dropdown-menu dropdown-menu-end">
                         {SORT_OPTIONS.map((opt) => (
@@ -822,7 +826,7 @@ const CategoryManagement: React.FC = () => {
                               className={`dropdown-item${sortKey === opt.value ? ' active' : ''}`}
                               onClick={() => setSortKey(opt.value)}
                             >
-                              {opt.label}
+                              {t(opt.label)}
                             </button>
                           </li>
                         ))}
@@ -860,27 +864,27 @@ const CategoryManagement: React.FC = () => {
                   <>
                     {/* Type filter tabs */}
                     <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                      {(['all', 'expense', 'income'] as TypeFilter[]).map((t) => (
+                      {(['all', 'expense', 'income'] as TypeFilter[]).map((typ) => (
                         <button
-                          key={t}
+                          key={typ}
                           type="button"
-                          onClick={() => setTypeFilter(t)}
+                          onClick={() => setTypeFilter(typ)}
                           style={{
                             flex: 1, padding: '7px 0', borderRadius: 10,
                             fontSize: 12, fontWeight: 700,
-                            border: typeFilter === t
+                            border: typeFilter === typ
                               ? '2px solid var(--primary-color, #6C3DE6)'
                               : '2px solid rgba(108,61,230,0.15)',
-                            background: typeFilter === t
+                            background: typeFilter === typ
                               ? 'rgba(108,61,230,0.12)'
                               : 'var(--sub-bg-color)',
-                            color: typeFilter === t
+                            color: typeFilter === typ
                               ? 'var(--primary-color, #6C3DE6)'
                               : 'var(--sub-text-color)',
                             cursor: 'pointer',
                           }}
                         >
-                          {t === 'all' ? 'All' : t === 'income' ? '↑ Income' : '↓ Expense'}
+                          {typ === 'all' ? t('All') : typ === 'income' ? t('↑ Income') : t('↓ Expense')}
                         </button>
                       ))}
                     </div>
@@ -889,10 +893,10 @@ const CategoryManagement: React.FC = () => {
                     {!loading && !errorMsg && (
                       <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto' }}>
                         {[
-                          { label: 'Total',   count: flat.length,                            color: '#6C3DE6' },
-                          { label: 'Expense', count: flat.filter((c) => c.type === 'expense').length, color: '#F97316' },
-                          { label: 'Income',  count: flat.filter((c) => c.type === 'income').length,  color: '#4ADE80' },
-                          { label: 'Custom',  count: flat.filter((c) => !c.is_system).length,         color: '#06B6D4' },
+                          { label: t('Total'),   count: flat.length,                            color: '#6C3DE6' },
+                          { label: t('Expense'), count: flat.filter((c) => c.type === 'expense').length, color: '#F97316' },
+                          { label: t('Income'),  count: flat.filter((c) => c.type === 'income').length,  color: '#4ADE80' },
+                          { label: t('Custom'),  count: flat.filter((c) => !c.is_system).length,         color: '#06B6D4' },
                         ].map((s) => (
                           <div key={s.label} style={{
                             flexShrink: 0, minWidth: 64,
@@ -918,7 +922,7 @@ const CategoryManagement: React.FC = () => {
                           <span className="visually-hidden">Loading…</span>
                         </div>
                         <p style={{ color: 'var(--sub-text-color)', marginTop: 12, fontSize: 14 }}>
-                          Loading categories…
+                          {t('Loading categories…')}
                         </p>
                       </div>
                     )}
@@ -932,7 +936,7 @@ const CategoryManagement: React.FC = () => {
                             href="#"
                             onClick={(e) => { e.preventDefault(); void fetchCategories(); }}
                           >
-                            Try Again
+                            {t('Try Again')}
                           </a>
                         </div>
                       </div>
@@ -943,7 +947,7 @@ const CategoryManagement: React.FC = () => {
                       <div className="text-center py-5">
                         <p style={{ fontSize: 40, marginBottom: 8 }}>🗂️</p>
                         <p style={{ color: 'var(--text-color)', fontSize: 16, fontWeight: 700, marginBottom: 4 }}>
-                          {search || typeFilter !== 'all' ? 'No categories match your filter.' : 'No categories yet.'}
+                          {search || typeFilter !== 'all' ? t('No categories match your filter.') : t('No categories yet.')}
                         </p>
                         {search && (
                           <button
@@ -951,7 +955,7 @@ const CategoryManagement: React.FC = () => {
                             style={{ fontSize: 14 }}
                             onClick={() => setSearch('')}
                           >
-                            Clear search
+                            {t('Clear search')}
                           </button>
                         )}
                       </div>
@@ -972,7 +976,7 @@ const CategoryManagement: React.FC = () => {
                           onClick={(e) => { e.preventDefault(); openAdd(); }}
                         >
                           <span><img src={faqPlus} alt="plus-icon" /></span>
-                          Add Custom Category
+                          {t('Add Custom Category')}
                         </a>
                       </div>
                     )}

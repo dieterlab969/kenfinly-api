@@ -9,8 +9,10 @@ import Subscription5 from '../assets/images/subscription/subscription5.png'
 import EditIcon from '../assets/svg/edit-icon.svg'
 import ExpiredIcon from '../assets/svg/expired-icon.svg'
 import { Link } from 'react-router-dom'
+import { useTranslation } from '../../contexts/TranslationContext';
 
 const Subscription: React.FC = () => {
+	const { t } = useTranslation();
 	return (
 		<div>
 			<div className="site-content">
@@ -22,7 +24,7 @@ const Subscription: React.FC = () => {
 									<BackBtn />
 								</div>
 								<div className="header-title">
-									<p>Subscriptions</p>
+									<p>{t('Subscriptions')}</p>
 								</div>
 							</div>
 							<div className="contact-search">
@@ -31,13 +33,13 @@ const Subscription: React.FC = () => {
 										<img src={SearchIcon} alt="search-icon" />
 									</div>
 									<div className="seach-bar">
-										<input type="search" placeholder="Search" className="form-control search-text" id="search-input" />
+										<input type="search" placeholder={t('Search')} className="form-control search-text" id="search-input" />
 									</div>
 								</div>
 							</div>
 							<div className="nav nav-tabs custom-tab-contact" id="nav-tab" role="tablist">
-								<button className="nav-link active" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-selected="true">Active</button>
-								<button className="nav-link" id="nav-favourite-tab" data-bs-toggle="tab" data-bs-target="#nav-favourite" type="button" role="tab" aria-selected="false">Expired</button>
+								<button className="nav-link active" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-selected="true">{t('Active')}</button>
+								<button className="nav-link" id="nav-favourite-tab" data-bs-toggle="tab" data-bs-target="#nav-favourite" type="button" role="tab" aria-selected="false">{t('Expired')}</button>
 							</div>
 						</div>
 					</div>

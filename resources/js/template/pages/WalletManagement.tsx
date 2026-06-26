@@ -11,6 +11,7 @@ import faqPlus from '../assets/svg/faq-plus.svg';
 import purpleEditIcon from '../assets/svg/purple-edit-icon.svg';
 import api from '../../utils/api';
 import { formatCurrency } from '../../constants/categories';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Domain types
@@ -175,32 +176,36 @@ function sortAccounts(list: Account[], key: string): Account[] {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Locked badge shown wherever the balance appears in a read-only context */
-const ReadOnlyBadge: React.FC = () => (
-  <span
-    style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 4,
-      fontSize: 11,
-      fontWeight: 600,
-      color: 'var(--sub-text-color)',
-      background: 'rgba(108,61,230,0.08)',
-      border: '1px solid rgba(108,61,230,0.18)',
-      borderRadius: 6,
-      padding: '2px 8px',
-      letterSpacing: '0.3px',
-      userSelect: 'none',
-    }}
-  >
-    🔒 Read-only
-  </span>
-);
+const ReadOnlyBadge: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        fontSize: 11,
+        fontWeight: 600,
+        color: 'var(--sub-text-color)',
+        background: 'rgba(108,61,230,0.08)',
+        border: '1px solid rgba(108,61,230,0.18)',
+        borderRadius: 6,
+        padding: '2px 8px',
+        letterSpacing: '0.3px',
+        userSelect: 'none',
+      }}
+    >
+      {t('🔒 Read-only')}
+    </span>
+  );
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Main component
 // ─────────────────────────────────────────────────────────────────────────────
 
 const WalletManagement: React.FC = () => {
+  const { t } = useTranslation();
   // ── Data ──
   const [accounts,    setAccounts]    = useState<Account[]>([]);
   const [categories,  setCategories]  = useState<Category[]>([]);
@@ -536,7 +541,7 @@ const WalletManagement: React.FC = () => {
 
   const iconPickerRow = (current: string, onChange: (v: string) => void): React.ReactNode => (
     <div className="mb-3">
-      <p style={{ color: 'var(--sub-text-color)', fontSize: 13, marginBottom: 8 }}>Icon</p>
+      <p style={{ color: 'var(--sub-text-color)', fontSize: 13, marginBottom: 8 }}>{t('Icon')}</p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {ICON_PRESETS.map((ic) => (
           <button
@@ -563,7 +568,7 @@ const WalletManagement: React.FC = () => {
 
   const colorPickerRow = (current: string, onChange: (v: string) => void): React.ReactNode => (
     <div className="mb-3">
-      <p style={{ color: 'var(--sub-text-color)', fontSize: 13, marginBottom: 8 }}>Color</p>
+      <p style={{ color: 'var(--sub-text-color)', fontSize: 13, marginBottom: 8 }}>{t('Color')}</p>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {COLOR_PRESETS.map((c) => (
           <button
@@ -598,7 +603,7 @@ const WalletManagement: React.FC = () => {
         {icon}
       </div>
       <div className="bank-details" style={{ flex: 1, minWidth: 0 }}>
-        <h2 style={{ marginBottom: 2 }}>{name || 'Account name'}</h2>
+        <h2 style={{ marginBottom: 2 }}>{name || t('Account name')}</h2>
         <div className="bank-card">
           <span style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>{currency}</span>
         </div>
@@ -616,10 +621,10 @@ const WalletManagement: React.FC = () => {
   // ─────────────────────────────────────────────────────────────────────────
 
   const headerTitle: Record<PageView, string> = {
-    list:   'Wallets & Accounts',
-    add:    'Add Account',
-    edit:   'Edit Account',
-    adjust: 'Adjust Balance',
+    list:   t('Wallets & Accounts'),
+    add:    t('Add Account'),
+    edit:   t('Edit Account'),
+    adjust: t('Adjust Balance'),
   };
 
   return (
@@ -661,7 +666,7 @@ const WalletManagement: React.FC = () => {
                         type="search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search name, bank or type…"
+                        placeholder={t('Search name, bank or type…')}
                         className="form-control search-text"
                       />
                     </div>
@@ -673,7 +678,7 @@ const WalletManagement: React.FC = () => {
                         aria-expanded="false"
                         style={{ color: 'rgba(255,255,255,0.64)', fontSize: 12 }}
                       >
-                        Sort
+                        {t('Sort')}
                       </button>
                       <ul className="dropdown-menu dropdown-menu-end">
                         {SORT_OPTIONS.map((opt) => (
@@ -682,7 +687,7 @@ const WalletManagement: React.FC = () => {
                               className={`dropdown-item${sortKey === opt.value ? ' active' : ''}`}
                               onClick={() => setSortKey(opt.value)}
                             >
-                              {opt.label}
+                              {t(opt.label)}
                             </button>
                           </li>
                         ))}
@@ -731,7 +736,7 @@ const WalletManagement: React.FC = () => {
                           <span className="visually-hidden">Loading…</span>
                         </div>
                         <p style={{ color: 'var(--sub-text-color)', marginTop: 12, fontSize: 14 }}>
-                          Loading accounts…
+                          {t('Loading accounts…')}
                         </p>
                       </div>
                     )}
@@ -745,7 +750,7 @@ const WalletManagement: React.FC = () => {
                             href="#"
                             onClick={(e) => { e.preventDefault(); void fetchAccounts(); }}
                           >
-                            Try Again
+                            {t('Try Again')}
                           </a>
                         </div>
                       </div>
@@ -760,7 +765,7 @@ const WalletManagement: React.FC = () => {
                             textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 4,
                           }}
                         >
-                          Total Balance
+                          {t('Total Balance')}
                         </p>
                         {totals.map(([cur, amt]) => (
                           <p key={cur} className="pay-txt1" style={{ fontSize: 24, fontWeight: 700, marginBottom: 2 }}>
@@ -768,7 +773,7 @@ const WalletManagement: React.FC = () => {
                           </p>
                         ))}
                         <p style={{ color: 'var(--sub-text-color)', fontSize: 13, marginBottom: 0 }}>
-                          {accounts.length} account{accounts.length !== 1 ? 's' : ''}
+                          {accounts.length} {accounts.length !== 1 ? t('accounts') : t('account')}
                         </p>
                       </div>
                     )}
@@ -778,10 +783,10 @@ const WalletManagement: React.FC = () => {
                       <div className="text-center py-5">
                         <p style={{ fontSize: 40, marginBottom: 8 }}>💰</p>
                         <p style={{ color: 'var(--text-color)', fontSize: 16, fontWeight: 700, marginBottom: 4 }}>
-                          No accounts yet
+                          {t('No accounts yet')}
                         </p>
                         <p style={{ color: 'var(--sub-text-color)', fontSize: 14, marginBottom: 20 }}>
-                          Add your first wallet or bank account to get started.
+                          {t('Add your first wallet or bank account to get started.')}
                         </p>
                       </div>
                     )}
@@ -790,13 +795,13 @@ const WalletManagement: React.FC = () => {
                     {!loading && !errorMsg && accounts.length > 0 && displayed.length === 0 && (
                       <div className="text-center py-4">
                         <p style={{ color: 'var(--sub-text-color)', fontSize: 14 }}>
-                          No accounts match &ldquo;{search}&rdquo;.{' '}
+                          {t('No accounts match "{{search}}".'). replace('{{search}}', search)}{' '}
                           <button
                             className="btn btn-link p-0"
                             style={{ fontSize: 14 }}
                             onClick={() => setSearch('')}
                           >
-                            Clear search
+                            {t('Clear search')}
                           </button>
                         </p>
                       </div>
@@ -823,7 +828,7 @@ const WalletManagement: React.FC = () => {
                                     Delete &ldquo;{acc.name}&rdquo;?
                                   </p>
                                   <p style={{ color: '#B91C1C', fontSize: 12, marginBottom: 0 }}>
-                                    This cannot be undone.
+                                    {t('This cannot be undone.')}
                                   </p>
                                   {deleteError && (
                                     <p style={{ color: '#EF4444', fontSize: 12, marginTop: 4, marginBottom: 0 }}>
@@ -842,7 +847,7 @@ const WalletManagement: React.FC = () => {
                                       background: '#fff', color: '#374151', cursor: 'pointer',
                                     }}
                                   >
-                                    Cancel
+                                    {t('Cancel')}
                                   </button>
                                   <button
                                     type="button"
@@ -855,7 +860,7 @@ const WalletManagement: React.FC = () => {
                                       opacity: deleting ? 0.6 : 1,
                                     }}
                                   >
-                                    {deleting ? 'Deleting…' : 'Delete'}
+                                    {deleting ? t('Deleting…') : t('Delete')}
                                   </button>
                                 </div>
                               </div>
@@ -921,7 +926,7 @@ const WalletManagement: React.FC = () => {
                                   <button
                                     className="btn btn-link p-0"
                                     onClick={() => openEdit(acc)}
-                                    title="Edit name, icon, color"
+                                    title={t('Edit name, icon, color')}
                                     style={{ lineHeight: 1 }}
                                   >
                                     <img src={purpleEditIcon} alt="edit" style={{ width: 18, height: 18 }} />
@@ -931,7 +936,7 @@ const WalletManagement: React.FC = () => {
                                   <button
                                     className="btn btn-link p-0"
                                     onClick={() => openAdjust(acc)}
-                                    title="Adjust balance via transaction"
+                                    title={t('Adjust balance via transaction')}
                                     style={{ lineHeight: 1, fontSize: 16 }}
                                   >
                                     ⚖️
@@ -960,7 +965,7 @@ const WalletManagement: React.FC = () => {
                       <div className="verify-number-btn" id="bank-and-card-main" style={{ marginTop: 24 }}>
                         <a href="#" onClick={(e) => { e.preventDefault(); openAdd(); }}>
                           <span><img src={faqPlus} alt="plus-icon" /></span>
-                          Add a New Account
+                          {t('Add a New Account')}
                         </a>
                       </div>
                     )}
@@ -983,7 +988,7 @@ const WalletManagement: React.FC = () => {
                     {/* Account name */}
                     <div className="personal-name mt-0 mb-3">
                       <label htmlFor="add-name" style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
-                        Account Name <span style={{ color: '#EF4444' }}>*</span>
+                        {t('Account Name')} <span style={{ color: '#EF4444' }}>*</span>
                       </label>
                       <input
                         id="add-name"
@@ -991,7 +996,7 @@ const WalletManagement: React.FC = () => {
                         className={`px-0${formErrors.name ? ' is-invalid' : ''}`}
                         value={createForm.name}
                         onChange={(e) => setCreateForm((f) => ({ ...f, name: e.target.value }))}
-                        placeholder="e.g. Cash Wallet, Vietcombank"
+                        placeholder={t('e.g. Cash Wallet, Vietcombank')}
                         maxLength={255}
                       />
                       {formErrors.name && (
@@ -1005,7 +1010,7 @@ const WalletManagement: React.FC = () => {
                     <div style={{ display: 'flex', gap: 16 }}>
                       <div className="personal-name mb-3" style={{ flex: 2 }}>
                         <label htmlFor="add-initial-balance" style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
-                          Opening Balance <span style={{ color: '#EF4444' }}>*</span>
+                          {t('Opening Balance')} <span style={{ color: '#EF4444' }}>*</span>
                         </label>
                         <input
                           id="add-initial-balance"
@@ -1023,7 +1028,7 @@ const WalletManagement: React.FC = () => {
                           placeholder="0"
                         />
                         <p style={{ fontSize: 11, color: 'var(--sub-text-color)', marginTop: 4, marginBottom: 0 }}>
-                          Set once at creation. After this, balance changes through transactions only.
+                          {t('Set once at creation. After this, balance changes through transactions only.')}
                         </p>
                         {formErrors.balance && (
                           <div className="invalid-feedback d-block" style={{ fontSize: 12 }}>
@@ -1034,7 +1039,7 @@ const WalletManagement: React.FC = () => {
 
                       <div className="personal-name mb-3" style={{ flex: 1 }}>
                         <label htmlFor="add-currency" style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
-                          Currency
+                          {t('Currency')}
                         </label>
                         <select
                           id="add-currency"
@@ -1066,7 +1071,7 @@ const WalletManagement: React.FC = () => {
 
                     <div className="verify-number-btn" style={{ marginTop: 8 }}>
                       <button type="submit" disabled={saving}>
-                        {saving ? 'Creating…' : 'Create Account'}
+                        {saving ? t('Creating…') : t('Create Account')}
                       </button>
                     </div>
                     <div style={{ textAlign: 'center', marginTop: 14 }}>
@@ -1076,7 +1081,7 @@ const WalletManagement: React.FC = () => {
                         disabled={saving}
                         style={{ background: 'none', border: 'none', color: 'var(--sub-text-color)', fontSize: 14, cursor: 'pointer', padding: '8px 0' }}
                       >
-                        Cancel
+                        {t('Cancel')}
                       </button>
                     </div>
                   </form>
@@ -1107,7 +1112,7 @@ const WalletManagement: React.FC = () => {
                     >
                       <div>
                         <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--sub-text-color)', textTransform: 'uppercase', letterSpacing: '0.6px', margin: 0, marginBottom: 2 }}>
-                          Current Balance
+                          {t('Current Balance')}
                         </p>
                         <p
                           style={{
@@ -1123,14 +1128,13 @@ const WalletManagement: React.FC = () => {
 
                     {/* Hint linking to Adjust Balance */}
                     <p style={{ fontSize: 12, color: 'var(--sub-text-color)', marginBottom: 20, lineHeight: 1.5 }}>
-                      Balance is calculated from your transactions and cannot be edited here.
-                      Go back to the wallet list and tap the <strong>⚖️</strong> icon to adjust it.
+                      {t('Balance is calculated from your transactions and cannot be edited here. Go back to the wallet list and tap the ⚖️ icon to adjust it.')}
                     </p>
 
                     {/* Account name */}
                     <div className="personal-name mt-0 mb-3">
                       <label htmlFor="edit-name" style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
-                        Account Name <span style={{ color: '#EF4444' }}>*</span>
+                        {t('Account Name')} <span style={{ color: '#EF4444' }}>*</span>
                       </label>
                       <input
                         id="edit-name"
@@ -1138,7 +1142,7 @@ const WalletManagement: React.FC = () => {
                         className={`px-0${formErrors.name ? ' is-invalid' : ''}`}
                         value={editForm.name}
                         onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
-                        placeholder="e.g. Cash Wallet"
+                        placeholder={t('e.g. Cash Wallet')}
                         maxLength={255}
                       />
                       {formErrors.name && (
@@ -1151,7 +1155,7 @@ const WalletManagement: React.FC = () => {
                     {/* Currency (still editable metadata) */}
                     <div className="personal-name mb-3">
                       <label htmlFor="edit-currency" style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
-                        Currency
+                        {t('Currency')}
                       </label>
                       <select
                         id="edit-currency"
@@ -1182,7 +1186,7 @@ const WalletManagement: React.FC = () => {
 
                     <div className="verify-number-btn" style={{ marginTop: 8 }}>
                       <button type="submit" disabled={saving}>
-                        {saving ? 'Saving…' : 'Save Changes'}
+                        {saving ? t('Saving…') : t('Save Changes')}
                       </button>
                     </div>
                     <div style={{ textAlign: 'center', marginTop: 14 }}>
@@ -1192,7 +1196,7 @@ const WalletManagement: React.FC = () => {
                         disabled={saving}
                         style={{ background: 'none', border: 'none', color: 'var(--sub-text-color)', fontSize: 14, cursor: 'pointer', padding: '8px 0' }}
                       >
-                        Cancel
+                        {t('Cancel')}
                       </button>
                     </div>
                   </form>
@@ -1229,7 +1233,7 @@ const WalletManagement: React.FC = () => {
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div>
                           <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--sub-text-color)', textTransform: 'uppercase', letterSpacing: '0.6px', margin: 0 }}>
-                            Current Balance
+                            {t('Current Balance')}
                           </p>
                           <p
                             style={{
@@ -1254,9 +1258,11 @@ const WalletManagement: React.FC = () => {
                         color: 'var(--sub-text-color)', lineHeight: 1.55,
                       }}
                     >
-                      ℹ️ Enter the <strong>target balance</strong> you want. We&rsquo;ll automatically create{' '}
-                      {adjustDiff > 0 ? 'an <strong>income</strong>' : adjustDiff < 0 ? 'an <strong>expense</strong>' : 'a'}{' '}
-                      transaction for the difference to keep your audit trail intact.
+                      {adjustDiff > 0
+                        ? t("ℹ️ Enter the target balance you want. We'll automatically create an income transaction for the difference to keep your audit trail intact.")
+                        : adjustDiff < 0
+                          ? t("ℹ️ Enter the target balance you want. We'll automatically create an expense transaction for the difference to keep your audit trail intact.")
+                          : t("ℹ️ Enter the target balance you want. We'll automatically create a transaction for the difference to keep your audit trail intact.")}
                     </div>
 
                     {adjustGenError && (
@@ -1268,7 +1274,7 @@ const WalletManagement: React.FC = () => {
                     {/* Target balance input */}
                     <div className="personal-name mt-0 mb-3">
                       <label htmlFor="adj-target" style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
-                        New Target Balance <span style={{ color: '#EF4444' }}>*</span>
+                        {t('New Target Balance')} <span style={{ color: '#EF4444' }}>*</span>
                       </label>
                       <input
                         id="adj-target"
@@ -1277,13 +1283,13 @@ const WalletManagement: React.FC = () => {
                         className="px-0"
                         value={adjustForm.targetBalance}
                         onChange={(e) => setAdjustForm((f) => ({ ...f, targetBalance: e.target.value }))}
-                        placeholder="Enter desired balance"
+                        placeholder={t('Enter desired balance')}
                       />
 
                       {/* Live diff preview */}
                       {adjustForm.targetBalance !== '' && Math.abs(adjustDiff) >= 0.01 && (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
-                          <span style={{ fontSize: 12, color: 'var(--sub-text-color)' }}>Difference:</span>
+                          <span style={{ fontSize: 12, color: 'var(--sub-text-color)' }}>{t('Difference:')}</span>
                           <span
                             style={{
                               fontSize: 13, fontWeight: 700,
@@ -1299,7 +1305,7 @@ const WalletManagement: React.FC = () => {
                               color:      adjustDiff > 0 ? '#166534'  : '#991B1B',
                             }}
                           >
-                            {adjustDiff > 0 ? 'Income txn' : 'Expense txn'}
+                            {adjustDiff > 0 ? t('Income txn') : t('Expense txn')}
                           </span>
                         </div>
                       )}
@@ -1308,11 +1314,11 @@ const WalletManagement: React.FC = () => {
                     {/* Category picker */}
                     <div className="personal-name mb-3">
                       <label htmlFor="adj-category" style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
-                        Category <span style={{ color: '#EF4444' }}>*</span>
+                        {t('Category')} <span style={{ color: '#EF4444' }}>*</span>
                       </label>
                       {categories.length === 0 ? (
                         <p style={{ fontSize: 12, color: '#EF4444', margin: 0 }}>
-                          No categories found. Please create a category first.
+                          {t('No categories found. Please create a category first.')}
                         </p>
                       ) : (
                         <select
@@ -1326,7 +1332,7 @@ const WalletManagement: React.FC = () => {
                             width: '100%', fontSize: 14, paddingBottom: 4,
                           }}
                         >
-                          <option value="">Select a category…</option>
+                          <option value="">{t('Select a category…')}</option>
                           {/* Filter to matching type when diff direction is known */}
                           {(relevantCategories.length > 0 ? relevantCategories : categories).map((cat) => (
                             <option key={cat.id} value={String(cat.id)}>
@@ -1355,14 +1361,18 @@ const WalletManagement: React.FC = () => {
                         </select>
                       )}
                       <p style={{ fontSize: 11, color: 'var(--sub-text-color)', marginTop: 4, marginBottom: 0 }}>
-                        Shows {adjustDiff > 0 ? 'income' : adjustDiff < 0 ? 'expense' : 'all'} categories matching the adjustment direction.
+                        {adjustDiff > 0
+                          ? t('Shows income categories matching the adjustment direction.')
+                          : adjustDiff < 0
+                            ? t('Shows expense categories matching the adjustment direction.')
+                            : t('Shows all categories matching the adjustment direction.')}
                       </p>
                     </div>
 
                     {/* Notes */}
                     <div className="personal-name mb-3">
                       <label htmlFor="adj-notes" style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
-                        Note
+                        {t('Note')}
                       </label>
                       <input
                         id="adj-notes"
@@ -1370,14 +1380,14 @@ const WalletManagement: React.FC = () => {
                         className="px-0"
                         value={adjustForm.notes}
                         onChange={(e) => setAdjustForm((f) => ({ ...f, notes: e.target.value }))}
-                        placeholder="Balance adjustment"
+                        placeholder={t('Balance adjustment')}
                         maxLength={500}
                       />
                     </div>
 
                     <div className="verify-number-btn" style={{ marginTop: 8 }}>
                       <button type="submit" disabled={adjusting || categories.length === 0}>
-                        {adjusting ? 'Applying…' : 'Apply Adjustment'}
+                        {adjusting ? t('Applying…') : t('Apply Adjustment')}
                       </button>
                     </div>
                     <div style={{ textAlign: 'center', marginTop: 14 }}>
@@ -1387,7 +1397,7 @@ const WalletManagement: React.FC = () => {
                         disabled={adjusting}
                         style={{ background: 'none', border: 'none', color: 'var(--sub-text-color)', fontSize: 14, cursor: 'pointer', padding: '8px 0' }}
                       >
-                        Cancel
+                        {t('Cancel')}
                       </button>
                     </div>
                   </form>

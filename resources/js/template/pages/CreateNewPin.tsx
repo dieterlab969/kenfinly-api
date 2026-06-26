@@ -2,8 +2,10 @@ import React, { useRef } from 'react';
 import CreateNewPinImg from '../assets/images/main-img/create-new-pin-img.png'
 import { Link } from 'react-router-dom';
 import BackBtn from '../components/BackBtn.tsx';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 const CreateNewPin: React.FC = () => {
+	const { t } = useTranslation();
 	const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
@@ -33,7 +35,7 @@ const CreateNewPin: React.FC = () => {
 									<BackBtn />
 								</div>
 								<div className="header-title">
-									<p>Create New PIN</p>
+									<p>{t('Create New PIN')}</p>
 								</div>
 							</div>
 						</div>
@@ -46,7 +48,7 @@ const CreateNewPin: React.FC = () => {
 								</div>
 								<div className="verify-txt mt-24">
 									<h1 className="d-none">Create pin</h1>
-									<p>Add a PIN Number to make your account more secure.</p>
+									<p>{t('Add a PIN Number to make your account more secure.')}</p>
 								</div>
 								<form className="mt-24" method="get">
 									<div id="otp" className="digit-group otp-section">
@@ -67,7 +69,7 @@ const CreateNewPin: React.FC = () => {
 										))}
 									</div>
 								</form>
-								<div className="verify-number-btn"><Link to="/Fingerprint">Continue</Link></div>
+								<div className="verify-number-btn"><Link to="/Fingerprint">{t('Continue')}</Link></div>
 							</div>
 						</div>
 					</div>

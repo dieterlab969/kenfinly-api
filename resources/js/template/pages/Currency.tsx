@@ -1,6 +1,7 @@
 import React from 'react';
 import BackBtn from '../components/BackBtn.tsx';
 import { useCurrency, SUPPORTED_CURRENCIES } from '../components/CurrencyContext.tsx';
+import { useTranslation } from '../../contexts/TranslationContext';
 import Currency1 from '../assets/images/currency/currency1.svg';
 import Currency3 from '../assets/images/currency/currency3.svg';
 import Currency4 from '../assets/images/currency/currency4.svg';
@@ -25,6 +26,7 @@ const ICON_MAP: Record<string, string> = {
 
 const Currency: React.FC = () => {
   const { currency, setCurrency } = useCurrency();
+  const { t } = useTranslation();
 
   return (
     <div>
@@ -39,7 +41,7 @@ const Currency: React.FC = () => {
                   <BackBtn />
                 </div>
                 <div className="header-title">
-                  <p>Currency</p>
+                  <p>{t('Currency')}</p>
                 </div>
               </div>
             </div>

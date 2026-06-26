@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import BackBtn from '../components/BackBtn.tsx';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -13,97 +14,6 @@ interface FaqCategory {
   label: string;
   items: FaqItem[];
 }
-
-// ─── FAQ data ─────────────────────────────────────────────────────────────────
-
-const FAQ_DATA: FaqCategory[] = [
-  {
-    label: 'Getting Started',
-    items: [
-      {
-        id: 1,
-        question: 'How do I create my first account?',
-        answer:
-          'After signing up, go to Settings → Wallets & Accounts and tap "Add Account". Enter a name, choose a currency, and set an opening balance. Your new account will appear on the Home dashboard instantly.',
-      },
-      {
-        id: 2,
-        question: 'How do I add my first transaction?',
-        answer:
-          'Tap the "+" button on the Home screen. Choose the type (Expense or Income), select a category, enter the amount, pick the date, and optionally attach a photo receipt. Tap Save to confirm.',
-      },
-      {
-        id: 3,
-        question: 'Can I import transactions from a CSV file?',
-        answer:
-          'Yes. Go to Settings → Data & Privacy and use the CSV Import option. Download the sample template, fill it with your transaction data, then upload the file. Kenfinly validates each row before importing and shows a detailed error report for any issues.',
-      },
-    ],
-  },
-  {
-    label: 'Accounts & Budgets',
-    items: [
-      {
-        id: 4,
-        question: 'Can I manage multiple accounts and currencies?',
-        answer:
-          'Absolutely. Kenfinly supports unlimited accounts in different currencies (USD, VND, EUR, and more). Each account is tracked independently, and the Home dashboard can display totals converted to your preferred currency.',
-      },
-      {
-        id: 5,
-        question: 'How do I set a spending budget?',
-        answer:
-          'Navigate to the Budget section from the Home screen. Tap "Add Budget", choose a category (e.g., Food, Transport), set the monthly limit, and optionally enable smart notifications when you reach 80% of your limit.',
-      },
-      {
-        id: 6,
-        question: 'How do I invite someone to share an account?',
-        answer:
-          'Open the account from Wallets & Accounts, tap "Participants", then "Invite". Enter the person\'s email address. They will receive an invitation link and can join with an owner, editor, or viewer role.',
-      },
-    ],
-  },
-  {
-    label: 'Security & Privacy',
-    items: [
-      {
-        id: 7,
-        question: 'Is my financial data secure?',
-        answer:
-          'Yes. All data is encrypted in transit (TLS) and at rest. Authentication uses JWT tokens with short expiry windows. You can also enable PIN or biometric login for an extra layer of protection on your device.',
-      },
-      {
-        id: 8,
-        question: 'How do I reset my PIN or password?',
-        answer:
-          'For password reset, tap "Forgot Password?" on the Sign In screen and follow the email link. For PIN reset, go to Settings → Security and choose "Change PIN". You\'ll need to confirm your current password first.',
-      },
-      {
-        id: 9,
-        question: 'What data is collected and how is it used?',
-        answer:
-          'Kenfinly collects only the data you enter (transactions, account names, categories). We do not sell your data to third parties. You can download or delete all your data at any time from Settings → Data & Privacy.',
-      },
-    ],
-  },
-  {
-    label: 'Payments & Subscriptions',
-    items: [
-      {
-        id: 10,
-        question: 'What payment methods does Kenfinly support?',
-        answer:
-          'Kenfinly supports credit/debit cards and PayPal for subscription payments. Payment information is processed securely and never stored on our servers — we use a PCI-compliant payment processor.',
-      },
-      {
-        id: 11,
-        question: 'How do I cancel or change my subscription plan?',
-        answer:
-          'Go to Settings → Subscriptions. Tap "Manage Plan" to upgrade, downgrade, or cancel. Cancellations take effect at the end of the current billing period and your data remains accessible until then.',
-      },
-    ],
-  },
-];
 
 // ─── Accordion icons (inline SVG — dark mode safe) ────────────────────────────
 
@@ -185,9 +95,88 @@ const STYLES = `
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const Faq: React.FC = () => {
+  const { t } = useTranslation();
   const [openId, setOpenId] = useState<number | null>(null);
 
   const toggle = (id: number) => setOpenId((prev) => (prev === id ? null : id));
+
+  const FAQ_DATA: FaqCategory[] = [
+    {
+      label: t('Getting Started'),
+      items: [
+        {
+          id: 1,
+          question: t('How do I create my first account?'),
+          answer: t('After signing up, go to Settings → Wallets & Accounts and tap "Add Account". Enter a name, choose a currency, and set an opening balance. Your new account will appear on the Home dashboard instantly.'),
+        },
+        {
+          id: 2,
+          question: t('How do I add my first transaction?'),
+          answer: t('Tap the "+" button on the Home screen. Choose the type (Expense or Income), select a category, enter the amount, pick the date, and optionally attach a photo receipt. Tap Save to confirm.'),
+        },
+        {
+          id: 3,
+          question: t('Can I import transactions from a CSV file?'),
+          answer: t('Yes. Go to Settings → Data & Privacy and use the CSV Import option. Download the sample template, fill it with your transaction data, then upload the file. Kenfinly validates each row before importing and shows a detailed error report for any issues.'),
+        },
+      ],
+    },
+    {
+      label: t('Accounts & Budgets'),
+      items: [
+        {
+          id: 4,
+          question: t('Can I manage multiple accounts and currencies?'),
+          answer: t('Absolutely. Kenfinly supports unlimited accounts in different currencies (USD, VND, EUR, and more). Each account is tracked independently, and the Home dashboard can display totals converted to your preferred currency.'),
+        },
+        {
+          id: 5,
+          question: t('How do I set a spending budget?'),
+          answer: t('Navigate to the Budget section from the Home screen. Tap "Add Budget", choose a category (e.g., Food, Transport), set the monthly limit, and optionally enable smart notifications when you reach 80% of your limit.'),
+        },
+        {
+          id: 6,
+          question: t('How do I invite someone to share an account?'),
+          answer: t("Open the account from Wallets & Accounts, tap \"Participants\", then \"Invite\". Enter the person's email address. They will receive an invitation link and can join with an owner, editor, or viewer role."),
+        },
+      ],
+    },
+    {
+      label: t('Security & Privacy'),
+      items: [
+        {
+          id: 7,
+          question: t('Is my financial data secure?'),
+          answer: t('Yes. All data is encrypted in transit (TLS) and at rest. Authentication uses JWT tokens with short expiry windows. You can also enable PIN or biometric login for an extra layer of protection on your device.'),
+        },
+        {
+          id: 8,
+          question: t('How do I reset my PIN or password?'),
+          answer: t('For password reset, tap "Forgot Password?" on the Sign In screen and follow the email link. For PIN reset, go to Settings → Security and choose "Change PIN". You\'ll need to confirm your current password first.'),
+        },
+        {
+          id: 9,
+          question: t('What data is collected and how is it used?'),
+          answer: t('Kenfinly collects only the data you enter (transactions, account names, categories). We do not sell your data to third parties. You can download or delete all your data at any time from Settings → Data & Privacy.'),
+        },
+      ],
+    },
+    {
+      label: t('Payments & Subscriptions'),
+      items: [
+        {
+          id: 10,
+          question: t('What payment methods does Kenfinly support?'),
+          answer: t('Kenfinly supports credit/debit cards and PayPal for subscription payments. Payment information is processed securely and never stored on our servers — we use a PCI-compliant payment processor.'),
+        },
+        {
+          id: 11,
+          question: t('How do I cancel or change my subscription plan?'),
+          answer: t('Go to Settings → Subscriptions. Tap "Manage Plan" to upgrade, downgrade, or cancel. Cancellations take effect at the end of the current billing period and your data remains accessible until then.'),
+        },
+      ],
+    },
+  ];
 
   return (
     <div>
@@ -204,7 +193,7 @@ const Faq: React.FC = () => {
                   <BackBtn />
                 </div>
                 <div className="header-title">
-                  <p>FAQs</p>
+                  <p>{t('FAQs')}</p>
                 </div>
               </div>
             </div>
