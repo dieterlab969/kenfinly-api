@@ -842,7 +842,7 @@ const CategoryManagement: React.FC = () => {
           <div className="verify-number-bottom" id="category-management-main">
             <div className="verify-number-bottom-wrap">
               <div className="verify-number-content">
-                <h1 className="d-none">Categories</h1>
+                <h1 className="d-none">{t('Categories')}</h1>
 
                 {/* Page flash message */}
                 {pageMsg && (

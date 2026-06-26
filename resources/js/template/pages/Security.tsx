@@ -3,7 +3,7 @@ import { Offcanvas } from 'bootstrap';
 import BackBtn from '../components/BackBtn.tsx';
 import { useSecuritySettings, ToggleKey } from '../hooks/useSecuritySettings.ts';
 import api from '../../utils/api.js';
-import { useTranslation } from '../../contexts/TranslationContext';
+import { useTranslation } from 'react-i18next';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
