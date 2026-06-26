@@ -375,5 +375,20 @@
   "Please enter a valid amount.": "Please enter a valid amount.",
   "Please select a category.": "Please select a category.",
   "Please select an account.": "Please select an account.",
-  "Could not save transaction.": "Could not save transaction."
+  "Could not save transaction.": "Could not save transaction.",
+
+  "Notification": "Notification",
+  "Security Updates!": "Security Updates!",
+  "Today |  09:24 AM": "Today |  09:24 AM",
+  "New": "New",
+  "Now PayFast has a Two-Factor Authentication. Try it now to make your account more secure.": "Now PayFast has a Two-Factor Authentication. Try it now to make your account more secure.",
+  "Multiple Card Features!": "Multiple Card Features!",
+  "1 day ago | 14:43 PM": "1 day ago | 14:43 PM",
+  "Now you can also connect PayFast with multiple MasterCard & Visa. Try the service now.": "Now you can also connect PayFast with multiple MasterCard & Visa. Try the service now.",
+  "New Updates Available!": "New Updates Available!",
+  "2 days ago |  10:24 AM": "2 days ago |  10:24 AM",
+  "Update PayFast now to get access to the latest features for easier in making online payments.": "Update PayFast now to get access to the latest features for easier in making online payments.",
+  "Account Setup Successful!": "Account Setup Successful!",
+  "10 Dec, 2023 |  14:24 AM": "10 Dec, 2023 |  14:24 AM",
+  "Your account creation is successful, you can now experience our services.": "Your account creation is successful, you can now experience our services."
 }

@@ -386,5 +386,20 @@
   "Please enter a valid amount.": "Vui lòng nhập số tiền hợp lệ.",
   "Please select a category.": "Vui lòng chọn hạng mục.",
   "Please select an account.": "Vui lòng chọn tài khoản.",
-  "Could not save transaction.": "Không thể lưu giao dịch."
+  "Could not save transaction.": "Không thể lưu giao dịch.",
+
+  "Notification": "Thông báo",
+  "Security Updates!": "Cập nhật bảo mật!",
+  "Today |  09:24 AM": "Hôm nay |  09:24 SA",
+  "New": "Mới",
+  "Now PayFast has a Two-Factor Authentication. Try it now to make your account more secure.": "PayFast hiện có Xác thực hai yếu tố. Hãy thử ngay để bảo mật tài khoản của bạn hơn.",
+  "Multiple Card Features!": "Tính năng nhiều thẻ!",
+  "1 day ago | 14:43 PM": "1 ngày trước | 14:43 CH",
+  "Now you can also connect PayFast with multiple MasterCard & Visa. Try the service now.": "Bạn cũng có thể kết nối PayFast với nhiều MasterCard & Visa. Dùng thử ngay.",
+  "New Updates Available!": "Có cập nhật mới!",
+  "2 days ago |  10:24 AM": "2 ngày trước |  10:24 SA",
+  "Update PayFast now to get access to the latest features for easier in making online payments.": "Cập nhật PayFast ngay để truy cập các tính năng mới nhất, giúp thanh toán trực tuyến dễ dàng hơn.",
+  "Account Setup Successful!": "Thiết lập tài khoản thành công!",
+  "10 Dec, 2023 |  14:24 AM": "10 Th12, 2023 |  14:24 CH",
+  "Your account creation is successful, you can now experience our services.": "Tài khoản của bạn đã được tạo thành công, bạn có thể trải nghiệm dịch vụ của chúng tôi ngay."
 }
