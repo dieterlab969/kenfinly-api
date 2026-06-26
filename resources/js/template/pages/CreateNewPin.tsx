@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import CreateNewPinImg from '../assets/images/main-img/create-new-pin-img.png'
 import { Link } from 'react-router-dom';
 import BackBtn from '../components/BackBtn.tsx';
-import { useTranslation } from '../../contexts/TranslationContext';
+import { useTranslation } from 'react-i18next';
 
 const CreateNewPin: React.FC = () => {
 	const { t } = useTranslation();

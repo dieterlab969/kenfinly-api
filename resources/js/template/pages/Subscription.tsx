@@ -9,7 +9,7 @@ import Subscription5 from '../assets/images/subscription/subscription5.png'
 import EditIcon from '../assets/svg/edit-icon.svg'
 import ExpiredIcon from '../assets/svg/expired-icon.svg'
 import { Link } from 'react-router-dom'
-import { useTranslation } from '../../contexts/TranslationContext';
+import { useTranslation } from 'react-i18next';
 
 const Subscription: React.FC = () => {
 	const { t } = useTranslation();

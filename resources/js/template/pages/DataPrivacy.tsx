@@ -1,6 +1,6 @@
 import React from 'react';
 import BackBtn from '../components/BackBtn.tsx';
-import { useTranslation } from '../../contexts/TranslationContext';
+import { useTranslation } from 'react-i18next';
 
 // ─── Scoped styles ────────────────────────────────────────────────────────────
 

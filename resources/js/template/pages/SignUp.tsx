@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 import { useAuth } from '../../contexts/AuthContext';
-import { useTranslation } from '../../contexts/TranslationContext';
+import { useTranslation } from 'react-i18next';
 import { useRecaptchaConfig } from '../../components/App';
 import BackBtn from '../components/BackBtn';
 import Logo from '../assets/images/let-you-screen/logo.svg';

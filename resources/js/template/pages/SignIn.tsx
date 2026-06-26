@@ -4,7 +4,7 @@ import { useRecaptchaConfig } from '../../components/App';
 import BackBtn from '../components/BackBtn';
 import Logo from '../assets/images/let-you-screen/logo.svg';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useTranslation } from '../../contexts/TranslationContext';
+import { useTranslation } from 'react-i18next';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

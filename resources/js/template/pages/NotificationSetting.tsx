@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import BackBtn from '../components/BackBtn.tsx';
 import api from '../../utils/api';
 
@@ -117,6 +118,8 @@ const DEFAULT_SETTINGS: NotifSettings = {
 // ---------------------------------------------------------------------------
 
 const NotificationSetting: React.FC = () => {
+    const { t } = useTranslation();
+
     const [settings, setSettings] = useState<NotifSettings>(DEFAULT_SETTINGS);
     const [loading,  setLoading]  = useState(true);
     const [saving,   setSaving]   = useState(false);
@@ -175,10 +178,10 @@ const NotificationSetting: React.FC = () => {
             <div className="notification-option-wrapper">
                 <div className="notification-option-name" style={{ flex: 1 }}>
                     <p style={{ fontFamily: 'Satoshi, sans-serif', fontWeight: 600, marginBottom: 2 }}>
-                        {section.label}
+                        {t(section.label)}
                     </p>
                     <p style={{ fontFamily: 'Satoshi, sans-serif', fontSize: 12, color: '#6c757d', marginBottom: 0 }}>
-                        {section.description}
+                        {t(section.description)}
                     </p>
                 </div>
                 <div className="notification-option-switch">
@@ -215,7 +218,7 @@ const NotificationSetting: React.FC = () => {
                         color:         '#7B51F1',
                         marginBottom:  6,
                     }}>
-                        {group}
+                        {t(group)}
                     </p>
                     {items.map(renderToggle)}
                 </div>
@@ -235,7 +238,7 @@ const NotificationSetting: React.FC = () => {
                                     <BackBtn />
                                 </div>
                                 <div className="header-title">
-                                    <p style={{ fontFamily: 'Satoshi, sans-serif' }}>Notification Settings</p>
+                                    <p style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('Notification Settings')}</p>
                                 </div>
                             </div>
                         </div>
@@ -244,7 +247,7 @@ const NotificationSetting: React.FC = () => {
                     <div className="verify-number-bottom" id="notification-setting">
                         <div className="verify-number-bottom-wrap">
                             <div className="verify-number-content">
-                                <h1 className="d-none">Notification Settings</h1>
+                                <h1 className="d-none">{t('Notification Settings')}</h1>
 
                                 {/* Toast */}
                                 {toast && (
@@ -252,7 +255,7 @@ const NotificationSetting: React.FC = () => {
                                         className={`alert alert-${toast.type === 'success' ? 'success' : 'danger'} py-2 px-3 mb-3`}
                                         style={{ borderRadius: 12, fontSize: 13, fontFamily: 'Satoshi, sans-serif' }}
                                     >
-                                        {toast.msg}
+                                        {t(toast.msg)}
                                     </div>
                                 )}
 
@@ -261,7 +264,7 @@ const NotificationSetting: React.FC = () => {
                                         className="notify-txt"
                                         style={{ fontFamily: 'Satoshi, sans-serif', color: '#6c757d' }}
                                     >
-                                        Choose which financial events trigger a notification.
+                                        {t('Choose which financial events trigger a notification.')}
                                     </p>
 
                                     {loading ? (
@@ -271,7 +274,7 @@ const NotificationSetting: React.FC = () => {
                                                 role="status"
                                                 style={{ color: '#7B51F1', width: 32, height: 32 }}
                                             >
-                                                <span className="visually-hidden">Loading…</span>
+                                                <span className="visually-hidden">{t('Loading…')}</span>
                                             </div>
                                         </div>
                                     ) : (

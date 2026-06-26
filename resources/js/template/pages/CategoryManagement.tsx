@@ -10,7 +10,7 @@ import SearchIcon from '../assets/svg/search-icon.svg';
 import faqPlus from '../assets/svg/faq-plus.svg';
 import purpleEditIcon from '../assets/svg/purple-edit-icon.svg';
 import api from '../../utils/api';
-import { useTranslation } from '../../contexts/TranslationContext';
+import { useTranslation } from 'react-i18next';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Domain types
@@ -154,7 +154,7 @@ const CategoryManagement: React.FC = () => {
       const res = await api.get('/categories');
       setTree(res.data.categories ?? []);
     } catch {
-      setErrorMsg('Unable to load categories. Please try again.');
+      setErrorMsg(t('Unable to load categories. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -251,7 +251,7 @@ const CategoryManagement: React.FC = () => {
         color:     resolvedColor,
         parent_id: form.parent_id ? parseInt(form.parent_id, 10) : null,
       });
-      showPageMsg('success', `"${form.name}" created successfully.`);
+      showPageMsg('success', t('"{{name}}" created successfully.', { name: form.name }));
       goToList();
       await fetchCategories();
     } catch (err: unknown) {
@@ -260,7 +260,7 @@ const CategoryManagement: React.FC = () => {
       if (Object.keys(errs).length > 0) {
         setFormErrors(errs);
       } else {
-        setFormGenError(ax.response?.data?.message ?? 'Something went wrong. Please try again.');
+        setFormGenError(ax.response?.data?.message ?? t('Something went wrong. Please try again.'));
       }
     } finally {
       setSaving(false);
@@ -283,19 +283,19 @@ const CategoryManagement: React.FC = () => {
         color:     resolvedColor,
         parent_id: form.parent_id ? parseInt(form.parent_id, 10) : null,
       });
-      showPageMsg('success', `"${form.name}" updated successfully.`);
+      showPageMsg('success', t('"{{name}}" updated successfully.', { name: form.name }));
       goToList();
       await fetchCategories();
     } catch (err: unknown) {
       const ax = err as { response?: { status?: number; data?: { errors?: ApiValidationErrors; message?: string } } };
       if (ax.response?.status === 403) {
-        setFormGenError('You cannot edit a system category.');
+        setFormGenError(t('You cannot edit a system category.'));
       } else {
         const errs = ax.response?.data?.errors ?? {};
         if (Object.keys(errs).length > 0) {
           setFormErrors(errs);
         } else {
-          setFormGenError(ax.response?.data?.message ?? 'Something went wrong. Please try again.');
+          setFormGenError(ax.response?.data?.message ?? t('Something went wrong. Please try again.'));
         }
       }
     } finally {
@@ -310,10 +310,10 @@ const CategoryManagement: React.FC = () => {
       await api.delete(`/categories/${id}`);
       setConfirmDeleteId(null);
       await fetchCategories();
-      showPageMsg('success', 'Category deleted successfully.');
+      showPageMsg('success', t('Category deleted successfully.'));
     } catch (err: unknown) {
       const ax = err as { response?: { data?: { message?: string } } };
-      setDeleteError(ax.response?.data?.message ?? 'Could not delete this category.');
+      setDeleteError(ax.response?.data?.message ?? t('Could not delete this category.'));
     } finally {
       setDeleting(false);
     }
@@ -379,14 +379,14 @@ const CategoryManagement: React.FC = () => {
       <input
         type="text"
         className="px-0"
-        placeholder="#RRGGBB  — custom hex"
+        placeholder={t('#RRGGBB — custom hex')}
         value={form.customColor}
         onChange={(e) => updateForm({ customColor: e.target.value })}
         style={{ maxWidth: 200, fontSize: 13 }}
       />
       {form.customColor && !isValidHex(form.customColor) && (
         <p style={{ color: '#EF4444', fontSize: 12, marginTop: 4 }}>
-          Must be a valid hex colour (e.g. #FF6B35)
+          {t('Must be a valid hex colour (e.g. #FF6B35)')}
         </p>
       )}
     </div>
@@ -408,7 +408,7 @@ const CategoryManagement: React.FC = () => {
         {form.icon}
       </div>
       <div className="bank-details" style={{ flex: 1, minWidth: 0 }}>
-        <h2 style={{ marginBottom: 2 }}>{form.name || 'Category Name'}</h2>
+        <h2 style={{ marginBottom: 2 }}>{form.name || t('Category Name')}</h2>
         <div className="bank-card">
           <span
             style={{
@@ -418,7 +418,7 @@ const CategoryManagement: React.FC = () => {
               padding: '1px 7px', borderRadius: 20,
             }}
           >
-            {form.type === 'income' ? '↑ Income' : '↓ Expense'}
+            {form.type === 'income' ? t('↑ Income') : t('↓ Expense')}
           </span>
         </div>
       </div>
@@ -466,13 +466,13 @@ const CategoryManagement: React.FC = () => {
           >
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ color: '#991B1B', fontWeight: 600, marginBottom: 2, fontSize: 14 }}>
-                Delete &ldquo;{cat.name}&rdquo;?
+                {t('Delete "{{name}}"?', { name: cat.name })}
               </p>
               {cat.children?.length ? (
                 <p style={{ color: '#B91C1C', fontSize: 12, marginBottom: 0 }}>
                   {cat.children.length === 1
                     ? t('⚠️ Also removes 1 sub-category.')
-                    : t('⚠️ Also removes {{count}} sub-categories.').replace('{{count}}', String(cat.children.length))}
+                    : t('⚠️ Also removes {{count}} sub-categories.', { count: cat.children.length })}
                 </p>
               ) : (
                 <p style={{ color: '#B91C1C', fontSize: 12, marginBottom: 0 }}>{t('This cannot be undone.')}</p>
@@ -566,7 +566,7 @@ const CategoryManagement: React.FC = () => {
               )}
               {!isChild && cat.children?.length ? (
                 <span style={{ fontSize: 11, color: 'var(--sub-text-color)' }}>
-                  {cat.children.length} sub
+                  {t('{{count}} sub', { count: cat.children.length })}
                 </span>
               ) : null}
             </div>
@@ -842,7 +842,7 @@ const CategoryManagement: React.FC = () => {
           <div className="verify-number-bottom" id="category-management-main">
             <div className="verify-number-bottom-wrap">
               <div className="verify-number-content">
-                <h1 className="d-none">Categories</h1>
+                <h1 className="d-none">{t('Categories')}</h1>
 
                 {/* Page flash message */}
                 {pageMsg && (
@@ -919,7 +919,7 @@ const CategoryManagement: React.FC = () => {
                           role="status"
                           style={{ color: 'var(--primary-color, #6C3DE6)', width: 40, height: 40 }}
                         >
-                          <span className="visually-hidden">Loading…</span>
+                          <span className="visually-hidden">{t('Loading…')}</span>
                         </div>
                         <p style={{ color: 'var(--sub-text-color)', marginTop: 12, fontSize: 14 }}>
                           {t('Loading categories…')}

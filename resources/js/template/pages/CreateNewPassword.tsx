@@ -2,7 +2,7 @@ import React from 'react'
 import BackBtn from '../components/BackBtn.tsx';
 import CreateNewPasswordImg from '../assets/images/main-img/create-new-password-img.png'
 import { Link } from 'react-router-dom';
-import { useTranslation } from '../../contexts/TranslationContext';
+import { useTranslation } from 'react-i18next';
 
 const CreateNewPassword: React.FC = () => {
 	const { t } = useTranslation();

@@ -12,6 +12,7 @@ import api from '../../utils/api'
 import { formatCurrency, getCategoryIcon } from '../../constants/categories'
 import EditTransactionModal from '../../components/EditTransactionModal'
 import { processImageForUpload, validateImageFile, formatFileSize } from '../../utils/imageCompression'
+import { useTranslation } from 'react-i18next'
 
 type ApiAmount = string | number | null | undefined
 type TransactionType = 'income' | 'expense'
@@ -254,6 +255,7 @@ const HalfDonut: React.FC<HalfDonutProps> = ({ expensePct, incomePct, isEmpty, s
 }
 
 const SpendingChart: React.FC<{ data: SpendingDay[] }> = ({ data }) => {
+  const { t } = useTranslation()
   const [hoveredBar, setHoveredBar] = useState<number | null>(null)
   const maxAmount = Math.max(...data.map(day => day.amount), 0)
   const maxVal = maxAmount > 0 ? Math.ceil(maxAmount / 1_000_000) * 1_000_000 : 1_000_000
@@ -265,7 +267,7 @@ const SpendingChart: React.FC<{ data: SpendingDay[] }> = ({ data }) => {
       viewBox="0 0 278 130"
       style={{ width: '100%', overflow: 'visible' }}
       role="img"
-      aria-label="Chi tiêu 7 ngày qua"
+      aria-label={t('Spending — Last 7 Days')}
       onMouseLeave={() => setHoveredBar(null)}
     >
       <defs>
@@ -375,13 +377,14 @@ const SpendingChart: React.FC<{ data: SpendingDay[] }> = ({ data }) => {
 }
 
 const HistoricalChart: React.FC<{ data: BalanceHistoryPoint[] }> = ({ data }) => {
+  const { t } = useTranslation()
   const [hoveredPt, setHoveredPt] = useState<number | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
 
   if (data.length === 0) {
     return (
-      <svg viewBox="0 0 275 130" style={{ width: '100%' }} role="img" aria-label="Số dư lịch sử">
-        <text x="137" y="66" fontSize="10" textAnchor="middle" fill="#9ca3af">Chưa có dữ liệu số dư</text>
+      <svg viewBox="0 0 275 130" style={{ width: '100%' }} role="img" aria-label={t('Balance History')}>
+        <text x="137" y="66" fontSize="10" textAnchor="middle" fill="#9ca3af">{t('No balance data yet')}</text>
       </svg>
     )
   }
@@ -429,7 +432,7 @@ const HistoricalChart: React.FC<{ data: BalanceHistoryPoint[] }> = ({ data }) =>
       viewBox="0 0 275 130"
       style={{ width: '100%', overflow: 'visible', cursor: 'crosshair' }}
       role="img"
-      aria-label="Số dư lịch sử"
+      aria-label={t('Balance History')}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setHoveredPt(null)}
       onClick={handleMouseMove}
@@ -497,7 +500,7 @@ const HistoricalChart: React.FC<{ data: BalanceHistoryPoint[] }> = ({ data }) =>
             {formatMonthShort(hovered.date)}
           </text>
           <text x={tipX} y={tipY + 24} fontSize="6.5" textAnchor="middle" fill="#fbbf24" fontWeight="bold">
-            Số dư:
+            {t('Balance:')}
           </text>
           <text x={tipX} y={tipY + 35} fontSize="6" textAnchor="middle" fill="#fbbf24">
             {fmtVND(hovered.value)}
@@ -583,44 +586,48 @@ type BottomNavItem =
   | { to: null; icon: null; label: string; center: true; active?: false }
 
 const bottomNavItems: BottomNavItem[] = [
-  { to: '/Home', icon: icon1, label: 'Trang chủ', active: true },
-  { to: '/Activity', icon: icon2, label: 'Phân tích', active: false },
-  { to: null, icon: null, label: 'THÊM NHANH', center: true },
-  { to: '/BarChart', icon: icon3, label: 'Mục tiêu', active: false },
-  { to: '/Invoicing', icon: icon4, label: 'Báo cáo', active: false },
+  { to: '/Home',     icon: icon1, label: 'Home',      active: true  },
+  { to: '/Activity', icon: icon2, label: 'Analytics', active: false },
+  { to: null,        icon: null,  label: 'QUICK ADD', center: true  },
+  { to: '/BarChart', icon: icon3, label: 'Goals',     active: false },
+  { to: '/Invoicing',icon: icon4, label: 'Reports',   active: false },
 ]
 
 const MonthCol: React.FC<{
   title: string; sub: string; expensePct: number; incomePct: number; isEmpty?: boolean;
   income: string; expense: string; total: string; incomeColor: string; expenseColor: string; totalColor: string;
-}> = ({ title, sub, expensePct, incomePct, isEmpty, income, expense, total, incomeColor, expenseColor, totalColor }) => (
-  <div style={{ flex: 1, minWidth: 0 }}>
-    <p style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '2px', fontWeight: 500 }}>{title}</p>
-    <p style={{ fontSize: '11px', fontWeight: 700, color: '#121212', marginBottom: '8px' }}>{sub}</p>
-    <div style={{ display: 'flex', justifyContent: 'center' }}>
-      <HalfDonut expensePct={expensePct} incomePct={incomePct} isEmpty={isEmpty} size={100} />
+}> = ({ title, sub, expensePct, incomePct, isEmpty, income, expense, total, incomeColor, expenseColor, totalColor }) => {
+  const { t } = useTranslation()
+  return (
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <p style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '2px', fontWeight: 500 }}>{title}</p>
+      <p style={{ fontSize: '11px', fontWeight: 700, color: '#121212', marginBottom: '8px' }}>{sub}</p>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <HalfDonut expensePct={expensePct} incomePct={incomePct} isEmpty={isEmpty} size={100} />
+      </div>
+      <div style={{ marginTop: '10px' }}>
+        <div style={S.row}>
+          <span style={S.dot('#22c55e')} />
+          <span style={S.statLabel}>{t('Income:')}</span>
+          <span style={S.statVal(incomeColor)}>{income}</span>
+        </div>
+        <div style={S.row}>
+          <span style={S.dot('#ef4444')} />
+          <span style={S.statLabel}>{t('Expense:')}</span>
+          <span style={S.statVal(expenseColor)}>{expense}</span>
+        </div>
+        <div style={S.row}>
+          <span style={S.dot(totalColor === '#ef4444' ? '#ef4444' : '#d1d5db')} />
+          <span style={S.statLabel}>{t('Total:')}</span>
+          <span style={S.statVal(totalColor)}>{total}</span>
+        </div>
+      </div>
     </div>
-    <div style={{ marginTop: '10px' }}>
-      <div style={S.row}>
-        <span style={S.dot('#22c55e')} />
-        <span style={S.statLabel}>Thu nhập:</span>
-        <span style={S.statVal(incomeColor)}>{income}</span>
-      </div>
-      <div style={S.row}>
-        <span style={S.dot('#ef4444')} />
-        <span style={S.statLabel}>Chi phí:</span>
-        <span style={S.statVal(expenseColor)}>{expense}</span>
-      </div>
-      <div style={S.row}>
-        <span style={S.dot(totalColor === '#ef4444' ? '#ef4444' : '#d1d5db')} />
-        <span style={S.statLabel}>Tổng cộng:</span>
-        <span style={S.statVal(totalColor)}>{total}</span>
-      </div>
-    </div>
-  </div>
-)
+  )
+}
 
 const Home: React.FC = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -653,11 +660,11 @@ const Home: React.FC = () => {
       setDashboardData(response.data.data ?? null)
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err)
-      setError(getApiErrorMessage(err, 'Không thể tải dữ liệu dashboard.'))
+      setError(getApiErrorMessage(err, t('Could not load dashboard data.')))
     } finally {
       if (showLoading) setLoading(false)
     }
-  }, [])
+  }, [t])
 
   const fetchUser = useCallback(async () => {
     try {
@@ -687,11 +694,11 @@ const Home: React.FC = () => {
       setAccountId(current => current || String(nextAccounts[0]?.id ?? ''))
     } catch (err) {
       console.error('Failed to fetch quick add options:', err)
-      setFormError(getApiErrorMessage(err, 'Không thể tải hạng mục hoặc tài khoản.'))
+      setFormError(getApiErrorMessage(err, t('Could not load categories or accounts.')))
     } finally {
       setFormLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     fetchDashboardData()
@@ -722,7 +729,7 @@ const Home: React.FC = () => {
   const recentTransactions = dashboardData?.recent_transactions ?? []
   const categoryOptions = useMemo(() => flattenCategories(categories), [categories])
   const quickAddSummary = currentMonthSummary
-  const transactionLabel = transactionType === 'income' ? 'THU NHẬP' : 'CHI TIÊU'
+  const transactionLabel = transactionType === 'income' ? t('INCOME') : t('EXPENSE')
   const transactionAccent = transactionType === 'income' ? '#22c55e' : '#ef4444'
 
   const openQuickAdd = (type: TransactionType) => {
@@ -745,18 +752,18 @@ const Home: React.FC = () => {
 
     const validation = validateImageFile(file)
     if (!validation.valid) {
-      setFormError(validation.error ?? 'Tệp không hợp lệ.')
+      setFormError(validation.error ?? t('Invalid file.'))
       e.target.value = ''
       return
     }
 
     try {
-      setCompressionStatus('Đang nén ảnh...')
+      setCompressionStatus(t('Compressing image...'))
       setFormError('')
 
       const result = await processImageForUpload(file, (progress: { stage: string }) => {
         if (progress.stage === 'compressing') {
-          setCompressionStatus('Đang nén ảnh...')
+          setCompressionStatus(t('Compressing image...'))
         }
       })
 
@@ -769,7 +776,7 @@ const Home: React.FC = () => {
       reader.onloadend = () => { setReceiptPreview(reader.result as string) }
       reader.readAsDataURL(result.file)
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Không thể xử lý ảnh.'
+      const message = err instanceof Error ? err.message : t('Could not process image.')
       setFormError(message)
       e.target.value = ''
     } finally {
@@ -780,15 +787,15 @@ const Home: React.FC = () => {
   const handleSaveQuickAdd = async () => {
     const amountValue = Number(amount)
     if (!Number.isFinite(amountValue) || amountValue <= 0) {
-      setFormError('Vui lòng nhập số tiền hợp lệ.')
+      setFormError(t('Please enter a valid amount.'))
       return
     }
     if (!category) {
-      setFormError('Vui lòng chọn hạng mục.')
+      setFormError(t('Please select a category.'))
       return
     }
     if (!accountId) {
-      setFormError('Vui lòng chọn tài khoản.')
+      setFormError(t('Please select an account.'))
       return
     }
 
@@ -816,7 +823,7 @@ const Home: React.FC = () => {
       await fetchDashboardData(false)
     } catch (err) {
       console.error('Failed to save quick add transaction:', err)
-      setFormError(getApiErrorMessage(err, 'Không thể lưu giao dịch.'))
+      setFormError(getApiErrorMessage(err, t('Could not save transaction.')))
     } finally {
       setSaving(false)
     }
@@ -827,7 +834,7 @@ const Home: React.FC = () => {
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f3ff' }}>
         <div style={{ textAlign: 'center', color: '#6b7280', fontFamily: 'Satoshi, sans-serif' }}>
           <div style={{ width: '44px', height: '44px', border: '4px solid #ddd6fe', borderTopColor: '#7B51F1', borderRadius: '50%', margin: '0 auto 14px', animation: 'spin 0.9s linear infinite' }} />
-          <p>Đang tải dashboard...</p>
+          <p>{t('Loading dashboard...')}</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
       </div>
@@ -845,12 +852,12 @@ const Home: React.FC = () => {
                 <div className="setting-header">
                   <div className="setting-left">
                     <span><img src={Logo} alt="logo" /></span>
-                    <span className="setting-txt">Dashboard</span>
+                    <span className="setting-txt">{t('Dashboard')}</span>
                   </div>
                   <div className="setting-right">
                     <span>
                       <Link to="/Notification">
-                        <img src={NotificationIcon} alt="thông báo" />
+                        <img src={NotificationIcon} alt="notifications" />
                       </Link>
                     </span>
                     <span className="dots-icon">
@@ -864,7 +871,7 @@ const Home: React.FC = () => {
 
               <div style={{ paddingBottom: '24px', paddingTop: '4px' }}>
                 <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '14px', fontWeight: 500, fontFamily: 'Satoshi, sans-serif' }}>
-                  Chào {user?.name || 'bạn'},
+                  {user?.name ? t('Hello {{name}},', { name: user.name }) : t('Hello,')}
                 </p>
                 <h1 style={{
                   color: '#fff', fontSize: '28px', fontWeight: 800,
@@ -877,7 +884,7 @@ const Home: React.FC = () => {
                   letterSpacing: '2.5px', marginTop: '4px', textTransform: 'uppercase',
                   fontFamily: 'Satoshi, sans-serif',
                 }}>
-                  TỔNG SỐ TIỀN SỞ HỮU
+                  {t('TOTAL BALANCE')}
                 </p>
               </div>
             </div>
@@ -894,12 +901,12 @@ const Home: React.FC = () => {
 
               <div style={S.card}>
                 <div style={S.cardHeader}>
-                  <span style={S.cardTitle}>Sơ lược</span>
+                  <span style={S.cardTitle}>{t('Overview')}</span>
                   <span style={{ color: '#9ca3af', fontSize: '18px', cursor: 'pointer', letterSpacing: '2px' }}>···</span>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <MonthCol
-                    title="Tháng Này" sub={currentMonthSummary.sub}
+                    title={t('This Month')} sub={currentMonthSummary.sub}
                     expensePct={currentMonthSummary.expensePct} incomePct={currentMonthSummary.incomePct}
                     isEmpty={currentMonthSummary.isEmpty}
                     income={currentMonthSummary.income} expense={currentMonthSummary.expense} total={currentMonthSummary.total}
@@ -907,7 +914,7 @@ const Home: React.FC = () => {
                   />
                   <div style={{ width: '1px', background: '#e5e7eb', margin: '0 4px', alignSelf: 'stretch' }} />
                   <MonthCol
-                    title="Tháng Trước" sub={previousMonthSummary.sub}
+                    title={t('Last Month')} sub={previousMonthSummary.sub}
                     expensePct={previousMonthSummary.expensePct} incomePct={previousMonthSummary.incomePct}
                     isEmpty={previousMonthSummary.isEmpty}
                     income={previousMonthSummary.income} expense={previousMonthSummary.expense} total={previousMonthSummary.total}
@@ -918,30 +925,30 @@ const Home: React.FC = () => {
 
               <div style={S.card}>
                 <div style={S.cardHeader}>
-                  <span style={S.cardTitle}>Chi tiêu - 7 ngày qua</span>
+                  <span style={S.cardTitle}>{t('Spending — Last 7 Days')}</span>
                   <span style={{ fontSize: '18px', cursor: 'pointer' }}>📅</span>
                 </div>
                 <SpendingChart data={spendingData} />
                 <p style={{ textAlign: 'center', fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>
-                  Kéo ngang để xem chi tiết từng ngày
+                  {t('Swipe to see daily details')}
                 </p>
               </div>
 
               <div style={S.card}>
                 <div style={S.cardHeader}>
-                  <span style={S.cardTitle}>Số dư lịch sử</span>
+                  <span style={S.cardTitle}>{t('Balance History')}</span>
                   <span style={{
                     fontSize: '11px', color: '#7B51F1',
                     background: 'rgba(123,81,241,0.1)', padding: '3px 10px',
                     borderRadius: '20px', fontWeight: 700,
-                  }}>{balanceDelta === null ? 'Chưa có dữ liệu' : `${fmtCompactVND(balanceDelta)} ▾`}</span>
+                  }}>{balanceDelta === null ? t('No data yet') : `${fmtCompactVND(balanceDelta)} ▾`}</span>
                 </div>
                 <HistoricalChart data={balanceHistory} />
               </div>
 
               <div style={S.card}>
                 <div style={S.cardHeader}>
-                  <span style={S.cardTitle}>Giao dịch gần đây</span>
+                  <span style={S.cardTitle}>{t('Recent Transactions')}</span>
                   <span style={{
                     width: '30px', height: '30px', borderRadius: '50%',
                     background: 'rgba(123,81,241,0.1)', display: 'flex',
@@ -951,7 +958,7 @@ const Home: React.FC = () => {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   {recentTransactions.length === 0 ? (
                     <p style={{ color: '#9ca3af', fontSize: '13px', textAlign: 'center', padding: '10px 0' }}>
-                      Chưa có giao dịch nào.
+                      {t('No transactions yet.')}
                     </p>
                   ) : recentTransactions.map(tx => {
                     const signedAmount = getTransactionSignedAmount(tx)
@@ -969,7 +976,7 @@ const Home: React.FC = () => {
                           fontSize: '14px', fontWeight: 600, color: '#121212',
                           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                           fontFamily: 'Satoshi, sans-serif',
-                        }}>{tx.category?.name || (tx.type === 'income' ? 'Thu nhập' : 'Chi tiêu')}</p>
+                        }}>{tx.category?.name || (tx.type === 'income' ? t('Income') : t('Expense'))}</p>
                         <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>
                           {[getTransactionDateLabel(tx), tx.account?.name].filter(Boolean).join(' · ')}
                         </p>
@@ -994,7 +1001,7 @@ const Home: React.FC = () => {
 
         <div className="offcanvas offcanvas-start menu-canvas" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
           <div className="offcanvas-header">
-            <h5 className="offcanvas-title" id="offcanvasExampleLabel">Setting</h5>
+            <h5 className="offcanvas-title" id="offcanvasExampleLabel">{t('Settings')}</h5>
             <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
           </div>
           <div className="offcanvas-body">
@@ -1062,7 +1069,7 @@ const Home: React.FC = () => {
                 <span style={{ fontSize: '22px', lineHeight: 1, fontWeight: 300 }}>+</span>
                 <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.5px' }}>VND</span>
               </button>
-              <span style={{ fontSize: '10px', color: '#fff', fontWeight: 600, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>Thu nhập</span>
+              <span style={{ fontSize: '10px', color: '#fff', fontWeight: 600, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>{t('Income')}</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
               <button
@@ -1078,7 +1085,7 @@ const Home: React.FC = () => {
                 <span style={{ fontSize: '22px', lineHeight: 1, fontWeight: 300 }}>−</span>
                 <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.5px' }}>VND</span>
               </button>
-              <span style={{ fontSize: '10px', color: '#fff', fontWeight: 600, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>Chi tiêu</span>
+              <span style={{ fontSize: '10px', color: '#fff', fontWeight: 600, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>{t('Expense')}</span>
             </div>
           </div>
         )}
@@ -1090,7 +1097,7 @@ const Home: React.FC = () => {
                 return (
                   <li key={i} className="list" style={{ visibility: 'hidden', width: '80px', textAlign: 'center' }}>
                     <span style={{ fontSize: '8px', color: '#7B51F1', fontWeight: 700, display: 'block', marginTop: '44px' }}>
-                      THÊM NHANH
+                      {t(item.label)}
                     </span>
                   </li>
                 )
@@ -1106,7 +1113,7 @@ const Home: React.FC = () => {
                     fontSize: '9px', color: item.active ? '#7B51F1' : '#9ca3af',
                     fontWeight: item.active ? 700 : 400, textAlign: 'center',
                     display: 'block', marginTop: '2px', whiteSpace: 'nowrap',
-                  }}>{item.label}</span>
+                  }}>{t(item.label)}</span>
                 </li>
               )
             })}
@@ -1123,11 +1130,11 @@ const Home: React.FC = () => {
             </svg>
           </button>
           <div className="offcanvas-body small">
-            <h2 className="logout-text-pop mt-12">Đăng xuất</h2>
-            <p className="sm-txt mt-16">Bạn có chắc muốn đăng xuất?</p>
+            <h2 className="logout-text-pop mt-12">{t('Logout')}</h2>
+            <p className="sm-txt mt-16">{t('Are you sure you want to log out?')}</p>
             <div className="logout-button-main mt-32">
-              <button className="logout-cancel" data-bs-dismiss="offcanvas" aria-label="Close">Hủy</button>
-              <button className="logout-cancel yes-logot" onClick={() => navigate('/')}>Đồng ý</button>
+              <button className="logout-cancel" data-bs-dismiss="offcanvas" aria-label="Close">{t('Cancel')}</button>
+              <button className="logout-cancel yes-logot" onClick={() => navigate('/')}>{t('Confirm')}</button>
             </div>
           </div>
         </div>
@@ -1154,9 +1161,9 @@ const Home: React.FC = () => {
               <button
                 onClick={() => setShowModal(false)}
                 style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '14px', fontWeight: 600, cursor: 'pointer', padding: '4px 8px' }}
-              >Hủy</button>
+              >{t('Cancel')}</button>
               <div style={{ textAlign: 'center' }}>
-                <p style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>THÊM KHOẢN</p>
+                <p style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>{t('ADD ENTRY')}</p>
                 <p style={{ fontSize: '14px', fontWeight: 800, color: transactionAccent, letterSpacing: '0.5px' }}>{transactionLabel}</p>
               </div>
               <button
@@ -1167,7 +1174,7 @@ const Home: React.FC = () => {
                   padding: '8px 18px', borderRadius: '20px',
                   fontSize: '14px', fontWeight: 700, cursor: saving || formLoading ? 'not-allowed' : 'pointer',
                 }}
-              >{saving ? 'Đang lưu...' : 'Lưu'}</button>
+              >{saving ? t('Saving...') : t('Save')}</button>
             </div>
 
             <div style={{
@@ -1181,12 +1188,12 @@ const Home: React.FC = () => {
                 <HalfDonut expensePct={quickAddSummary.expensePct} incomePct={quickAddSummary.incomePct} isEmpty={quickAddSummary.isEmpty} size={64} />
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: '10px', color: '#9ca3af', fontWeight: 600, marginBottom: '6px', letterSpacing: '1px' }}>SƠ LƯỢC</p>
+                <p style={{ fontSize: '10px', color: '#9ca3af', fontWeight: 600, marginBottom: '6px', letterSpacing: '1px' }}>{t('OVERVIEW')}</p>
                 <div style={{ display: 'flex', gap: '20px' }}>
                   {[
-                    { label: 'Thu nhập:', val: quickAddSummary.income, color: quickAddSummary.incomeColor },
-                    { label: 'Chi phí:', val: quickAddSummary.expense, color: quickAddSummary.expenseColor },
-                    { label: 'Tổng cộng:', val: quickAddSummary.total, color: quickAddSummary.totalColor },
+                    { label: t('Income:'),  val: quickAddSummary.income,  color: quickAddSummary.incomeColor  },
+                    { label: t('Expense:'), val: quickAddSummary.expense, color: quickAddSummary.expenseColor },
+                    { label: t('Total:'),   val: quickAddSummary.total,   color: quickAddSummary.totalColor   },
                   ].map((s, i) => (
                     <div key={i}>
                       <p style={{ fontSize: '10px', color: '#9ca3af' }}>{s.label}</p>
@@ -1205,7 +1212,7 @@ const Home: React.FC = () => {
               )}
 
               <div style={S.fieldWrap}>
-                <label style={S.fieldLabel}>Số tiền</label>
+                <label style={S.fieldLabel}>{t('Amount')}</label>
                 <div style={{
                   display: 'flex', alignItems: 'center',
                   border: '1.5px solid #e5e7eb', borderRadius: '14px', padding: '0 16px',
@@ -1230,7 +1237,7 @@ const Home: React.FC = () => {
               </div>
 
               <div style={S.fieldWrap}>
-                <label style={S.fieldLabel}>Hạng mục</label>
+                <label style={S.fieldLabel}>{t('Category')}</label>
                 <div style={{ position: 'relative' }}>
                   <select
                     value={category}
@@ -1238,7 +1245,7 @@ const Home: React.FC = () => {
                     disabled={formLoading || saving}
                     style={{ ...S.inputBase, appearance: 'none', paddingRight: '36px' }}
                   >
-                    <option value="">{formLoading ? 'Đang tải hạng mục...' : 'Chọn hạng mục'}</option>
+                    <option value="">{formLoading ? t('Loading categories...') : t('Select category')}</option>
                     {categoryOptions.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                   <span style={{
@@ -1249,7 +1256,7 @@ const Home: React.FC = () => {
               </div>
 
               <div style={S.fieldWrap}>
-                <label style={S.fieldLabel}>Ngày</label>
+                <label style={S.fieldLabel}>{t('Date')}</label>
                 <input
                   type="date"
                   value={transactionDate}
@@ -1260,7 +1267,7 @@ const Home: React.FC = () => {
               </div>
 
               <div style={S.fieldWrap}>
-                <label style={S.fieldLabel}>Tài khoản</label>
+                <label style={S.fieldLabel}>{t('Account')}</label>
                 <div style={{ position: 'relative' }}>
                   <select
                     value={accountId}
@@ -1268,7 +1275,7 @@ const Home: React.FC = () => {
                     disabled={formLoading || saving}
                     style={{ ...S.inputBase, appearance: 'none', paddingRight: '36px' }}
                   >
-                    <option value="">{formLoading ? 'Đang tải tài khoản...' : 'Chọn tài khoản'}</option>
+                    <option value="">{formLoading ? t('Loading accounts...') : t('Select account')}</option>
                     {accounts.map(account => <option key={account.id} value={account.id}>{account.name}</option>)}
                   </select>
                   <span style={{
@@ -1279,19 +1286,19 @@ const Home: React.FC = () => {
               </div>
 
               <div style={S.fieldWrap}>
-                <label style={S.fieldLabel}>Ghi chú</label>
+                <label style={S.fieldLabel}>{t('Note')}</label>
                 <input
                   type="text"
                   value={note}
                   onChange={e => setNote(e.target.value)}
                   disabled={saving}
-                  placeholder="Thêm ghi chú..."
+                  placeholder={t('Add a note...')}
                   style={S.inputBase}
                 />
               </div>
 
               <div style={S.fieldWrap}>
-                <label style={S.fieldLabel}>Ảnh hóa đơn <span style={{ color: '#9ca3af', fontWeight: 400 }}>(tuỳ chọn)</span></label>
+                <label style={S.fieldLabel}>{t('Receipt photo')} <span style={{ color: '#9ca3af', fontWeight: 400 }}>{t('(optional)')}</span></label>
                 <input
                   type="file"
                   id="quick-add-receipt"
@@ -1325,10 +1332,10 @@ const Home: React.FC = () => {
                     <>
                       <img
                         src={receiptPreview}
-                        alt="Xem trước hóa đơn"
+                        alt="receipt preview"
                         style={{ maxHeight: '120px', borderRadius: '10px', marginBottom: '8px', objectFit: 'contain' }}
                       />
-                      <span style={{ fontSize: '12px', color: '#7B51F1', fontWeight: 600 }}>Nhấn để thay ảnh</span>
+                      <span style={{ fontSize: '12px', color: '#7B51F1', fontWeight: 600 }}>{t('Tap to change photo')}</span>
                     </>
                   ) : (
                     <>
@@ -1337,8 +1344,8 @@ const Home: React.FC = () => {
                         <polyline points="17 8 12 3 7 8" />
                         <line x1="12" y1="3" x2="12" y2="15" />
                       </svg>
-                      <span style={{ fontSize: '13px', color: '#6b7280', fontWeight: 500 }}>Tải ảnh lên</span>
-                      <span style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>JPEG, PNG, WebP · tối đa 10 MB</span>
+                      <span style={{ fontSize: '13px', color: '#6b7280', fontWeight: 500 }}>{t('Upload photo')}</span>
+                      <span style={{ fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>{t('JPEG, PNG, WebP · max 10 MB')}</span>
                     </>
                   )}
                 </label>
@@ -1352,7 +1359,7 @@ const Home: React.FC = () => {
                       color: '#ef4444', fontSize: '12px', fontWeight: 600,
                       cursor: 'pointer', padding: '2px 0',
                     }}
-                  >✕ Xoá ảnh</button>
+                  >{t('✕ Remove photo')}</button>
                 )}
               </div>
             </div>

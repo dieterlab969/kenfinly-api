@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import BackBtn from '../components/BackBtn.tsx';
 import api from '../../utils/api';
 
@@ -29,18 +30,20 @@ const sections: { key: PrefKey; id: string; title: string; description: string }
         id: 'switch-offers',
         title: 'Offers',
         description:
-            'From travel to technology and fashion to food. We\'ll send discounts and offers from our partner brands.',
+            "From travel to technology and fashion to food. We'll send discounts and offers from our partner brands.",
     },
     {
         key: 'email_surveys',
         id: 'switch-surveys',
         title: 'Surveys',
         description:
-            'From time to time, we\'ll invite you to share your opinions. By taking part, you can help us create an even better experience.',
+            "From time to time, we'll invite you to share your opinions. By taking part, you can help us create an even better experience.",
     },
 ];
 
 const MarketingScreen: React.FC = () => {
+    const { t } = useTranslation();
+
     const [prefs, setPrefs] = useState<MarketingPrefs>(defaultPrefs);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -96,7 +99,7 @@ const MarketingScreen: React.FC = () => {
                                     <BackBtn />
                                 </div>
                                 <div className="header-title">
-                                    <p style={{ fontFamily: 'Satoshi, sans-serif' }}>Marketing Preferences</p>
+                                    <p style={{ fontFamily: 'Satoshi, sans-serif' }}>{t('Marketing Preferences')}</p>
                                 </div>
                             </div>
                         </div>
@@ -117,15 +120,14 @@ const MarketingScreen: React.FC = () => {
                                             fontFamily: 'Satoshi, sans-serif',
                                         }}
                                     >
-                                        {toast.msg}
+                                        {t(toast.msg)}
                                     </div>
                                 )}
 
                                 <div className="marketing-wrap">
                                     <div className="marketing-content">
                                         <p style={{ fontFamily: 'Satoshi, sans-serif', color: '#6c757d' }}>
-                                            We'll send info that's relevant to you. You can choose what
-                                            you'd like to get from us and how we should send it.
+                                            {t("We'll send info that's relevant to you. You can choose what you'd like to get from us and how we should send it.")}
                                         </p>
                                     </div>
 
@@ -136,7 +138,7 @@ const MarketingScreen: React.FC = () => {
                                                 role="status"
                                                 style={{ color: '#7B51F1', width: 32, height: 32 }}
                                             >
-                                                <span className="visually-hidden">Loading…</span>
+                                                <span className="visually-hidden">{t('Loading…')}</span>
                                             </div>
                                         </div>
                                     ) : (
@@ -146,7 +148,7 @@ const MarketingScreen: React.FC = () => {
                                                 className={`marketing-content mt-16${idx === sections.length - 1 ? ' border-0' : ''}`}
                                             >
                                                 <h2 style={{ fontFamily: 'Satoshi, sans-serif', fontWeight: 700 }}>
-                                                    {section.title}
+                                                    {t(section.title)}
                                                 </h2>
                                                 <p
                                                     className="mt-8"
@@ -156,12 +158,12 @@ const MarketingScreen: React.FC = () => {
                                                         fontSize: 14,
                                                     }}
                                                 >
-                                                    {section.description}
+                                                    {t(section.description)}
                                                 </p>
                                                 <div className="notification-option-wrapper mt-8">
                                                     <div className="notification-option-name">
                                                         <p style={{ fontFamily: 'Satoshi, sans-serif' }}>
-                                                            Email me
+                                                            {t('Email me')}
                                                         </p>
                                                     </div>
                                                     <div className="notification-option-switch">

@@ -1,7 +1,7 @@
 import React from 'react'
 import BackBtn from '../components/BackBtn.tsx';
 import { Link } from 'react-router-dom';
-import { useTranslation } from '../../contexts/TranslationContext';
+import { useTranslation } from 'react-i18next';
 
 const DeactiveAccount: React.FC = () => {
 	const { t } = useTranslation();

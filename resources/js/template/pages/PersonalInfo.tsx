@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import BackBtn from '../components/BackBtn.tsx';
 import ProfileImg from '../assets/images/personal-info/profile-img.png';
 import CameraIconImg from '../assets/svg/camera-icon.svg';
@@ -199,6 +200,8 @@ const STYLES = `
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const PersonalInfo: React.FC = () => {
+  const { t } = useTranslation();
+
   // Profile data
   const [profile,        setProfile]        = useState<Profile | null>(null);
   const [form,           setForm]           = useState<FormState>({ name: '', phone: '', date_of_birth: '', gender: '' });
@@ -404,12 +407,12 @@ const PersonalInfo: React.FC = () => {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
             {inputEl}
             {error && (
-              <span style={{ color: '#ef4444', fontSize: 12, marginTop: 2 }}>{error}</span>
+              <span style={{ color: '#ef4444', fontSize: 12, marginTop: 2 }}>{t(error)}</span>
             )}
           </div>
         ) : (
           <span className="personal-field-value">
-            {displayValue || <em style={{ color: '#9ca3af', fontStyle: 'normal' }}>Not set</em>}
+            {displayValue || <em style={{ color: '#9ca3af', fontStyle: 'normal' }}>{t('Not set')}</em>}
           </span>
         )}
         <button
@@ -417,7 +420,7 @@ const PersonalInfo: React.FC = () => {
           className="personal-edit-btn"
           onClick={() => toggleEdit(field)}
           aria-label={isEditing ? `Cancel editing ${label}` : `Edit ${label}`}
-          title={isEditing ? 'Cancel' : 'Edit'}
+          title={isEditing ? t('Cancel') : t('Edit')}
         >
           {isEditing
             ? <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 500 }}>✕</span>
@@ -442,7 +445,7 @@ const PersonalInfo: React.FC = () => {
               <div className="container">
                 <div className="verify-number-top-content">
                   <div className="back-btn"><BackBtn /></div>
-                  <div className="header-title"><p>Personal Info</p></div>
+                  <div className="header-title"><p>{t('Personal Info')}</p></div>
                 </div>
               </div>
             </div>
@@ -480,7 +483,7 @@ const PersonalInfo: React.FC = () => {
               <div className="container">
                 <div className="verify-number-top-content">
                   <div className="back-btn"><BackBtn /></div>
-                  <div className="header-title"><p>Personal Info</p></div>
+                  <div className="header-title"><p>{t('Personal Info')}</p></div>
                 </div>
               </div>
             </div>
@@ -488,7 +491,7 @@ const PersonalInfo: React.FC = () => {
               <div className="verify-number-bottom-wrap">
                 <div className="verify-number-content">
                   <div style={{ textAlign: 'center', padding: '48px 24px' }}>
-                    <p style={{ color: '#ef4444', marginBottom: 16 }}>{fetchError}</p>
+                    <p style={{ color: '#ef4444', marginBottom: 16 }}>{t(fetchError)}</p>
                     <button
                       type="button"
                       onClick={fetchProfile}
@@ -497,7 +500,7 @@ const PersonalInfo: React.FC = () => {
                         border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 600,
                       }}
                     >
-                      Try Again
+                      {t('Try Again')}
                     </button>
                   </div>
                 </div>
@@ -522,7 +525,7 @@ const PersonalInfo: React.FC = () => {
             <div className="container">
               <div className="verify-number-top-content">
                 <div className="back-btn"><BackBtn /></div>
-                <div className="header-title"><p>Personal Info</p></div>
+                <div className="header-title"><p>{t('Personal Info')}</p></div>
               </div>
             </div>
           </div>
@@ -531,7 +534,7 @@ const PersonalInfo: React.FC = () => {
           <div className="verify-number-bottom" id="personal-info">
             <div className="verify-number-bottom-wrap">
               <div className="verify-number-content">
-                <h1 className="d-none">Personal Info</h1>
+                <h1 className="d-none">{t('Personal Info')}</h1>
 
                 <div className="personal-info-main">
 
@@ -573,7 +576,7 @@ const PersonalInfo: React.FC = () => {
                               onError={(e) => { (e.target as HTMLImageElement).src = ProfileImg; }}
                             />
                             <div className="avatar-overlay">
-                              <span style={{ color: '#fff', fontSize: 12, fontWeight: 600 }}>Change</span>
+                              <span style={{ color: '#fff', fontSize: 12, fontWeight: 600 }}>{t('Change')}</span>
                             </div>
                           </>
                         )}
@@ -582,7 +585,7 @@ const PersonalInfo: React.FC = () => {
                         <label
                           htmlFor="imageInput"
                           className="avatar-camera-btn"
-                          title={avatarUploading ? 'Uploading…' : 'Change profile photo'}
+                          title={avatarUploading ? t('Uploading…') : t('Change profile photo')}
                           style={{ cursor: avatarUploading ? 'not-allowed' : 'pointer' }}
                         >
                           {avatarUploading
@@ -598,7 +601,7 @@ const PersonalInfo: React.FC = () => {
                           color: '#dc2626', fontSize: 11, textAlign: 'center',
                           marginTop: 6, maxWidth: 160,
                         }}>
-                          {avatarError}
+                          {t(avatarError)}
                         </p>
                       )}
                     </div>
@@ -607,11 +610,11 @@ const PersonalInfo: React.FC = () => {
                   {/* ── Global alerts ── */}
                   {successMsg && (
                     <div className="pi-alert-success" role="status">
-                      <span>✓</span> {successMsg}
+                      <span>✓</span> {t(successMsg)}
                     </div>
                   )}
                   {saveError && (
-                    <div className="pi-alert-error" role="alert">{saveError}</div>
+                    <div className="pi-alert-error" role="alert">{t(saveError)}</div>
                   )}
 
                   {/* ── Profile form ── */}
@@ -620,7 +623,7 @@ const PersonalInfo: React.FC = () => {
                     {/* Name */}
                     {renderField({
                       field:        'name',
-                      label:        'Name',
+                      label:        t('Name'),
                       displayValue: form.name,
                       className:    '',
                       inputEl: (
@@ -630,7 +633,7 @@ const PersonalInfo: React.FC = () => {
                           className={`personal-field-input${fieldErrors.name ? ' error' : ''}`}
                           value={form.name}
                           onChange={e => handleChange('name', e.target.value)}
-                          placeholder="Enter your full name"
+                          placeholder={t('Enter your full name')}
                           autoComplete="name"
                           maxLength={100}
                           autoFocus
@@ -640,16 +643,16 @@ const PersonalInfo: React.FC = () => {
 
                     {/* Email — read-only */}
                     <div className="personal-name mt-16">
-                      <label htmlFor="email">Email Address</label>
+                      <label htmlFor="email">{t('Email Address')}</label>
                       <span className="personal-field-value">
                         {profile?.email ?? '—'}
                         {profile?.email_verified && (
-                          <span style={{ marginLeft: 6, color: '#16a34a', fontSize: 11 }}>✓ Verified</span>
+                          <span style={{ marginLeft: 6, color: '#16a34a', fontSize: 11 }}>{t('✓ Verified')}</span>
                         )}
                       </span>
                       <span
                         style={{ width: 28, flexShrink: 0, color: '#9ca3af', fontSize: 11 }}
-                        title="Email cannot be changed here"
+                        title={t('Email cannot be changed here')}
                       >
                         🔒
                       </span>
@@ -658,7 +661,7 @@ const PersonalInfo: React.FC = () => {
                     {/* Phone */}
                     {renderField({
                       field:        'phone',
-                      label:        'Phone Number',
+                      label:        t('Phone Number'),
                       displayValue: form.phone,
                       inputEl: (
                         <input
@@ -677,7 +680,7 @@ const PersonalInfo: React.FC = () => {
                     {/* Date of Birth */}
                     {renderField({
                       field:        'date_of_birth',
-                      label:        'Date of Birth',
+                      label:        t('Date of Birth'),
                       displayValue: formatDisplayDate(form.date_of_birth),
                       inputEl: (
                         <input
@@ -694,8 +697,8 @@ const PersonalInfo: React.FC = () => {
                     {/* Gender */}
                     {renderField({
                       field:        'gender',
-                      label:        'Gender',
-                      displayValue: form.gender ? (GENDER_LABELS[form.gender] ?? form.gender) : '',
+                      label:        t('Gender'),
+                      displayValue: form.gender ? t(GENDER_LABELS[form.gender] ?? form.gender) : '',
                       inputEl: (
                         <select
                           id="gender"
@@ -704,7 +707,7 @@ const PersonalInfo: React.FC = () => {
                           onChange={e => handleChange('gender', e.target.value)}
                         >
                           {GENDER_OPTIONS.map(o => (
-                            <option key={o.value} value={o.value}>{o.label}</option>
+                            <option key={o.value} value={o.value}>{t(o.label)}</option>
                           ))}
                         </select>
                       ),
@@ -725,7 +728,7 @@ const PersonalInfo: React.FC = () => {
                         }}
                       >
                         {saving && <Spinner small />}
-                        {saving ? 'Saving…' : 'Update Changes'}
+                        {saving ? t('Saving…') : t('Update Changes')}
                       </button>
                     </div>
 
@@ -751,7 +754,7 @@ const PersonalInfo: React.FC = () => {
                           color: '#6b7280', fontSize: 14, cursor: 'pointer', fontWeight: 500,
                         }}
                       >
-                        Cancel All Changes
+                        {t('Cancel All Changes')}
                       </button>
                     )}
 
