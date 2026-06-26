@@ -712,6 +712,29 @@ const Home: React.FC = () => {
     }
   }, [loadQuickAddOptions, showModal, transactionType])
 
+  // ── Restore Settings drawer after back-navigation ─────────────────────────
+  // Setting.tsx writes 'kenfinly_settings_return' to sessionStorage before
+  // navigating to any child settings page. We read it here on mount, consume
+  // it immediately (so it never fires twice), and programmatically re-open the
+  // Bootstrap offcanvas so the user is returned to the exact context they left.
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem('kenfinly_settings_return')
+      if (!raw) return
+      sessionStorage.removeItem('kenfinly_settings_return')   // consume once
+      const state = JSON.parse(raw)
+      if (!state.drawerOpen) return
+      // Defer slightly: Bootstrap's MutationObserver finishes wiring the
+      // offcanvas element a tick after React commits the DOM.
+      const timer = setTimeout(() => {
+        const bsOffcanvas = (window as any).bootstrap?.Offcanvas
+        const el = document.getElementById('offcanvasExample')
+        if (bsOffcanvas && el) bsOffcanvas.getOrCreateInstance(el).show()
+      }, 50)
+      return () => clearTimeout(timer)
+    } catch { /* sessionStorage unavailable or JSON malformed — safe to ignore */ }
+  }, [])
+
   const totalBalance = useMemo(() => (
     dashboardData?.accounts?.reduce((sum, account) => sum + toNumber(account.balance), 0) ?? 0
   ), [dashboardData])

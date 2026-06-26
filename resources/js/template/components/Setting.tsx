@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from './LanguageContext.tsx';
 import { useCurrency } from './CurrencyContext.tsx';
@@ -33,6 +33,10 @@ import settingWallet from '../assets/images/setting/setting-wallet.svg';
 import { useDarkMode } from './DarkModeContext.tsx';
 import api from '../../utils/api.js';
 
+// ─── Session-storage key ────────────────────────────────────────────────────
+// Home.tsx reads this on mount to decide whether to re-open the drawer.
+const NAV_STATE_KEY = 'kenfinly_settings_return';
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface UserSummary {
@@ -48,12 +52,19 @@ interface SettingOptionProps {
   icon: string;
   title: string;
   subtitle?: string;
+  /** Called synchronously before React Router navigates — used to persist drawer state. */
+  onBeforeNavigate?: () => void;
 }
 
-const SettingOption: React.FC<SettingOptionProps> = ({ to, icon, title, subtitle }) => {
+const SettingOption: React.FC<SettingOptionProps> = ({ to, icon, title, subtitle, onBeforeNavigate }) => {
   const { t } = useTranslation();
+
+  const handleClick = () => {
+    onBeforeNavigate?.();
+  };
+
   return (
-    <Link to={to} className="send-money-contact-tab setting-border">
+    <Link to={to} className="send-money-contact-tab setting-border" onClick={handleClick}>
       <div className="setting-icon">
         <img src={icon} alt="setting-icon" />
       </div>
@@ -154,6 +165,16 @@ const Setting: React.FC = () => {
     return () => { cancelled = true; };
   }, []);
 
+  // ── Save navigation state before leaving to a child settings screen ────────
+  // Home.tsx reads this flag on mount and re-opens the offcanvas drawer.
+  const saveNavState = () => {
+    try {
+      sessionStorage.setItem(NAV_STATE_KEY, JSON.stringify({ drawerOpen: true }));
+    } catch {
+      // sessionStorage may be unavailable in private/restricted contexts — safe to ignore
+    }
+  };
+
   return (
     <div>
       <div className="setting-bottom-sec">
@@ -173,7 +194,8 @@ const Setting: React.FC = () => {
               </div>
               <div className="contact-star">
                 <div className="star-favourite">
-                  <Link to="/PersonalInfo">
+                  {/* Save drawer state before navigating to PersonalInfo from profile edit */}
+                  <Link to="/PersonalInfo" onClick={saveNavState}>
                     <img src={purpleEditIcon} alt="edit-icon" />
                   </Link>
                 </div>
@@ -184,8 +206,8 @@ const Setting: React.FC = () => {
 
         {/* ── Settings list ── */}
         <div className="setting-bottom">
-          {/* <SettingOption to="/AllContact"     icon={setting1}      title="All Contact" /> */}
-          {/* <SettingOption to="/CustomerScreen" icon={setting2}      title="Customers" /> */}
+          {/* <SettingOption to="/AllContact"     icon={setting1}      title="All Contact" onBeforeNavigate={saveNavState} /> */}
+          {/* <SettingOption to="/CustomerScreen" icon={setting2}      title="Customers"   onBeforeNavigate={saveNavState} /> */}
 
           {/* Chart accordion — hidden temporarily */}
           {/* <div className="Char-content">
@@ -210,33 +232,33 @@ const Setting: React.FC = () => {
               </div>
             </div>
             <ul className={`diffrent-chat-dropdown ${isChartOpen ? 'open' : ''}`}>
-              <li><Link to="/AreaChart">Area Chart</Link></li>
-              <li><Link to="/LineChart">Line Chart</Link></li>
-              <li className="border-0"><Link to="/PieChart">Pie Chart</Link></li>
+              <li><Link to="/AreaChart" onClick={saveNavState}>Area Chart</Link></li>
+              <li><Link to="/LineChart" onClick={saveNavState}>Line Chart</Link></li>
+              <li className="border-0"><Link to="/PieChart" onClick={saveNavState}>Pie Chart</Link></li>
             </ul>
           </div> */}
 
-          <SettingOption to="/WalletManagement"        icon={settingWallet} title="Wallets & Accounts" />
-          <SettingOption to="/CategoryManagement"      icon={setting3}      title="Categories" />
-          {/* <SettingOption to="/BankAndCard"             icon={setting4}      title="Banks & Cards" /> */}
-          {/* <SettingOption to="/Payment"                 icon={setting5}      title="Payment Methods" /> */}
-          {/* <SettingOption to="/AutomaticPayment"        icon={setting6}      title="Automatic Payments" /> */}
-          <SettingOption to="/Subscription"            icon={setting7}      title="Subscriptions" />
-          {/* <SettingOption to="/Invoicing"               icon={setting8}      title="Invoice Settings" /> */}
+          <SettingOption to="/WalletManagement"        icon={settingWallet} title="Wallets & Accounts"          onBeforeNavigate={saveNavState} />
+          <SettingOption to="/CategoryManagement"      icon={setting3}      title="Categories"                  onBeforeNavigate={saveNavState} />
+          {/* <SettingOption to="/BankAndCard"             icon={setting4}      title="Banks & Cards"               onBeforeNavigate={saveNavState} /> */}
+          {/* <SettingOption to="/Payment"                 icon={setting5}      title="Payment Methods"             onBeforeNavigate={saveNavState} /> */}
+          {/* <SettingOption to="/AutomaticPayment"        icon={setting6}      title="Automatic Payments"          onBeforeNavigate={saveNavState} /> */}
+          <SettingOption to="/Subscription"            icon={setting7}      title="Subscriptions"               onBeforeNavigate={saveNavState} />
+          {/* <SettingOption to="/Invoicing"               icon={setting8}      title="Invoice Settings"            onBeforeNavigate={saveNavState} /> */}
 
           <div className="setting-center-border" />
 
-          <SettingOption to="/PersonalInfo"            icon={setting9}      title="Personal Info" />
-          <SettingOption to="/Security"                icon={setting10}     title="Security" />
-          <SettingOption to="/MarketingScreen"         icon={setting11}     title="Marketing Preferences" />
-          <SettingOption to="/NotificationSetting"     icon={setting12}     title="Notification Setting" />
-          <SettingOption to="/Language"                icon={setting13}     title="Language" subtitle={language.name} />
-          <SettingOption to="/Currency"                icon={setting14}     title="Currency" subtitle={currency.code} />
-          <SettingOption to="/Faq"                     icon={setting15}     title="FAQs" />
-          <SettingOption to="/DataPrivacy"             icon={setting16}     title="Data & Privacy Policy" />
-          {/* <SettingOption to="/AboutUs"                 icon={setting17}     title="About PayFast" subtitle="v2.0.2" /> */}
-          {/* <SettingOption to="/Feedback"                icon={setting18}     title="Send Feedback" /> */}
-          <SettingOption to="/ContactUs"               icon={setting19}     title="Contact Us" />
+          <SettingOption to="/PersonalInfo"            icon={setting9}      title="Personal Info"               onBeforeNavigate={saveNavState} />
+          <SettingOption to="/Security"                icon={setting10}     title="Security"                    onBeforeNavigate={saveNavState} />
+          <SettingOption to="/MarketingScreen"         icon={setting11}     title="Marketing Preferences"       onBeforeNavigate={saveNavState} />
+          <SettingOption to="/NotificationSetting"     icon={setting12}     title="Notification Setting"        onBeforeNavigate={saveNavState} />
+          <SettingOption to="/Language"                icon={setting13}     title="Language"   subtitle={language.name} onBeforeNavigate={saveNavState} />
+          <SettingOption to="/Currency"                icon={setting14}     title="Currency"   subtitle={currency.code} onBeforeNavigate={saveNavState} />
+          <SettingOption to="/Faq"                     icon={setting15}     title="FAQs"                        onBeforeNavigate={saveNavState} />
+          <SettingOption to="/DataPrivacy"             icon={setting16}     title="Data & Privacy Policy"       onBeforeNavigate={saveNavState} />
+          {/* <SettingOption to="/AboutUs"                 icon={setting17}     title="About PayFast"  subtitle="v2.0.2" onBeforeNavigate={saveNavState} /> */}
+          {/* <SettingOption to="/Feedback"                icon={setting18}     title="Send Feedback"              onBeforeNavigate={saveNavState} /> */}
+          <SettingOption to="/ContactUs"               icon={setting19}     title="Contact Us"                  onBeforeNavigate={saveNavState} />
 
           {/* Dark mode toggle */}
           <div className="send-money-contact-tab setting-border">
@@ -264,10 +286,10 @@ const Setting: React.FC = () => {
             </div>
           </div>
 
-          {/* <SettingOption to="/InviteFriend"            icon={setting20}     title="Invite Friends" /> */}
-          <SettingOption to="/DeleteDeactivateAccount" icon={setting21}     title="Delete or Deactivate Account" />
+          {/* <SettingOption to="/InviteFriend"            icon={setting20}     title="Invite Friends"              onBeforeNavigate={saveNavState} /> */}
+          <SettingOption to="/DeleteDeactivateAccount" icon={setting21}     title="Delete or Deactivate Account" onBeforeNavigate={saveNavState} />
 
-          {/* Logout */}
+          {/* Logout — opens a different offcanvas (#offcanvasBottom), does NOT navigate away */}
           <div
             className="send-money-contact-tab setting-border border-0"
             data-bs-toggle="offcanvas"
