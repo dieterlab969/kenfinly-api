@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useLanguage } from './LanguageContext.tsx';
 import { useCurrency } from './CurrencyContext.tsx';
 import profileImg from '../assets/images/setting/profile-img.png';
@@ -49,24 +50,27 @@ interface SettingOptionProps {
   subtitle?: string;
 }
 
-const SettingOption: React.FC<SettingOptionProps> = ({ to, icon, title, subtitle }) => (
-  <Link to={to} className="send-money-contact-tab setting-border">
-    <div className="setting-icon">
-      <img src={icon} alt="setting-icon" />
-    </div>
-    <div className="setting-title">
-      <h3>{title}</h3>
-    </div>
-    <div className="contact-star">
-      <div className="star-favourite">
-        {subtitle && <span className="setting-lanuage">{subtitle}</span>}
-        <span>
-          <img src={rightIcon} alt="right-icon" />
-        </span>
+const SettingOption: React.FC<SettingOptionProps> = ({ to, icon, title, subtitle }) => {
+  const { t } = useTranslation();
+  return (
+    <Link to={to} className="send-money-contact-tab setting-border">
+      <div className="setting-icon">
+        <img src={icon} alt="setting-icon" />
       </div>
-    </div>
-  </Link>
-);
+      <div className="setting-title">
+        <h3>{t(title)}</h3>
+      </div>
+      <div className="contact-star">
+        <div className="star-favourite">
+          {subtitle && <span className="setting-lanuage">{subtitle}</span>}
+          <span>
+            <img src={rightIcon} alt="right-icon" />
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+};
 
 // ─── Avatar with fallback ─────────────────────────────────────────────────────
 
@@ -97,6 +101,7 @@ const ProfileSkeleton: React.FC = () => (
 // ─── Main component ───────────────────────────────────────────────────────────
 
 const Setting: React.FC = () => {
+  const { t } = useTranslation();
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const { language } = useLanguage();
   const { currency } = useCurrency();
@@ -163,7 +168,7 @@ const Setting: React.FC = () => {
                 <AvatarImg src={user?.avatar ?? null} />
               </div>
               <div className="contact-details">
-                <h3>{user?.name ?? 'Loading…'}</h3>
+                <h3>{user?.name ?? t('Loading…')}</h3>
                 <h4>{user?.email ?? ''}</h4>
               </div>
               <div className="contact-star">
@@ -241,7 +246,7 @@ const Setting: React.FC = () => {
               </svg>
             </div>
             <div className="setting-title">
-              <h3 className="smith new-chat">{isDarkMode ? 'Dark Mode' : 'Light Mode'}</h3>
+              <h3 className="smith new-chat">{isDarkMode ? t('Dark Mode') : t('Light Mode')}</h3>
             </div>
             <div className="contact-star">
               <div className="notification-option-switch">
@@ -272,7 +277,7 @@ const Setting: React.FC = () => {
               <img src={setting22} alt="setting-icon" />
             </div>
             <div className="setting-title">
-              <h3>Logout</h3>
+              <h3>{t('Logout')}</h3>
             </div>
             <div className="contact-star">
               <div className="star-favourite">
