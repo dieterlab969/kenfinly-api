@@ -289,11 +289,18 @@ const Setting: React.FC = () => {
           {/* <SettingOption to="/InviteFriend"            icon={setting20}     title="Invite Friends"              onBeforeNavigate={saveNavState} /> */}
           <SettingOption to="/DeleteDeactivateAccount" icon={setting21}     title="Delete or Deactivate Account" onBeforeNavigate={saveNavState} />
 
-          {/* Logout — opens a different offcanvas (#offcanvasBottom), does NOT navigate away */}
+          {/* Logout — dispatches a custom event consumed by Home.tsx */}
           <div
+            role="button"
+            tabIndex={0}
             className="send-money-contact-tab setting-border border-0"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#offcanvasBottom"
+            onClick={() => window.dispatchEvent(new CustomEvent('kenfinly:open-logout'))}
+            onKeyDown={(e: React.KeyboardEvent) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                window.dispatchEvent(new CustomEvent('kenfinly:open-logout'))
+              }
+            }}
+            style={{ cursor: 'pointer' }}
           >
             <div className="setting-icon pay-bill-img bg-2">
               <img src={setting22} alt="setting-icon" />

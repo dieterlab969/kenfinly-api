@@ -259,6 +259,23 @@ class AuthController extends Controller
             ], 403);
         }
 
+        // ── Auto-reactivation ────────────────────────────────────────────────
+        // Deactivated accounts and accounts pending deletion are restored to
+        // 'active' on next successful login (GDPR grace-period cancellation).
+        if (in_array($user->status, ['deactivated', 'pending_deletion'], true)) {
+            $previousStatus = $user->status;
+            $user->update([
+                'status'                => 'active',
+                'deletion_scheduled_at' => null,
+            ]);
+
+            Log::info('Reactivated user account on login', [
+                'user_id'         => $user->id,
+                'email'           => $user->email,
+                'previous_status' => $previousStatus,
+            ]);
+        }
+
         return $this->respondWithToken($token);
     }
 

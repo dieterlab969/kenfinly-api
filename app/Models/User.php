@@ -90,6 +90,7 @@ class User extends Authenticatable implements JWTSubject
         'login_notifications_enabled',
         'security_alerts_enabled',
         'pin_hash',
+        'deletion_scheduled_at',
     ];
 
     /**
@@ -124,6 +125,7 @@ class User extends Authenticatable implements JWTSubject
             'longest_streak'           => 'integer',
             'trial_ends_at'                  => 'datetime',
             'subscription_expires_at'        => 'datetime',
+            'deletion_scheduled_at'          => 'datetime',
             'is_2fa_enabled'                 => 'boolean',
             'is_biometric_enabled'           => 'boolean',
             'login_notifications_enabled'    => 'boolean',
