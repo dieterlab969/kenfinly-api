@@ -13,6 +13,7 @@ import { formatCurrency, getCategoryIcon } from '../../constants/categories'
 import EditTransactionModal from '../../components/EditTransactionModal'
 import { processImageForUpload, validateImageFile, formatFileSize } from '../../utils/imageCompression'
 import { useTranslation } from 'react-i18next'
+import Offcanvas from 'react-bootstrap/Offcanvas'
 
 type ApiAmount = string | number | null | undefined
 type TransactionType = 'income' | 'expense'
@@ -633,6 +634,7 @@ const Home: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [user, setUser] = useState<UserProfile | null>(() => getStoredUser())
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [fabOpen, setFabOpen] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [transactionType, setTransactionType] = useState<TransactionType>('expense')
@@ -714,24 +716,15 @@ const Home: React.FC = () => {
 
   // ── Restore Settings drawer after back-navigation ─────────────────────────
   // Setting.tsx writes 'kenfinly_settings_return' to sessionStorage before
-  // navigating to any child settings page. We read it here on mount, consume
-  // it immediately (so it never fires twice), and programmatically re-open the
-  // Bootstrap offcanvas so the user is returned to the exact context they left.
+  // navigating to any child settings page. On mount we read + consume the flag
+  // and drive the drawer purely through React state — no Bootstrap JS API needed.
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem('kenfinly_settings_return')
       if (!raw) return
       sessionStorage.removeItem('kenfinly_settings_return')   // consume once
       const state = JSON.parse(raw)
-      if (!state.drawerOpen) return
-      // Defer slightly: Bootstrap's MutationObserver finishes wiring the
-      // offcanvas element a tick after React commits the DOM.
-      const timer = setTimeout(() => {
-        const bsOffcanvas = (window as any).bootstrap?.Offcanvas
-        const el = document.getElementById('offcanvasExample')
-        if (bsOffcanvas && el) bsOffcanvas.getOrCreateInstance(el).show()
-      }, 50)
-      return () => clearTimeout(timer)
+      if (state.drawerOpen) setIsDrawerOpen(true)
     } catch { /* sessionStorage unavailable or JSON malformed — safe to ignore */ }
   }, [])
 
@@ -884,9 +877,14 @@ const Home: React.FC = () => {
                       </Link>
                     </span>
                     <span className="dots-icon">
-                      <Link to="#" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample">
+                      <button
+                        type="button"
+                        onClick={() => setIsDrawerOpen(true)}
+                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', lineHeight: 0 }}
+                        aria-label="Open settings"
+                      >
                         <img src={dotsIcon} alt="menu" />
-                      </Link>
+                      </button>
                     </span>
                   </div>
                 </div>
@@ -1022,15 +1020,20 @@ const Home: React.FC = () => {
           </div>
         </div>
 
-        <div className="offcanvas offcanvas-start menu-canvas" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
-          <div className="offcanvas-header">
-            <h5 className="offcanvas-title" id="offcanvasExampleLabel">{t('Settings')}</h5>
-            <button type="button" className="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-          </div>
-          <div className="offcanvas-body">
+        <Offcanvas
+          show={isDrawerOpen}
+          onHide={() => setIsDrawerOpen(false)}
+          placement="start"
+          className="menu-canvas"
+          aria-labelledby="offcanvasExampleLabel"
+        >
+          <Offcanvas.Header closeButton>
+            <Offcanvas.Title id="offcanvasExampleLabel">{t('Settings')}</Offcanvas.Title>
+          </Offcanvas.Header>
+          <Offcanvas.Body>
             <Setting />
-          </div>
-        </div>
+          </Offcanvas.Body>
+        </Offcanvas>
 
         <div className="bottom-menu-svg-main">
           <div className="bottom-menu-svg">
