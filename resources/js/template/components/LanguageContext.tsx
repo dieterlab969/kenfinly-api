@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import i18n from '../../i18n';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -53,11 +54,17 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     return DEFAULT_LANGUAGE;
   });
 
-  // Apply language to document immediately when it changes
+  // Apply language to document and sync react-i18next whenever the selection changes
   useEffect(() => {
     document.documentElement.lang = language.code;
     document.documentElement.dir = language.dir;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(language));
+    // Sync the i18next singleton so all t() calls re-render in the new locale.
+    // i18next uses 'vi' for Vietnamese and 'en' for all English variants.
+    const i18nCode = language.code.startsWith('vi') ? 'vi' : 'en';
+    if (i18n.language !== i18nCode) {
+      i18n.changeLanguage(i18nCode);
+    }
   }, [language]);
 
   const setLanguage = (lang: Language) => setLanguageState(lang);

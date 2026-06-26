@@ -3,6 +3,8 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './assets/css/swap.css';
 import './assets/css/style.css';
 import './assets/css/media-query.css';
+// Bootstrap react-i18next — must be imported before any component that calls useTranslation()
+import '../i18n';
 import type { ReactElement } from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DarkModeProvider } from "./components/DarkModeContext";
