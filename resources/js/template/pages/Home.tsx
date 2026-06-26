@@ -1109,11 +1109,6 @@ const Home: React.FC = () => {
                     <i className="icon"><img src={item.icon!} alt={item.label} /></i>
                     <span className="text"></span>
                   </Link>
-                  <span style={{
-                    fontSize: '9px', color: item.active ? '#7B51F1' : '#9ca3af',
-                    fontWeight: item.active ? 700 : 400, textAlign: 'center',
-                    display: 'block', marginTop: '2px', whiteSpace: 'nowrap',
-                  }}>{t(item.label)}</span>
                 </li>
               )
             })}
