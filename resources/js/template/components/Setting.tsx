@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from './LanguageContext.tsx';
+import { useCurrency } from './CurrencyContext.tsx';
 import profileImg from '../assets/images/setting/profile-img.png';
 import purpleEditIcon from '../assets/svg/purple-edit-icon.svg';
 import rightIcon from '../assets/svg/right-icon.svg';
@@ -96,6 +98,8 @@ const ProfileSkeleton: React.FC = () => (
 
 const Setting: React.FC = () => {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const { language } = useLanguage();
+  const { currency } = useCurrency();
   const [isChartOpen, setIsChartOpen]  = useState<boolean>(false);
   const [user, setUser]                = useState<UserSummary | null>(null);
   const [profileLoading, setProfileLoading] = useState<boolean>(true);
@@ -221,8 +225,8 @@ const Setting: React.FC = () => {
           <SettingOption to="/Security"                icon={setting10}     title="Security" />
           <SettingOption to="/MarketingScreen"         icon={setting11}     title="Marketing Preferences" />
           <SettingOption to="/NotificationSetting"     icon={setting12}     title="Notification Setting" />
-          <SettingOption to="/Language"                icon={setting13}     title="Language" subtitle="English (US)" />
-          <SettingOption to="/Currency"                icon={setting14}     title="Currency" subtitle="USD" />
+          <SettingOption to="/Language"                icon={setting13}     title="Language" subtitle={language.name} />
+          <SettingOption to="/Currency"                icon={setting14}     title="Currency" subtitle={currency.code} />
           <SettingOption to="/Faq"                     icon={setting15}     title="FAQs" />
           <SettingOption to="/DataPrivacy"             icon={setting16}     title="Data & Privacy Policy" />
           {/* <SettingOption to="/AboutUs"                 icon={setting17}     title="About PayFast" subtitle="v2.0.2" /> */}

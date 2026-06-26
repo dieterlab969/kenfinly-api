@@ -6,6 +6,8 @@ import './assets/css/media-query.css';
 import type { ReactElement } from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DarkModeProvider } from "./components/DarkModeContext";
+import { LanguageProvider } from "./components/LanguageContext";
+import { CurrencyProvider } from "./components/CurrencyContext";
 import { TranslationProvider } from '../contexts/TranslationContext';
 import { AuthProvider } from '../contexts/AuthContext';
 import { LogoProvider } from '../contexts/LogoContext';
@@ -124,6 +126,7 @@ import Language from './pages/Language';
 import MarketingScreen from './pages/MarketingScreen';
 import EmptyNotification from './pages/EmptyNotification';
 import DataPrivacy from './pages/DataPrivacy';
+import Faq from './pages/Faq';
 import Feedback from './pages/Feedback';
 import Payment from './pages/Payment';
 import NotificationSetting from './pages/NotificationSetting';
@@ -140,6 +143,8 @@ function App(): ReactElement {
     <LogoProvider>
     <AuthProvider>
     <DarkModeProvider>
+    <LanguageProvider>
+    <CurrencyProvider>
       <BrowserRouter>
         <Loader />
         <Routes>
@@ -257,6 +262,7 @@ function App(): ReactElement {
           <Route path="/MarketingScreen" element={<MarketingScreen />} />
           <Route path="/EmptyNotification" element={<EmptyNotification />} />
           <Route path="/DataPrivacy" element={<DataPrivacy />} />
+          <Route path="/Faq" element={<Faq />} />
           <Route path="/Feedback" element={<Feedback />} />
           <Route path="/Payment" element={<Payment />} />
           <Route path="/NotificationSetting" element={<NotificationSetting />} />
@@ -268,6 +274,8 @@ function App(): ReactElement {
           <Route path="/PersonalInfo" element={<PersonalInfo />} />
         </Routes>
       </BrowserRouter>
+    </CurrencyProvider>
+    </LanguageProvider>
     </DarkModeProvider>
     </AuthProvider>
     </LogoProvider>
