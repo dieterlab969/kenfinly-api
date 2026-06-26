@@ -198,7 +198,7 @@ const SignUp: React.FC = () => {
                 <div className="auth-alert-info">
                   <span className="auth-alert-info-icon">🛒</span>
                   <span>
-                    Tạo tài khoản để hoàn tất đơn hàng của bạn. Sau khi xác thực email, bạn sẽ có thể thanh toán ngay.
+                    {t("Create an account to complete your order. After verifying your email, you'll be able to pay right away.")}
                   </span>
                 </div>
               )}
@@ -233,9 +233,9 @@ const SignUp: React.FC = () => {
                 }}
               >
                 {googleLoading ? (
-                  <span style={{ fontSize: '13px' }}>Redirecting to Google…</span>
+                  <span style={{ fontSize: '13px' }}>{t('Redirecting to Google…')}</span>
                 ) : (
-                  <><GoogleLogo />Continue with Google</>
+                  <><GoogleLogo />{t('Continue with Google')}</>
                 )}
               </button>
 
@@ -255,14 +255,14 @@ const SignUp: React.FC = () => {
                 }}
               >
                 {fbLoading ? (
-                  <span style={{ fontSize: '13px' }}>Redirecting to Facebook…</span>
+                  <span style={{ fontSize: '13px' }}>{t('Redirecting to Facebook…')}</span>
                 ) : (
-                  <><FacebookLogo />Continue with Facebook</>
+                  <><FacebookLogo />{t('Continue with Facebook')}</>
                 )}
               </button>
 
               <div className="or-section mt-24">
-                <p>or sign up with email</p>
+                <p>{t('or sign up with email')}</p>
               </div>
 
               <form className="mt-8" onSubmit={handleSubmit} noValidate>

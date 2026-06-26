@@ -4,6 +4,7 @@ import { useRecaptchaConfig } from '../../components/App';
 import BackBtn from '../components/BackBtn';
 import Logo from '../assets/images/let-you-screen/logo.svg';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -55,8 +56,6 @@ const EyeIcon: React.FC<EyeIconProps> = ({ open }) =>
   );
 
 // ─── Scoped styles ────────────────────────────────────────────────────────────
-// This <style> tag lives inside the component tree and is removed from the DOM
-// automatically when the component unmounts — no other route is affected.
 
 const STYLES = `
   /* ── Social sign-in buttons ───────────────────────────────────────────────
@@ -174,6 +173,7 @@ const SignIn: React.FC = () => {
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const { executeRecaptcha }          = useGoogleReCaptcha();
   const { enabled: recaptchaEnabled } = useRecaptchaConfig();
@@ -193,7 +193,7 @@ const SignIn: React.FC = () => {
 
       if (recaptchaEnabled) {
         if (!executeRecaptcha) {
-          setError('Security check not loaded. Please refresh the page.');
+          setError(t('Security check not loaded. Please refresh the page.'));
           setLoading(false);
           return;
         }
@@ -216,7 +216,7 @@ const SignIn: React.FC = () => {
         const firstFieldError  = errData.errors
           ? Object.values(errData.errors)[0]?.[0]
           : null;
-        setError(firstFieldError || errData.message || 'Login failed. Please check your credentials.');
+        setError(firstFieldError || errData.message || t('Login failed. Please check your credentials.'));
         return;
       }
 
@@ -226,7 +226,7 @@ const SignIn: React.FC = () => {
       if (user) localStorage.setItem('user', JSON.stringify(user));
       navigate('/Home');
     } catch {
-      setError('Network error. Please try again.');
+      setError(t('Network error. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -244,9 +244,9 @@ const SignIn: React.FC = () => {
 
   const displayError =
     error ||
-    (urlError === 'google_failed'   ? 'Google sign-in failed. Please try again or use email.'   :
-     urlError === 'facebook_failed' ? 'Facebook sign-in failed. Please try again or use email.' :
-     urlError                       ? 'Sign-in failed. Please try again.'                        :
+    (urlError === 'google_failed'   ? t('Google sign-in failed. Please try again or use email.')   :
+     urlError === 'facebook_failed' ? t('Facebook sign-in failed. Please try again or use email.') :
+     urlError                       ? t('Sign-in failed. Please try again.')                        :
      '');
 
   return (
@@ -272,7 +272,7 @@ const SignIn: React.FC = () => {
           <div className="let-you-social-sec" id="sign-in-main">
             <div className="lets_you_in_box">
               <h1 className="d-none">Sign In</h1>
-              <h2 className="lets_you_in_text">Sign In</h2>
+              <h2 className="lets_you_in_text">{t('Sign In')}</h2>
 
               {/* ── Error banner ── */}
               {displayError && (
@@ -288,8 +288,8 @@ const SignIn: React.FC = () => {
                   disabled={anyLoading}
                 >
                   {googleLoading
-                    ? 'Redirecting to Google…'
-                    : <><GoogleLogo />Continue with Google</>}
+                    ? t('Redirecting to Google…')
+                    : <><GoogleLogo />{t('Continue with Google')}</>}
                 </button>
 
                 <button
@@ -299,14 +299,14 @@ const SignIn: React.FC = () => {
                   disabled={anyLoading}
                 >
                   {fbLoading
-                    ? 'Redirecting to Facebook…'
-                    : <><FacebookLogo />Continue with Facebook</>}
+                    ? t('Redirecting to Facebook…')
+                    : <><FacebookLogo />{t('Continue with Facebook')}</>}
                 </button>
               </div>
 
               {/* ── Divider ── */}
               <div className="or-section mt-24">
-                <p>or sign in with email</p>
+                <p>{t('or sign in with email')}</p>
               </div>
 
               {/* ── Form ── */}
@@ -317,7 +317,7 @@ const SignIn: React.FC = () => {
                   <input
                     type="email"
                     className="sign-in-custom-input"
-                    placeholder="Enter Email Address"
+                    placeholder={t('Enter Email Address')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete="email"
@@ -330,7 +330,7 @@ const SignIn: React.FC = () => {
                   <input
                     type={showPw ? 'text' : 'password'}
                     className="si-pw-input"
-                    placeholder="Enter Password"
+                    placeholder={t('Enter Password')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     autoComplete="current-password"
@@ -340,7 +340,7 @@ const SignIn: React.FC = () => {
                     type="button"
                     className="si-eye-btn"
                     onClick={() => setShowPw((v) => !v)}
-                    aria-label={showPw ? 'Hide password' : 'Show password'}
+                    aria-label={showPw ? t('Hide password') : t('Show password')}
                   >
                     <EyeIcon open={showPw} />
                   </button>
@@ -349,7 +349,7 @@ const SignIn: React.FC = () => {
                 {/* Forgot password — right-aligned, above submit */}
                 <div className="si-forgot-row">
                   <Link to="/ForgetPassword" className="si-forgot-link">
-                    Forgot Password?
+                    {t('Forgot Password?')}
                   </Link>
                 </div>
 
@@ -360,7 +360,7 @@ const SignIn: React.FC = () => {
                     className="auth-submit-btn"
                     disabled={anyLoading}
                   >
-                    {loading ? 'Signing In…' : 'Sign In'}
+                    {loading ? t('Signing In…') : t('Sign In')}
                   </button>
                 </div>
 
@@ -371,7 +371,7 @@ const SignIn: React.FC = () => {
           {/* ── Footer: sign up link ── */}
           <footer id="let-you-footer">
             <div className="block-footer">
-              <p>Don't have an account? <Link to="/SignUp">Sign up</Link></p>
+              <p>{t("Don't have an account?")} <Link to="/SignUp">{t('Sign up')}</Link></p>
             </div>
           </footer>
 

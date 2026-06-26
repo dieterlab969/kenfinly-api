@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import BackBtn from '../components/BackBtn.tsx';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 const DeleteDeactivateAccount: React.FC = () => {
 	const [action, setAction] = useState("");
 	const navigate = useNavigate();
+	const { t } = useTranslation();
 
 	const continueAction = (e) => {
 		e.preventDefault();
@@ -14,7 +16,7 @@ const DeleteDeactivateAccount: React.FC = () => {
 		} else if (action === "deactivate") {
 			navigate("/DeactiveAccount");
 		} else {
-			alert("Please select an option first.");
+			alert(t("Please select an option first."));
 		}
 	};
 
@@ -30,7 +32,7 @@ const DeleteDeactivateAccount: React.FC = () => {
 									<BackBtn />
 								</div>
 								<div className="header-title">
-									<p>Delete or Deactivate</p>
+									<p>{t('Delete or Deactivate')}</p>
 								</div>
 							</div>
 						</div>
@@ -44,8 +46,7 @@ const DeleteDeactivateAccount: React.FC = () => {
 								<div className="delete-deactivate-content">
 									<div className="delete-content">
 										<p>
-											If you want to leave PayFast temporarily, simply deactivate your account.
-											If you choose to delete your account instead, you won’t be able to recover it after 30 days.
+											{t("If you want to leave Kenfinly temporarily, simply deactivate your account. If you choose to delete your account instead, you won't be able to recover it after 30 days.")}
 										</p>
 									</div>
 
@@ -68,10 +69,9 @@ const DeleteDeactivateAccount: React.FC = () => {
 												className="form-check-label checkout-modal-lbl pt-0 pb-0"
 												htmlFor="shipping1"
 											>
-												Deactivate Account
+												{t('Deactivate Account')}
 												<span className="mt-8">
-													No one can see your account, including all content that is stored in it.
-													Reactivate your account and recover all content anytime.
+													{t('No one can see your account, including all content that is stored in it. Reactivate your account and recover all content anytime.')}
 												</span>
 											</label>
 										</div>
@@ -93,10 +93,9 @@ const DeleteDeactivateAccount: React.FC = () => {
 												className="form-check-label checkout-modal-lbl pt-0 pb-0"
 												htmlFor="shipping2"
 											>
-												Delete Account Permanently
+												{t('Delete Account Permanently')}
 												<span className="mt-8">
-													Your account and content will be deleted permanently.
-													You may cancel the deletion request by reactivating your account within 30 days.
+													{t('Your account and content will be deleted permanently. You may cancel the deletion request by reactivating your account within 30 days.')}
 												</span>
 											</label>
 										</div>
@@ -106,7 +105,7 @@ const DeleteDeactivateAccount: React.FC = () => {
 								{/* Continue Button */}
 								<div className="verify-number-btn">
 									<Link to="#" onClick={continueAction}>
-										Continue
+										{t('Continue')}
 									</Link>
 								</div>
 							</div>
