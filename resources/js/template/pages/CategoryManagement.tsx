@@ -10,7 +10,7 @@ import SearchIcon from '../assets/svg/search-icon.svg';
 import faqPlus from '../assets/svg/faq-plus.svg';
 import purpleEditIcon from '../assets/svg/purple-edit-icon.svg';
 import api from '../../utils/api';
-import { useTranslation } from '../../contexts/TranslationContext';
+import { useTranslation } from 'react-i18next';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Domain types
@@ -68,11 +68,11 @@ const COLOR_PRESETS: string[] = [
   '#3B82F6', '#6B7280', '#10B981', '#84CC16',
 ];
 
-const SORT_OPTIONS: { value: string; labelKey: string }[] = [
-  { value: 'system_first', labelKey: 'category_mgmt.sort.system_first' },
-  { value: 'name_asc',     labelKey: 'category_mgmt.sort.name_asc' },
-  { value: 'name_desc',    labelKey: 'category_mgmt.sort.name_desc' },
-  { value: 'type',         labelKey: 'category_mgmt.sort.by_type' },
+const SORT_OPTIONS: { value: string; label: string }[] = [
+  { value: 'system_first', label: 'System first' },
+  { value: 'name_asc',     label: 'Name A → Z' },
+  { value: 'name_desc',    label: 'Name Z → A' },
+  { value: 'type',         label: 'By type' },
 ];
 
 const EMPTY_FORM: CategoryForm = {
@@ -154,7 +154,7 @@ const CategoryManagement: React.FC = () => {
       const res = await api.get('/categories');
       setTree(res.data.categories ?? []);
     } catch {
-      setErrorMsg(t('category_mgmt.error.load'));
+      setErrorMsg(t('Unable to load categories. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -251,7 +251,7 @@ const CategoryManagement: React.FC = () => {
         color:     resolvedColor,
         parent_id: form.parent_id ? parseInt(form.parent_id, 10) : null,
       });
-      showPageMsg('success', t('category_mgmt.success.created').replace('{{name}}', form.name));
+      showPageMsg('success', t('"{{name}}" created successfully.', { name: form.name }));
       goToList();
       await fetchCategories();
     } catch (err: unknown) {
@@ -260,7 +260,7 @@ const CategoryManagement: React.FC = () => {
       if (Object.keys(errs).length > 0) {
         setFormErrors(errs);
       } else {
-        setFormGenError(ax.response?.data?.message ?? t('category_mgmt.error.generic'));
+        setFormGenError(ax.response?.data?.message ?? t('Something went wrong. Please try again.'));
       }
     } finally {
       setSaving(false);
@@ -283,19 +283,19 @@ const CategoryManagement: React.FC = () => {
         color:     resolvedColor,
         parent_id: form.parent_id ? parseInt(form.parent_id, 10) : null,
       });
-      showPageMsg('success', t('category_mgmt.success.updated').replace('{{name}}', form.name));
+      showPageMsg('success', t('"{{name}}" updated successfully.', { name: form.name }));
       goToList();
       await fetchCategories();
     } catch (err: unknown) {
       const ax = err as { response?: { status?: number; data?: { errors?: ApiValidationErrors; message?: string } } };
       if (ax.response?.status === 403) {
-        setFormGenError(t('category_mgmt.error.system_edit'));
+        setFormGenError(t('You cannot edit a system category.'));
       } else {
         const errs = ax.response?.data?.errors ?? {};
         if (Object.keys(errs).length > 0) {
           setFormErrors(errs);
         } else {
-          setFormGenError(ax.response?.data?.message ?? t('category_mgmt.error.generic'));
+          setFormGenError(ax.response?.data?.message ?? t('Something went wrong. Please try again.'));
         }
       }
     } finally {
@@ -310,10 +310,10 @@ const CategoryManagement: React.FC = () => {
       await api.delete(`/categories/${id}`);
       setConfirmDeleteId(null);
       await fetchCategories();
-      showPageMsg('success', t('category_mgmt.success.deleted'));
+      showPageMsg('success', t('Category deleted successfully.'));
     } catch (err: unknown) {
       const ax = err as { response?: { data?: { message?: string } } };
-      setDeleteError(ax.response?.data?.message ?? t('category_mgmt.error.delete'));
+      setDeleteError(ax.response?.data?.message ?? t('Could not delete this category.'));
     } finally {
       setDeleting(false);
     }
@@ -330,7 +330,7 @@ const CategoryManagement: React.FC = () => {
 
   const iconPickerRow = (): React.ReactNode => (
     <div className="personal-name mb-3">
-      <label style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>{t('category_mgmt.form.icon_label')}</label>
+      <label style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>{t('Icon')}</label>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
         {ICON_PRESETS.map((ic) => (
           <button
@@ -357,7 +357,7 @@ const CategoryManagement: React.FC = () => {
 
   const colorPickerRow = (): React.ReactNode => (
     <div className="personal-name mb-3">
-      <label style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>{t('category_mgmt.form.color_label')}</label>
+      <label style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>{t('Color')}</label>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8, marginBottom: 10 }}>
         {COLOR_PRESETS.map((c) => (
           <button
@@ -379,14 +379,14 @@ const CategoryManagement: React.FC = () => {
       <input
         type="text"
         className="px-0"
-        placeholder={t('category_mgmt.form.color_placeholder')}
+        placeholder={t('#RRGGBB — custom hex')}
         value={form.customColor}
         onChange={(e) => updateForm({ customColor: e.target.value })}
         style={{ maxWidth: 200, fontSize: 13 }}
       />
       {form.customColor && !isValidHex(form.customColor) && (
         <p style={{ color: '#EF4444', fontSize: 12, marginTop: 4 }}>
-          {t('category_mgmt.form.color_error')}
+          {t('Must be a valid hex colour (e.g. #FF6B35)')}
         </p>
       )}
     </div>
@@ -408,7 +408,7 @@ const CategoryManagement: React.FC = () => {
         {form.icon}
       </div>
       <div className="bank-details" style={{ flex: 1, minWidth: 0 }}>
-        <h2 style={{ marginBottom: 2 }}>{form.name || t('category_mgmt.form.name_label')}</h2>
+        <h2 style={{ marginBottom: 2 }}>{form.name || t('Category Name')}</h2>
         <div className="bank-card">
           <span
             style={{
@@ -418,7 +418,7 @@ const CategoryManagement: React.FC = () => {
               padding: '1px 7px', borderRadius: 20,
             }}
           >
-            {form.type === 'income' ? t('category_mgmt.badge.income') : t('category_mgmt.badge.expense')}
+            {form.type === 'income' ? t('↑ Income') : t('↓ Expense')}
           </span>
         </div>
       </div>
@@ -440,9 +440,9 @@ const CategoryManagement: React.FC = () => {
   // ─────────────────────────────────────────────────────────────────────────────
 
   const headerTitle: Record<PageView, string> = {
-    list: t('category_mgmt.title'),
-    add:  t('category_mgmt.new_category'),
-    edit: t('category_mgmt.edit_category'),
+    list: t('Categories'),
+    add:  t('New Category'),
+    edit: t('Edit Category'),
   };
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -466,16 +466,16 @@ const CategoryManagement: React.FC = () => {
           >
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ color: '#991B1B', fontWeight: 600, marginBottom: 2, fontSize: 14 }}>
-                {t('category_mgmt.delete_confirm').replace('{{name}}', cat.name)}
+                {t('Delete "{{name}}"?', { name: cat.name })}
               </p>
               {cat.children?.length ? (
                 <p style={{ color: '#B91C1C', fontSize: 12, marginBottom: 0 }}>
                   {cat.children.length === 1
-                    ? t('category_mgmt.delete_warn_one')
-                    : t('category_mgmt.delete_warn_many').replace('{{count}}', String(cat.children.length))}
+                    ? t('⚠️ Also removes 1 sub-category.')
+                    : t('⚠️ Also removes {{count}} sub-categories.', { count: cat.children.length })}
                 </p>
               ) : (
-                <p style={{ color: '#B91C1C', fontSize: 12, marginBottom: 0 }}>{t('category_mgmt.delete_undone')}</p>
+                <p style={{ color: '#B91C1C', fontSize: 12, marginBottom: 0 }}>{t('This cannot be undone.')}</p>
               )}
               {deleteError && (
                 <p style={{ color: '#EF4444', fontSize: 12, marginTop: 4, marginBottom: 0 }}>{deleteError}</p>
@@ -492,7 +492,7 @@ const CategoryManagement: React.FC = () => {
                   background: '#fff', color: '#374151', cursor: 'pointer',
                 }}
               >
-                {t('category_mgmt.btn.cancel')}
+                {t('Cancel')}
               </button>
               <button
                 type="button"
@@ -505,7 +505,7 @@ const CategoryManagement: React.FC = () => {
                   opacity: deleting ? 0.6 : 1,
                 }}
               >
-                {deleting ? t('category_mgmt.btn.deleting') : t('category_mgmt.btn.delete')}
+                {deleting ? t('Deleting…') : t('Delete')}
               </button>
             </div>
           </div>
@@ -548,7 +548,7 @@ const CategoryManagement: React.FC = () => {
                   padding: '1px 7px', borderRadius: 20,
                 }}
               >
-                {cat.type === 'income' ? t('category_mgmt.badge.income') : t('category_mgmt.badge.expense')}
+                {cat.type === 'income' ? t('↑ Income') : t('↓ Expense')}
               </span>
               {cat.is_system && (
                 <span
@@ -561,12 +561,12 @@ const CategoryManagement: React.FC = () => {
                     userSelect: 'none',
                   }}
                 >
-                  {t('category_mgmt.badge.system')}
+                  {t('🔒 System')}
                 </span>
               )}
               {!isChild && cat.children?.length ? (
                 <span style={{ fontSize: 11, color: 'var(--sub-text-color)' }}>
-                  {t('category_mgmt.children_count').replace('{{count}}', String(cat.children.length))}
+                  {t('{{count}} sub', { count: cat.children.length })}
                 </span>
               ) : null}
             </div>
@@ -588,7 +588,7 @@ const CategoryManagement: React.FC = () => {
                   transform: collapsed.has(cat.id) ? 'rotate(-90deg)' : 'rotate(0deg)',
                   transition: 'transform 0.2s', lineHeight: 1,
                 }}
-                aria-label={collapsed.has(cat.id) ? t('category_mgmt.btn.expand') : t('category_mgmt.btn.collapse')}
+                aria-label={collapsed.has(cat.id) ? t('Expand') : t('Collapse')}
               >
                 ▾
               </button>
@@ -600,7 +600,7 @@ const CategoryManagement: React.FC = () => {
                 <button
                   className="btn btn-link p-0"
                   onClick={() => openEdit(cat)}
-                  title={t('category_mgmt.btn.edit_title')}
+                  title={t('Edit category')}
                   style={{ lineHeight: 1 }}
                 >
                   <img src={purpleEditIcon} alt="edit" style={{ width: 18, height: 18 }} />
@@ -608,7 +608,7 @@ const CategoryManagement: React.FC = () => {
                 <button
                   className="btn btn-link p-0"
                   onClick={() => { setConfirmDeleteId(cat.id); setDeleteError(''); }}
-                  title={t('category_mgmt.btn.delete_title')}
+                  title={t('Delete category')}
                   style={{ lineHeight: 1 }}
                 >
                   <span style={{ color: '#EF4444', fontSize: 16 }}>✕</span>
@@ -649,7 +649,7 @@ const CategoryManagement: React.FC = () => {
         {/* Name */}
         <div className="personal-name mt-0 mb-3">
           <label htmlFor="cat-name" style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
-            {t('category_mgmt.form.name_label')} <span style={{ color: '#EF4444' }}>*</span>
+            {t('Category Name')} <span style={{ color: '#EF4444' }}>*</span>
           </label>
           <input
             id="cat-name"
@@ -657,7 +657,7 @@ const CategoryManagement: React.FC = () => {
             className={`px-0${formErrors.name ? ' is-invalid' : ''}`}
             value={form.name}
             onChange={(e) => updateForm({ name: e.target.value })}
-            placeholder={t('category_mgmt.form.name_placeholder')}
+            placeholder={t('e.g. Coffee & Tea')}
             maxLength={255}
           />
           {fieldError('name')}
@@ -666,7 +666,7 @@ const CategoryManagement: React.FC = () => {
         {/* Type */}
         <div className="personal-name mb-3">
           <label style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
-            {t('category_mgmt.form.type_label')} <span style={{ color: '#EF4444' }}>*</span>
+            {t('Type')} <span style={{ color: '#EF4444' }}>*</span>
           </label>
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
             {(['expense', 'income'] as const).map((typ) => (
@@ -689,7 +689,7 @@ const CategoryManagement: React.FC = () => {
                   cursor: 'pointer',
                 }}
               >
-                {typ === 'income' ? t('category_mgmt.badge.income') : t('category_mgmt.badge.expense')}
+                {typ === 'income' ? t('↑ Income') : t('↓ Expense')}
               </button>
             ))}
           </div>
@@ -699,8 +699,8 @@ const CategoryManagement: React.FC = () => {
         {/* Parent */}
         <div className="personal-name mb-3">
           <label htmlFor="cat-parent" style={{ color: 'var(--sub-text-color)', fontSize: 13 }}>
-            {t('category_mgmt.form.parent_label')}
-            <span style={{ color: 'var(--sub-text-color)', fontWeight: 400, fontSize: 12 }}> {t('category_mgmt.form.optional')}</span>
+            {t('Parent Category')}
+            <span style={{ color: 'var(--sub-text-color)', fontWeight: 400, fontSize: 12 }}> {t('(optional)')}</span>
           </label>
           <select
             id="cat-parent"
@@ -713,7 +713,7 @@ const CategoryManagement: React.FC = () => {
               width: '100%', fontSize: 14, paddingBottom: 4,
             }}
           >
-            <option value="">{t('category_mgmt.form.no_parent')}</option>
+            <option value="">{t('— No parent (top-level) —')}</option>
             {topLevelOptions
               .filter((c) => c.id !== editingId)
               .map((c) => (
@@ -738,8 +738,8 @@ const CategoryManagement: React.FC = () => {
             disabled={saving || (!!form.customColor && !isValidHex(form.customColor))}
           >
             {saving
-              ? (isEdit ? t('category_mgmt.form.btn_saving') : t('category_mgmt.form.btn_creating'))
-              : (isEdit ? t('category_mgmt.form.btn_save') : t('category_mgmt.form.btn_create'))}
+              ? (isEdit ? t('Saving…') : t('Creating…'))
+              : (isEdit ? t('Save Changes') : t('Create Category'))}
           </button>
         </div>
         <div style={{ textAlign: 'center', marginTop: 14 }}>
@@ -753,7 +753,7 @@ const CategoryManagement: React.FC = () => {
               cursor: 'pointer', padding: '8px 0',
             }}
           >
-            {t('category_mgmt.btn.cancel')}
+            {t('Cancel')}
           </button>
         </div>
       </form>
@@ -805,7 +805,7 @@ const CategoryManagement: React.FC = () => {
                         type="search"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder={t('category_mgmt.search_placeholder')}
+                        placeholder={t('Search categories…')}
                         className="form-control search-text"
                       />
                     </div>
@@ -817,7 +817,7 @@ const CategoryManagement: React.FC = () => {
                         aria-expanded="false"
                         style={{ color: 'rgba(255,255,255,0.64)', fontSize: 12 }}
                       >
-                        {t('category_mgmt.sort')}
+                        {t('Sort')}
                       </button>
                       <ul className="dropdown-menu dropdown-menu-end">
                         {SORT_OPTIONS.map((opt) => (
@@ -826,7 +826,7 @@ const CategoryManagement: React.FC = () => {
                               className={`dropdown-item${sortKey === opt.value ? ' active' : ''}`}
                               onClick={() => setSortKey(opt.value)}
                             >
-                              {t(opt.labelKey)}
+                              {t(opt.label)}
                             </button>
                           </li>
                         ))}
@@ -884,7 +884,7 @@ const CategoryManagement: React.FC = () => {
                             cursor: 'pointer',
                           }}
                         >
-                          {typ === 'all' ? t('category_mgmt.filter.all') : typ === 'income' ? t('category_mgmt.badge.income') : t('category_mgmt.badge.expense')}
+                          {typ === 'all' ? t('All') : typ === 'income' ? t('↑ Income') : t('↓ Expense')}
                         </button>
                       ))}
                     </div>
@@ -893,10 +893,10 @@ const CategoryManagement: React.FC = () => {
                     {!loading && !errorMsg && (
                       <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto' }}>
                         {[
-                          { label: t('category_mgmt.stats.total'),   count: flat.length,                            color: '#6C3DE6' },
-                          { label: t('category_mgmt.stats.expense'), count: flat.filter((c) => c.type === 'expense').length, color: '#F97316' },
-                          { label: t('category_mgmt.stats.income'),  count: flat.filter((c) => c.type === 'income').length,  color: '#4ADE80' },
-                          { label: t('category_mgmt.stats.custom'),  count: flat.filter((c) => !c.is_system).length,         color: '#06B6D4' },
+                          { label: t('Total'),   count: flat.length,                            color: '#6C3DE6' },
+                          { label: t('Expense'), count: flat.filter((c) => c.type === 'expense').length, color: '#F97316' },
+                          { label: t('Income'),  count: flat.filter((c) => c.type === 'income').length,  color: '#4ADE80' },
+                          { label: t('Custom'),  count: flat.filter((c) => !c.is_system).length,         color: '#06B6D4' },
                         ].map((s) => (
                           <div key={s.label} style={{
                             flexShrink: 0, minWidth: 64,
@@ -919,10 +919,10 @@ const CategoryManagement: React.FC = () => {
                           role="status"
                           style={{ color: 'var(--primary-color, #6C3DE6)', width: 40, height: 40 }}
                         >
-                          <span className="visually-hidden">{t('category_mgmt.loading_spinner')}</span>
+                          <span className="visually-hidden">{t('Loading…')}</span>
                         </div>
                         <p style={{ color: 'var(--sub-text-color)', marginTop: 12, fontSize: 14 }}>
-                          {t('category_mgmt.loading')}
+                          {t('Loading categories…')}
                         </p>
                       </div>
                     )}
@@ -936,7 +936,7 @@ const CategoryManagement: React.FC = () => {
                             href="#"
                             onClick={(e) => { e.preventDefault(); void fetchCategories(); }}
                           >
-                            {t('category_mgmt.try_again')}
+                            {t('Try Again')}
                           </a>
                         </div>
                       </div>
@@ -947,7 +947,7 @@ const CategoryManagement: React.FC = () => {
                       <div className="text-center py-5">
                         <p style={{ fontSize: 40, marginBottom: 8 }}>🗂️</p>
                         <p style={{ color: 'var(--text-color)', fontSize: 16, fontWeight: 700, marginBottom: 4 }}>
-                          {search || typeFilter !== 'all' ? t('category_mgmt.empty.no_match') : t('category_mgmt.empty.no_categories')}
+                          {search || typeFilter !== 'all' ? t('No categories match your filter.') : t('No categories yet.')}
                         </p>
                         {search && (
                           <button
@@ -955,7 +955,7 @@ const CategoryManagement: React.FC = () => {
                             style={{ fontSize: 14 }}
                             onClick={() => setSearch('')}
                           >
-                            {t('category_mgmt.clear_search')}
+                            {t('Clear search')}
                           </button>
                         )}
                       </div>
@@ -976,7 +976,7 @@ const CategoryManagement: React.FC = () => {
                           onClick={(e) => { e.preventDefault(); openAdd(); }}
                         >
                           <span><img src={faqPlus} alt="plus-icon" /></span>
-                          {t('category_mgmt.add_custom')}
+                          {t('Add Custom Category')}
                         </a>
                       </div>
                     )}

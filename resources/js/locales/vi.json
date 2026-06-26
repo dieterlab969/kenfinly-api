@@ -319,5 +319,16 @@
   "Kenfinly will continue to keep your data so that you can recover it when you reactivate your account.": "Kenfinly sẽ tiếp tục lưu giữ dữ liệu của bạn để bạn có thể khôi phục khi kích hoạt lại tài khoản.",
   "You can reactivate your account and recover all content anytime by using the same login details.": "Bạn có thể kích hoạt lại tài khoản và khôi phục toàn bộ nội dung bất cứ lúc nào bằng cùng thông tin đăng nhập.",
   "Deactivate": "Vô hiệu hóa",
-  "Deactivate this account?": "Vô hiệu hóa tài khoản này?"
+  "Deactivate this account?": "Vô hiệu hóa tài khoản này?",
+
+  "Delete \"{{name}}\"?": "Xóa \"{{name}}\"?",
+  "\"{{name}}\" created successfully.": "\"{{name}}\" đã được tạo thành công.",
+  "\"{{name}}\" updated successfully.": "\"{{name}}\" đã được cập nhật thành công.",
+  "Category deleted successfully.": "Danh mục đã được xóa thành công.",
+  "You cannot edit a system category.": "Bạn không thể chỉnh sửa danh mục hệ thống.",
+  "Something went wrong. Please try again.": "Đã có lỗi xảy ra. Vui lòng thử lại.",
+  "Could not delete this category.": "Không thể xóa danh mục này.",
+  "#RRGGBB — custom hex": "#RRGGBB — mã màu hex tùy chỉnh",
+  "Must be a valid hex colour (e.g. #FF6B35)": "Phải là mã màu hex hợp lệ (VD: #FF6B35)",
+  "{{count}} sub": "{{count}} con"
 }
