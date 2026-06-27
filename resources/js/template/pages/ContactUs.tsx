@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import BackBtn from '../components/BackBtn.tsx';
 import ContactUsImg from '../assets/images/main-img/contact-us-img.png';
 import CallIcon from '../assets/svg/call-icon.svg';
@@ -149,6 +150,8 @@ const SocialItem: React.FC<SocialItemProps> = ({ href, bgClass, label, icon }) =
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const ContactUs: React.FC = () => {
+    const { t } = useTranslation();
+
     useEffect(() => {
         document.body.classList.add('contact-us-page');
         return () => document.body.classList.remove('contact-us-page');
@@ -169,7 +172,7 @@ const ContactUs: React.FC = () => {
                                     <BackBtn />
                                 </div>
                                 <div className="header-title">
-                                    <p>Contact Us</p>
+                                    <p>{t('Contact Us')}</p>
                                 </div>
                             </div>
                         </div>
@@ -187,10 +190,9 @@ const ContactUs: React.FC = () => {
 
                                 {/* Intro */}
                                 <div className="verify-txt mt-24">
-                                    <h1>Get In Touch</h1>
+                                    <h1>{t('Get In Touch')}</h1>
                                     <p className="mt-12">
-                                        Have a question or need support? We're happy to help.
-                                        Reach out through any channel below.
+                                        {t("Have a question or need support? We're happy to help. Reach out through any channel below.")}
                                     </p>
                                 </div>
 
@@ -199,7 +201,7 @@ const ContactUs: React.FC = () => {
 
                                     {/* Email — primary channel */}
                                     <div className="mt-24">
-                                        <span className="cu-primary-badge">✉ Primary Channel</span>
+                                        <span className="cu-primary-badge">{t('✉ Primary Channel')}</span>
                                         <ContactItem
                                             href="mailto:purchasevn@getkenka.com"
                                             icon={MailIcon}
@@ -232,30 +234,30 @@ const ContactUs: React.FC = () => {
                                 <hr className="cu-divider" />
 
                                 <div className="about-us-social-media mt-16">
-                                    <h2 className="cu-section-heading">Follow &amp; Connect</h2>
+                                    <h2 className="cu-section-heading">{t('Follow & Connect')}</h2>
                                     <div className="about-us-icon-wrapper mt-12">
                                         <SocialItem
                                             href="https://www.linkedin.com/in/dieter-entrepreneur/"
                                             bgClass="linkedin-bg"
-                                            label="LinkedIn"
+                                            label={t('LinkedIn')}
                                             icon={<LinkedInSVG />}
                                         />
                                         <SocialItem
                                             href="https://www.facebook.com/profile.php?id=61573603022542"
                                             bgClass="facebook-bg"
-                                            label="Fanpage"
+                                            label={t('Fanpage')}
                                             icon={<img src={FacebookIcon} alt="facebook" />}
                                         />
                                         <SocialItem
                                             href="https://x.com/hoangpv3"
                                             bgClass="x-bg"
-                                            label="X"
+                                            label={t('X')}
                                             icon={<XSocialSVG />}
                                         />
                                         <SocialItem
                                             href="https://www.youtube.com/@DieterLab"
                                             bgClass="youtube-bg"
-                                            label="YouTube"
+                                            label={t('YouTube')}
                                             icon={<img src={YoutubeIcon} alt="youtube" />}
                                         />
                                     </div>
