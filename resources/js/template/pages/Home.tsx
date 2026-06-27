@@ -11,6 +11,7 @@ import Setting from '../components/Setting.tsx'
 import api from '../../utils/api'
 import { formatCurrency, getCategoryIcon } from '../../constants/categories'
 import EditTransactionModal from '../../components/EditTransactionModal'
+import TransferMoneyModal from '../../components/TransferMoneyModal'
 import { processImageForUpload, validateImageFile, formatFileSize } from '../../utils/imageCompression'
 import { useTranslation } from 'react-i18next'
 import Offcanvas from 'react-bootstrap/Offcanvas'
@@ -654,6 +655,7 @@ const Home: React.FC = () => {
   const [formError, setFormError] = useState('')
   const [selectedTransactionId, setSelectedTransactionId] = useState<number | null>(null)
   const [showEditModal, setShowEditModal] = useState<boolean>(false)
+  const [showTransferModal, setShowTransferModal] = useState(false)
   const [receipt, setReceipt] = useState<File | null>(null)
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null)
   const [compressionStatus, setCompressionStatus] = useState<string>('')
@@ -1139,6 +1141,21 @@ const Home: React.FC = () => {
               </button>
               <span style={{ fontSize: '10px', color: '#fff', fontWeight: 600, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>{t('Expense')}</span>
             </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+              <button
+                onClick={() => { setFabOpen(false); setShowTransferModal(true) }}
+                style={{
+                  width: '60px', height: '60px', borderRadius: '50%',
+                  background: 'linear-gradient(145deg, #3b82f6, #1d4ed8)',
+                  border: 'none', color: '#fff', cursor: 'pointer',
+                  boxShadow: '0 8px 28px rgba(59,130,246,0.5)',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1px',
+                }}
+              >
+                <span style={{ fontSize: '18px', lineHeight: 1 }}>⇄</span>
+              </button>
+              <span style={{ fontSize: '10px', color: '#fff', fontWeight: 600, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>{t('Transfer')}</span>
+            </div>
           </div>
         )}
 
@@ -1467,6 +1484,12 @@ const Home: React.FC = () => {
         }}
         transactionId={selectedTransactionId}
         onUpdate={() => fetchDashboardData(false)}
+      />
+
+      <TransferMoneyModal
+        isOpen={showTransferModal}
+        onClose={() => setShowTransferModal(false)}
+        onSuccess={() => fetchDashboardData(false)}
       />
 
       <style>{`
