@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { ArrowLeftRight, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
-import { useTranslation } from '../contexts/TranslationContext'
+import { useTranslation } from 'react-i18next'
 import api from '../utils/api'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -88,6 +88,16 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
         ? (typeof fromAccount.balance === 'string' ? parseFloat(fromAccount.balance) : fromAccount.balance)
         : null
 
+    // Only accounts that share the same currency as the selected source account
+    const compatibleToAccounts = fromAccount
+        ? accounts.filter(a => a.currency === fromAccount.currency && String(a.id) !== fromAccountId)
+        : accounts.filter(a => String(a.id) !== fromAccountId)
+
+    const differentCurrency =
+        fromAccount !== null &&
+        toAccount   !== null &&
+        fromAccount.currency !== toAccount.currency
+
     const amountNum      = parseFloat(amount) || 0
     const isInsufficient = fromBalance !== null && amountNum > 0 && amountNum > fromBalance
     const sameWallet     = fromAccountId !== '' && fromAccountId === toAccountId
@@ -95,6 +105,7 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
         fromAccountId !== '' &&
         toAccountId   !== '' &&
         !sameWallet &&
+        !differentCurrency &&
         amountNum > 0 &&
         !isInsufficient &&
         !loading &&
@@ -108,8 +119,13 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
             const res = await api.get('/accounts')
             const list: Account[] = res.data.accounts ?? []
             setAccounts(list)
-            if (list.length >= 1) setFromAccountId(String(list[0].id))
-            if (list.length >= 2) setToAccountId(String(list[1].id))
+            if (list.length >= 1) {
+                const first = list[0]
+                setFromAccountId(String(first.id))
+                // Pre-select the first compatible (same-currency) destination
+                const compatible = list.filter(a => a.currency === first.currency && a.id !== first.id)
+                if (compatible.length >= 1) setToAccountId(String(compatible[0].id))
+            }
         } catch {
             setError(t('Failed to load wallets. Please close and try again.') as string)
         } finally {
@@ -129,6 +145,15 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
         setSuccessData(null)
         fetchAccounts()
     }, [isOpen, fetchAccounts])
+
+    // When "from" wallet changes, clear "to" if it no longer has the same currency
+    useEffect(() => {
+        if (!fromAccount || !toAccount) return
+        if (fromAccount.currency !== toAccount.currency) {
+            setToAccountId('')
+            setAmountError('')
+        }
+    }, [fromAccountId]) // eslint-disable-line react-hooks/exhaustive-deps
 
     // Auto-close after success
     useEffect(() => {
@@ -157,6 +182,10 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
 
         if (sameWallet) {
             setError(t('Destination wallet must be different from the source wallet.') as string)
+            return
+        }
+        if (differentCurrency) {
+            setError(t('Both wallets must use the same currency.') as string)
             return
         }
         if (amountNum <= 0) {
@@ -401,6 +430,22 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
                             </div>
                         )}
 
+                        {/* No compatible (same-currency) destination wallets */}
+                        {!fetchingAccounts && accounts.length >= 2 && fromAccount && compatibleToAccounts.length === 0 && (
+                            <div style={{
+                                display: 'flex', alignItems: 'flex-start', gap: '8px',
+                                background: '#fffbeb', border: '1px solid #fde68a',
+                                borderRadius: '12px', padding: '10px 12px',
+                                fontSize: '13px', color: '#92400e', fontWeight: 500,
+                                marginBottom: '16px',
+                            }}>
+                                <AlertCircle style={{ width: '15px', height: '15px', flexShrink: 0, marginTop: '1px' }} />
+                                <span>
+                                    {t('No other wallet with the same currency ({{currency}}) found. Transfers are only allowed between wallets with the same currency.', { currency: fromAccount.currency }) as string}
+                                </span>
+                            </div>
+                        )}
+
                         {!fetchingAccounts && accounts.length >= 2 && (
                             <>
                                 {/* From Wallet */}
@@ -467,21 +512,23 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
                                             required
                                             value={toAccountId}
                                             onChange={e => { setToAccountId(e.target.value); setAmountError('') }}
+                                            disabled={compatibleToAccounts.length === 0}
                                             style={{
                                                 ...MS.inputBase, appearance: 'none', paddingRight: '36px',
                                                 borderColor: sameWallet ? '#fca5a5' : '#e5e7eb',
-                                                background: sameWallet ? '#fef2f2' : '#fff',
+                                                background: compatibleToAccounts.length === 0 ? '#f9fafb' : sameWallet ? '#fef2f2' : '#fff',
+                                                color: compatibleToAccounts.length === 0 ? '#9ca3af' : '#121212',
+                                                cursor: compatibleToAccounts.length === 0 ? 'not-allowed' : 'pointer',
                                             }}
                                         >
-                                            <option value="">{t('Select wallet…') as string}</option>
-                                            {accounts.map(a => (
-                                                <option
-                                                    key={a.id}
-                                                    value={String(a.id)}
-                                                    disabled={String(a.id) === fromAccountId}
-                                                >
+                                            <option value="">
+                                                {compatibleToAccounts.length === 0
+                                                    ? t('No compatible wallet available') as string
+                                                    : t('Select wallet…') as string}
+                                            </option>
+                                            {compatibleToAccounts.map(a => (
+                                                <option key={a.id} value={String(a.id)}>
                                                     {a.name} — {formatBalance(a.balance, a.currency)}
-                                                    {String(a.id) === fromAccountId ? ` ${t('(source)') as string}` : ''}
                                                 </option>
                                             ))}
                                         </select>
@@ -496,7 +543,7 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
                                             {t('Destination wallet must be different from the source wallet.') as string}
                                         </p>
                                     )}
-                                    {toAccount && !sameWallet && (
+                                    {toAccount && !sameWallet && !differentCurrency && (
                                         <p style={{ marginTop: '6px', fontSize: '12px', color: '#6b7280' }}>
                                             {t('Current balance') as string}:{' '}
                                             <span style={{ fontWeight: 700, color: '#374151' }}>
