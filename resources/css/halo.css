@@ -536,6 +536,11 @@
   color: #fff;
 }
 
+.fab-picker-option--transfer {
+  background: #3b82f6;
+  color: #fff;
+}
+
 .fab-picker-option__icon {
   font-size: 18px;
 }

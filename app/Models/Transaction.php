@@ -30,6 +30,7 @@ class Transaction extends Model
         'source_type',
         'source_id',
         'idempotency_key',
+        'transfer_pair_id',
     ];
 
     /**
@@ -65,6 +66,24 @@ class Transaction extends Model
     public function isImmutable(): bool
     {
         return $this->ledger_type === 'halo' || $this->source_type !== 'manual';
+    }
+
+    /**
+     * Returns whether this transaction is one side of a wallet transfer.
+     * Both the debit and the credit record have a non-null transfer_pair_id.
+     */
+    public function isTransfer(): bool
+    {
+        return $this->transfer_pair_id !== null;
+    }
+
+    /**
+     * The paired counterpart transaction for a wallet transfer.
+     * Debit side → credit side, and vice-versa.
+     */
+    public function transferPair(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Transaction::class, 'transfer_pair_id');
     }
 
     /**

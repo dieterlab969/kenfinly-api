@@ -138,6 +138,7 @@ import DeleteAccount from './pages/DeleteAccount';
 import DeleteDeactivateAccount from './pages/DeleteDeactivateAccount';
 import InviteFriend from './pages/InviteFriend';
 import PersonalInfo from './pages/PersonalInfo';
+import HaloDashboard from '../pages/halo/HaloDashboard';
 
 function App(): ReactElement {
   return (
@@ -274,6 +275,9 @@ function App(): ReactElement {
           <Route path="/DeleteAccount" element={<DeleteAccount />} />
           <Route path="/InviteFriend" element={<InviteFriend />} />
           <Route path="/PersonalInfo" element={<PersonalInfo />} />
+          {/* Halo Dashboard — migrated to TSX, wired into the active entry point */}
+          <Route path="/halo" element={<HaloDashboard />} />
+          <Route path="/halo/*" element={<HaloDashboard />} />
         </Routes>
       </BrowserRouter>
     </CurrencyProvider>

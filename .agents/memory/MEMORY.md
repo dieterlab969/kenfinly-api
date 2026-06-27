@@ -5,3 +5,5 @@
 - [reCAPTCHA setup](recaptcha-setup.md) — env var names, provider location, and how to enable the setting
 - [LanguageController null-guard](language-controller-null.md) — getTranslations() must guard against null language before accessing id
 - [Design DNA fonts](design-dna-fonts.md) — Satoshi for UI/body, Poppins only for large display numbers (balance, hero headings)
+- [Halo pages TSX migration](halo-tsx-migration.md) — HaloLayout/HaloDashboard migrated .jsx→.tsx; wired into template/App.tsx at /halo and /halo/*
+- [Transfer source_type strategy](transfer-source-type.md) — use source_type='adjustment' for wallet transfers (avoids PostgreSQL enum ALTER); transfer_pair_id cross-links the two records

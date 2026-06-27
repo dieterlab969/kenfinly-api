@@ -107,6 +107,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/v1/user/deactivate', [\App\Http\Controllers\Api\UserAccountController::class, 'deactivate']);
     Route::delete('/v1/user/account',  [\App\Http\Controllers\Api\UserAccountController::class, 'scheduleDelete']);
 
+    // Wallet-to-wallet transfer (ACID — both records + both balances in one DB transaction)
+    Route::post('/v1/accounts/transfer', [\App\Http\Controllers\Api\TransferController::class, 'transfer']);
+
     Route::middleware('halo.integrity')->group(function () {
         Route::get('/auth/me', [AuthController::class, 'me']);
 
