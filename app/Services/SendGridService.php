@@ -117,6 +117,48 @@ class SendGridService
     }
 
     /**
+     * Send a subscription renewal reminder email.
+     *
+     * @param string             $to
+     * @param string             $name
+     * @param string             $serviceName
+     * @param float              $amount
+     * @param string             $currency
+     * @param string             $billingCycle
+     * @param \Carbon\Carbon     $nextBillingDate
+     * @param int                $remindBeforeDays
+     * @return void
+     * @throws \Exception
+     */
+    public function sendSubscriptionReminderEmail(
+        string $to,
+        string $name,
+        string $serviceName,
+        float  $amount,
+        string $currency,
+        string $billingCycle,
+        \Carbon\Carbon $nextBillingDate,
+        int    $remindBeforeDays,
+    ): void {
+        $daysLabel = $remindBeforeDays === 1 ? '1 day' : "{$remindBeforeDays} days";
+        $subject   = "Reminder: {$serviceName} renews in {$daysLabel}";
+
+        $htmlContent = View::make('emails.subscription-reminder', [
+            'name'             => $name,
+            'serviceName'      => $serviceName,
+            'amount'           => $amount,
+            'currency'         => $currency,
+            'billingCycle'     => $billingCycle,
+            'nextBillingDate'  => $nextBillingDate,
+            'remindBeforeDays' => $remindBeforeDays,
+            'appName'          => config('app.name', 'Kenfinly'),
+            'appUrl'           => env('FRONTEND_URL', env('APP_URL', 'https://kenfinly.com')),
+        ]);
+
+        $this->sendEmail($to, $subject, $htmlContent);
+    }
+
+    /**
      * @param string $to
      * @param string $subject
      * @param string $htmlContent
