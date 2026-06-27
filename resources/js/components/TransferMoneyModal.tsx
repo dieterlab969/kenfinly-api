@@ -1,446 +1,639 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { X, ArrowLeftRight, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
+import { ArrowLeftRight, AlertCircle, CheckCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api from '../utils/api'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Account {
-  id: number
-  name: string
-  balance: string | number
-  currency: string
-  icon?: string
-  color?: string
+    id: number
+    name: string
+    balance: string | number
+    currency: string
+    icon?: string
+    color?: string
 }
 
 interface TransferSuccessData {
-  amount: number
-  from_account: { id: number; name: string; balance: number }
-  to_account: { id: number; name: string; balance: number }
+    amount: number
+    from_account: { id: number; name: string; balance: number }
+    to_account:   { id: number; name: string; balance: number }
 }
 
 interface TransferMoneyModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSuccess: () => void
+    isOpen:    boolean
+    onClose:   () => void
+    onSuccess: () => void
 }
+
+// ─── Design tokens (mirrors EditTransactionModal's MS object) ─────────────────
+
+const MS = {
+    fieldWrap: { marginBottom: '16px' } as React.CSSProperties,
+    fieldLabel: {
+        fontSize: '13px', color: '#6b7280', display: 'block',
+        marginBottom: '8px', fontWeight: 600,
+    } as React.CSSProperties,
+    inputBase: {
+        width: '100%',
+        border: '1.5px solid #e5e7eb',
+        borderRadius: '14px',
+        padding: '13px 16px',
+        fontSize: '14px',
+        color: '#121212',
+        outline: 'none',
+        background: '#fff',
+        fontFamily: 'inherit',
+        boxSizing: 'border-box' as const,
+    } as React.CSSProperties,
+} as const
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const formatBalance = (balance: string | number, currency: string): string => {
-  const num = typeof balance === 'string' ? parseFloat(balance) : balance
-  if (isNaN(num)) return `0 ${currency}`
-  return `${num.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${currency}`
+    const num = typeof balance === 'string' ? parseFloat(balance) : balance
+    if (isNaN(num)) return `0 ${currency}`
+    return `${num.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${currency}`
 }
 
 const isAxiosError = (
-  err: unknown,
+    err: unknown,
 ): err is { response: { status: number; data: { message?: string; errors?: Record<string, string[]> } } } =>
-  typeof err === 'object' &&
-  err !== null &&
-  'response' in err &&
-  typeof (err as { response: unknown }).response === 'object'
+    typeof err === 'object' &&
+    err !== null &&
+    'response' in err &&
+    typeof (err as { response: unknown }).response === 'object'
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose, onSuccess }) => {
-  const { t } = useTranslation()
+    const { t } = useTranslation()
+    const formRef = useRef<HTMLFormElement>(null)
 
-  const [accounts,         setAccounts]         = useState<Account[]>([])
-  const [fromAccountId,    setFromAccountId]    = useState<string>('')
-  const [toAccountId,      setToAccountId]      = useState<string>('')
-  const [amount,           setAmount]           = useState<string>('')
-  const [notes,            setNotes]            = useState<string>('')
-  const [loading,          setLoading]          = useState(false)
-  const [fetchingAccounts, setFetchingAccounts] = useState(false)
-  const [error,            setError]            = useState<string>('')
-  const [amountError,      setAmountError]      = useState<string>('')
-  const [successData,      setSuccessData]      = useState<TransferSuccessData | null>(null)
+    const [accounts,         setAccounts]         = useState<Account[]>([])
+    const [fromAccountId,    setFromAccountId]    = useState<string>('')
+    const [toAccountId,      setToAccountId]      = useState<string>('')
+    const [amount,           setAmount]           = useState<string>('')
+    const [notes,            setNotes]            = useState<string>('')
+    const [loading,          setLoading]          = useState(false)
+    const [fetchingAccounts, setFetchingAccounts] = useState(false)
+    const [error,            setError]            = useState<string>('')
+    const [amountError,      setAmountError]      = useState<string>('')
+    const [successData,      setSuccessData]      = useState<TransferSuccessData | null>(null)
 
-  const fromAccount = accounts.find(a => String(a.id) === fromAccountId) ?? null
-  const toAccount   = accounts.find(a => String(a.id) === toAccountId)   ?? null
+    const fromAccount = accounts.find(a => String(a.id) === fromAccountId) ?? null
+    const toAccount   = accounts.find(a => String(a.id) === toAccountId)   ?? null
 
-  const fromBalance = fromAccount
-    ? (typeof fromAccount.balance === 'string' ? parseFloat(fromAccount.balance) : fromAccount.balance)
-    : null
+    const fromBalance = fromAccount
+        ? (typeof fromAccount.balance === 'string' ? parseFloat(fromAccount.balance) : fromAccount.balance)
+        : null
 
-  const amountNum      = parseFloat(amount) || 0
-  const isInsufficient = fromBalance !== null && amountNum > 0 && amountNum > fromBalance
-  const sameWallet     = fromAccountId !== '' && fromAccountId === toAccountId
-  const canSubmit      =
-    fromAccountId !== '' &&
-    toAccountId   !== '' &&
-    !sameWallet &&
-    amountNum > 0 &&
-    !isInsufficient &&
-    !loading &&
-    !successData
+    // Only accounts that share the same currency as the selected source account
+    const compatibleToAccounts = fromAccount
+        ? accounts.filter(a => a.currency === fromAccount.currency && String(a.id) !== fromAccountId)
+        : accounts.filter(a => String(a.id) !== fromAccountId)
 
-  // ── Fetch accounts ─────────────────────────────────────────────────────────
+    const differentCurrency =
+        fromAccount !== null &&
+        toAccount   !== null &&
+        fromAccount.currency !== toAccount.currency
 
-  const fetchAccounts = useCallback(async () => {
-    setFetchingAccounts(true)
-    try {
-      const res = await api.get('/accounts')
-      const list: Account[] = res.data.accounts ?? []
-      setAccounts(list)
-      if (list.length >= 1) setFromAccountId(String(list[0].id))
-      if (list.length >= 2) setToAccountId(String(list[1].id))
-    } catch {
-      setError(t('Failed to load wallets. Please close and try again.'))
-    } finally {
-      setFetchingAccounts(false)
-    }
-  }, [t])
+    const amountNum      = parseFloat(amount) || 0
+    const isInsufficient = fromBalance !== null && amountNum > 0 && amountNum > fromBalance
+    const sameWallet     = fromAccountId !== '' && fromAccountId === toAccountId
+    const canSubmit      =
+        fromAccountId !== '' &&
+        toAccountId   !== '' &&
+        !sameWallet &&
+        !differentCurrency &&
+        amountNum > 0 &&
+        !isInsufficient &&
+        !loading &&
+        !successData
 
-  // Reset and fetch on open
-  useEffect(() => {
-    if (!isOpen) return
-    setFromAccountId('')
-    setToAccountId('')
-    setAmount('')
-    setNotes('')
-    setError('')
-    setAmountError('')
-    setSuccessData(null)
-    fetchAccounts()
-  }, [isOpen, fetchAccounts])
+    // ── Fetch accounts ─────────────────────────────────────────────────────────
 
-  // Auto-close after success
-  useEffect(() => {
-    if (!successData) return
-    const id = setTimeout(() => {
-      onSuccess()
-      onClose()
-    }, 2200)
-    return () => clearTimeout(id)
-  }, [successData, onSuccess, onClose])
-
-  // ── Swap handler ───────────────────────────────────────────────────────────
-
-  const handleSwap = () => {
-    setFromAccountId(toAccountId)
-    setToAccountId(fromAccountId)
-    setAmountError('')
-  }
-
-  // ── Submit ─────────────────────────────────────────────────────────────────
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setError('')
-    setAmountError('')
-
-    if (sameWallet) {
-      setError(t('Destination wallet must be different from the source wallet.'))
-      return
-    }
-    if (amountNum <= 0) {
-      setAmountError(t('Please enter a valid amount greater than zero.'))
-      return
-    }
-    if (isInsufficient) {
-      setAmountError(t('Amount exceeds available balance in source wallet.'))
-      return
-    }
-
-    setLoading(true)
-    try {
-      const res = await api.post('/v1/accounts/transfer', {
-        from_account_id: parseInt(fromAccountId, 10),
-        to_account_id:   parseInt(toAccountId,   10),
-        amount:          amountNum,
-        notes:           notes || undefined,
-      })
-      setSuccessData(res.data.data as TransferSuccessData)
-    } catch (err: unknown) {
-      if (isAxiosError(err)) {
-        const { data } = err.response
-        if (data.errors?.amount) {
-          setAmountError(data.errors.amount[0])
-        } else {
-          setError(data.message ?? t('Transfer failed. Please try again.'))
+    const fetchAccounts = useCallback(async () => {
+        setFetchingAccounts(true)
+        try {
+            const res = await api.get('/accounts')
+            const list: Account[] = res.data.accounts ?? []
+            setAccounts(list)
+            if (list.length >= 1) {
+                const first = list[0]
+                setFromAccountId(String(first.id))
+                // Pre-select the first compatible (same-currency) destination
+                const compatible = list.filter(a => a.currency === first.currency && a.id !== first.id)
+                if (compatible.length >= 1) setToAccountId(String(compatible[0].id))
+            }
+        } catch {
+            setError(t('Failed to load wallets. Please close and try again.') as string)
+        } finally {
+            setFetchingAccounts(false)
         }
-      } else {
-        setError(t('Network error. Please check your connection and try again.'))
-      }
-    } finally {
-      setLoading(false)
+    }, [t])
+
+    // Reset and fetch on open
+    useEffect(() => {
+        if (!isOpen) return
+        setFromAccountId('')
+        setToAccountId('')
+        setAmount('')
+        setNotes('')
+        setError('')
+        setAmountError('')
+        setSuccessData(null)
+        fetchAccounts()
+    }, [isOpen, fetchAccounts])
+
+    // When "from" wallet changes, clear "to" if it no longer has the same currency
+    useEffect(() => {
+        if (!fromAccount || !toAccount) return
+        if (fromAccount.currency !== toAccount.currency) {
+            setToAccountId('')
+            setAmountError('')
+        }
+    }, [fromAccountId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Auto-close after success
+    useEffect(() => {
+        if (!successData) return
+        const id = setTimeout(() => {
+            onSuccess()
+            onClose()
+        }, 2200)
+        return () => clearTimeout(id)
+    }, [successData, onSuccess, onClose])
+
+    // ── Swap handler ───────────────────────────────────────────────────────────
+
+    const handleSwap = () => {
+        setFromAccountId(toAccountId)
+        setToAccountId(fromAccountId)
+        setAmountError('')
     }
-  }
 
-  if (!isOpen) return null
+    // ── Submit ─────────────────────────────────────────────────────────────────
 
-  const currency = fromAccount?.currency ?? toAccount?.currency ?? 'VND'
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        setError('')
+        setAmountError('')
 
-  // ── Success screen ─────────────────────────────────────────────────────────
+        if (sameWallet) {
+            setError(t('Destination wallet must be different from the source wallet.') as string)
+            return
+        }
+        if (differentCurrency) {
+            setError(t('Both wallets must use the same currency.') as string)
+            return
+        }
+        if (amountNum <= 0) {
+            setAmountError(t('Please enter a valid amount greater than zero.') as string)
+            return
+        }
+        if (isInsufficient) {
+            setAmountError(t('Amount exceeds available balance in source wallet.') as string)
+            return
+        }
 
-  if (successData) {
+        setLoading(true)
+        try {
+            const res = await api.post('/v1/accounts/transfer', {
+                from_account_id: parseInt(fromAccountId, 10),
+                to_account_id:   parseInt(toAccountId,   10),
+                amount:          amountNum,
+                notes:           notes || undefined,
+            })
+            setSuccessData(res.data.data as TransferSuccessData)
+        } catch (err: unknown) {
+            if (isAxiosError(err)) {
+                const { data } = err.response
+                if (data.errors?.amount) {
+                    setAmountError(data.errors.amount[0])
+                } else {
+                    setError(data.message ?? (t('Transfer failed. Please try again.') as string))
+                }
+            } else {
+                setError(t('Network error. Please check your connection and try again.') as string)
+            }
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleClose = () => {
+        setError('')
+        setAmountError('')
+        onClose()
+    }
+
+    if (!isOpen) return null
+
+    const currency = fromAccount?.currency ?? toAccount?.currency ?? 'VND'
+
+    // ── Render ─────────────────────────────────────────────────────────────────
+
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-8 text-center">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-gray-900 mb-2">
-            {t('Transfer Completed')}
-          </h2>
-          <p className="text-gray-600 mb-6">
-            {t('Your funds have been moved successfully.')}
-          </p>
+        <div
+            style={{
+                position: 'fixed', inset: 0, zIndex: 200,
+                background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)',
+                display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
+            }}
+            onClick={e => { if (e.currentTarget === e.target) handleClose() }}
+        >
+            <div style={{
+                background: '#fff', borderRadius: '24px 24px 0 0',
+                maxHeight: '92vh', overflowY: 'auto',
+                boxShadow: '0 -8px 48px rgba(0,0,0,0.25)',
+            }}>
 
-          <div className="bg-gray-50 rounded-lg p-4 text-left space-y-3 mb-6">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">{t('From')}</span>
-              <span className="font-medium text-gray-900">{successData.from_account.name}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">{t('To')}</span>
-              <span className="font-medium text-gray-900">{successData.to_account.name}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">{t('Amount')}</span>
-              <span className="font-bold text-blue-600">
-                {successData.amount.toLocaleString('en-US')} {currency}
-              </span>
-            </div>
-            <hr />
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">{successData.from_account.name} {t('new balance')}</span>
-              <span className="font-medium text-red-600">
-                {formatBalance(successData.from_account.balance, currency)}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">{successData.to_account.name} {t('new balance')}</span>
-              <span className="font-medium text-green-600">
-                {formatBalance(successData.to_account.balance, currency)}
-              </span>
-            </div>
-          </div>
-
-          <p className="text-xs text-gray-400">{t('Closing automatically…')}</p>
-        </div>
-      </div>
-    )
-  }
-
-  // ── Form screen ────────────────────────────────────────────────────────────
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-
-        {/* Header */}
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ArrowLeftRight className="w-5 h-5 text-blue-600" />
-            <h2 className="text-xl font-bold text-gray-900">
-              {t('Transfer Money')}
-            </h2>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-
-          {/* Global error */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span className="text-sm">{error}</span>
-            </div>
-          )}
-
-          {/* Fetching spinner */}
-          {fetchingAccounts && (
-            <div className="flex justify-center py-4">
-              <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
-            </div>
-          )}
-
-          {!fetchingAccounts && accounts.length === 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded text-sm">
-              {t('No wallets found. Please create at least two wallets to transfer between.')}
-            </div>
-          )}
-
-          {!fetchingAccounts && accounts.length === 1 && (
-            <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded text-sm">
-              {t('You need at least two wallets to make a transfer.')}
-            </div>
-          )}
-
-          {!fetchingAccounts && accounts.length >= 2 && (
-            <>
-              {/* From Wallet */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('From Wallet')} <span className="text-red-500">*</span>
-                </label>
-                <select
-                  required
-                  value={fromAccountId}
-                  onChange={e => { setFromAccountId(e.target.value); setAmountError('') }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="">{t('Select wallet…')}</option>
-                  {accounts.map(a => (
-                    <option key={a.id} value={String(a.id)}>
-                      {a.name} — {formatBalance(a.balance, a.currency)}
-                    </option>
-                  ))}
-                </select>
-                {fromAccount && (
-                  <p className="mt-1 text-xs text-gray-500">
-                    {t('Available')}: <span className="font-semibold text-gray-700">{formatBalance(fromAccount.balance, fromAccount.currency)}</span>
-                  </p>
-                )}
-              </div>
-
-              {/* Swap button */}
-              <div className="flex justify-center">
-                <button
-                  type="button"
-                  onClick={handleSwap}
-                  title={t('Swap wallets')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors font-medium"
-                >
-                  <ArrowLeftRight className="w-4 h-4" />
-                  {t('Swap')}
-                </button>
-              </div>
-
-              {/* To Wallet */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('To Wallet')} <span className="text-red-500">*</span>
-                </label>
-                <select
-                  required
-                  value={toAccountId}
-                  onChange={e => { setToAccountId(e.target.value); setAmountError('') }}
-                  className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    sameWallet ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                  }`}
-                >
-                  <option value="">{t('Select wallet…')}</option>
-                  {accounts.map(a => (
-                    <option
-                      key={a.id}
-                      value={String(a.id)}
-                      disabled={String(a.id) === fromAccountId}
+                {/* ── Sticky header ─────────────────────────────────────────── */}
+                <div style={{
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    padding: '16px 20px 14px', borderBottom: '1px solid #f1f5f9',
+                    position: 'sticky', top: 0, background: '#fff', zIndex: 1,
+                }}>
+                    <button
+                        type="button"
+                        onClick={handleClose}
+                        disabled={loading}
+                        style={{
+                            background: 'none', border: 'none', color: '#6b7280',
+                            fontSize: '14px', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
+                            padding: '4px 8px', opacity: loading ? 0.5 : 1,
+                        }}
                     >
-                      {a.name} — {formatBalance(a.balance, a.currency)}
-                      {String(a.id) === fromAccountId ? ` ${t('(source)')}` : ''}
-                    </option>
-                  ))}
-                </select>
-                {sameWallet && (
-                  <p className="mt-1 text-xs text-red-600">
-                    {t('Destination wallet must be different from the source wallet.')}
-                  </p>
-                )}
-                {toAccount && !sameWallet && (
-                  <p className="mt-1 text-xs text-gray-500">
-                    {t('Current balance')}: <span className="font-semibold text-gray-700">{formatBalance(toAccount.balance, toAccount.currency)}</span>
-                  </p>
-                )}
-              </div>
+                        {t('Cancel') as string}
+                    </button>
 
-              {/* Amount */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('Amount')} <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    required
-                    value={amount}
-                    onChange={e => { setAmount(e.target.value); setAmountError('') }}
-                    className={`w-full px-4 py-2 pr-16 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      isInsufficient || amountError ? 'border-red-400 bg-red-50' : 'border-gray-300'
-                    }`}
-                    placeholder="0"
-                  />
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <span className="text-gray-500 font-medium text-sm">{currency}</span>
-                  </div>
+                    <div style={{ textAlign: 'center' }}>
+                        <p style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>
+                            {t('CHUYỂN TIỀN') as string}
+                        </p>
+                        <p style={{ fontSize: '14px', fontWeight: 800, color: '#3b82f6', letterSpacing: '0.5px' }}>
+                            {t('Transfer Money') as string}
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => formRef.current?.requestSubmit()}
+                        disabled={!canSubmit}
+                        style={{
+                            background: canSubmit ? '#3b82f6' : '#93c5fd',
+                            border: 'none', color: '#fff',
+                            padding: '8px 18px', borderRadius: '20px',
+                            fontSize: '14px', fontWeight: 700,
+                            cursor: canSubmit ? 'pointer' : 'not-allowed',
+                            transition: 'background 0.2s',
+                            display: 'flex', alignItems: 'center', gap: '6px',
+                        }}
+                    >
+                        {loading && <Loader2 style={{ width: '14px', height: '14px', animation: 'spin 0.9s linear infinite' }} />}
+                        {loading ? (t('Processing…') as string) : (t('Transfer') as string)}
+                    </button>
                 </div>
 
-                {/* Insufficient balance warning */}
-                {isInsufficient && !amountError && (
-                  <div className="mt-2 flex items-start gap-1.5 text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
-                    <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <span className="text-xs">
-                      {t('Insufficient balance in source wallet.')}
-                      {fromAccount && (
-                        <> {t('Available')}: <strong>{formatBalance(fromBalance ?? 0, currency)}</strong></>
-                      )}
-                    </span>
-                  </div>
+                {/* ── Summary strip ─────────────────────────────────────────── */}
+                {(fromAccount || toAccount) && !successData && (
+                    <div style={{
+                        display: 'flex', alignItems: 'center', gap: '12px',
+                        padding: '12px 20px', background: '#f8fafc', borderBottom: '1px solid #f1f5f9',
+                    }}>
+                        <div style={{
+                            width: '38px', height: '38px', borderRadius: '11px', flexShrink: 0,
+                            background: '#dbeafe',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                            <ArrowLeftRight style={{ width: '18px', height: '18px', color: '#3b82f6' }} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: '11px', color: '#9ca3af', fontWeight: 600, marginBottom: '2px' }}>
+                                {fromAccount?.name ?? '—'} → {toAccount?.name ?? '—'}
+                            </p>
+                            {amountNum > 0 && (
+                                <p style={{ fontSize: '16px', fontWeight: 800, color: '#3b82f6' }}>
+                                    {amountNum.toLocaleString('en-US')} {currency}
+                                </p>
+                            )}
+                        </div>
+                        {sameWallet && (
+                            <div style={{
+                                display: 'flex', alignItems: 'center', gap: '4px',
+                                background: '#fef2f2', border: '1px solid #fecaca',
+                                borderRadius: '20px', padding: '4px 10px',
+                            }}>
+                                <AlertCircle style={{ width: '11px', height: '11px', color: '#ef4444' }} />
+                                <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 600 }}>
+                                    {t('Same wallet') as string}
+                                </span>
+                            </div>
+                        )}
+                    </div>
                 )}
 
-                {amountError && (
-                  <p className="mt-1 text-xs text-red-600">{amountError}</p>
+                {/* ── Success screen ─────────────────────────────────────────── */}
+                {successData && (
+                    <div style={{ padding: '40px 20px', textAlign: 'center' }}>
+                        <div style={{
+                            width: '64px', height: '64px', borderRadius: '50%',
+                            background: '#dcfce7', display: 'flex', alignItems: 'center',
+                            justifyContent: 'center', margin: '0 auto 16px',
+                        }}>
+                            <CheckCircle style={{ width: '36px', height: '36px', color: '#22c55e' }} />
+                        </div>
+                        <p style={{ fontSize: '18px', fontWeight: 800, color: '#121212', marginBottom: '6px' }}>
+                            {t('Transfer Completed') as string}
+                        </p>
+                        <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '24px' }}>
+                            {t('Your funds have been moved successfully.') as string}
+                        </p>
+
+                        <div style={{
+                            background: '#f8fafc', borderRadius: '14px', padding: '16px',
+                            textAlign: 'left', marginBottom: '20px',
+                            border: '1px solid #f1f5f9',
+                        }}>
+                            {[
+                                { label: t('From') as string,           val: successData.from_account.name, color: '#121212' },
+                                { label: t('To') as string,             val: successData.to_account.name,   color: '#121212' },
+                                { label: t('Amount') as string,         val: `${successData.amount.toLocaleString('en-US')} ${currency}`, color: '#3b82f6' },
+                            ].map(({ label, val, color }) => (
+                                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                                    <span style={{ fontSize: '13px', color: '#6b7280' }}>{label}</span>
+                                    <span style={{ fontSize: '13px', fontWeight: 700, color }}>{val}</span>
+                                </div>
+                            ))}
+                            <div style={{ height: '1px', background: '#e5e7eb', margin: '10px 0' }} />
+                            {[
+                                { label: `${successData.from_account.name} ${t('new balance') as string}`, val: formatBalance(successData.from_account.balance, currency), color: '#ef4444' },
+                                { label: `${successData.to_account.name} ${t('new balance') as string}`,   val: formatBalance(successData.to_account.balance, currency),   color: '#22c55e' },
+                            ].map(({ label, val, color }) => (
+                                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                                    <span style={{ fontSize: '13px', color: '#6b7280' }}>{label}</span>
+                                    <span style={{ fontSize: '13px', fontWeight: 700, color }}>{val}</span>
+                                </div>
+                            ))}
+                        </div>
+
+                        <p style={{ fontSize: '12px', color: '#9ca3af' }}>{t('Closing automatically…') as string}</p>
+                    </div>
                 )}
-              </div>
 
-              {/* Notes */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('Note')}{' '}
-                  <span className="text-gray-400 font-normal">({t('optional')})</span>
-                </label>
-                <textarea
-                  value={notes}
-                  onChange={e => setNotes(e.target.value.slice(0, 200))}
-                  rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                  placeholder={t('e.g. Monthly savings transfer…')}
-                />
-                <p className="text-xs text-gray-400 text-right mt-1">{notes.length}/200</p>
-              </div>
+                {/* ── Form ──────────────────────────────────────────────────── */}
+                {!successData && (
+                    <form ref={formRef} onSubmit={handleSubmit} style={{ padding: '20px' }}>
 
-              {/* Buttons */}
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  disabled={loading}
-                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-                >
-                  {t('Cancel')}
-                </button>
-                <button
-                  type="submit"
-                  disabled={!canSubmit}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-white font-medium transition-colors ${
-                    canSubmit
-                      ? 'bg-blue-600 hover:bg-blue-700'
-                      : 'bg-blue-300 cursor-not-allowed'
-                  }`}
-                >
-                  {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {loading ? t('Processing…') : t('Transfer')}
-                </button>
-              </div>
-            </>
-          )}
-        </form>
-      </div>
-    </div>
-  )
+                        {/* Global error */}
+                        {error && (
+                            <div style={{
+                                display: 'flex', alignItems: 'flex-start', gap: '8px',
+                                background: '#fef2f2', border: '1px solid #fecaca',
+                                borderRadius: '12px', padding: '10px 12px',
+                                fontSize: '13px', color: '#b91c1c', fontWeight: 600,
+                                marginBottom: '16px',
+                            }}>
+                                <AlertCircle style={{ width: '15px', height: '15px', flexShrink: 0, marginTop: '1px' }} />
+                                <span>{error}</span>
+                            </div>
+                        )}
+
+                        {/* Fetching spinner */}
+                        {fetchingAccounts && (
+                            <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
+                                <div style={{
+                                    width: '36px', height: '36px',
+                                    border: '4px solid #dbeafe', borderTopColor: '#3b82f6',
+                                    borderRadius: '50%', animation: 'spin 0.9s linear infinite',
+                                }} />
+                                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                            </div>
+                        )}
+
+                        {/* Not enough wallets */}
+                        {!fetchingAccounts && accounts.length < 2 && (
+                            <div style={{
+                                display: 'flex', alignItems: 'flex-start', gap: '8px',
+                                background: '#fffbeb', border: '1px solid #fde68a',
+                                borderRadius: '12px', padding: '10px 12px',
+                                fontSize: '13px', color: '#92400e', fontWeight: 500,
+                                marginBottom: '16px',
+                            }}>
+                                <AlertCircle style={{ width: '15px', height: '15px', flexShrink: 0, marginTop: '1px' }} />
+                                <span>
+                                    {accounts.length === 0
+                                        ? (t('No wallets found. Please create at least two wallets to transfer between.') as string)
+                                        : (t('You need at least two wallets to make a transfer.') as string)}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* No compatible (same-currency) destination wallets */}
+                        {!fetchingAccounts && accounts.length >= 2 && fromAccount && compatibleToAccounts.length === 0 && (
+                            <div style={{
+                                display: 'flex', alignItems: 'flex-start', gap: '8px',
+                                background: '#fffbeb', border: '1px solid #fde68a',
+                                borderRadius: '12px', padding: '10px 12px',
+                                fontSize: '13px', color: '#92400e', fontWeight: 500,
+                                marginBottom: '16px',
+                            }}>
+                                <AlertCircle style={{ width: '15px', height: '15px', flexShrink: 0, marginTop: '1px' }} />
+                                <span>
+                                    {t('No other wallet with the same currency ({{currency}}) found. Transfers are only allowed between wallets with the same currency.', { currency: fromAccount.currency }) as string}
+                                </span>
+                            </div>
+                        )}
+
+                        {!fetchingAccounts && accounts.length >= 2 && (
+                            <>
+                                {/* From Wallet */}
+                                <div style={MS.fieldWrap}>
+                                    <label style={MS.fieldLabel}>
+                                        {t('From Wallet') as string} <span style={{ color: '#ef4444' }}>*</span>
+                                    </label>
+                                    <div style={{ position: 'relative' }}>
+                                        <select
+                                            required
+                                            value={fromAccountId}
+                                            onChange={e => { setFromAccountId(e.target.value); setAmountError('') }}
+                                            style={{ ...MS.inputBase, appearance: 'none', paddingRight: '36px' }}
+                                        >
+                                            <option value="">{t('Select wallet…') as string}</option>
+                                            {accounts.map(a => (
+                                                <option key={a.id} value={String(a.id)}>
+                                                    {a.name} — {formatBalance(a.balance, a.currency)}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <span style={{
+                                            position: 'absolute', right: '14px', top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            pointerEvents: 'none', fontSize: '12px', color: '#9ca3af',
+                                        }}>▾</span>
+                                    </div>
+                                    {fromAccount && (
+                                        <p style={{ marginTop: '6px', fontSize: '12px', color: '#6b7280' }}>
+                                            {t('Available') as string}:{' '}
+                                            <span style={{ fontWeight: 700, color: '#374151' }}>
+                                                {formatBalance(fromAccount.balance, fromAccount.currency)}
+                                            </span>
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Swap button */}
+                                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                                    <button
+                                        type="button"
+                                        onClick={handleSwap}
+                                        title={t('Swap wallets') as string}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: '6px',
+                                            background: '#eff6ff', border: '1.5px solid #bfdbfe',
+                                            borderRadius: '20px', padding: '8px 16px',
+                                            fontSize: '13px', fontWeight: 600, color: '#3b82f6',
+                                            cursor: 'pointer', transition: 'background 0.15s',
+                                        }}
+                                    >
+                                        <ArrowLeftRight style={{ width: '14px', height: '14px' }} />
+                                        {t('Swap') as string}
+                                    </button>
+                                </div>
+
+                                {/* To Wallet */}
+                                <div style={MS.fieldWrap}>
+                                    <label style={MS.fieldLabel}>
+                                        {t('To Wallet') as string} <span style={{ color: '#ef4444' }}>*</span>
+                                    </label>
+                                    <div style={{ position: 'relative' }}>
+                                        <select
+                                            required
+                                            value={toAccountId}
+                                            onChange={e => { setToAccountId(e.target.value); setAmountError('') }}
+                                            disabled={compatibleToAccounts.length === 0}
+                                            style={{
+                                                ...MS.inputBase, appearance: 'none', paddingRight: '36px',
+                                                borderColor: sameWallet ? '#fca5a5' : '#e5e7eb',
+                                                background: compatibleToAccounts.length === 0 ? '#f9fafb' : sameWallet ? '#fef2f2' : '#fff',
+                                                color: compatibleToAccounts.length === 0 ? '#9ca3af' : '#121212',
+                                                cursor: compatibleToAccounts.length === 0 ? 'not-allowed' : 'pointer',
+                                            }}
+                                        >
+                                            <option value="">
+                                                {compatibleToAccounts.length === 0
+                                                    ? t('No compatible wallet available') as string
+                                                    : t('Select wallet…') as string}
+                                            </option>
+                                            {compatibleToAccounts.map(a => (
+                                                <option key={a.id} value={String(a.id)}>
+                                                    {a.name} — {formatBalance(a.balance, a.currency)}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <span style={{
+                                            position: 'absolute', right: '14px', top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            pointerEvents: 'none', fontSize: '12px', color: '#9ca3af',
+                                        }}>▾</span>
+                                    </div>
+                                    {sameWallet && (
+                                        <p style={{ marginTop: '6px', fontSize: '12px', color: '#ef4444', fontWeight: 600 }}>
+                                            {t('Destination wallet must be different from the source wallet.') as string}
+                                        </p>
+                                    )}
+                                    {toAccount && !sameWallet && !differentCurrency && (
+                                        <p style={{ marginTop: '6px', fontSize: '12px', color: '#6b7280' }}>
+                                            {t('Current balance') as string}:{' '}
+                                            <span style={{ fontWeight: 700, color: '#374151' }}>
+                                                {formatBalance(toAccount.balance, toAccount.currency)}
+                                            </span>
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Amount */}
+                                <div style={MS.fieldWrap}>
+                                    <label style={MS.fieldLabel}>
+                                        {t('Amount') as string} <span style={{ color: '#ef4444' }}>*</span>
+                                    </label>
+                                    <div style={{ position: 'relative' }}>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0.01"
+                                            required
+                                            value={amount}
+                                            onChange={e => { setAmount(e.target.value); setAmountError('') }}
+                                            placeholder="0"
+                                            style={{
+                                                ...MS.inputBase,
+                                                paddingRight: '56px',
+                                                borderColor: isInsufficient || amountError ? '#fca5a5' : '#e5e7eb',
+                                                background:  isInsufficient || amountError ? '#fef2f2' : '#fff',
+                                            }}
+                                        />
+                                        <span style={{
+                                            position: 'absolute', right: '14px', top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            pointerEvents: 'none', fontSize: '13px',
+                                            fontWeight: 600, color: '#9ca3af',
+                                        }}>{currency}</span>
+                                    </div>
+
+                                    {isInsufficient && !amountError && (
+                                        <div style={{
+                                            display: 'flex', alignItems: 'flex-start', gap: '6px',
+                                            background: '#fffbeb', border: '1px solid #fde68a',
+                                            borderRadius: '10px', padding: '8px 10px',
+                                            marginTop: '8px',
+                                        }}>
+                                            <AlertCircle style={{ width: '13px', height: '13px', color: '#d97706', flexShrink: 0, marginTop: '1px' }} />
+                                            <span style={{ fontSize: '12px', color: '#92400e' }}>
+                                                {t('Insufficient balance in source wallet.') as string}
+                                                {fromAccount && (
+                                                    <> {t('Available') as string}: <strong>{formatBalance(fromBalance ?? 0, currency)}</strong></>
+                                                )}
+                                            </span>
+                                        </div>
+                                    )}
+                                    {amountError && (
+                                        <p style={{ marginTop: '6px', fontSize: '12px', color: '#ef4444', fontWeight: 600 }}>
+                                            {amountError}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Notes */}
+                                <div style={MS.fieldWrap}>
+                                    <label style={MS.fieldLabel}>
+                                        {t('Note') as string}{' '}
+                                        <span style={{ color: '#9ca3af', fontWeight: 400 }}>({t('optional') as string})</span>
+                                    </label>
+                                    <textarea
+                                        value={notes}
+                                        onChange={e => setNotes(e.target.value.slice(0, 200))}
+                                        rows={3}
+                                        placeholder={t('e.g. Monthly savings transfer…') as string}
+                                        style={{ ...MS.inputBase, resize: 'none', lineHeight: '1.5' }}
+                                    />
+                                    <p style={{ textAlign: 'right', fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>
+                                        {notes.length}/200
+                                    </p>
+                                </div>
+                            </>
+                        )}
+
+                        {/* Hidden submit — triggered by header Transfer button */}
+                        <button type="submit" style={{ display: 'none' }} aria-hidden />
+                    </form>
+                )}
+
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            </div>
+        </div>
+    )
 }
 
 export default TransferMoneyModal
