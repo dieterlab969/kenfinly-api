@@ -11,7 +11,6 @@ import {
     Search,
     Plus,
     TrendingDown,
-    ArrowLeftRight,
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -28,7 +27,6 @@ interface HaloLayoutProps {
     children: React.ReactNode
     onFabExpense?: () => void
     onFabIncome?:  () => void
-    onFabTransfer?: () => void
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -41,7 +39,7 @@ const NAV_ITEMS: NavItem[] = [
     { key: 'settings',  labelEn: 'Settings',  labelVi: 'Cài Đặt',   icon: Settings,        to: '/halo/settings' },
 ]
 
-type FabOption = 'income' | 'expense' | 'transfer'
+type FabOption = 'income' | 'expense'
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -49,7 +47,6 @@ const HaloLayout: React.FC<HaloLayoutProps> = ({
     children,
     onFabExpense,
     onFabIncome,
-    onFabTransfer,
 }) => {
     const { currentLanguage, changeLanguage, languages } = useTranslation()
     const { user } = useAuth()
@@ -67,9 +64,8 @@ const HaloLayout: React.FC<HaloLayoutProps> = ({
 
     const handleFabOption = (type: FabOption) => {
         setFabOpen(false)
-        if (type === 'expense'  && onFabExpense)  onFabExpense()
-        if (type === 'income'   && onFabIncome)   onFabIncome()
-        if (type === 'transfer' && onFabTransfer) onFabTransfer()
+        if (type === 'expense' && onFabExpense) onFabExpense()
+        if (type === 'income'  && onFabIncome)  onFabIncome()
     }
 
     return (
@@ -147,15 +143,7 @@ const HaloLayout: React.FC<HaloLayoutProps> = ({
                         </span>
                         {isVi ? 'Thêm Chi Tiêu' : 'Add Expense'}
                     </button>
-                    <button
-                        className="fab-picker-option fab-picker-option--transfer"
-                        onClick={() => handleFabOption('transfer')}
-                    >
-                        <span className="fab-picker-option__icon">
-                            <ArrowLeftRight size={18} />
-                        </span>
-                        {isVi ? 'Chuyển Tiền' : 'Transfer Money'}
-                    </button>
+
                 </div>
             )}
 
