@@ -1,0 +1,173 @@
+Task: Migrate Obsolete TranslationContext to the New i18n Architecture
+Background
+
+The application has already migrated to the new internationalization (i18n) system.
+
+The legacy implementation located at:
+
+../../contexts/TranslationContext
+
+is now obsolete and must no longer be used.
+
+Your task is to update all affected files so they fully comply with the new i18n architecture described in:
+
+docs/issues/i18n-setting-poc-2026-06-26.md
+Files to Update
+
+Please refactor the following files:
+
+resources/js/components/TransferMoneyModal.tsx
+resources/js/pages/halo/HaloDashboard.tsx
+Requirements
+1. Analyze the New i18n Architecture
+
+Before making changes:
+
+Read and understand the migration guide:
+
+docs/issues/i18n-setting-poc-2026-06-26.md
+Identify:
+The recommended translation hook(s)
+The new translation provider
+Namespace conventions
+Translation key structure
+Fallback behavior
+Language switching mechanism
+2. Remove Legacy TranslationContext Usage
+
+Completely eliminate any dependency on:
+
+../../contexts/TranslationContext
+
+including:
+
+imports
+hooks
+context consumers
+helper functions
+legacy translation wrappers
+
+No obsolete translation code should remain.
+
+3. Migrate to the New i18n Implementation
+
+Replace the old implementation with the project's current standard.
+
+Examples include (if applicable):
+
+useTranslation()
+react-i18next hooks
+centralized translation helpers
+namespace-based translations
+
+Follow the exact patterns defined in the migration document.
+
+4. Convert All User-Facing Text
+
+Review each file and ensure every user-visible string is translated.
+
+This includes:
+
+labels
+buttons
+placeholders
+modal titles
+section headers
+empty states
+validation messages
+loading text
+tooltips
+status messages
+notifications
+error messages
+
+No hardcoded UI text should remain unless explicitly required by the project standards.
+
+5. Preserve Existing Functionality
+
+The migration must not alter:
+
+business logic
+API behavior
+component state management
+permissions
+validation rules
+data flow
+UI behavior
+
+Only translation-related code should be modified unless absolutely necessary.
+
+6. Validate Translation Keys
+
+For every newly introduced translation key:
+
+Verify the key follows the project's naming convention.
+Reuse existing keys whenever possible.
+Avoid creating duplicate or semantically overlapping keys.
+Group keys into the appropriate namespace.
+
+If a required key does not exist:
+
+clearly identify it
+specify where it should be added
+7. TypeScript Quality Requirements
+
+Ensure:
+
+no TypeScript errors
+no unused imports
+no dead code
+no lint violations introduced by the migration
+
+The resulting code should compile successfully.
+
+8. Deliverables
+
+For each modified file, provide:
+
+A. Summary of Changes
+
+Explain:
+
+what was replaced
+why it was changed
+how it aligns with the new i18n system
+B. Code Changes
+
+Provide the updated implementation.
+
+C. New Translation Keys
+
+List:
+
+namespace.key
+
+for every newly added key.
+
+D. Migration Verification Checklist
+
+Confirm:
+
+TranslationContext removed
+
+New i18n hook integrated
+
+All UI strings localized
+
+No hardcoded user-facing text remains
+
+No TypeScript issues
+
+No lint issues
+
+Behavior unchanged
+
+Expected Outcome
+
+After completion:
+
+The two target files should be fully migrated to the new i18n architecture.
+No dependency on the legacy TranslationContext should remain.
+All user-facing content should be translated through the new localization framework.
+The implementation should match the standards defined in:
+docs/issues/i18n-setting-poc-2026-06-26.md

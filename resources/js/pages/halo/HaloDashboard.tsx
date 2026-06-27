@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { format, parseISO } from 'date-fns'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area, CartesianGrid } from 'recharts'
+import { useTranslation } from 'react-i18next'
 import api from '../../utils/api'
-import { useAuth } from '../../contexts/AuthContext'
-import { useTranslation } from '../../contexts/TranslationContext'
 import { formatCurrency } from '../../constants/categories'
 import HaloLayout from '../../components/halo/HaloLayout'
 import AddTransactionModal from '../../components/AddTransactionModal'
@@ -138,8 +137,8 @@ const HaloGauge: React.FC<{ income?: number; expense?: number }> = ({ income = 0
 // ─── Halo Ritual Card ─────────────────────────────────────────────────────────
 
 const HaloRitualCard: React.FC<{ onRewardCreated?: () => void }> = ({ onRewardCreated }) => {
-    const { currentLanguage } = useTranslation()
-    const isVi = currentLanguage?.code === 'vi'
+    const { t, i18n } = useTranslation()
+    const isVi = i18n.language === 'vi'
 
     const [startTime,     setStartTime]     = useState<number | null>(null)
     const [duration,      setDuration]      = useState(8 * 3600)
@@ -218,6 +217,7 @@ const HaloRitualCard: React.FC<{ onRewardCreated?: () => void }> = ({ onRewardCr
         return Math.min(100, Math.max(0, ((duration - secondsLeft) / duration) * 100))
     }, [isActive, isDone, secondsLeft, duration])
 
+    // isVi drives the Intl locale for date formatting — not a translation call
     const todayStr = new Date().toLocaleDateString(isVi ? 'vi-VN' : 'en-US', {
         weekday: 'short', day: 'numeric', month: 'long',
     })
@@ -245,7 +245,7 @@ const HaloRitualCard: React.FC<{ onRewardCreated?: () => void }> = ({ onRewardCr
                         className={btnClass}
                         onClick={handlePress}
                         disabled={isActive || isDone || actionLoading}
-                        aria-label={isVi ? 'Bắt đầu Halo' : 'Start Halo'}
+                        aria-label={t('Start Halo')}
                     >
                         {actionLoading ? '…' : 'Halo'}
                     </button>
@@ -259,13 +259,14 @@ const HaloRitualCard: React.FC<{ onRewardCreated?: () => void }> = ({ onRewardCr
 // ─── Monthly Summary ──────────────────────────────────────────────────────────
 
 const HaloMonthlySummary: React.FC<{ monthlySummary?: MonthlySummary }> = ({ monthlySummary }) => {
-    const { currentLanguage } = useTranslation()
-    const isVi = currentLanguage?.code === 'vi'
+    const { t, i18n } = useTranslation()
+    const isVi = i18n.language === 'vi'
 
     if (!monthlySummary?.current) return null
 
     const { current, previous } = monthlySummary
 
+    // Month name mapping is locale-specific date formatting, not UI copy
     const formatMonthLabel = (label: string) => {
         if (!label) return ''
         try {
@@ -298,7 +299,7 @@ const HaloMonthlySummary: React.FC<{ monthlySummary?: MonthlySummary }> = ({ mon
                 <div className="summary-arc-col__gauge">
                     <HaloGauge income={data.income || 0} expense={data.expense || 0} />
                     <div className="summary-arc-col__net">
-                        <div className="summary-arc-col__net-label">{isVi ? 'Còn lại' : 'Net'}</div>
+                        <div className="summary-arc-col__net-label">{t('Net')}</div>
                         <div className="summary-arc-col__net-value" style={{ color: isPos ? '#22c55e' : '#ef4444' }}>
                             {compactCurrency(net)}
                         </div>
@@ -307,22 +308,22 @@ const HaloMonthlySummary: React.FC<{ monthlySummary?: MonthlySummary }> = ({ mon
                 <div className="summary-arc-col__legend">
                     <span className="summary-arc-col__legend-item">
                         <span className="summary-arc-col__legend-dot" style={{ background: '#22c55e' }} />
-                        {isVi ? 'Thu' : 'Income'}
+                        {t('Income')}
                     </span>
                     <span className="summary-arc-col__legend-item">
                         <span className="summary-arc-col__legend-dot" style={{ background: '#f97316' }} />
-                        {isVi ? 'Chi' : 'Expense'}
+                        {t('Expense')}
                     </span>
                 </div>
                 <div className="summary-arc-col__values">
                     <div className="summary-arc-col__value-item">
-                        <div className="summary-arc-col__value-label">{isVi ? 'Thu nhập' : 'Income'}</div>
+                        <div className="summary-arc-col__value-label">{t('Income')}</div>
                         <div className="summary-arc-col__value-amount" style={{ color: '#22c55e' }}>
                             {compactCurrency(data.income || 0)}
                         </div>
                     </div>
                     <div className="summary-arc-col__value-item">
-                        <div className="summary-arc-col__value-label">{isVi ? 'Chi tiêu' : 'Expense'}</div>
+                        <div className="summary-arc-col__value-label">{t('Expense')}</div>
                         <div className="summary-arc-col__value-amount" style={{ color: '#ef4444' }}>
                             {compactCurrency(data.expense || 0)}
                         </div>
@@ -335,7 +336,7 @@ const HaloMonthlySummary: React.FC<{ monthlySummary?: MonthlySummary }> = ({ mon
     return (
         <div className="summary-arc-container">
             <div className="halo-card">
-                <div className="halo-card__title">{isVi ? 'Tóm Tắt Tháng' : 'Monthly Summary'}</div>
+                <div className="halo-card__title">{t('Monthly Summary')}</div>
                 <div className="summary-arc-grid">
                     <MonthArcCol data={current}  label={current.month}  />
                     <div style={{ width: 1, background: 'var(--color-border)', flexShrink: 0, margin: '0 6px' }} />
@@ -352,8 +353,8 @@ const HaloInsights: React.FC<{
     sevenDayExpenses?: SevenDayExpense[]
     activeCommitmentsCount?: number
 }> = ({ sevenDayExpenses, activeCommitmentsCount = 0 }) => {
-    const { currentLanguage } = useTranslation()
-    const isVi = currentLanguage?.code === 'vi'
+    const { t, i18n } = useTranslation()
+    const isVi = i18n.language === 'vi'
 
     const chartData = useMemo(() => {
         const today = new Date()
@@ -364,6 +365,7 @@ const HaloInsights: React.FC<{
             const dayEn   = format(d, 'EEE')
             const found   = sevenDayExpenses?.find(x => x.date === dateStr)
             return {
+                // Day abbreviations for chart axis are locale-specific data display
                 day:    isVi ? (DAY_SHORT_VI[dayEn] || dayEn) : dayEn,
                 amount: found ? parseFloat(String(found.total)) : 0,
             }
@@ -380,11 +382,11 @@ const HaloInsights: React.FC<{
         <div className="insights-section halo-card">
             <div className="insights-section__header">
                 <span className="insights-section__title">
-                    {isVi ? 'Chi tiêu – 7 Ngày Qua' : 'Expenses – Last 7 Days'}
+                    {t('Expenses – Last 7 Days')}
                 </span>
                 {activeCommitmentsCount > 0 && (
                     <span className="insights-section__badge">
-                        {isVi ? 'CAM KẾT ĐANG HOẠT ĐỘNG' : 'ACTIVE COMMITMENTS'}
+                        {t('ACTIVE COMMITMENTS')}
                     </span>
                 )}
             </div>
@@ -397,7 +399,7 @@ const HaloInsights: React.FC<{
                         axisLine={false} tickLine={false} tickFormatter={tickFmt} width={36} />
                     <Tooltip
                         cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                        formatter={(v: number) => [formatCurrency(v), isVi ? 'Chi tiêu' : 'Expense']}
+                        formatter={(v: number) => [formatCurrency(v), t('Expense')]}
                         contentStyle={{
                             background: 'var(--color-surface-2)',
                             border: '1px solid var(--color-border)',
@@ -419,8 +421,7 @@ const HaloBalanceChart: React.FC<{
     balanceHistory?: BalanceHistoryItem[]
     totalBalance: number
 }> = ({ balanceHistory, totalBalance }) => {
-    const { currentLanguage } = useTranslation()
-    const isVi = currentLanguage?.code === 'vi'
+    const { t } = useTranslation()
 
     if (!balanceHistory?.length) return null
 
@@ -445,9 +446,9 @@ const HaloBalanceChart: React.FC<{
     return (
         <div className="balance-chart halo-card">
             <div className="balance-chart__header">
-                <span className="balance-chart__title">{isVi ? 'Số Dư' : 'Balance'}</span>
+                <span className="balance-chart__title">{t('Balance')}</span>
                 <div className="balance-chart__total">
-                    <div className="balance-chart__total-label">{isVi ? 'Tổng tài sản' : 'Total Owned'}</div>
+                    <div className="balance-chart__total-label">{t('Total Owned')}</div>
                     <div className="balance-chart__total-value" style={{ color: isNeg ? '#ef4444' : '#22c55e' }}>
                         {formatCurrency(totalBalance)}
                     </div>
@@ -468,7 +469,7 @@ const HaloBalanceChart: React.FC<{
                         axisLine={false} tickLine={false} domain={[minB - pad, maxB + pad]}
                         tickFormatter={tickFmt} width={42} />
                     <Tooltip
-                        formatter={(v: number) => [formatCurrency(v), isVi ? 'Số dư' : 'Balance']}
+                        formatter={(v: number) => [formatCurrency(v), t('Balance')]}
                         contentStyle={{
                             background: 'var(--color-surface-2)',
                             border: '1px solid var(--color-border)',
@@ -489,9 +490,6 @@ const HaloBalanceChart: React.FC<{
 // ─── Halo Dashboard (page root) ───────────────────────────────────────────────
 
 const HaloDashboard: React.FC = () => {
-    const { user }            = useAuth()
-    const { currentLanguage } = useTranslation()
-
     const [dashData,           setDashData]           = useState<DashData | null>(null)
     const [loading,            setLoading]            = useState(true)
     const [showModal,          setShowModal]          = useState(false)
@@ -514,7 +512,7 @@ const HaloDashboard: React.FC = () => {
 
     const openModal = (type: 'expense' | 'income') => { setModalType(type); setShowModal(true) }
 
-    const handleRewardCreated = useCallback(() => { fetchDash(false) }, [fetchDash])
+    const handleRewardCreated    = useCallback(() => { fetchDash(false) }, [fetchDash])
     const handleTransactionAdded = useCallback(() => { fetchDash(false) }, [fetchDash])
     const handleTransferSuccess  = useCallback(() => { fetchDash(false) }, [fetchDash])
 
@@ -522,10 +520,6 @@ const HaloDashboard: React.FC = () => {
         dashData?.accounts?.reduce((s, a) => s + parseFloat(String(a.balance)), 0) ?? 0,
         [dashData],
     )
-
-    // Suppress unused var warning — currentLanguage is consumed by child components
-    void user
-    void currentLanguage
 
     if (loading) {
         return (

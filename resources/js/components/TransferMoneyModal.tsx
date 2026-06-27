@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { X, ArrowLeftRight, AlertTriangle, CheckCircle, Loader2 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import api from '../utils/api'
-import { useTranslation } from '@assets/js/contexts/TranslationContext.jsx'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,16 +47,16 @@ const isAxiosError = (
 const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { t } = useTranslation()
 
-  const [accounts,        setAccounts]        = useState<Account[]>([])
-  const [fromAccountId,   setFromAccountId]   = useState<string>('')
-  const [toAccountId,     setToAccountId]     = useState<string>('')
-  const [amount,          setAmount]          = useState<string>('')
-  const [notes,           setNotes]           = useState<string>('')
-  const [loading,         setLoading]         = useState(false)
+  const [accounts,         setAccounts]         = useState<Account[]>([])
+  const [fromAccountId,    setFromAccountId]    = useState<string>('')
+  const [toAccountId,      setToAccountId]      = useState<string>('')
+  const [amount,           setAmount]           = useState<string>('')
+  const [notes,            setNotes]            = useState<string>('')
+  const [loading,          setLoading]          = useState(false)
   const [fetchingAccounts, setFetchingAccounts] = useState(false)
-  const [error,           setError]           = useState<string>('')
-  const [amountError,     setAmountError]     = useState<string>('')
-  const [successData,     setSuccessData]     = useState<TransferSuccessData | null>(null)
+  const [error,            setError]            = useState<string>('')
+  const [amountError,      setAmountError]      = useState<string>('')
+  const [successData,      setSuccessData]      = useState<TransferSuccessData | null>(null)
 
   const fromAccount = accounts.find(a => String(a.id) === fromAccountId) ?? null
   const toAccount   = accounts.find(a => String(a.id) === toAccountId)   ?? null
@@ -88,11 +88,11 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
       if (list.length >= 1) setFromAccountId(String(list[0].id))
       if (list.length >= 2) setToAccountId(String(list[1].id))
     } catch {
-      setError('Failed to load wallets. Please close and try again.')
+      setError(t('Failed to load wallets. Please close and try again.'))
     } finally {
       setFetchingAccounts(false)
     }
-  }, [])
+  }, [t])
 
   // Reset and fetch on open
   useEffect(() => {
@@ -132,9 +132,18 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
     setError('')
     setAmountError('')
 
-    if (sameWallet) { setError('Destination wallet must be different from the source wallet.'); return }
-    if (amountNum <= 0) { setAmountError('Please enter a valid amount greater than zero.'); return }
-    if (isInsufficient) { setAmountError('Amount exceeds available balance in source wallet.'); return }
+    if (sameWallet) {
+      setError(t('Destination wallet must be different from the source wallet.'))
+      return
+    }
+    if (amountNum <= 0) {
+      setAmountError(t('Please enter a valid amount greater than zero.'))
+      return
+    }
+    if (isInsufficient) {
+      setAmountError(t('Amount exceeds available balance in source wallet.'))
+      return
+    }
 
     setLoading(true)
     try {
@@ -151,10 +160,10 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
         if (data.errors?.amount) {
           setAmountError(data.errors.amount[0])
         } else {
-          setError(data.message ?? 'Transfer failed. Please try again.')
+          setError(data.message ?? t('Transfer failed. Please try again.'))
         }
       } else {
-        setError('Network error. Please check your connection and try again.')
+        setError(t('Network error. Please check your connection and try again.'))
       }
     } finally {
       setLoading(false)
@@ -173,43 +182,43 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
         <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-8 text-center">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-gray-900 mb-2">
-            {t('transfer.success_title') || 'Transfer Completed'}
+            {t('Transfer Completed')}
           </h2>
           <p className="text-gray-600 mb-6">
-            {t('transfer.success_message') || 'Your funds have been moved successfully.'}
+            {t('Your funds have been moved successfully.')}
           </p>
 
           <div className="bg-gray-50 rounded-lg p-4 text-left space-y-3 mb-6">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">{t('transfer.from') || 'From'}</span>
+              <span className="text-gray-500">{t('From')}</span>
               <span className="font-medium text-gray-900">{successData.from_account.name}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">{t('transfer.to') || 'To'}</span>
+              <span className="text-gray-500">{t('To')}</span>
               <span className="font-medium text-gray-900">{successData.to_account.name}</span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">{t('transfer.amount') || 'Amount'}</span>
+              <span className="text-gray-500">{t('Amount')}</span>
               <span className="font-bold text-blue-600">
                 {successData.amount.toLocaleString('en-US')} {currency}
               </span>
             </div>
             <hr />
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">{successData.from_account.name} {t('transfer.new_balance') || 'new balance'}</span>
+              <span className="text-gray-500">{successData.from_account.name} {t('new balance')}</span>
               <span className="font-medium text-red-600">
                 {formatBalance(successData.from_account.balance, currency)}
               </span>
             </div>
             <div className="flex justify-between text-sm">
-              <span className="text-gray-500">{successData.to_account.name} {t('transfer.new_balance') || 'new balance'}</span>
+              <span className="text-gray-500">{successData.to_account.name} {t('new balance')}</span>
               <span className="font-medium text-green-600">
                 {formatBalance(successData.to_account.balance, currency)}
               </span>
             </div>
           </div>
 
-          <p className="text-xs text-gray-400">{t('transfer.auto_close') || 'Closing automatically…'}</p>
+          <p className="text-xs text-gray-400">{t('Closing automatically…')}</p>
         </div>
       </div>
     )
@@ -226,7 +235,7 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
           <div className="flex items-center gap-2">
             <ArrowLeftRight className="w-5 h-5 text-blue-600" />
             <h2 className="text-xl font-bold text-gray-900">
-              {t('transfer.title') || 'Transfer Money'}
+              {t('Transfer Money')}
             </h2>
           </div>
           <button
@@ -259,13 +268,13 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
 
           {!fetchingAccounts && accounts.length === 0 && (
             <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded text-sm">
-              {t('transfer.no_wallets') || 'No wallets found. Please create at least two wallets to transfer between.'}
+              {t('No wallets found. Please create at least two wallets to transfer between.')}
             </div>
           )}
 
           {!fetchingAccounts && accounts.length === 1 && (
             <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded text-sm">
-              {t('transfer.need_two_wallets') || 'You need at least two wallets to make a transfer.'}
+              {t('You need at least two wallets to make a transfer.')}
             </div>
           )}
 
@@ -274,7 +283,7 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
               {/* From Wallet */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('transfer.from_wallet') || 'From Wallet'} <span className="text-red-500">*</span>
+                  {t('From Wallet')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   required
@@ -282,7 +291,7 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
                   onChange={e => { setFromAccountId(e.target.value); setAmountError('') }}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="">{t('transfer.select_wallet') || 'Select wallet…'}</option>
+                  <option value="">{t('Select wallet…')}</option>
                   {accounts.map(a => (
                     <option key={a.id} value={String(a.id)}>
                       {a.name} — {formatBalance(a.balance, a.currency)}
@@ -291,7 +300,7 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
                 </select>
                 {fromAccount && (
                   <p className="mt-1 text-xs text-gray-500">
-                    {t('transfer.available_balance') || 'Available'}: <span className="font-semibold text-gray-700">{formatBalance(fromAccount.balance, fromAccount.currency)}</span>
+                    {t('Available')}: <span className="font-semibold text-gray-700">{formatBalance(fromAccount.balance, fromAccount.currency)}</span>
                   </p>
                 )}
               </div>
@@ -301,18 +310,18 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
                 <button
                   type="button"
                   onClick={handleSwap}
-                  title={t('transfer.swap') || 'Swap wallets'}
+                  title={t('Swap wallets')}
                   className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors font-medium"
                 >
                   <ArrowLeftRight className="w-4 h-4" />
-                  {t('transfer.swap') || 'Swap'}
+                  {t('Swap')}
                 </button>
               </div>
 
               {/* To Wallet */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('transfer.to_wallet') || 'To Wallet'} <span className="text-red-500">*</span>
+                  {t('To Wallet')} <span className="text-red-500">*</span>
                 </label>
                 <select
                   required
@@ -322,7 +331,7 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
                     sameWallet ? 'border-red-400 bg-red-50' : 'border-gray-300'
                   }`}
                 >
-                  <option value="">{t('transfer.select_wallet') || 'Select wallet…'}</option>
+                  <option value="">{t('Select wallet…')}</option>
                   {accounts.map(a => (
                     <option
                       key={a.id}
@@ -330,18 +339,18 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
                       disabled={String(a.id) === fromAccountId}
                     >
                       {a.name} — {formatBalance(a.balance, a.currency)}
-                      {String(a.id) === fromAccountId ? ' (source)' : ''}
+                      {String(a.id) === fromAccountId ? ` ${t('(source)')}` : ''}
                     </option>
                   ))}
                 </select>
                 {sameWallet && (
                   <p className="mt-1 text-xs text-red-600">
-                    {t('transfer.same_wallet_error') || 'Destination wallet must be different from the source wallet.'}
+                    {t('Destination wallet must be different from the source wallet.')}
                   </p>
                 )}
                 {toAccount && !sameWallet && (
                   <p className="mt-1 text-xs text-gray-500">
-                    {t('transfer.current_balance') || 'Current balance'}: <span className="font-semibold text-gray-700">{formatBalance(toAccount.balance, toAccount.currency)}</span>
+                    {t('Current balance')}: <span className="font-semibold text-gray-700">{formatBalance(toAccount.balance, toAccount.currency)}</span>
                   </p>
                 )}
               </div>
@@ -349,7 +358,7 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
               {/* Amount */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('transfer.amount_label') || 'Amount'} <span className="text-red-500">*</span>
+                  {t('Amount')} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -374,9 +383,9 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
                   <div className="mt-2 flex items-start gap-1.5 text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
                     <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <span className="text-xs">
-                      {t('transfer.insufficient_balance') || 'Insufficient balance in source wallet.'}
+                      {t('Insufficient balance in source wallet.')}
                       {fromAccount && (
-                        <> {t('transfer.available_balance') || 'Available'}: <strong>{formatBalance(fromBalance ?? 0, currency)}</strong></>
+                        <> {t('Available')}: <strong>{formatBalance(fromBalance ?? 0, currency)}</strong></>
                       )}
                     </span>
                   </div>
@@ -390,15 +399,15 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
               {/* Notes */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('transfer.notes_label') || 'Note'}{' '}
-                  <span className="text-gray-400 font-normal">({t('common.optional') || 'optional'})</span>
+                  {t('Note')}{' '}
+                  <span className="text-gray-400 font-normal">({t('optional')})</span>
                 </label>
                 <textarea
                   value={notes}
                   onChange={e => setNotes(e.target.value.slice(0, 200))}
                   rows={3}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                  placeholder={t('transfer.notes_placeholder') || 'e.g. Monthly savings transfer…'}
+                  placeholder={t('e.g. Monthly savings transfer…')}
                 />
                 <p className="text-xs text-gray-400 text-right mt-1">{notes.length}/200</p>
               </div>
@@ -411,7 +420,7 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
                   disabled={loading}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
-                  {t('common.cancel') || 'Cancel'}
+                  {t('Cancel')}
                 </button>
                 <button
                   type="submit"
@@ -423,9 +432,7 @@ const TransferMoneyModal: React.FC<TransferMoneyModalProps> = ({ isOpen, onClose
                   }`}
                 >
                   {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {loading
-                    ? (t('transfer.processing') || 'Processing…')
-                    : (t('transfer.confirm_button') || 'Transfer')}
+                  {loading ? t('Processing…') : t('Transfer')}
                 </button>
               </div>
             </>
