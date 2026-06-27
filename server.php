@@ -2,9 +2,16 @@
 /**
  * Custom PHP Built-in Server Router
  * Handles both Laravel and WordPress in /wordpress subdirectory
- * 
+ *
  * Usage: php -S 0.0.0.0:5000 server.php
  */
+
+// Force SQLite as the active database so the Replit-injected DATABASE_URL
+// (pointing to an external Neon host) does not override the .env config.
+putenv('DATABASE_URL=');
+putenv('DB_CONNECTION=sqlite');
+$_ENV['DATABASE_URL']  = '';
+$_ENV['DB_CONNECTION'] = 'sqlite';
 
 $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 
