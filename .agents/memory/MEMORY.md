@@ -7,3 +7,5 @@
 - [Design DNA fonts](design-dna-fonts.md) — Satoshi for UI/body, Poppins only for large display numbers (balance, hero headings)
 - [Halo pages TSX migration](halo-tsx-migration.md) — HaloLayout/HaloDashboard migrated .jsx→.tsx; wired into template/App.tsx at /halo and /halo/*
 - [Transfer source_type strategy](transfer-source-type.md) — use source_type='adjustment' for wallet transfers (avoids PostgreSQL enum ALTER); transfer_pair_id cross-links the two records
+- [User Subscriptions vs Platform Subscriptions](user-vs-platform-subscriptions.md) — two separate subscription systems; `user_subscriptions` tracks personal services (Netflix etc.), `subscriptions` tracks Kenfinly plan billing
+- [JWT Secret must be set](jwt-secret-env.md) — JWT_SECRET in .env is empty by default on fresh environments; run `php artisan jwt:secret --force` before testing auth-protected routes

@@ -204,6 +204,12 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/analytics/trends', [AnalyticsController::class, 'getTrends']);
     });
 });
+// User Subscription Tracker (personal recurring services: Netflix, Spotify, etc.)
+Route::middleware('auth:api')->group(function () {
+    Route::apiResource('user-subscriptions', \App\Http\Controllers\Api\UserSubscriptionController::class);
+    Route::get('user-subscriptions/{id}/payment-history', [\App\Http\Controllers\Api\UserSubscriptionController::class, 'paymentHistory']);
+});
+
 Route::middleware(['auth:api', 'halo.integrity'])->prefix('saving-tracker')->group(function() {
     Route::apiResource('habits', \App\Http\Controllers\Api\SavingTracker\HabitController::class);
     Route::post('tracking/toggle', [\App\Http\Controllers\Api\SavingTracker\HabitTrackingController::class, 'toggle']);

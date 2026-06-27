@@ -119,7 +119,7 @@ import BankAndCard from './pages/BankAndCard';
 import WalletManagement from './pages/WalletManagement';
 import CategoryManagement from './pages/CategoryManagement';
 import ContactUs from './pages/ContactUs';
-import Subscription from './pages/Subscription';
+import SubscriptionManagement from './pages/SubscriptionManagement';
 import Security from './pages/Security';
 import AboutUs from './pages/AboutUs';
 import AutomaticPayment from './pages/AutomaticPayment';
@@ -256,7 +256,7 @@ function App(): ReactElement {
           <Route path="/WalletManagement" element={<WalletManagement />} />
           <Route path="/CategoryManagement" element={<CategoryManagement />} />
           <Route path="/ContactUs" element={<ContactUs />} />
-          <Route path="/Subscription" element={<Subscription />} />
+          <Route path="/Subscription" element={<SubscriptionManagement />} />
           <Route path="/Security" element={<Security />} />
           <Route path="/AboutUs" element={<AboutUs />} />
           <Route path="/AutomaticPayment" element={<AutomaticPayment />} />
