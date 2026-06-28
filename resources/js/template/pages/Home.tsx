@@ -204,9 +204,9 @@ function buildMonthSummary(summary?: DashboardSummaryPeriod) {
     income: fmtVND(income),
     expense: expense > 0 ? fmtSignedVND(-expense) : fmtVND(0),
     total: fmtSignedVND(net),
-    incomeColor: income > 0 ? '#22c55e' : '#9ca3af',
-    expenseColor: expense > 0 ? '#ef4444' : '#9ca3af',
-    totalColor: net < 0 ? '#ef4444' : net > 0 ? '#22c55e' : '#9ca3af',
+    incomeColor: income > 0 ? '#28a745' : '#9ca3af',
+    expenseColor: expense > 0 ? '#dc3545' : '#9ca3af',
+    totalColor: net < 0 ? '#dc3545' : net > 0 ? '#28a745' : '#9ca3af',
   }
 }
 
@@ -599,31 +599,42 @@ const bottomNavItems: BottomNavItem[] = [
 const MonthCol: React.FC<{
   title: string; sub: string; expensePct: number; incomePct: number; isEmpty?: boolean;
   income: string; expense: string; total: string; incomeColor: string; expenseColor: string; totalColor: string;
-}> = ({ title, sub, expensePct, incomePct, isEmpty, income, expense, total, incomeColor, expenseColor, totalColor }) => {
+}> = ({ title, expensePct, incomePct, isEmpty, income, expense, total, incomeColor, expenseColor, totalColor }) => {
   const { t } = useTranslation()
   return (
     <div style={{ flex: 1, minWidth: 0 }}>
-      <p style={{ fontSize: '11px', color: '#9ca3af', marginBottom: '2px', fontWeight: 500 }}>{title}</p>
-      <p style={{ fontSize: '11px', fontWeight: 700, color: '#121212', marginBottom: '8px' }}>{sub}</p>
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <HalfDonut expensePct={expensePct} incomePct={incomePct} isEmpty={isEmpty} size={100} />
-      </div>
-      <div style={{ marginTop: '10px' }}>
-        <div style={S.row}>
-          <span style={S.dot('#22c55e')} />
-          <span style={S.statLabel}>{t('Income:')}</span>
-          <span style={S.statVal(incomeColor)}>{income}</span>
+      {/* Column header — only the period label ("This Month"), no date sub-text */}
+      <p style={{ fontSize: '11px', fontWeight: 700, color: '#121212', marginBottom: '8px', fontFamily: 'Satoshi, sans-serif' }}>{title}</p>
+
+      {/* Horizontal layout: rotated chart on the left, metrics on the right */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+
+        {/* Chart container — keeps a stable bounding box after 90° rotation */}
+        <div style={{ width: 56, height: 100, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ transform: 'rotate(90deg)', transformOrigin: 'center' }}>
+            <HalfDonut expensePct={expensePct} incomePct={incomePct} isEmpty={isEmpty} size={100} />
+          </div>
         </div>
-        <div style={S.row}>
-          <span style={S.dot('#ef4444')} />
-          <span style={S.statLabel}>{t('Expense:')}</span>
-          <span style={S.statVal(expenseColor)}>{expense}</span>
+
+        {/* Metrics — "Title: Value" on each line */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={S.row}>
+            <span style={S.dot('#28a745')} />
+            <span style={S.statLabel}>{t('Income:')}</span>
+            <span style={S.statVal(incomeColor)}>{income}</span>
+          </div>
+          <div style={S.row}>
+            <span style={S.dot('#dc3545')} />
+            <span style={S.statLabel}>{t('Expense:')}</span>
+            <span style={S.statVal(expenseColor)}>{expense}</span>
+          </div>
+          <div style={S.row}>
+            <span style={S.dot(totalColor === '#dc3545' ? '#dc3545' : '#d1d5db')} />
+            <span style={S.statLabel}>{t('Total:')}</span>
+            <span style={S.statVal(totalColor)}>{total}</span>
+          </div>
         </div>
-        <div style={S.row}>
-          <span style={S.dot(totalColor === '#ef4444' ? '#ef4444' : '#d1d5db')} />
-          <span style={S.statLabel}>{t('Total:')}</span>
-          <span style={S.statVal(totalColor)}>{total}</span>
-        </div>
+
       </div>
     </div>
   )
