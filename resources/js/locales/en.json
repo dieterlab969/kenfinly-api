@@ -484,5 +484,12 @@
   "Something went wrong. Please try again.": "Something went wrong. Please try again.",
   "Cancel": "Cancel",
   "Delete": "Delete",
-  "Deleting…": "Deleting…"
+  "Deleting…": "Deleting…",
+  "Full Name": "Full Name",
+  "Password": "Password",
+  "Confirm Password": "Confirm Password",
+  "Already have an account": "Already have an account",
+  "Log in here": "Log in here",
+  "Registration successful! Please check your email to verify your account.": "Registration successful! Please check your email to verify your account.",
+  "Registration failed. Please try again.": "Registration failed. Please try again."
 }

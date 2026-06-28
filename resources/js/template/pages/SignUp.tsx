@@ -140,7 +140,7 @@ const SignUp: React.FC = () => {
       ) as RegisterResult;
 
       if (result.success) {
-        setSuccessMessage(result.message || t('auth.register_success'));
+        setSuccessMessage(result.message || t('Registration successful! Please check your email to verify your account.'));
         // Token already stored in AuthContext — go straight to the app.
         setTimeout(() => {
           if (redirectTo) {
@@ -154,11 +154,11 @@ const SignUp: React.FC = () => {
         if (failure.errors) {
           setErrors(failure.errors);
         } else {
-          setErrors({ general: [failure.message || t('auth.register_error')] });
+          setErrors({ general: [failure.message || t('Registration failed. Please try again.')] });
         }
       }
     } catch {
-      setErrors({ general: [t('auth.register_error')] });
+      setErrors({ general: [t('Registration failed. Please try again.')] });
     } finally {
       setLoading(false);
     }
@@ -191,7 +191,7 @@ const SignUp: React.FC = () => {
           <div className="let-you-social-sec" id="sign-up-main">
             <div className="lets_you_in_box">
               <h1 className="d-none">hidden</h1>
-              <h2 className="lets_you_in_text">{t('auth.register')}</h2>
+              <h2 className="lets_you_in_text">{t('Create Account')}</h2>
 
               {/* Cart-checkout context notice */}
               {isCartRedirect && (
@@ -276,7 +276,7 @@ const SignUp: React.FC = () => {
                     type="text"
                     id="name"
                     name="name"
-                    placeholder={t('auth.name')}
+                    placeholder={t('Full Name')}
                     className="sign-in-custom-input"
                     value={formData.name}
                     onChange={handleChange}
@@ -294,7 +294,7 @@ const SignUp: React.FC = () => {
                     type="email"
                     id="email"
                     name="email"
-                    placeholder={t('auth.email')}
+                    placeholder={t('Email Address')}
                     className="sign-in-custom-input"
                     value={formData.email}
                     onChange={handleChange}
@@ -312,7 +312,7 @@ const SignUp: React.FC = () => {
                     type="password"
                     id="password"
                     name="password"
-                    placeholder={t('auth.password')}
+                    placeholder={t('Password')}
                     className="sign-in-custom-input"
                     value={formData.password}
                     onChange={handleChange}
@@ -330,7 +330,7 @@ const SignUp: React.FC = () => {
                     type="password"
                     id="passwordConfirmation"
                     name="passwordConfirmation"
-                    placeholder={t('auth.confirm_password')}
+                    placeholder={t('Confirm Password')}
                     className="sign-in-custom-input"
                     value={formData.passwordConfirmation}
                     onChange={handleChange}
@@ -346,7 +346,7 @@ const SignUp: React.FC = () => {
                     className="auth-submit-btn"
                     disabled={loading}
                   >
-                    {loading ? `${t('auth.sign_up')}…` : t('auth.sign_up')}
+                    {loading ? `${t('Sign Up')}…` : t('Sign Up')}
                   </button>
                 </div>
 
@@ -358,7 +358,7 @@ const SignUp: React.FC = () => {
           <footer id="let-you-footer">
             <div className="block-footer">
               <p>
-                {t('auth.have_account')}{' '}
+                {t('Already have an account?')}{' '}
                 <Link
                   to={
                     redirectTo
@@ -366,7 +366,7 @@ const SignUp: React.FC = () => {
                       : '/SignIn'
                   }
                 >
-                  {t('auth.login_here')}
+                  {t('Log in here')}
                 </Link>
               </p>
             </div>
