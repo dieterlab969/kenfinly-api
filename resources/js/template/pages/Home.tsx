@@ -616,20 +616,17 @@ const MonthCol: React.FC<{
           </div>
         </div>
 
-        {/* Metrics — "Title: Value" on each line */}
+        {/* Metrics — "Label: Value" plain text rows, no dot icons */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={S.row}>
-            <span style={S.dot('#28a745')} />
             <span style={S.statLabel}>{t('Income:')}</span>
             <span style={S.statVal(incomeColor)}>{income}</span>
           </div>
           <div style={S.row}>
-            <span style={S.dot('#dc3545')} />
             <span style={S.statLabel}>{t('Expense:')}</span>
             <span style={S.statVal(expenseColor)}>{expense}</span>
           </div>
           <div style={S.row}>
-            <span style={S.dot(totalColor === '#dc3545' ? '#dc3545' : '#d1d5db')} />
             <span style={S.statLabel}>{t('Total:')}</span>
             <span style={S.statVal(totalColor)}>{total}</span>
           </div>
