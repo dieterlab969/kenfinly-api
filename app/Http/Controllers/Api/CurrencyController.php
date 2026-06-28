@@ -3,15 +3,17 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Currency;
 use App\Services\CurrencyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 /**
- * Exposes currency/country detection over the API so the React SPA can
- * read the result on initial load and cache it in app state.
+ * Exposes currency data and geo-detection over the API.
  *
  * Routes:
+ *   GET  /api/currencies         — list all app-active currencies (public)
  *   GET  /api/currency/detect   — detect & return currency + country for visitor
  *   POST /api/currency/save     — save the authenticated user's explicit preference
  */
@@ -40,6 +42,45 @@ class CurrencyController extends Controller
      *   }
      * }
      */
+
+    /**
+     * Return all app-active currencies ordered by display_order.
+     *
+     * PUBLIC endpoint — no authentication required.
+     * Mirrors the Language module's index() pattern for consistency.
+     *
+     * The SQL executed is:
+     *   SELECT code, name, symbol, display_order
+     *   FROM   currencies
+     *   WHERE  is_active = true
+     *   ORDER  BY display_order ASC;
+     *
+     * GET /api/currencies
+     *
+     * @return JsonResponse {
+     *   "success": true,
+     *   "currencies": [
+     *     { "code": "USD", "name": "US Dollar", "symbol": "$", "display_order": 1 },
+     *     { "code": "VND", "name": "Vietnamese Dong", "symbol": "₫", "display_order": 2 }
+     *   ]
+     * }
+     */
+    public function index(): JsonResponse
+    {
+        $currencies = Currency::getActive()
+            ->map(fn (Currency $c) => [
+                'code'          => $c->code,
+                'name'          => $c->name,
+                'symbol'        => $c->symbol,
+                'display_order' => $c->display_order,
+            ]);
+
+        return response()->json([
+            'success'    => true,
+            'currencies' => $currencies,
+        ]);
+    }
+
     public function detect(Request $request): JsonResponse
     {
         $currency    = $this->currencyService->detectUserCurrency($request);
@@ -64,7 +105,14 @@ class CurrencyController extends Controller
      */
     public function save(Request $request): JsonResponse
     {
-        $request->validate(['currency' => 'required|in:VND,USD']);
+        $activeCodes = Currency::activeCodes();
+        $request->validate([
+            'currency' => [
+                'required',
+                'string',
+                $activeCodes ? Rule::in($activeCodes) : 'in:VND,USD',
+            ],
+        ]);
 
         $user = auth('api')->user();
 

@@ -228,6 +228,7 @@ Route::post('/webhooks/payment', [PaymentController::class, 'webhook']);
 
 // ── Currency / Geo-detection Routes ──────────────────────────────────────
 // Guest-accessible: React SPA calls this on load to get prices + gateway hint.
+Route::get('/currencies', [CurrencyController::class, 'index']);
 Route::get('/currency/detect', [CurrencyController::class, 'detect']);
 // Auth-required: save the user's explicit currency preference.
 Route::middleware('auth:api')->post('/currency/save', [CurrencyController::class, 'save']);
