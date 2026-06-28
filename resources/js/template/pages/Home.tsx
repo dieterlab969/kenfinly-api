@@ -1031,23 +1031,30 @@ const Home: React.FC = () => {
                       }}>
                         {getCategoryIcon(tx.category?.slug)}
                       </div>
+                      {/* Left column — category name (bold) + wallet name (gray) */}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{
                           fontSize: '14px', fontWeight: 600, color: '#121212',
                           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                           fontFamily: 'Satoshi, sans-serif',
                         }}>{tx.category?.name || (tx.type === 'income' ? t('Income') : t('Expense'))}</p>
-                        <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px' }}>
-                          {[getTransactionDateLabel(tx), tx.account?.name].filter(Boolean).join(' · ')}
+                        <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px', fontFamily: 'Satoshi, sans-serif' }}>
+                          {tx.account?.name || ''}
                         </p>
                       </div>
-                      <span style={{
-                        fontSize: '14px', fontWeight: 700, flexShrink: 0,
-                        color: signedAmount >= 0 ? '#22c55e' : '#ef4444',
-                        fontFamily: 'Satoshi, sans-serif',
-                      }}>
-                        {fmtSignedVND(signedAmount)}
-                      </span>
+                      {/* Right column — amount (bold, color-coded) + date (gray), mirrors left height */}
+                      <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                        <p style={{
+                          fontSize: '14px', fontWeight: 700,
+                          color: signedAmount >= 0 ? '#28a745' : '#dc3545',
+                          fontFamily: 'Satoshi, sans-serif',
+                        }}>
+                          {fmtSignedVND(signedAmount)}
+                        </p>
+                        <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '2px', fontFamily: 'Satoshi, sans-serif' }}>
+                          {getTransactionDateLabel(tx)}
+                        </p>
+                      </div>
                     </div>
                     )
                   })}
