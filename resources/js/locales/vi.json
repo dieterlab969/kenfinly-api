@@ -496,5 +496,12 @@
   "Something went wrong. Please try again.": "Đã xảy ra lỗi. Vui lòng thử lại.",
   "Cancel": "Huỷ",
   "Delete": "Xoá",
-  "Deleting…": "Đang xoá…"
+  "Deleting…": "Đang xoá…",
+  "Full Name": "Họ và tên",
+  "Password": "Mật khẩu",
+  "Confirm Password": "Xác nhận mật khẩu",
+  "Already have an account": "Bạn đã có tài khoản?",
+  "Log in here": "Đăng nhập tại đây",
+  "Registration successful! Please check your email to verify your account.": "Đăng ký thành công! Vui lòng kiểm tra email để xác minh tài khoản.",
+  "Registration failed. Please try again.": "Đăng ký thất bại. Vui lòng thử lại."
 }
