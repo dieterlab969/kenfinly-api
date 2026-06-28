@@ -601,6 +601,9 @@ const MonthCol: React.FC<{
   income: string; expense: string; total: string; incomeColor: string; expenseColor: string; totalColor: string;
 }> = ({ title, expensePct, incomePct, isEmpty, income, expense, total, incomeColor, expenseColor, totalColor }) => {
   const { t } = useTranslation()
+  console.log('Income label:', t('income'));
+  console.log('Expense label:', t('expense'));
+  console.log('Total label:', t('total'));
   return (
     <div style={{ flex: 1, minWidth: 0 }}>
       {/* Column header — only the period label ("This Month"), no date sub-text */}
@@ -619,15 +622,15 @@ const MonthCol: React.FC<{
         {/* Metrics — "Label: Value" plain text rows, no dot icons */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={S.row}>
-            <span style={S.statLabel}>{t('Income:')}</span>
+            <span style={S.statLabel}>{t('income')}</span>
             <span style={S.statVal(incomeColor)}>{income}</span>
           </div>
           <div style={S.row}>
-            <span style={S.statLabel}>{t('Expense:')}</span>
+            <span style={S.statLabel}>{t('expense')}</span>
             <span style={S.statVal(expenseColor)}>{expense}</span>
           </div>
           <div style={S.row}>
-            <span style={S.statLabel}>{t('Total:')}</span>
+            <span style={S.statLabel}>{t('total')}</span>
             <span style={S.statVal(totalColor)}>{total}</span>
           </div>
         </div>
