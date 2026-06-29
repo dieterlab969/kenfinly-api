@@ -49,7 +49,7 @@ const Splashscreen: React.FC = () => {
                 }
         };
 
-        const goToSlide = (index) => {
+        const goToSlide = (index: number): void => {
                 setActiveSlide(index);
         };
 
