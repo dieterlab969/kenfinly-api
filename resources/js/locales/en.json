@@ -491,5 +491,14 @@
   "Already have an account": "Already have an account",
   "Log in here": "Log in here",
   "Registration successful! Please check your email to verify your account.": "Registration successful! Please check your email to verify your account.",
-  "Registration failed. Please try again.": "Registration failed. Please try again."
+  "Registration failed. Please try again.": "Registration failed. Please try again.",
+
+  "onboarding.slide1.title": "Smart Cash Flow Control",
+  "onboarding.slide1.description": "Manage all your wallets, bank accounts, and recurring expenses in one place. Every transaction clear, nothing lost.",
+  "onboarding.slide2.title": "Your Personal AI Financial Assistant",
+  "onboarding.slide2.description": "Get in-depth analysis of your spending habits, automated savings plan suggestions, and smart budget optimization powered by artificial intelligence.",
+  "onboarding.slide3.title": "Financial Freedom Within Reach",
+  "onboarding.slide3.description": "Set financial goals, track spending limits, and start your smart wealth-building journey today.",
+  "onboarding.next": "Next",
+  "onboarding.getStarted": "Get Started"
 }

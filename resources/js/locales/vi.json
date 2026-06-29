@@ -503,5 +503,14 @@
   "Already have an account": "Bạn đã có tài khoản?",
   "Log in here": "Đăng nhập tại đây",
   "Registration successful! Please check your email to verify your account.": "Đăng ký thành công! Vui lòng kiểm tra email để xác minh tài khoản.",
-  "Registration failed. Please try again.": "Đăng ký thất bại. Vui lòng thử lại."
+  "Registration failed. Please try again.": "Đăng ký thất bại. Vui lòng thử lại.",
+
+  "onboarding.slide1.title": "Kiểm Soát Dòng Tiền Thông Minh",
+  "onboarding.slide1.description": "Quản lý toàn bộ ví, tài khoản ngân hàng và chi phí định kỳ tại một nơi duy nhất. Rõ ràng từng đồng, không lo thất thoát.",
+  "onboarding.slide2.title": "Trợ Lý Tài Chính AI Riêng Bạn",
+  "onboarding.slide2.description": "Nhận phân tích chuyên sâu về thói quen chi tiêu, tự động gợi ý kế hoạch tiết kiệm và tối ưu hóa ngân sách hiệu quả bằng trí tuệ nhân tạo.",
+  "onboarding.slide3.title": "Tự Do Tài Chính Trong Tầm Tay",
+  "onboarding.slide3.description": "Thiết lập mục tiêu tài chính, theo dõi hạn mức chi tiêu và bắt đầu hành trình tích lũy thông minh ngay hôm nay.",
+  "onboarding.next": "Tiếp theo",
+  "onboarding.getStarted": "Bắt đầu ngay"
 }
