@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import logo from '../assets/images/splashscreen/logo.png'
 import onboarding1 from '../assets/images/main-img/onboarding1-img.png'
 import onboarding2 from '../assets/images/main-img/onboarding2-img.png'
@@ -7,6 +8,8 @@ import { Link } from 'react-router-dom';
 
 
 const Splashscreen: React.FC = () => {
+        const { t } = useTranslation();
+
         // Loader Mask
         const [showSplash, setShowSplash] = useState(true);
         useEffect(() => {
@@ -21,20 +24,20 @@ const Splashscreen: React.FC = () => {
                 {
                         id: 1,
                         image: onboarding1,
-                        title: 'Streamlining Online Payments Process',
-                        description: 'Odio venenatis egestas dignissim ante duis amet mauris nunc mauris.',
+                        title: t('onboarding.slide1.title'),
+                        description: t('onboarding.slide1.description'),
                 },
                 {
                         id: 2,
                         image: onboarding2,
-                        title: 'Safe & Reliable Anytime. Anywhere.',
-                        description: 'Elevate Your Transaction Experience with Absolute Security and Dependability',
+                        title: t('onboarding.slide2.title'),
+                        description: t('onboarding.slide2.description'),
                 },
                 {
                         id: 3,
                         image: onboarding3,
-                        title: 'Let’s Manage Your Financials Now!',
-                        description: 'Sollicitudin nibh id aliquam at a non. Facilisis convallis sed ultrices fermentum.',
+                        title: t('onboarding.slide3.title'),
+                        description: t('onboarding.slide3.description'),
                 },
         ];
 
@@ -46,7 +49,7 @@ const Splashscreen: React.FC = () => {
                 }
         };
 
-        const goToSlide = (index) => {
+        const goToSlide = (index: number): void => {
                 setActiveSlide(index);
         };
 
@@ -89,11 +92,11 @@ const Splashscreen: React.FC = () => {
                                                                                                         <div className="slider-sec-btn next-btn">
                                                                                                                 {index < slides.length - 1 ? (
                                                                                                                         <Link to="#" onClick={nextSlide} className="w-100">
-                                                                                                                                Next
+                                                                                                                                {t('onboarding.next')}
                                                                                                                         </Link>
                                                                                                                 ) : (
                                                                                                                         <Link to="/SignIn" className="w-100">
-                                                                                                                                Get started
+                                                                                                                                {t('onboarding.getStarted')}
                                                                                                                         </Link>
                                                                                                                 )}
                                                                                                         </div>
