@@ -906,7 +906,7 @@ const Home: React.FC = () => {
               <div className="verify-number-top-content">
                 <div className="setting-header">
                   <div className="setting-left">
-                    <span><img src={Logo} alt="logo" /></span>
+                    <span></span>
                     <span className="setting-txt">{t('Dashboard')}</span>
                   </div>
                   <div className="setting-right">
