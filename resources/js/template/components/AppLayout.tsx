@@ -3,14 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { TrendingUp, TrendingDown, ArrowLeftRight } from 'lucide-react'
 import BottomNavigation from './BottomNavigation'
-
-// ─── Custom events dispatched to active pages ─────────────────────────────────
-// Home.tsx listens for 'kenfinly:quick-add:income' / 'kenfinly:quick-add:expense'
-// and 'kenfinly:quick-add:transfer' to open its modals.
-
-function dispatchQuickAdd(type: 'income' | 'expense' | 'transfer') {
-    window.dispatchEvent(new CustomEvent(`kenfinly:quick-add:${type}`))
-}
+import { useQuickAdd } from '../context/QuickAddContext'
 
 // ─── FAB speed-dial menu ──────────────────────────────────────────────────────
 
@@ -26,6 +19,7 @@ interface FabOption {
 
 const AppLayout: React.FC = () => {
     const { t } = useTranslation()
+    const { triggerQuickAdd } = useQuickAdd()
     const [fabOpen, setFabOpen] = useState(false)
 
     const handleFabToggle = useCallback(() => setFabOpen(v => !v), [])
@@ -37,21 +31,21 @@ const AppLayout: React.FC = () => {
             Icon: TrendingUp,
             bg: 'linear-gradient(145deg, #22c55e, #16a34a)',
             shadow: '0 8px 28px rgba(34,197,94,0.50)',
-            action: () => { closeFab(); dispatchQuickAdd('income') },
+            action: () => { closeFab(); triggerQuickAdd('income') },
         },
         {
             label: t('Expense'),
             Icon: TrendingDown,
             bg: 'linear-gradient(145deg, #ef4444, #dc2626)',
             shadow: '0 8px 28px rgba(239,68,68,0.50)',
-            action: () => { closeFab(); dispatchQuickAdd('expense') },
+            action: () => { closeFab(); triggerQuickAdd('expense') },
         },
         {
             label: t('Transfer'),
             Icon: ArrowLeftRight,
             bg: 'linear-gradient(145deg, #3b82f6, #1d4ed8)',
             shadow: '0 8px 28px rgba(59,130,246,0.50)',
-            action: () => { closeFab(); dispatchQuickAdd('transfer') },
+            action: () => { closeFab(); triggerQuickAdd('transfer') },
         },
     ]
 

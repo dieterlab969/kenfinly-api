@@ -12,6 +12,7 @@ import { processImageForUpload, validateImageFile, formatFileSize } from '../../
 import { useTranslation } from 'react-i18next'
 import Offcanvas from 'react-bootstrap/Offcanvas'
 import { useSecureLogout } from '../hooks/useSecureLogout'
+import { useQuickAdd } from '../context/QuickAddContext'
 
 type ApiAmount = string | number | null | undefined
 type TransactionType = 'income' | 'expense'
@@ -742,23 +743,20 @@ const Home: React.FC = () => {
   }, [])
 
   // ── FAB quick-add events from AppLayout ──────────────────────────────────
-  // AppLayout dispatches these when the user picks Income / Expense / Transfer
-  // from the speed-dial that floats above the bottom nav.
+  // AppLayout triggers these via QuickAddContext when the user picks
+  // Income / Expense / Transfer from the FAB speed-dial.
+  const { pendingAction, clearQuickAdd } = useQuickAdd()
   useEffect(() => {
-    const onIncome   = () => openQuickAdd('income')
-    const onExpense  = () => openQuickAdd('expense')
-    const onTransfer = () => setShowTransferModal(true)
-    window.addEventListener('kenfinly:quick-add:income',   onIncome)
-    window.addEventListener('kenfinly:quick-add:expense',  onExpense)
-    window.addEventListener('kenfinly:quick-add:transfer', onTransfer)
-    return () => {
-      window.removeEventListener('kenfinly:quick-add:income',   onIncome)
-      window.removeEventListener('kenfinly:quick-add:expense',  onExpense)
-      window.removeEventListener('kenfinly:quick-add:transfer', onTransfer)
+    if (!pendingAction) return
+    if (pendingAction === 'transfer') {
+      setShowTransferModal(true)
+    } else {
+      openQuickAdd(pendingAction)
     }
-  // openQuickAdd is stable (no deps) — safe to omit from dep-array
+    clearQuickAdd()
+  // openQuickAdd is stable; clearQuickAdd is memoised — safe deps
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [pendingAction])
 
   const handleConfirmLogout = async () => {
     setLogoutLoading(true)

@@ -140,7 +140,8 @@ import DeleteDeactivateAccount from './pages/DeleteDeactivateAccount';
 import InviteFriend from './pages/InviteFriend';
 import PersonalInfo from './pages/PersonalInfo';
 import HaloDashboard from '../pages/halo/HaloDashboard';
-import AppLayout from './components/AppLayout';
+import AppLayout from './components/AppLayout'
+import { QuickAddProvider } from './context/QuickAddContext';
 
 function App(): ReactElement {
   return (
@@ -160,7 +161,7 @@ function App(): ReactElement {
           <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
           <Route path="/auth/facebook/success" element={<FacebookAuthSuccess />} />
           {/* ── App shell with persistent bottom navigation ── */}
-          <Route element={<AppLayout />}>
+          <Route element={<QuickAddProvider><AppLayout /></QuickAddProvider>}>
             <Route path="/Home"      element={<Home />} />
             <Route path="/analytics" element={<Analytics />} />
           </Route>
