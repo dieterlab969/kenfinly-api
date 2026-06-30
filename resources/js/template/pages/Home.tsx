@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Logo from '../assets/images/setting/logo.png'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import NotificationIcon from '../assets/svg/notification-icon.svg'
 import dotsIcon from '../assets/svg/dots-icon.svg'
 import icon1 from '../assets/images/tabbar/icon1.svg'
-import icon2 from '../assets/images/tabbar/icon2.svg'
 import icon3 from '../assets/images/tabbar/icon3.svg'
 import icon4 from '../assets/images/tabbar/icon4.svg'
+import icon5 from '../assets/images/tabbar/icon5.svg'
 import Setting from '../components/Setting.tsx'
 import api from '../../utils/api'
 import { formatCurrency, getCategoryIcon } from '../../constants/categories'
@@ -585,15 +585,15 @@ const S: HomeStyleMap = {
 }
 
 type BottomNavItem =
-  | { to: string; icon: string; label: string; active: boolean; center?: false }
-  | { to: null; icon: null; label: string; center: true; active?: false }
+  | { to: string; icon: string; label: string; center?: false }
+  | { to: null; icon: null; label: string; center: true }
 
 const bottomNavItems: BottomNavItem[] = [
-  { to: '/Home',     icon: icon1, label: 'Home',      active: true  },
-  { to: '/Activity', icon: icon2, label: 'Analytics', active: false },
-  { to: null,        icon: null,  label: 'QUICK ADD', center: true  },
-  { to: '/BarChart', icon: icon3, label: 'Goals',     active: false },
-  { to: '/Invoicing',icon: icon4, label: 'Reports',   active: false },
+  { to: '/Home',      icon: icon1, label: 'Home'       },
+  { to: '/analytics', icon: icon5, label: 'Phân tích' },
+  { to: null,         icon: null,  label: 'QUICK ADD', center: true },
+  { to: '/BarChart',  icon: icon3, label: 'Goals'      },
+  { to: '/Invoicing', icon: icon4, label: 'Reports'    },
 ]
 
 const MonthCol: React.FC<{
@@ -643,6 +643,7 @@ const MonthCol: React.FC<{
 const Home: React.FC = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
   const { logout } = useSecureLogout()
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -1189,11 +1190,21 @@ const Home: React.FC = () => {
                   </li>
                 )
               }
+              const isActive = location.pathname === item.to ||
+                (item.to === '/Home' && location.pathname === '/')
               return (
-                <li key={i} className={`list${item.active ? ' active' : ''}`}
+                <li key={i} className={`list${isActive ? ' active' : ''}`}
                   style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                   <Link to={item.to!}>
                     <i className="icon"><img src={item.icon!} alt={item.label} /></i>
+                    {item.to === '/analytics' && (
+                      <span style={{
+                        fontSize: '9px', fontWeight: 700, display: 'block', marginTop: '2px',
+                        color: isActive ? '#7B51F1' : '#9ca3af', textAlign: 'center',
+                      }}>
+                        {item.label}
+                      </span>
+                    )}
                     <span className="text"></span>
                   </Link>
                 </li>
