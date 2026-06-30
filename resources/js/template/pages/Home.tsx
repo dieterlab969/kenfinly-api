@@ -589,8 +589,8 @@ type BottomNavItem =
   | { to: null; icon: null; label: string; center: true }
 
 const bottomNavItems: BottomNavItem[] = [
-  { to: '/analytics', icon: icon5, label: 'Phân tích' },
   { to: '/Home',      icon: icon1, label: 'Home'       },
+  { to: '/analytics', icon: icon5, label: 'Phân tích' },
   { to: null,         icon: null,  label: 'QUICK ADD', center: true },
   { to: '/BarChart',  icon: icon3, label: 'Goals'      },
   { to: '/Invoicing', icon: icon4, label: 'Reports'    },
