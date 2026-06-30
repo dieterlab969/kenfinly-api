@@ -3,10 +3,6 @@ import Logo from '../assets/images/setting/logo.png'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import NotificationIcon from '../assets/svg/notification-icon.svg'
 import dotsIcon from '../assets/svg/dots-icon.svg'
-import icon1 from '../assets/images/tabbar/icon1.svg'
-import icon3 from '../assets/images/tabbar/icon3.svg'
-import icon4 from '../assets/images/tabbar/icon4.svg'
-import icon5 from '../assets/images/tabbar/icon5.svg'
 import Setting from '../components/Setting.tsx'
 import api from '../../utils/api'
 import { formatCurrency, getCategoryIcon } from '../../constants/categories'
@@ -16,6 +12,7 @@ import { processImageForUpload, validateImageFile, formatFileSize } from '../../
 import { useTranslation } from 'react-i18next'
 import Offcanvas from 'react-bootstrap/Offcanvas'
 import { useSecureLogout } from '../hooks/useSecureLogout'
+import { useQuickAdd } from '../context/QuickAddContext'
 
 type ApiAmount = string | number | null | undefined
 type TransactionType = 'income' | 'expense'
@@ -584,18 +581,6 @@ const S: HomeStyleMap = {
   fieldWrap: { marginBottom: '16px' },
 }
 
-type BottomNavItem =
-  | { to: string; icon: string; label: string; center?: false }
-  | { to: null; icon: null; label: string; center: true }
-
-const bottomNavItems: BottomNavItem[] = [
-  { to: '/Home',      icon: icon1, label: 'Home'       },
-  { to: '/analytics', icon: icon5, label: 'Phân tích' },
-  { to: null,         icon: null,  label: 'QUICK ADD', center: true },
-  { to: '/BarChart',  icon: icon3, label: 'Goals'      },
-  { to: '/Invoicing', icon: icon4, label: 'Reports'    },
-]
-
 const MonthCol: React.FC<{
   title: string; sub: string; expensePct: number; incomePct: number; isEmpty?: boolean;
   income: string; expense: string; total: string; incomeColor: string; expenseColor: string; totalColor: string;
@@ -652,7 +637,6 @@ const Home: React.FC = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isLogoutOpen, setIsLogoutOpen] = useState(false)
   const [logoutLoading, setLogoutLoading] = useState(false)
-  const [fabOpen, setFabOpen] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [transactionType, setTransactionType] = useState<TransactionType>('expense')
   const [amount, setAmount] = useState('')
@@ -758,6 +742,22 @@ const Home: React.FC = () => {
     return () => window.removeEventListener('kenfinly:open-logout', handler)
   }, [])
 
+  // ── FAB quick-add events from AppLayout ──────────────────────────────────
+  // AppLayout triggers these via QuickAddContext when the user picks
+  // Income / Expense / Transfer from the FAB speed-dial.
+  const { pendingAction, clearQuickAdd } = useQuickAdd()
+  useEffect(() => {
+    if (!pendingAction) return
+    if (pendingAction === 'transfer') {
+      setShowTransferModal(true)
+    } else {
+      openQuickAdd(pendingAction)
+    }
+    clearQuickAdd()
+  // openQuickAdd is stable; clearQuickAdd is memoised — safe deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingAction])
+
   const handleConfirmLogout = async () => {
     setLogoutLoading(true)
     try {
@@ -790,7 +790,6 @@ const Home: React.FC = () => {
 
   const openQuickAdd = (type: TransactionType) => {
     setTransactionType(type)
-    setFabOpen(false)
     setShowModal(true)
     setAmount('')
     setCategory('')
@@ -1082,136 +1081,8 @@ const Home: React.FC = () => {
           </Offcanvas.Body>
         </Offcanvas>
 
-        <div className="bottom-menu-svg-main">
-          <div className="bottom-menu-svg">
-            <div className="gol3" onClick={() => setFabOpen(f => !f)} style={{ cursor: 'pointer' }}>
-              <div className="add-to-cart-icon">
-                <span style={{
-                  color: '#fff', fontSize: '32px', fontWeight: 300, lineHeight: 1,
-                  display: 'block', userSelect: 'none',
-                  transform: fabOpen ? 'rotate(45deg)' : 'none',
-                  transition: 'transform 0.22s ease',
-                }}>+</span>
-              </div>
-            </div>
-            <svg className="bottom-menu-svg-design" width="600" height="150" viewBox="0 0 375 104" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g filter="url(#filter0_b_1_13394)">
-                <path d="M188 45.5313C205.673 45.5313 220 31.2045 220 13.5313C220 7.32365 224.732 0.674172 230.917 1.20338L360.364 12.2791C368.642 12.9873 375 19.913 375 28.2208V103.531H0V28.2275C0 19.9169 6.36254 12.9898 14.6432 12.2851L145.074 1.18463C151.266 0.657657 156 7.31698 156 13.5313C156 31.2045 170.327 45.5313 188 45.5313Z" fill="url(#paint0_linear_1_13394)" />
-              </g>
-              <defs>
-                <filter id="filter0_b_1_13394" x="-24" y="-22.8447" width="423" height="150.376" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
-                  <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                  <feGaussianBlur in="BackgroundImageFix" stdDeviation="12" />
-                  <feComposite in2="SourceAlpha" operator="in" result="effect1_backgroundBlur_1_13394" />
-                  <feBlend mode="normal" in="SourceGraphic" in2="effect1_backgroundBlur_1_13394" result="shape" />
-                </filter>
-                <linearGradient id="paint0_linear_1_13394" x1="187.5" y1="0" x2="188" y2="103.531" gradientUnits="userSpaceOnUse">
-                  <stop offset="0" stopOpacity="0.24" />
-                  <stop offset="1" stopOpacity="0.16" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
-        </div>
+        {/* Bottom navigation is now rendered by AppLayout > BottomNavigation */}
 
-        {fabOpen && (
-          <div
-            style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(2px)' }}
-            onClick={() => setFabOpen(false)}
-          />
-        )}
-
-        {fabOpen && (
-          <div style={{
-            position: 'fixed', bottom: '112px', left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex', gap: '24px', zIndex: 90, alignItems: 'center',
-            animation: 'fadeUp 0.2s ease',
-          }}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-              <button
-                onClick={() => openQuickAdd('income')}
-                style={{
-                  width: '60px', height: '60px', borderRadius: '50%',
-                  background: 'linear-gradient(145deg, #22c55e, #16a34a)',
-                  border: 'none', color: '#fff', cursor: 'pointer',
-                  boxShadow: '0 8px 28px rgba(34,197,94,0.5)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1px',
-                }}
-              >
-                <span style={{ fontSize: '22px', lineHeight: 1, fontWeight: 300 }}>+</span>
-                <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.5px' }}>VND</span>
-              </button>
-              <span style={{ fontSize: '10px', color: '#fff', fontWeight: 600, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>{t('Income')}</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-              <button
-                onClick={() => openQuickAdd('expense')}
-                style={{
-                  width: '60px', height: '60px', borderRadius: '50%',
-                  background: 'linear-gradient(145deg, #ef4444, #dc2626)',
-                  border: 'none', color: '#fff', cursor: 'pointer',
-                  boxShadow: '0 8px 28px rgba(239,68,68,0.5)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1px',
-                }}
-              >
-                <span style={{ fontSize: '22px', lineHeight: 1, fontWeight: 300 }}>−</span>
-                <span style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.5px' }}>VND</span>
-              </button>
-              <span style={{ fontSize: '10px', color: '#fff', fontWeight: 600, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>{t('Expense')}</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-              <button
-                onClick={() => { setFabOpen(false); setShowTransferModal(true) }}
-                style={{
-                  width: '60px', height: '60px', borderRadius: '50%',
-                  background: 'linear-gradient(145deg, #3b82f6, #1d4ed8)',
-                  border: 'none', color: '#fff', cursor: 'pointer',
-                  boxShadow: '0 8px 28px rgba(59,130,246,0.5)',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1px',
-                }}
-              >
-                <span style={{ fontSize: '18px', lineHeight: 1 }}>⇄</span>
-              </button>
-              <span style={{ fontSize: '10px', color: '#fff', fontWeight: 600, textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>{t('Transfer')}</span>
-            </div>
-          </div>
-        )}
-
-        <div className="navigation">
-          <ul className="listWrap" style={{ alignItems: 'flex-start' }}>
-            {bottomNavItems.map((item, i) => {
-              if (item.center) {
-                return (
-                  <li key={i} className="list" style={{ visibility: 'hidden', width: '80px', textAlign: 'center' }}>
-                    <span style={{ fontSize: '8px', color: '#7B51F1', fontWeight: 700, display: 'block', marginTop: '44px' }}>
-                      {t(item.label)}
-                    </span>
-                  </li>
-                )
-              }
-              const isActive = location.pathname === item.to ||
-                (item.to === '/Home' && location.pathname === '/')
-              return (
-                <li key={i} className={`list${isActive ? ' active' : ''}`}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <Link to={item.to!}>
-                    <i className="icon"><img src={item.icon!} alt={item.label} /></i>
-                    {item.to === '/analytics' && (
-                      <span style={{
-                        fontSize: '9px', fontWeight: 700, display: 'block', marginTop: '2px',
-                        color: isActive ? '#7B51F1' : '#9ca3af', textAlign: 'center',
-                      }}>
-                        {item.label}
-                      </span>
-                    )}
-                    <span className="text"></span>
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
 
         {/* ── Logout confirmation sheet (react-bootstrap — no vanilla JS timing issues) ── */}
         <Offcanvas
