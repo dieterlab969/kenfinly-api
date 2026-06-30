@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use App\Models\Account;
+use App\Services\LedgerSummaryService;
 use App\Services\TransactionPhotoService;
 use App\Services\TransactionChangeLogService;
 use Illuminate\Http\Request;
@@ -14,13 +15,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Controller for managing financial transactions via API.
+ * Financial transactions — CRUD, photo attachments, and dashboard data.
  *
- * Provides CRUD operations for transactions including creation, retrieval,
- * updating, and deletion. Also handles transaction photo management and
- * provides dashboard data with financial summaries and trends.
+ * All write operations update the account balance and ledger summaries
+ * atomically. Halo-sourced transactions are immutable (Standard 5).
  *
- * Uses authorization policies to control access to transaction resources.
+ * @tags Transactions
  */
 class TransactionController extends Controller
 {
@@ -39,19 +39,29 @@ class TransactionController extends Controller
     protected $changeLogService;
 
     /**
+     * Ledger daily summary service (Standard 4 — write-time rollup).
+     *
+     * @var LedgerSummaryService
+     */
+    protected $ledgerSummary;
+
+    /**
      * TransactionController constructor.
      *
      * Initializes services and sets up authorization policies for transaction resources.
      *
      * @param TransactionPhotoService $photoService Service for handling transaction photos.
      * @param TransactionChangeLogService $changeLogService Service for logging transaction changes.
+     * @param LedgerSummaryService $ledgerSummary Service that updates ledger_daily_summaries at write time.
      */
     public function __construct(
         TransactionPhotoService $photoService,
-        TransactionChangeLogService $changeLogService
+        TransactionChangeLogService $changeLogService,
+        LedgerSummaryService $ledgerSummary
     ) {
         $this->photoService = $photoService;
         $this->changeLogService = $changeLogService;
+        $this->ledgerSummary = $ledgerSummary;
         $this->authorizeResource(Transaction::class, 'transaction');
     }
     /**
@@ -136,15 +146,24 @@ class TransactionController extends Controller
 
         DB::beginTransaction();
         try {
+            $amountMinor = (int) round(((float) $request->amount) * 100);
+
             $transaction = Transaction::create([
                 'user_id' => $user->id,
                 'account_id' => $request->account_id,
                 'category_id' => $request->category_id,
                 'type' => $request->type,
+                'ledger_type' => 'real',
                 'amount' => $request->amount,
+                'amount_minor' => $amountMinor,
                 'notes' => $request->notes,
                 'transaction_date' => $request->transaction_date,
+                'currency' => $account->currency ?? 'VND',
+                'source_type' => 'manual',
             ]);
+
+            // Standard 4 — write-time rollup into ledger_daily_summaries.
+            $this->ledgerSummary->applyTransaction($transaction);
 
             if ($request->hasFile('receipt')) {
                 $file = $request->file('receipt');
@@ -245,6 +264,15 @@ class TransactionController extends Controller
 
     public function update(Request $request, Transaction $transaction)
     {
+        // Standard 5 — Financial Ledger Immutability.
+        // Halo rewards and non-manual sources are append-only.
+        if ($transaction->isImmutable()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ledger transactions sourced from Halo or system flows are immutable. Use a reversing entry instead.',
+            ], 405);
+        }
+
         $validator = Validator::make($request->all(), [
             'account_id' => 'sometimes|required|exists:accounts,id',
             'category_id' => 'sometimes|required|exists:categories,id',
@@ -332,6 +360,14 @@ class TransactionController extends Controller
 
     public function destroy(Transaction $transaction)
     {
+        // Standard 5 — Financial Ledger Immutability.
+        if ($transaction->isImmutable()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ledger transactions sourced from Halo or system flows cannot be deleted. Use a reversing entry instead.',
+            ], 405);
+        }
+
         $user = auth('api')->user();
 
         DB::beginTransaction();
@@ -557,12 +593,62 @@ class TransactionController extends Controller
             ];
         }
 
+        // Keep dashboard serialization cast-safe. The dashboard does not render
+        // transaction notes, and some historical rows may contain plaintext or
+        // otherwise non-Laravel-encrypted `notes` values. Selecting/mapping only
+        // the fields required by the dashboard prevents Eloquent from attempting
+        // to decrypt `notes` while JSON-encoding the response.
         $recentTransactions = Transaction::where('user_id', $user->id)
-            ->with(['category', 'account'])
+            ->select([
+                'id',
+                'account_id',
+                'category_id',
+                'type',
+                'ledger_type',
+                'amount',
+                'amount_minor',
+                'currency',
+                'transaction_date',
+                'created_at',
+            ])
+            ->with([
+                'category:id,name,slug,icon,color,type',
+                'account:id,name,currency,icon,color',
+            ])
             ->orderBy('transaction_date', 'desc')
             ->orderBy('created_at', 'desc')
             ->limit(6)
-            ->get();
+            ->get()
+            ->map(function (Transaction $transaction) {
+                return [
+                    'id' => $transaction->id,
+                    'account_id' => $transaction->account_id,
+                    'category_id' => $transaction->category_id,
+                    'type' => $transaction->type,
+                    'ledger_type' => $transaction->ledger_type,
+                    'amount' => $transaction->amount,
+                    'amount_minor' => $transaction->amount_minor,
+                    'currency' => $transaction->currency,
+                    'transaction_date' => optional($transaction->transaction_date)->toDateString(),
+                    'created_at' => optional($transaction->created_at)->toIso8601String(),
+                    'category' => $transaction->category ? [
+                        'id' => $transaction->category->id,
+                        'name' => $transaction->category->name,
+                        'slug' => $transaction->category->slug,
+                        'icon' => $transaction->category->icon,
+                        'color' => $transaction->category->color,
+                        'type' => $transaction->category->type,
+                    ] : null,
+                    'account' => $transaction->account ? [
+                        'id' => $transaction->account->id,
+                        'name' => $transaction->account->name,
+                        'currency' => $transaction->account->currency,
+                        'icon' => $transaction->account->icon,
+                        'color' => $transaction->account->color,
+                    ] : null,
+                ];
+            })
+            ->values();
 
         return response()->json([
             'success' => true,

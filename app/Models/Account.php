@@ -7,10 +7,26 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Account model representing a financial account.
+ * Account model — a financial wallet or account belonging to a single user.
  *
- * Represents a user's financial account with balance tracking, currency information,
- * and relationships to transactions, participants, and invitations.
+ * BALANCE POLICY
+ * ──────────────
+ * `balance` is a denormalised running total maintained by the transaction
+ * observer.  It is intentionally absent from the UpdateAccountRequest
+ * validation rules and from the update controller action — it may only be
+ * changed as a side-effect of creating, editing, or deleting transactions.
+ *
+ * For new accounts the opening balance is set once in AccountController::store();
+ * from that point onward every credit/debit flows through the Transaction model.
+ *
+ * DELETION GUARD (two layers)
+ * ───────────────────────────
+ * 1. Application layer — AccountController::destroy() checks hasTransactions()
+ *    and returns HTTP 400 before any SQL runs.
+ * 2. Database layer — the FK on transactions.account_id is RESTRICT, meaning
+ *    even a raw DB-level DELETE on an account with transactions is rejected by
+ *    the database engine.  This prevents admin scripts or migrations from
+ *    silently orphaning financial history.
  */
 class Account extends Model
 {
@@ -21,57 +37,80 @@ class Account extends Model
         'currency',
         'icon',
         'color',
+        'account_type',   // added: wallet | bank | savings | credit_card | investment
     ];
 
     protected $casts = [
         'balance' => 'decimal:2',
     ];
 
-    /**
-     * Get the user that owns this account.
-     *
-     * @return BelongsTo Relationship to the User model.
-     */
+    // ── Relationships ─────────────────────────────────────────────────────
+
+    /** The user who owns this account. */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
     /**
-     * Get all transactions associated with this account.
+     * All financial transactions posted against this account.
      *
-     * @return HasMany Relationship to Transaction models.
+     * The database FK is RESTRICT — a transaction row can never be orphaned
+     * and the parent account cannot be deleted while any row references it.
      */
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
     }
 
-    /**
-     * Get all participants associated with this account.
-     *
-     * @return HasMany Relationship to AccountParticipant models.
-     */
+    /** Users granted shared access to this account. */
     public function participants(): HasMany
     {
         return $this->hasMany(AccountParticipant::class);
     }
 
-    /**
-     * Get all invitations associated with this account.
-     *
-     * @return HasMany Relationship to Invitation models.
-     */
+    /** Pending share invitations for this account. */
     public function invitations(): HasMany
     {
         return $this->hasMany(Invitation::class);
     }
 
+    // ── Business-logic helpers ────────────────────────────────────────────
+
     /**
-     * Check if a user is a participant in this account.
+     * Return true if this account has at least one transaction.
      *
-     * @param int $userId The ID of the user to check.
-     * @return bool True if the user is a participant, false otherwise.
+     * Uses EXISTS rather than COUNT(*) for a single fast query.
+     * Called by AccountController::destroy() before attempting deletion.
+     */
+    public function hasTransactions(): bool
+    {
+        return $this->transactions()->exists();
+    }
+
+    /**
+     * Compute the authoritative balance directly from the transaction ledger.
+     *
+     * This differs from `$this->balance` only when the denormalised column is
+     * stale (e.g. after a manual DB edit or a failed observer).  Use for
+     * reconciliation, not for routine display.
+     *
+     * @return float  income − expenses, rounded to 2 decimal places.
+     */
+    public function calculateBalance(): float
+    {
+        $income  = (float) $this->transactions()->where('type', 'income')->sum('amount');
+        $expense = (float) $this->transactions()->where('type', 'expense')->sum('amount');
+
+        return round($income - $expense, 2);
+    }
+
+    // ── Participant helpers ───────────────────────────────────────────────
+
+    /**
+     * Return true if the given user is a registered participant on this account.
+     *
+     * @param int $userId
      */
     public function hasParticipant(int $userId): bool
     {
@@ -79,10 +118,10 @@ class Account extends Model
     }
 
     /**
-     * Get the role of a participant in this account.
+     * Return the role name for a given participant, or null if not found.
      *
-     * @param int $userId The ID of the user whose role to retrieve.
-     * @return string|null The role name if the user is a participant, null otherwise.
+     * @param  int  $userId
+     * @return string|null  e.g. 'owner', 'editor', 'viewer'
      */
     public function getParticipantRole(int $userId): ?string
     {

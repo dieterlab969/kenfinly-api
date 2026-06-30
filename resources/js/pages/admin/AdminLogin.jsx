@@ -20,7 +20,7 @@ const AdminLogin = () => {
             if (user.roles && Array.isArray(user.roles) && user.roles.some(r => r.name === 'super_admin')) {
                 navigate('/admin/dashboard');
             } else {
-                navigate('/dashboard');
+                navigate('/');
             }
         }
     }, [user, navigate]);

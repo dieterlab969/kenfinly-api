@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,10 +20,17 @@ class Transaction extends Model
         'account_id',
         'category_id',
         'type',
+        'ledger_type',
         'amount',
+        'amount_minor',
         'notes',
         'receipt_path',
         'transaction_date',
+        'currency',
+        'source_type',
+        'source_id',
+        'idempotency_key',
+        'transfer_pair_id',
     ];
 
     /**
@@ -31,9 +40,51 @@ class Transaction extends Model
      */
     protected $casts = [
         'amount' => 'decimal:2',
+        'amount_minor' => 'integer',
         'transaction_date' => 'date',
         'type' => 'string',
+        'ledger_type' => 'string',
     ];
+
+    protected function notes(): Attribute
+    {
+        return Attribute::make(
+            get: function (?string $value): ?string {
+                if ($value === null) {
+                    return null;
+                }
+                try {
+                    return decrypt($value);
+                } catch (DecryptException) {
+                    return $value;
+                }
+            },
+            set: fn (?string $value): ?string => $value !== null ? encrypt($value) : null,
+        );
+    }
+
+    public function isImmutable(): bool
+    {
+        return $this->ledger_type === 'halo' || $this->source_type !== 'manual';
+    }
+
+    /**
+     * Returns whether this transaction is one side of a wallet transfer.
+     * Both the debit and the credit record have a non-null transfer_pair_id.
+     */
+    public function isTransfer(): bool
+    {
+        return $this->transfer_pair_id !== null;
+    }
+
+    /**
+     * The paired counterpart transaction for a wallet transfer.
+     * Debit side → credit side, and vice-versa.
+     */
+    public function transferPair(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Transaction::class, 'transfer_pair_id');
+    }
 
     /**
      * Defines the relationship to the user who owns this transaction.

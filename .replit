@@ -5,7 +5,7 @@ integrations = ["sendgrid:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
-packages = ["openssh", "unzip", "php82Packages.composer"]
+packages = ["openssh", "unzip", "php82Packages.composer", "vim-full", "nano", "inshellisense"]
 
 [workflows]
 runButton = "Project"
@@ -46,3 +46,22 @@ externalPort = 5173
 [userenv.shared]
 GA4_ENABLED = "false"
 DB_CONNECTION = "pgsql"
+DB_HOST = "helium"
+DB_PORT = "5432"
+DB_DATABASE = "heliumdb"
+DB_USERNAME = "postgres"
+APP_ENV = "local"
+APP_DEBUG = "true"
+APP_TIMEZONE = "Asia/Ho_Chi_Minh"
+LOG_LEVEL = "debug"
+SESSION_DRIVER = "database"
+QUEUE_CONNECTION = "database"
+CACHE_STORE = "database"
+BROADCAST_CONNECTION = "log"
+FILESYSTEM_DISK = "local"
+VITE_SUBSCRIPTIONS_ENABLED = "true"
+TRAFFIC_STATS_ENABLED = "false"
+COOKIE_CONSENT_ENABLED = "false"
+SITEMAP_GENERATION_FREQUENCY = "daily"
+PHP_CLI_SERVER_WORKERS = "4"
+BCRYPT_ROUNDS = "12"

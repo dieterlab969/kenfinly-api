@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import laravel from 'laravel-vite-plugin';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
@@ -12,13 +12,22 @@ const replitDomain = process.env.REPLIT_DOMAINS ||
 export default defineConfig({
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.jsx'],
+            input: ['resources/css/app.css', 'resources/js/app.tsx'],
             refresh: true,
         }),
         react(),
         tailwindcss(),
     ],
     resolve: {
+        alias: {
+            '@assets': path.resolve(__dirname, './resources'),
+        },
+    },
+    test: {
+        environment: 'jsdom',
+        globals: true,
+        setupFiles: ['./resources/js/__tests__/vitest.setup.js'],
+        include: ['resources/js/__tests__/**/*.test.{js,jsx,ts,tsx}'],
         alias: {
             '@assets': path.resolve(__dirname, './resources'),
         },

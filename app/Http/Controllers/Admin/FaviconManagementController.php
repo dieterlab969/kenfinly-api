@@ -13,6 +13,7 @@ use Intervention\Image\Laravel\Facades\Image;
  *
  * Handles displaying the current favicon URL and updating the favicon image
  * with validation and resizing to ensure proper format and size.
+ * @tags Admin — Branding
  */
 class FaviconManagementController extends Controller
 {

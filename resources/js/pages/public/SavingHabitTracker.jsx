@@ -359,13 +359,13 @@ export default function SavingHabitTracker() {
                         </p>
                         <div className="flex justify-center gap-4">
                             <button
-                                onClick={() => navigate('/login')}
+                                onClick={() => navigate('/SignIn')}
                                 className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
                             >
                                 {t('auth.login')}
                             </button>
                             <button
-                                onClick={() => navigate('/register')}
+                                onClick={() => navigate('/SignUp')}
                                 className="px-6 py-3 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 font-medium"
                             >
                                 {t('auth.register')}

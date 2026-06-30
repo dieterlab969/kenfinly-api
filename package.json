@@ -6,24 +6,43 @@
         "build": "vite build",
         "dev": "vite",
         "php:dev": "php -S 0.0.0.0:5000 server.php",
-        "serve": "concurrently \"npm run php:dev\" \"npm run dev\""
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
+        "@testing-library/jest-dom": "^6.9.1",
+        "@testing-library/react": "^16.3.2",
+        "@testing-library/user-event": "^14.6.1",
+        "@types/node": "^22.0.0",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "@vitest/coverage-v8": "^4.1.9",
         "axios": "^1.11.0",
-        "concurrently": "^9.0.1",
+        "jsdom": "^29.1.1",
         "laravel-vite-plugin": "^2.0.0",
         "tailwindcss": "^4.0.0",
-        "vite": "^7.0.7"
+        "typescript": "^5.0.0",
+        "vite": "^7.0.7",
+        "vitest": "^4.1.9"
     },
     "dependencies": {
         "@vitejs/plugin-react": "^5.1.0",
+        "bootstrap": "^5.3.8",
+        "chart.js": "^4.5.0",
         "date-fns": "^4.1.0",
         "dompurify": "^3.3.1",
+        "i18next": "^26.3.2",
         "lucide-react": "^0.552.0",
         "react": "^19.2.0",
+        "react-bootstrap": "^2.10.10",
+        "react-chartjs-2": "^5.3.0",
+        "react-datepicker": "^8.5.0",
         "react-dom": "^19.2.0",
+        "react-flags-select": "^2.5.0",
         "react-google-recaptcha-v3": "^1.11.0",
+        "react-i18next": "^17.0.8",
         "react-router-dom": "^7.9.5",
         "recharts": "^3.3.0"
     }

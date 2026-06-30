@@ -4,11 +4,7 @@ import { AuthProvider } from '../contexts/AuthContext';
 import { LogoProvider } from '../contexts/LogoContext';
 import { TranslationProvider, useTranslation } from '../contexts/TranslationContext';
 import axios from 'axios';
-import Login from '../pages/Login';
-import Register from '../pages/Register';
-import Dashboard from '../pages/Dashboard';
 import VerifyEmail from '../pages/VerifyEmail';
-import VerificationPending from '../pages/VerificationPending';
 import ProtectedRoute from './ProtectedRoute';
 import SuperAdminRoute from './SuperAdminRoute';
 import AdminLogin from '../pages/admin/AdminLogin';
@@ -25,6 +21,7 @@ import TranslationManagement from '../pages/admin/TranslationManagement';
 import TransactionManagement from '../pages/admin/TransactionManagement';
 import LogoManagement from '../pages/admin/LogoManagement';
 import FaviconManagement from '../pages/admin/FaviconManagement';
+import HaloDashboard from '../pages/halo/HaloDashboard';
 import LandingPage from '../pages/public/LandingPage';
 import BlogPage from '../pages/public/BlogPage';
 import BlogPostPage from '../pages/public/BlogPostPage';
@@ -36,7 +33,7 @@ import PlanSelection from './subscription/PlanSelection';
 import CheckoutForm from './subscription/CheckoutForm';
 import VietnameseTyping from "../pages/public/VietnameseTyping";
 
-const RecaptchaConfigContext = createContext({ enabled: false });
+export const RecaptchaConfigContext = createContext({ enabled: false });
 
 export const useRecaptchaConfig = () => useContext(RecaptchaConfigContext);
 
@@ -52,7 +49,7 @@ function PricingPage() {
                 <div className="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md">
                     <h1 className="text-3xl font-bold text-green-600">{t('payment.success_title') || 'Subscription Successful!'}</h1>
                     <p className="mt-4 text-gray-600">{t('payment.success_message') || 'Thank you for upgrading. Your premium features are now active.'}</p>
-                    <button onClick={() => window.location.href = '/dashboard'} className="mt-8 w-full bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700">{t('nav.dashboard') || 'Go to Dashboard'}</button>
+                    <button onClick={() => window.location.href = '/'} className="mt-8 w-full bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700">{t('nav.dashboard') || 'Go to Dashboard'}</button>
                 </div>
             </div>
         );
@@ -141,16 +138,17 @@ function App({ recaptchaEnabled = false }) {
                         <Route path="/textcase" element={<TextCaseConverter />} />
                         <Route path="/pomodoro" element={<PomodoroTimer />} />
                         <Route path="/pricing" element={<PricingPage />} />
-                        <Route path="/login" element={<Login />} />
                         <Route path="/go-tieng-viet" element={<VietnameseTyping />} />
-                        <Route path="/register" element={<Register />} />
                         <Route path="/verify-email" element={<VerifyEmail />} />
-                        <Route path="/verification-pending" element={<VerificationPending />} />
                         <Route
                             path="/dashboard"
+                            element={<Navigate to="/" replace />}
+                        />
+                        <Route
+                            path="/halo"
                             element={
                                 <ProtectedRoute>
-                                    <Dashboard />
+                                    <HaloDashboard />
                                 </ProtectedRoute>
                             }
                         />

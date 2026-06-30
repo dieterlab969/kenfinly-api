@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\AccountController;
@@ -10,7 +11,14 @@ use App\Http\Controllers\Api\CsvController;
 use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Api\CommitmentController;
+use App\Http\Controllers\Api\HaloSessionController;
+use App\Http\Controllers\Api\HaloTransactionController;
+use App\Http\Controllers\Api\HourlyRateController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\UserPreferenceController;
+use App\Http\Controllers\Api\NotificationSettingController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AccountManagementController;
 use App\Http\Controllers\Admin\UserManagementController;
@@ -31,6 +39,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PublicAnalyticsController;
 use App\Http\Controllers\Api\ConsentController;
 use App\Http\Controllers\Api\LogoController;
+use App\Http\Controllers\Api\PomodoroController;
+use App\Http\Controllers\Api\WooCommerceWebhookController;
+
+// Status / health endpoint (bypassed by CheckBetaAccess whitelist)
+Route::get('/status', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toISOString(),
+        'environment' => config('app.env'),
+    ]);
+});
 
 // Public routes
 Route::get('/logo', [LogoController::class, 'getLogo']);
@@ -38,10 +57,27 @@ Route::get('/subscription-plans', [\App\Http\Controllers\Api\SubscriptionPlanCon
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::get('/settings/logos', [PublicLogoController::class, 'index']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+
+// ── Google One-Click OAuth ────────────────────────────────────────────────
+// /redirect  → sends browser to Google consent screen
+// /callback  → Google returns here; issues JWT then redirects to /auth/google/success
+Route::get('/v1/auth/google/redirect', [\App\Http\Controllers\Api\GoogleAuthController::class, 'redirect']);
+Route::get('/v1/auth/google/callback', [\App\Http\Controllers\Api\GoogleAuthController::class, 'callback']);
+
+// ── Facebook One-Click OAuth ──────────────────────────────────────────────
+// /redirect  → sends browser to Facebook OAuth dialog
+// /callback  → Facebook returns here; issues JWT then redirects to /auth/facebook/success
+Route::get('/v1/auth/facebook/redirect', [\App\Http\Controllers\Api\FacebookAuthController::class, 'redirect']);
+Route::get('/v1/auth/facebook/callback', [\App\Http\Controllers\Api\FacebookAuthController::class, 'callback']);
 Route::post('/waitlist', [\App\Http\Controllers\Api\WaitlistController::class, 'store']);
 Route::get('/auth/config', [AuthController::class, 'config']);
 Route::get('/settings/company', [PublicSettingsController::class, 'getCompanyInfo']);
 Route::get('/analytics/public-stats', [PublicAnalyticsController::class, 'getPublicStats']);
+Route::middleware('pomodoro.acl')->prefix('v1/pomodoro')->group(function () {
+    Route::post('/start', [PomodoroController::class, 'start']);
+    Route::get('/state', [PomodoroController::class, 'state']);
+    Route::post('/complete', [PomodoroController::class, 'complete']);
+});
 Route::prefix('consent')->group(function () {
     Route::post('/', [ConsentController::class, 'store']);
     Route::get('/', [ConsentController::class, 'show']);
@@ -61,71 +97,152 @@ Route::get('/languages/{code}/translations', [LanguageController::class, 'getTra
 Route::middleware('auth:api')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::post('/auth/refresh', [AuthController::class, 'refresh']);
-    Route::get('/auth/me', [AuthController::class, 'me']);
 
-    // Logo management
-    Route::post('/logo/upload', [LogoController::class, 'uploadLogo']);
+    // Security — change-password and change-pin live outside halo.integrity
+    // so they can always be reached even when the integrity check would block.
+    Route::put('/v1/user/change-password', [\App\Http\Controllers\Api\SecuritySettingsController::class, 'changePassword']);
+    Route::post('/v1/user/change-pin',     [\App\Http\Controllers\Api\SecuritySettingsController::class, 'changePin']);
 
-    // Dashboard
-    Route::get('/dashboard', [TransactionController::class, 'getDashboardData']);
+    // User account self-service: deactivation and scheduled deletion
+    Route::post('/v1/user/deactivate', [\App\Http\Controllers\Api\UserAccountController::class, 'deactivate']);
+    Route::delete('/v1/user/account',  [\App\Http\Controllers\Api\UserAccountController::class, 'scheduleDelete']);
 
-    // Categories
-    Route::get('/categories', [CategoryController::class, 'index']);
+    // Wallet-to-wallet transfer (ACID — both records + both balances in one DB transaction)
+    Route::post('/v1/accounts/transfer', [\App\Http\Controllers\Api\TransferController::class, 'transfer']);
 
-    // Accounts
-    Route::apiResource('accounts', AccountController::class);
+    Route::middleware('halo.integrity')->group(function () {
+        Route::get('/auth/me', [AuthController::class, 'me']);
 
-    // Transactions
-    Route::apiResource('transactions', TransactionController::class);
-    Route::post('/transactions/{transaction}/photos', [TransactionController::class, 'addPhoto']);
-    Route::delete('/photos/{photoId}', [TransactionController::class, 'deletePhoto']);
+        // Logo management
+        Route::post('/logo/upload', [LogoController::class, 'uploadLogo']);
 
-    // Language preference
-    Route::post('/user/language', [LanguageController::class, 'updateUserLanguage']);
+        // Dashboard
+        Route::get('/dashboard', [TransactionController::class, 'getDashboardData']);
 
-    // User Profile
-    Route::get('/profile', [ProfileController::class, 'show']);
-    Route::put('/profile', [ProfileController::class, 'update']);
+        // Halo Attendance
+        Route::get('/attendance/status', [AttendanceController::class, 'status']);
+        Route::post('/attendance/start', [AttendanceController::class, 'start']);
+        Route::post('/attendance/complete', [AttendanceController::class, 'complete']);
+        Route::post('/attendance/kill', [AttendanceController::class, 'kill']);
 
-    // CSV Import & Export
-    Route::post('/csv/import', [CsvController::class, 'import']);
-    Route::get('/csv/export', [CsvController::class, 'export']);
+        // Halo Session (Standard 9 — persistent countdown state)
+        Route::get('/halo/current-session', [HaloSessionController::class, 'current']);
 
-    // Payments & Licenses
-    Route::post('/payments/create-intent', [PaymentController::class, 'createPaymentIntent']);
-    Route::get('/payments/info', [PaymentController::class, 'getPaymentInfo']);
-    Route::get('/payments/history', [PaymentController::class, 'getPaymentHistory']);
-    Route::get('/payments/methods', [PaymentController::class, 'getPaymentMethods']);
-    Route::post('/payments/methods', [PaymentController::class, 'addPaymentMethod']);
-    Route::put('/payments/methods/{id}', [PaymentController::class, 'updatePaymentMethod']);
-    Route::delete('/payments/methods/{id}', [PaymentController::class, 'deletePaymentMethod']);
-    Route::post('/payments/methods/{id}/default', [PaymentController::class, 'setDefaultPaymentMethod']);
-    Route::get('/licenses/my-licenses', [PaymentController::class, 'myLicenses']);
+        // Halo-aware transactions (Standards 2, 4, 5, 7, 8, 11) — POST + GET only.
+        Route::get('/halo/transactions', [HaloTransactionController::class, 'index']);
+        Route::post('/halo/transactions', [HaloTransactionController::class, 'store']);
 
-    // Participants & Invitations
-    Route::post('/participants/invite', [ParticipantController::class, 'invite']);
-    Route::post('/invitations/{token}/accept', [ParticipantController::class, 'acceptInvitation']);
-    Route::get('/accounts/{accountId}/participants', [ParticipantController::class, 'listParticipants']);
-    Route::delete('/accounts/{accountId}/participants/{userId}', [ParticipantController::class, 'removeParticipant']);
+        // Hourly rate governance
+        Route::put('/v1/user/hourly-rate', [HourlyRateController::class, 'update']);
+        Route::get('/v1/user/hourly-rate/history', [HourlyRateController::class, 'history']);
 
-    // Analytics
-    Route::get('/analytics/summary', [AnalyticsController::class, 'getSummary']);
-    Route::get('/analytics/category-breakdown', [AnalyticsController::class, 'getCategoryBreakdown']);
-    Route::get('/analytics/trends', [AnalyticsController::class, 'getTrends']);
+        // Commitments (Standard 10 — secure asset uploads)
+        Route::get('/commitments', [CommitmentController::class, 'index']);
+        Route::get('/commitments/{commitment}', [CommitmentController::class, 'show']);
+        Route::post('/commitments', [CommitmentController::class, 'store']);
+        Route::post('/commitments/{commitment}/complete', [CommitmentController::class, 'complete']);
+        Route::post('/commitments/{commitment}/kill', [CommitmentController::class, 'kill']);
+
+        // Categories — GET (tree), POST/PUT/DELETE (user-owned only; 403 for system)
+        Route::get('/categories',              [CategoryController::class, 'index']);
+        Route::post('/categories',             [CategoryController::class, 'store']);
+        Route::put('/categories/{category}',   [CategoryController::class, 'update']);
+        Route::delete('/categories/{category}',[CategoryController::class, 'destroy']);
+
+        // Accounts
+        Route::apiResource('accounts', AccountController::class);
+
+        // Transactions
+        Route::apiResource('transactions', TransactionController::class);
+        Route::post('/transactions/{transaction}/photos', [TransactionController::class, 'addPhoto']);
+        Route::delete('/photos/{photoId}', [TransactionController::class, 'deletePhoto']);
+
+        // Language preference
+        Route::post('/user/language', [LanguageController::class, 'updateUserLanguage']);
+
+        // User Profile
+        Route::get('/profile', [ProfileController::class, 'show']);
+        Route::put('/profile', [ProfileController::class, 'update']);
+        Route::post('/profile/avatar', [ProfileController::class, 'uploadAvatar']);
+
+        // Marketing Preferences
+        Route::get('/user/preferences/marketing',  [UserPreferenceController::class, 'show']);
+        Route::put('/user/preferences/marketing',  [UserPreferenceController::class, 'update']);
+
+        // Notification Settings
+        Route::get('/user/notification-settings', [NotificationSettingController::class, 'show']);
+        Route::put('/user/notification-settings', [NotificationSettingController::class, 'update']);
+
+        // Security settings (toggle states)
+        Route::get('/v1/user/security-settings',  [\App\Http\Controllers\Api\SecuritySettingsController::class, 'show']);
+        Route::put('/v1/user/security-settings',  [\App\Http\Controllers\Api\SecuritySettingsController::class, 'update']);
+
+        // CSV Import & Export
+        Route::post('/csv/import', [CsvController::class, 'import']);
+        Route::get('/csv/export', [CsvController::class, 'export']);
+
+        // Payments & Licenses
+        Route::post('/payments/create-intent', [PaymentController::class, 'createPaymentIntent']);
+        Route::get('/payments/info', [PaymentController::class, 'getPaymentInfo']);
+        Route::get('/payments/history', [PaymentController::class, 'getPaymentHistory']);
+        Route::get('/payments/methods', [PaymentController::class, 'getPaymentMethods']);
+        Route::post('/payments/methods', [PaymentController::class, 'addPaymentMethod']);
+        Route::put('/payments/methods/{id}', [PaymentController::class, 'updatePaymentMethod']);
+        Route::delete('/payments/methods/{id}', [PaymentController::class, 'deletePaymentMethod']);
+        Route::post('/payments/methods/{id}/default', [PaymentController::class, 'setDefaultPaymentMethod']);
+        Route::get('/licenses/my-licenses', [PaymentController::class, 'myLicenses']);
+
+        // Participants & Invitations
+        Route::post('/participants/invite', [ParticipantController::class, 'invite']);
+        Route::post('/invitations/{token}/accept', [ParticipantController::class, 'acceptInvitation']);
+        Route::get('/accounts/{accountId}/participants', [ParticipantController::class, 'listParticipants']);
+        Route::delete('/accounts/{accountId}/participants/{userId}', [ParticipantController::class, 'removeParticipant']);
+
+        // Analytics
+        Route::get('/analytics/summary', [AnalyticsController::class, 'getSummary']);
+        Route::get('/analytics/category-breakdown', [AnalyticsController::class, 'getCategoryBreakdown']);
+        Route::get('/analytics/trends', [AnalyticsController::class, 'getTrends']);
+        // Analytics v1 — full summary with Redis cache (spec: GET /api/v1/analytics/summary)
+        Route::get('/v1/analytics/summary', [AnalyticsController::class, 'summary']);
+    });
 });
-Route::middleware('auth:api')->prefix('saving-tracker')->group(function() {
+// User Subscription Tracker (personal recurring services: Netflix, Spotify, etc.)
+Route::middleware('auth:api')->group(function () {
+    Route::apiResource('user-subscriptions', \App\Http\Controllers\Api\UserSubscriptionController::class);
+    Route::get('user-subscriptions/{id}/payment-history', [\App\Http\Controllers\Api\UserSubscriptionController::class, 'paymentHistory']);
+});
+
+Route::middleware(['auth:api', 'halo.integrity'])->prefix('saving-tracker')->group(function() {
     Route::apiResource('habits', \App\Http\Controllers\Api\SavingTracker\HabitController::class);
     Route::post('tracking/toggle', [\App\Http\Controllers\Api\SavingTracker\HabitTrackingController::class, 'toggle']);
     Route::get('tracking/{habitId}', [\App\Http\Controllers\Api\SavingTracker\HabitTrackingController::class, 'getTracking']);
     Route::post('tracking/bulk', [\App\Http\Controllers\Api\SavingTracker\HabitTrackingController::class, 'bulkTrack']);
     Route::get('stats/habits/{id}', [\App\Http\Controllers\Api\SavingTracker\HabitController::class, 'stats']);
     Route::get('stats/overall', [\App\Http\Controllers\Api\SavingTracker\HabitController::class, 'overallStats']);
-    Route::get('achievements', [\App\Http\Controllers\Api\SavingTracker\AchievementController::class, 'index']);
+    Route::get('achievemenAI Pro
+￼
+ts', [\App\Http\Controllers\Api\SavingTracker\AchievementController::class, 'index']);
     Route::get('achievements/unlocked', [\App\Http\Controllers\Api\SavingTracker\AchievementController::class, 'unlocked']);
 });
 
 // Public webhook endpoint (no auth required)
 Route::post('/webhooks/payment', [PaymentController::class, 'webhook']);
+
+// ── Currency / Geo-detection Routes ──────────────────────────────────────
+// Guest-accessible: React SPA calls this on load to get prices + gateway hint.
+Route::get('/currencies', [CurrencyController::class, 'index']);
+Route::get('/currency/detect', [CurrencyController::class, 'detect']);
+// Auth-required: save the user's explicit currency preference.
+Route::middleware('auth:api')->post('/currency/save', [CurrencyController::class, 'save']);
+
+// ── WooCommerce Webhook ───────────────────────────────────────────────────
+// WordPress/WooCommerce calls this endpoint when a payment is completed.
+// The wc.signature middleware verifies the X-WC-Webhook-Signature HMAC
+// before the controller is reached. No JWT auth — this is a server-to-server call.
+Route::post(
+    '/v1/woocommerce-callback',
+    [WooCommerceWebhookController::class, 'handle']
+)->middleware(['wc.signature', 'throttle:60,1']);
 
 // Admin routes (Super Admin only)
 Route::middleware(['auth:api', App\Http\Middleware\SuperAdminMiddleware::class])->prefix('admin')->group(function () {

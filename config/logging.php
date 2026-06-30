@@ -127,6 +127,17 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        // Dedicated channel for WooCommerce webhook traffic.
+        // Rotates daily, retained for 30 days. Written to a separate file so
+        // webhook forensics never get buried in general application logs.
+        'woocommerce' => [
+            'driver'              => 'daily',
+            'path'                => storage_path('logs/woocommerce-webhook.log'),
+            'level'               => 'debug',
+            'days'                => 30,
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];

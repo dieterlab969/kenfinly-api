@@ -1,0 +1,15 @@
+{
+  "safety": {
+    "dangerousCommands": [
+      "php artisan migrate:fresh",
+      "php artisan migrate:refresh",
+      "php artisan migrate:reset",
+      "db:seed",
+      "rm -rf"
+    ],
+    "requireConfirmation": true
+  },
+  "environment": {
+    "productionProtection": true
+  }
+}

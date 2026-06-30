@@ -22,7 +22,7 @@ const SuperAdminRoute = ({ children }) => {
         !Array.isArray(user.roles) ||
         !user.roles.some(role => role.name === 'super_admin')
     ) {
-        return <Navigate to="/dashboard" replace />;
+        return <Navigate to="/" replace />;
     }
 
     return children;
