@@ -202,6 +202,8 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/analytics/summary', [AnalyticsController::class, 'getSummary']);
         Route::get('/analytics/category-breakdown', [AnalyticsController::class, 'getCategoryBreakdown']);
         Route::get('/analytics/trends', [AnalyticsController::class, 'getTrends']);
+        // Analytics v1 — full summary with Redis cache (spec: GET /api/v1/analytics/summary)
+        Route::get('/v1/analytics/summary', [AnalyticsController::class, 'summary']);
     });
 });
 // User Subscription Tracker (personal recurring services: Netflix, Spotify, etc.)

@@ -21,6 +21,7 @@ import SignUp from './pages/SignUp';
 import GoogleAuthSuccess from './pages/GoogleAuthSuccess';
 import FacebookAuthSuccess from './pages/FacebookAuthSuccess';
 import Home from './pages/Home';
+import Analytics from './pages/Analytics';
 import VerifyPhoneNumber from './pages/VerifyPhoneNumber';
 import NotificationAllow from './pages/NotificationAllow';
 import Notification from './pages/Notification';
@@ -275,6 +276,8 @@ function App(): ReactElement {
           <Route path="/DeleteAccount" element={<DeleteAccount />} />
           <Route path="/InviteFriend" element={<InviteFriend />} />
           <Route path="/PersonalInfo" element={<PersonalInfo />} />
+          {/* Analytics — financial analytics module */}
+          <Route path="/analytics" element={<Analytics />} />
           {/* Halo Dashboard — migrated to TSX, wired into the active entry point */}
           <Route path="/halo" element={<HaloDashboard />} />
           <Route path="/halo/*" element={<HaloDashboard />} />
