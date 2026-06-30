@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Home, TrendingUp, Plus, BarChart2, FileText } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -10,23 +11,24 @@ interface BottomNavigationProps {
 }
 
 type NavEntry =
-    | { kind: 'link';     to: string;  Icon: React.FC<{ size?: number; strokeWidth?: number }>; disabled?: boolean }
+    | { kind: 'link'; to: string; label: string; Icon: React.FC<{ size?: number; strokeWidth?: number }>; disabled?: boolean }
     | { kind: 'center' }
 
 // ─── Nav config ───────────────────────────────────────────────────────────────
 
 const NAV_ITEMS: NavEntry[] = [
-    { kind: 'link', to: '/Home',      Icon: Home,      disabled: false },
-    { kind: 'link', to: '/analytics', Icon: TrendingUp, disabled: false },
+    { kind: 'link', to: '/Home',      label: 'Home',      Icon: Home,       disabled: false },
+    { kind: 'link', to: '/analytics', label: 'Analytics', Icon: TrendingUp, disabled: false },
     { kind: 'center' },
-    { kind: 'link', to: '/BarChart',  Icon: BarChart2, disabled: true  },
-    { kind: 'link', to: '/Invoicing', Icon: FileText,  disabled: true  },
+    { kind: 'link', to: '/BarChart',  label: 'Goals',     Icon: BarChart2,  disabled: true  },
+    { kind: 'link', to: '/Invoicing', label: 'Reports',   Icon: FileText,   disabled: true  },
 ]
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 const BottomNavigation: React.FC<BottomNavigationProps> = ({ fabOpen, onFabToggle }) => {
     const { pathname } = useLocation()
+    const { t } = useTranslation()
 
     return (
         <>
@@ -37,6 +39,9 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ fabOpen, onFabToggl
                     <div
                         className="gol3"
                         onClick={onFabToggle}
+                        role="button"
+                        aria-label={t('Quick add')}
+                        aria-expanded={fabOpen}
                         style={{
                             cursor: 'pointer',
                             background: 'linear-gradient(145deg, #8B6CF7, #7B51F1)',
@@ -124,6 +129,8 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ fabOpen, onFabToggl
                                 <li
                                     key={i}
                                     className="list"
+                                    aria-label={t(item.label)}
+                                    aria-disabled="true"
                                     style={{
                                         display: 'flex',
                                         flexDirection: 'column',
@@ -151,6 +158,8 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ fabOpen, onFabToggl
                             >
                                 <Link
                                     to={item.to}
+                                    aria-label={t(item.label)}
+                                    aria-current={isActive ? 'page' : undefined}
                                     style={{
                                         display: 'flex',
                                         flexDirection: 'column',

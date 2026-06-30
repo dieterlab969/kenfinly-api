@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react'
 import { Outlet } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { TrendingUp, TrendingDown, ArrowLeftRight } from 'lucide-react'
 import BottomNavigation from './BottomNavigation'
 
@@ -24,6 +25,7 @@ interface FabOption {
 // ─── Layout ───────────────────────────────────────────────────────────────────
 
 const AppLayout: React.FC = () => {
+    const { t } = useTranslation()
     const [fabOpen, setFabOpen] = useState(false)
 
     const handleFabToggle = useCallback(() => setFabOpen(v => !v), [])
@@ -31,21 +33,21 @@ const AppLayout: React.FC = () => {
 
     const FAB_OPTIONS: FabOption[] = [
         {
-            label: 'Thu nhập',
+            label: t('Income'),
             Icon: TrendingUp,
             bg: 'linear-gradient(145deg, #22c55e, #16a34a)',
             shadow: '0 8px 28px rgba(34,197,94,0.50)',
             action: () => { closeFab(); dispatchQuickAdd('income') },
         },
         {
-            label: 'Chi tiêu',
+            label: t('Expense'),
             Icon: TrendingDown,
             bg: 'linear-gradient(145deg, #ef4444, #dc2626)',
             shadow: '0 8px 28px rgba(239,68,68,0.50)',
             action: () => { closeFab(); dispatchQuickAdd('expense') },
         },
         {
-            label: 'Chuyển khoản',
+            label: t('Transfer'),
             Icon: ArrowLeftRight,
             bg: 'linear-gradient(145deg, #3b82f6, #1d4ed8)',
             shadow: '0 8px 28px rgba(59,130,246,0.50)',

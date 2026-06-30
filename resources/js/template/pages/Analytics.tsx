@@ -244,22 +244,20 @@ const AnalyticsBarChart: React.FC<{ data: ChartPoint[] }> = ({ data }) => {
   )
 }
 
-// ── Filter button labels ───────────────────────────────────────────────────────
-
-const RANGE_OPTIONS: { key: RangeType; label: string }[] = [
-  { key: 'TODAY',      label: 'Hôm nay'     },
-  { key: '7_DAYS',     label: '7 ngày'      },
-  { key: 'THIS_MONTH', label: 'Tháng này'   },
-  { key: 'LAST_MONTH', label: 'Tháng trước' },
-  { key: 'THIS_YEAR',  label: 'Năm nay'     },
-  { key: 'CUSTOM',     label: 'Tuỳ chỉnh'   },
-]
-
 // ── Main page component ───────────────────────────────────────────────────────
 
 const Analytics: React.FC = () => {
   const navigate = useNavigate()
   const { t } = useTranslation()
+
+  const RANGE_OPTIONS: { key: RangeType; label: string }[] = [
+    { key: 'TODAY',      label: t('Today')         },
+    { key: '7_DAYS',     label: t('Last 7 Days')   },
+    { key: 'THIS_MONTH', label: t('This Month')    },
+    { key: 'LAST_MONTH', label: t('Last Month')    },
+    { key: 'THIS_YEAR',  label: t('This Year')     },
+    { key: 'CUSTOM',     label: t('Custom')        },
+  ]
 
   const [range, setRange]         = useState<RangeType>('THIS_MONTH')
   const [customStart, setCustomStart] = useState('')
@@ -284,7 +282,7 @@ const Analytics: React.FC = () => {
       setData(res.data as AnalyticsSummary)
     } catch (err: unknown) {
       const e = err as { response?: { data?: { message?: string } }; message?: string }
-      setError(e?.response?.data?.message || e?.message || 'Không thể tải dữ liệu phân tích.')
+      setError(e?.response?.data?.message || e?.message || t('Could not load analytics data.'))
     } finally {
       setLoading(false)
     }
@@ -344,7 +342,7 @@ const Analytics: React.FC = () => {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer',
           }}
-          aria-label="Thông báo"
+          aria-label={t('Notifications')}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -356,10 +354,10 @@ const Analytics: React.FC = () => {
           color: '#fff', fontSize: 20, fontWeight: 700,
           margin: 0, letterSpacing: '-0.3px',
         }}>
-          Phân tích tài chính
+          {t('Financial Analytics')}
         </h1>
         <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, margin: '4px 0 0' }}>
-          {loading ? 'Đang tải...' : data ? `${data.start_date} → ${data.end_date}` : ''}
+          {loading ? t('Loading…') : data ? `${data.start_date} → ${data.end_date}` : ''}
         </p>
       </div>
 
@@ -392,10 +390,10 @@ const Analytics: React.FC = () => {
       {/* Custom date pickers */}
       {showCustom && (
         <div style={{ background: '#fff', padding: '12px 16px', borderTop: '1px solid #f3f4f6', display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-          <label style={{ fontSize: 12, color: '#6b7280', fontWeight: 600 }}>Từ</label>
+          <label style={{ fontSize: 12, color: '#6b7280', fontWeight: 600 }}>{t('From')}</label>
           <input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)}
             style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '4px 8px', fontSize: 13 }} />
-          <label style={{ fontSize: 12, color: '#6b7280', fontWeight: 600 }}>Đến</label>
+          <label style={{ fontSize: 12, color: '#6b7280', fontWeight: 600 }}>{t('To')}</label>
           <input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)}
             style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '4px 8px', fontSize: 13 }} />
           <button onClick={handleCustomApply}
@@ -403,7 +401,7 @@ const Analytics: React.FC = () => {
               background: '#7B51F1', color: '#fff', border: 'none', borderRadius: 8,
               padding: '5px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer',
             }}>
-            Áp dụng
+            {t('Apply')}
           </button>
         </div>
       )}
@@ -418,12 +416,12 @@ const Analytics: React.FC = () => {
           }}>
             <span style={{ fontSize: 18 }}>⚠️</span>
             <div style={{ flex: 1 }}>
-              <p style={{ margin: 0, fontSize: 13, color: '#991B1B', fontWeight: 600 }}>Không thể tải dữ liệu</p>
+              <p style={{ margin: 0, fontSize: 13, color: '#991B1B', fontWeight: 600 }}>{t('Could not load data')}</p>
               <p style={{ margin: '2px 0 0', fontSize: 12, color: '#B91C1C' }}>{error}</p>
             </div>
             <button onClick={() => fetchSummary(range, customStart, customEnd)}
               style={{ background: '#dc2626', color: '#fff', border: 'none', borderRadius: 8, padding: '5px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-              Tải lại
+              {t('Reload')}
             </button>
           </div>
         )}
@@ -434,7 +432,7 @@ const Analytics: React.FC = () => {
           boxShadow: '0 2px 12px rgba(0,0,0,0.07)', marginBottom: 16,
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#121212' }}>So sánh kỳ trước</p>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#121212' }}>{t('Period comparison')}</p>
             {!loading && incomeBadge && (
               <span style={{
                 fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 20,
@@ -455,7 +453,7 @@ const Analytics: React.FC = () => {
             <div style={{ display: 'flex', gap: 12 }}>
               {/* Current period */}
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: '#121212', marginBottom: 8 }}>Kỳ này</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#121212', marginBottom: 8 }}>{t('This period')}</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ width: 50, height: 50, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ transform: 'rotate(90deg)' }}>
@@ -469,15 +467,15 @@ const Analytics: React.FC = () => {
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                      <span style={{ fontSize: 11, color: '#6b7280' }}>Thu</span>
+                      <span style={{ fontSize: 11, color: '#6b7280' }}>{t('Inc.')}</span>
                       <span style={{ fontSize: 11, fontWeight: 700, color: '#22c55e' }}>{fmtVND(curIncome)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                      <span style={{ fontSize: 11, color: '#6b7280' }}>Chi</span>
+                      <span style={{ fontSize: 11, color: '#6b7280' }}>{t('Exp.')}</span>
                       <span style={{ fontSize: 11, fontWeight: 700, color: '#ef4444' }}>{fmtVND(curExpense)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: 11, color: '#6b7280' }}>Ròng</span>
+                      <span style={{ fontSize: 11, color: '#6b7280' }}>{t('Net')}</span>
                       <span style={{ fontSize: 11, fontWeight: 700, color: toNum(cur?.net) >= 0 ? '#22c55e' : '#ef4444' }}>
                         {fmtVND(toNum(cur?.net))}
                       </span>
@@ -490,7 +488,7 @@ const Analytics: React.FC = () => {
 
               {/* Previous period */}
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, color: '#6b7280', marginBottom: 8 }}>Kỳ trước</p>
+                <p style={{ fontSize: 11, fontWeight: 700, color: '#6b7280', marginBottom: 8 }}>{t('Previous period')}</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ width: 50, height: 50, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ transform: 'rotate(90deg)' }}>
@@ -504,15 +502,15 @@ const Analytics: React.FC = () => {
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                      <span style={{ fontSize: 11, color: '#6b7280' }}>Thu</span>
+                      <span style={{ fontSize: 11, color: '#6b7280' }}>{t('Inc.')}</span>
                       <span style={{ fontSize: 11, fontWeight: 700, color: '#22c55e' }}>{fmtVND(prvIncome)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                      <span style={{ fontSize: 11, color: '#6b7280' }}>Chi</span>
+                      <span style={{ fontSize: 11, color: '#6b7280' }}>{t('Exp.')}</span>
                       <span style={{ fontSize: 11, fontWeight: 700, color: '#ef4444' }}>{fmtVND(prvExpense)}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: 11, color: '#6b7280' }}>Ròng</span>
+                      <span style={{ fontSize: 11, color: '#6b7280' }}>{t('Net')}</span>
                       <span style={{ fontSize: 11, fontWeight: 700, color: toNum(prv?.net) >= 0 ? '#22c55e' : '#ef4444' }}>
                         {fmtVND(toNum(prv?.net))}
                       </span>
@@ -530,7 +528,7 @@ const Analytics: React.FC = () => {
           boxShadow: '0 2px 12px rgba(0,0,0,0.07)', marginBottom: 16,
         }}>
           <p style={{ margin: '0 0 14px', fontSize: 13, fontWeight: 700, color: '#121212' }}>
-            Biểu đồ thu chi
+            {t('Income & Expense Chart')}
           </p>
 
           {loading ? (
@@ -546,7 +544,7 @@ const Analytics: React.FC = () => {
           boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
         }}>
           <p style={{ margin: '0 0 14px', fontSize: 13, fontWeight: 700, color: '#121212' }}>
-            Chi tiêu theo danh mục
+            {t('Spending by Category')}
           </p>
 
           {loading ? (
@@ -559,7 +557,7 @@ const Analytics: React.FC = () => {
               color: '#9ca3af', fontSize: 13, fontStyle: 'italic',
             }}>
               <div style={{ fontSize: 32, marginBottom: 8 }}>📊</div>
-              Không có giao dịch trong kỳ này
+              {t('No transactions in this period')}
             </div>
           ) : (
             <>
@@ -568,9 +566,9 @@ const Analytics: React.FC = () => {
                 display: 'grid', gridTemplateColumns: '1fr 80px 52px 42px',
                 padding: '0 4px 8px', borderBottom: '1px solid #f3f4f6',
               }}>
-                <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600 }}>Danh mục</span>
-                <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, textAlign: 'right' }}>Số tiền</span>
-                <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, textAlign: 'right' }}>Số GD</span>
+                <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600 }}>{t('Category')}</span>
+                <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, textAlign: 'right' }}>{t('Amount')}</span>
+                <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, textAlign: 'right' }}>{t('Txn count')}</span>
                 <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600, textAlign: 'right' }}>%</span>
               </div>
 
@@ -608,9 +606,9 @@ const Analytics: React.FC = () => {
                     -{fmtVND(cat.total_spend)}
                   </span>
 
-                  {/* Transaction count — FR-ANL-002: "12 GD" format */}
+                  {/* Transaction count — FR-ANL-002: "12 txn" format */}
                   <span style={{ fontSize: 12, color: '#6b7280', textAlign: 'right' }}>
-                    {cat.transaction_count} GD
+                    {cat.transaction_count} {t('txn')}
                   </span>
 
                   {/* Percentage */}
@@ -627,12 +625,12 @@ const Analytics: React.FC = () => {
                 borderTop: '2px solid #f3f4f6',
                 marginTop: 2,
               }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>Tổng chi</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#374151' }}>{t('Total expense')}</span>
                 <span style={{ fontSize: 12, fontWeight: 700, color: '#ef4444', textAlign: 'right' }}>
                   -{fmtFull(data.top_categories.reduce((s, c) => s + c.total_spend, 0))}
                 </span>
                 <span style={{ fontSize: 12, fontWeight: 700, color: '#374151', textAlign: 'right' }}>
-                  {data.top_categories.reduce((s, c) => s + c.transaction_count, 0)} GD
+                  {data.top_categories.reduce((s, c) => s + c.transaction_count, 0)} {t('txn')}
                 </span>
                 <span style={{ fontSize: 12, fontWeight: 700, color: '#374151', textAlign: 'right' }}>100%</span>
               </div>
