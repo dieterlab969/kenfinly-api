@@ -140,6 +140,7 @@ import DeleteDeactivateAccount from './pages/DeleteDeactivateAccount';
 import InviteFriend from './pages/InviteFriend';
 import PersonalInfo from './pages/PersonalInfo';
 import HaloDashboard from '../pages/halo/HaloDashboard';
+import AppLayout from './components/AppLayout';
 
 function App(): ReactElement {
   return (
@@ -158,7 +159,11 @@ function App(): ReactElement {
           <Route path="/SignUp" element={<SignUp />} />
           <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
           <Route path="/auth/facebook/success" element={<FacebookAuthSuccess />} />
-          <Route path="/Home" element={<Home />} />
+          {/* ── App shell with persistent bottom navigation ── */}
+          <Route element={<AppLayout />}>
+            <Route path="/Home"      element={<Home />} />
+            <Route path="/analytics" element={<Analytics />} />
+          </Route>
           <Route path="/VerifyPhoneNumber" element={<VerifyPhoneNumber />} />
           <Route path="/NotificationAllow" element={<NotificationAllow />} />
           <Route path="/Notification" element={<Notification />} />
@@ -276,8 +281,7 @@ function App(): ReactElement {
           <Route path="/DeleteAccount" element={<DeleteAccount />} />
           <Route path="/InviteFriend" element={<InviteFriend />} />
           <Route path="/PersonalInfo" element={<PersonalInfo />} />
-          {/* Analytics — financial analytics module */}
-          <Route path="/analytics" element={<Analytics />} />
+          {/* /analytics is now nested inside AppLayout above */}
           {/* Halo Dashboard — migrated to TSX, wired into the active entry point */}
           <Route path="/halo" element={<HaloDashboard />} />
           <Route path="/halo/*" element={<HaloDashboard />} />

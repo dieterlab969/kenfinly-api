@@ -2,11 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import api from '../../utils/api'
-import icon5 from '../assets/images/tabbar/icon5.svg'
-import icon1 from '../assets/images/tabbar/icon1.svg'
-import icon3 from '../assets/images/tabbar/icon3.svg'
-import icon4 from '../assets/images/tabbar/icon4.svg'
-
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type RangeType = 'TODAY' | '7_DAYS' | 'THIS_MONTH' | 'LAST_MONTH' | 'THIS_YEAR' | 'CUSTOM'
@@ -646,47 +641,7 @@ const Analytics: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Bottom Navigation ────────────────────────────────────────────────── */}
-      <div className="navigation">
-        <ul className="listWrap" style={{ alignItems: 'flex-start' }}>
-          {/* Phân tích — active */}
-          <li className="list active" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <a href="/analytics" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none' }}>
-              <i className="icon"><img src={icon5} alt="Phân tích" /></i>
-              <span className="text" style={{ fontSize: 9, color: '#7B51F1', fontWeight: 700 }}>Phân tích</span>
-            </a>
-          </li>
-
-          {/* Home */}
-          <li className="list" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <a href="/Home" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none' }}>
-              <i className="icon"><img src={icon1} alt="Home" /></i>
-              <span className="text"></span>
-            </a>
-          </li>
-
-          {/* Center placeholder (invisible, holds space for FAB) */}
-          <li className="list" style={{ visibility: 'hidden', width: '80px', textAlign: 'center' }}>
-            <span style={{ fontSize: '8px', display: 'block', marginTop: '44px' }} />
-          </li>
-
-          {/* Goals */}
-          <li className="list" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <a href="/BarChart" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none' }}>
-              <i className="icon"><img src={icon3} alt="Goals" /></i>
-              <span className="text"></span>
-            </a>
-          </li>
-
-          {/* Reports */}
-          <li className="list" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <a href="/Invoicing" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none' }}>
-              <i className="icon"><img src={icon4} alt="Reports" /></i>
-              <span className="text"></span>
-            </a>
-          </li>
-        </ul>
-      </div>
+      {/* Bottom navigation is now rendered by AppLayout > BottomNavigation */}
 
       <style>{`
         @keyframes shimmer {
