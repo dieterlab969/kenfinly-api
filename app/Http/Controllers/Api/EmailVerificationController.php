@@ -9,11 +9,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 
-/**
- * Email address verification flow.
- *
- * @tags Authentication
- */
 class EmailVerificationController extends Controller
 {
     public function __construct(

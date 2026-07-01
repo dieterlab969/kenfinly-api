@@ -55,14 +55,14 @@ function Navbar() {
                     <div className="hidden md:flex items-center space-x-4">
                         <LanguageSwitcher />
                         <Link
-                            to="/SignIn"
+                            to="/login"
                             onClick={() => gtmTracking.trackHeaderNavClick('sign_in')}
                             className="text-sm font-medium text-gray-600 hover:text-blue-600 transition-colors"
                         >
                             {t('navbar.sign_in')}
                         </Link>
                         <Link
-                            to="/SignUp"
+                            to="/register"
                             onClick={() => gtmTracking.trackHeaderNavClick('get_started')}
                             className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
                         >
@@ -105,7 +105,7 @@ function Navbar() {
                         ))}
                         <div className="pt-4 border-t space-y-3">
                             <Link
-                                to="/SignIn"
+                                to="/login"
                                 onClick={() => {
                                     gtmTracking.trackHeaderNavClick('sign_in');
                                     setIsMenuOpen(false);
@@ -115,7 +115,7 @@ function Navbar() {
                                 {t('navbar.sign_in')}
                             </Link>
                             <Link
-                                to="/SignUp"
+                                to="/register"
                                 onClick={() => {
                                     gtmTracking.trackHeaderNavClick('get_started');
                                     setIsMenuOpen(false);

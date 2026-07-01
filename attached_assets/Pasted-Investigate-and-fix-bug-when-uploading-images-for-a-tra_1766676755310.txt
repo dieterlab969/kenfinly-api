@@ -1,0 +1,85 @@
+Investigate and fix bug when uploading images for a transaction
+
+Steps to reproduce:
+
+User logs in successfully.
+
+User clicks on a transaction row.
+
+User opens the Images tab.
+
+User clicks the Upload Image button.
+
+User selects an image from their computer with a file size under 2 MB.
+
+Actual result:
+The image upload fails and the image is not uploaded.
+
+Expected result:
+The image should be uploaded successfully.
+
+Current findings:
+
+Console error in DevTools:
+app-CjuFtBpy.js:3
+POST https://kenfinly.test/api/transactions/796/photos 422 (Unprocessable Content)
+
+The error occurs when executing the following line of code:
+photoData.append('photo', file);
+
+Tasks to complete:
+
+Investigate the issue end-to-end (frontend and backend).
+
+Identify the root cause
+
+Fix the bug
+
+Add or update logging if needed to support future debugging and auditing.
+
+Write test cases (unit and/or integration tests) to cover the image upload flow.
+
+Update the testing guide / QA instructions to clearly document how to test the image upload feature, including:
+
+Invalid cases (unsupported format, oversized image, missing file)
+
+Expected API responses and UI behavior
+
+Set clear constraints, automatically compress images if they are too large, and do not require users to handle this themselves.
+Below are practical recommendations that balance quality, speed, and cost:
+
+Target (recommended): 300–600 KB per image
+
+Hard limit (after compression): ≤ 800 KB
+
+Reject immediately if original file size: > 10 MB
+
+Proposed flow:
+
+User selects an image (any size, as long as it is under 10 MB).
+
+Frontend:
+
+Detect file size and MIME type
+
+Automatically compress and resize the image
+
+Upload the compressed image
+
+Backend:
+
+Validate the image again
+
+Store the image along with metadata (original size, compressed size)
+
+
+
+Acceptance criteria:
+
+Users can successfully upload images under 10 MB for a transaction.
+
+No 422 error occurs for valid requests.
+
+All new and existing tests pass.
+
+Testing instructions are updated and easy for QA or developers to follow.

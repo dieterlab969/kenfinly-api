@@ -10,22 +10,8 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-/**
- * Multi-user account participant management (invite, list, remove).
- *
- * @tags Account Participants
- */
 class ParticipantController extends Controller
 {
-    /**
-     * Invite a user to collaborate on an account.
-     *
-     * Sends an email invitation to the specified address with the given role.
-     *
-     * @bodyParam account_id int required ID of the account to share. Example: 1
-     * @bodyParam email string required Email of the user to invite. Example: colleague@example.com
-     * @bodyParam role string required Role to assign: owner, editor, or viewer. Example: editor
-     */
     public function invite(Request $request)
     {
         $request->validate([

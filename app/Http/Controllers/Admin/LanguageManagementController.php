@@ -5,9 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-/**
- * @tags Admin — Languages
- */
 class LanguageManagementController extends Controller
 {
     protected $protectedLanguages = ['en', 'vi'];

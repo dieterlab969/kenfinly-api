@@ -7,9 +7,6 @@ use App\Models\Translation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-/**
- * @tags Admin — Translations
- */
 class TranslationManagementController extends Controller
 {
     public function index(Request $request)

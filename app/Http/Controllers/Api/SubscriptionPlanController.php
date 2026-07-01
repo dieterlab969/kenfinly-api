@@ -7,9 +7,9 @@ use App\Models\SubscriptionPlan;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Public subscription plan catalogue.
+ * Controller for managing subscription plans.
  *
- * @tags Subscriptions
+ * Provides endpoint to retrieve a list of active subscription plans ordered by sort order.
  */
 class SubscriptionPlanController extends Controller
 {

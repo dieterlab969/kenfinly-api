@@ -1,0 +1,240 @@
+Google Analytics 4 (GA4) is currently set up but only tracks the homepage. We need to implement Google Tag Manager (GTM) properly and expand tracking coverage across the entire website to capture key user interactions, navigation behavior, and content engagement.
+
+The goal is to have consistent, comprehensive event tracking for marketing, product, and growth analysis.
+
+Scope & Requirements
+
+1. Google Tag Manager Setup
+Ensure GTM is correctly implemented and loaded on all pages, including:
+Homepage
+Blog page
+Blog detail pages
+Feature pages
+Static pages (About Us, etc.)
+Confirm GA4 is firing correctly via GTM on every page.
+2. Page View Tracking
+Track page views for:
+Homepage
+Blog listing page
+Blog detail pages
+Feature pages
+Other key site pages
+3. Header Navigation Tracking
+Track click events for main header navigation items, including:
+Home
+Blog
+About Us
+Sign In
+Get Started
+4. Homepage CTA Tracking
+Track clicks on homepage buttons:
+
+Get Started
+Read Our Blog
+5. Footer Tracking
+a. Social Media Subscription Links
+Track clicks on social media icons in the footer:
+
+Twitter
+Facebook
+LinkedIn
+b. Footer Quick Links
+Track clicks on footer navigation links:
+
+Home
+Blog
+About Us
+Sign In
+Get Started
+6. Blog Page Tracking
+Track user interactions on the blog page, including:
+
+Clicks on blog category filters
+Clicks on individual blog posts
+Blog search interactions:
+Clicking the search input
+Submitting a search query
+7. Blog Detail Page Tracking
+Track engagement on blog article pages:
+
+Article view (page load)
+Clicks on Share button
+Any interaction related to navigating or discovering other articles from the detail page
+Acceptance Criteria
+
+GTM is implemented site-wide and verified
+All listed events are visible in GA4 (via DebugView or real-time reports)
+Events follow consistent naming conventions
+No duplicate or missing events
+Tracking works on both desktop and mobile
+1. Core Page & Session Events
+Event Name
+
+When It Fires
+
+page_view
+
+Default GA4 page view (all pages)
+
+view_home
+
+Homepage viewed (optional custom event)
+
+view_blog_list
+
+Blog listing page viewed
+
+view_blog_detail
+
+Blog article detail page viewed
+
+view_feature_page
+
+Feature page viewed
+
+2. Header Navigation Events
+Event Name
+
+ 
+
+click_header_nav 
+
+Recommended Parameters
+
+nav_item (home, blog, about_us, sign_in, get_started)
+page_location
+Example
+
+ 
+
+click_header_nav nav_item: "blog"
+
+ 
+
+3. Homepage CTA Events
+Event Name
+
+Trigger
+
+click_home_cta
+
+Any homepage CTA click
+
+Parameters
+
+cta_name (get_started, read_blog)
+page_location
+4. Footer Events
+a. Social Media Links
+Event Name
+
+ 
+
+click_social_link
+
+Parameters
+
+platform (twitter, facebook, linkedin)
+location (footer)
+page_location
+b. Footer Navigation Links
+Event Name
+
+ 
+
+click_footer_nav
+
+ 
+
+Parameters
+
+nav_item (home, blog, about_us, sign_in, get_started)
+page_location
+5. Blog Page Events
+a. Blog Category Filter
+Event Name
+
+ 
+
+select_blog_category
+
+ 
+
+Parameters
+
+category_name
+page_location
+b. Blog Post Click (from list)
+Event Name
+
+ 
+
+click_blog_post
+
+ 
+
+Parameters
+
+post_title
+post_id (if available)
+page_location
+c. Blog Search
+Event Name
+
+ 
+
+blog_search
+
+Parameters
+
+search_term
+page_location
+6. Blog Detail Page Events
+a. Article Engagement
+Event Name
+
+Description
+
+view_blog_article
+
+Blog article fully loaded
+
+Parameters
+
+post_title
+post_id
+b. Share Button Click
+Event Name
+
+ 
+
+click_share_article
+
+Parameters
+
+platform (twitter, facebook, linkedin, copy_link, etc.)
+post_title
+page_location
+7. Optional (Future-Proofing)
+Event Name
+
+Use Case
+
+cta_click
+
+Universal CTA tracking
+
+navigation_click
+
+Unified nav tracking
+
+content_engagement
+
+Scroll / read depth
+
+ 
+
+Naming Principles Used
+✅ Verb-first (click_, view_, select_)
+✅ Reusable events + parameters (GA4-recommended)
+✅ Easy to analyze in GA4 Explorations

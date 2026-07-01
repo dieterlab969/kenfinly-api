@@ -36,30 +36,13 @@ return [
     ],
 
     'recaptcha' => [
-        'site_key' => env('RECAPTCHA_SITE_KEY'),
-        'secret_key' => env('RECAPTCHA_SECRET_KEY'),
+        'site_key' => env('GOOGLE_RECAPTCHA_SITE_KEY'),
+        'secret_key' => env('GOOGLE_RECAPTCHA_SECRET_KEY'),
     ],
 
      'google_analytics' => [
-        'enabled' => env('GA4_ENABLED', false),
         'property_id' => env('GOOGLE_ANALYTICS_PROPERTY_ID'),
         'credentials_path' => env('GOOGLE_ANALYTICS_CREDENTIALS_PATH')
-     ],
-
-    'woocommerce' => [
-        'webhook_secret' => env('WOOCOMMERCE_WEBHOOK_SECRET'),
-    ],
-
-    'google' => [
-        'client_id'     => env('GOOGLE_CLIENT_ID'),
-        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect'      => env('GOOGLE_REDIRECT_URI'),
-    ],
-
-    'facebook' => [
-        'client_id'     => env('FACEBOOK_CLIENT_ID'),
-        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
-        'redirect'      => env('FACEBOOK_REDIRECT_URI'),
-    ],
+     ]
 
 ];

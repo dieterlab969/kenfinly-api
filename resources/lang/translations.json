@@ -11,10 +11,6 @@
     "en": "Sign in to Kenfinly",
     "vi": "Đăng nhập vào Kenfinly"
   },
-  "auth.login_subtitle": {
-    "en": "Enter your credentials to continue to your Kenfinly account.",
-    "vi": "Nhập thông tin đăng nhập của bạn để tiếp tục vào tài khoản Kenfinly."
-  },
   "auth.register": {
     "en": "Create your Kenfinly account",
     "vi": "Tạo tài khoản Kenfinly của bạn"
