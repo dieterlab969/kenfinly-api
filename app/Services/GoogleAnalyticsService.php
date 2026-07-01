@@ -48,8 +48,7 @@ class GoogleAnalyticsService
             ]);
         } catch (\Throwable $e) {
             Log::error('Failed to initialize Google Analytics client: ' . $e->getMessage());
-            // Re-throw to prevent silent failure
-            throw $e;
+            $this->client = null;
         }
     }
 
@@ -98,8 +97,20 @@ class GoogleAnalyticsService
      * @param string $endDate
      * @return array
      */
+    public function isConfigured(): bool
+    {
+        return $this->client !== null;
+    }
+
     protected function fetchTrafficData(string $startDate, string $endDate): array
     {
+        if (!$this->client) {
+            return [
+                'users' => 0,
+                'sessions' => 0,
+                'updated_at' => now()->toIso8601String(),
+            ];
+        }
         try {
             $response = $this->client->runReport([
                 'property' => 'properties/' . $this->propertyId,
