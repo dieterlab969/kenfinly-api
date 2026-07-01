@@ -7,7 +7,7 @@ import {
 import api from '../utils/api';
 import { getCategoryIcon, formatCurrency } from '../constants/categories';
 import { format, parseISO } from 'date-fns';
-import { useTranslation } from '../contexts/TranslationContext';
+import { useTranslation } from 'react-i18next';
 import { processImageForUpload, validateImageFile, formatFileSize } from '../utils/imageCompression';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -252,7 +252,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                 transaction_date: tx.transaction_date,
             });
         } catch (err) {
-            setError(t('transaction_detail_modal.failed_to_load_transaction_details'));
+            setError(t('Failed to load transaction details.'));
             console.error(err);
         }
     };
@@ -292,12 +292,12 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
             }
             const response = await api.put(`/transactions/${transactionId}`, payload);
             setTransaction(response.data.transaction);
-            setSuccessMsg(t('transactions.transaction_updated_successfully') || 'Transaction updated successfully.');
+            setSuccessMsg(t('Transaction updated successfully.'));
             if (onUpdate) onUpdate(response.data.transaction);
             setTimeout(() => setSuccessMsg(''), 3000);
         } catch (err: unknown) {
             const axiosErr = err as { response?: { data?: { message?: string } } };
-            setError(axiosErr.response?.data?.message || t('transaction_detail_modal.failed_to_update_transaction'));
+            setError(axiosErr.response?.data?.message || t('Failed to update transaction.'));
         } finally {
             setSaving(false);
         }
@@ -312,8 +312,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
 
         if (availableSlots <= 0) {
             setPhotoError(
-                t('transactions.photos.max_photos_reached') ||
-                `Maximum of ${MAX_PHOTOS} images allowed. Please delete some before uploading more.`
+                t('Maximum of {{max}} images allowed. Please delete some before uploading more.', { max: MAX_PHOTOS })
             );
             if (fileInputRef.current) fileInputRef.current.value = '';
             return;
@@ -322,8 +321,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         const filesToUpload: File[] = files.slice(0, availableSlots);
         if (files.length > availableSlots) {
             setPhotoError(
-                t('transactions.photos.upload_limit_exceeded') ||
-                `Only ${availableSlots} more image(s) can be uploaded (max ${MAX_PHOTOS} total). Uploading first ${availableSlots}.`
+                t('Only {{n}} more image(s) can be uploaded (max {{max}} total). Uploading first {{n}}.', { n: availableSlots, max: MAX_PHOTOS })
             );
         } else {
             setPhotoError('');
@@ -364,7 +362,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
         } catch (err: unknown) {
             console.error('Photo upload error:', err);
             const axiosErr = err as { response?: { data?: { message?: string } }; message?: string };
-            setPhotoError(axiosErr.response?.data?.message || axiosErr.message || t('transactions.photos.error.upload_failed'));
+            setPhotoError(axiosErr.response?.data?.message || axiosErr.message || t('Upload failed. Please try again.'));
         } finally {
             setUploadingPhoto(false);
             setUploadProgress({ stage: '', progress: 0 });
@@ -373,12 +371,12 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     };
 
     const handleDeletePhoto = async (photoId: number): Promise<void> => {
-        if (!confirm(t('transactions.photos.delete_photo_confirmation') || 'Delete this photo?')) return;
+        if (!confirm(t('Delete this photo?'))) return;
         try {
             await api.delete(`/photos/${photoId}`);
             await fetchTransactionDetails();
         } catch (err) {
-            setPhotoError(t('transactions.photos.delete_photo_error') || 'Failed to delete photo.');
+            setPhotoError(t('Failed to delete photo.'));
         }
     };
 
@@ -395,12 +393,12 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     const canUploadMore: boolean = photoCount < MAX_PHOTOS;
 
     const transactionAccent: string = transaction?.type === 'income' ? '#22c55e' : '#ef4444';
-    const transactionLabel: string = transaction?.type === 'income' ? 'THU NHẬP' : 'CHI TIÊU';
+    const transactionLabel: string = transaction?.type === 'income' ? t('INCOME') : t('EXPENSE');
 
     const tabLabel = (tab: TabId): string => {
-        if (tab === 'details') return t('transactions.transaction_tab_details') || 'Chi tiết';
-        if (tab === 'images') return `${t('transactions.transaction_tab_photos') || 'Ảnh'} (${photoCount})`;
-        if (tab === 'history') return t('transaction_detail_modal.history') || 'Lịch sử';
+        if (tab === 'details') return t('Details');
+        if (tab === 'images') return `${t('Photos')} (${photoCount})`;
+        if (tab === 'history') return t('History');
         return tab;
     };
 
@@ -434,11 +432,11 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                             fontSize: '14px', fontWeight: 600, cursor: 'pointer', padding: '4px 8px',
                         }}
                     >
-                        Hủy
+                        {t('Cancel')}
                     </button>
 
                     <div style={{ textAlign: 'center' }}>
-                        <p style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>SỬA GIAO DỊCH</p>
+                        <p style={{ fontSize: '12px', color: '#9ca3af', marginBottom: '2px' }}>{t('EDIT TRANSACTION')}</p>
                         <p style={{ fontSize: '14px', fontWeight: 800, color: transaction ? transactionAccent : '#7B51F1', letterSpacing: '0.5px' }}>
                             {transaction ? transactionLabel : '…'}
                         </p>
@@ -461,9 +459,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                             transition: 'opacity 0.2s, background 0.2s',
                         }}
                     >
-                        {saving
-                            ? (t('transactions.transaction_saving_state') || 'Đang lưu...')
-                            : (t('transactions.transaction_save_action') || 'Lưu')}
+                        {saving ? t('Saving…') : t('Save')}
                     </button>
                 </div>
 
@@ -496,7 +492,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                             }}>
                                 <Lock style={{ width: '11px', height: '11px', color: '#d97706' }} />
                                 <span style={{ fontSize: '11px', color: '#d97706', fontWeight: 600 }}>
-                                    {t('transactions.amount_locked_hint') || `Khoá sau ${AMOUNT_LOCK_MINUTES} phút`}
+                                    {t('Locked after {{n}} min', { n: AMOUNT_LOCK_MINUTES })}
                                 </span>
                             </div>
                         )}
@@ -571,7 +567,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                     {/* Amount */}
                                     <div style={MS.fieldWrap}>
                                         <label style={MS.fieldLabel}>
-                                            {t('transactions.transaction_form_amount_label') || 'Số tiền'}
+                                            {t('Amount')}
                                         </label>
                                         <div style={{ position: 'relative' }}>
                                             <input
@@ -586,7 +582,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                                 required
                                                 style={amountLocked ? MS.inputLocked : MS.inputBase}
                                                 title={amountLocked
-                                                    ? (t('transactions.amount_locked_tooltip') || `Amount can only be edited within ${AMOUNT_LOCK_MINUTES} minutes of creation.`)
+                                                    ? t('Amount can only be edited within {{n}} minutes of creation.', { n: AMOUNT_LOCK_MINUTES })
                                                     : ''}
                                             />
                                             {amountLocked && (
@@ -599,8 +595,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                         </div>
                                         {amountLocked && (
                                             <p style={{ marginTop: '6px', fontSize: '12px', color: '#d97706' }}>
-                                                {t('transactions.amount_locked_description') ||
-                                                    `Trường này chỉ đọc vì giao dịch được tạo hơn ${AMOUNT_LOCK_MINUTES} phút trước.`}
+                                                {t('This field is read-only because the transaction was created more than {{n}} minutes ago.', { n: AMOUNT_LOCK_MINUTES })}
                                             </p>
                                         )}
                                     </div>
@@ -608,7 +603,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                     {/* Category */}
                                     <div style={MS.fieldWrap}>
                                         <label style={MS.fieldLabel}>
-                                            {t('transactions.transaction_form_category_label') || 'Hạng mục'}
+                                            {t('Category')}
                                         </label>
                                         <div style={{ position: 'relative' }}>
                                             <select
@@ -636,7 +631,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                     {/* Account */}
                                     <div style={MS.fieldWrap}>
                                         <label style={MS.fieldLabel}>
-                                            {t('transactions.transaction_form_account_label') || 'Tài khoản'}
+                                            {t('Account')}
                                         </label>
                                         <div style={{ position: 'relative' }}>
                                             <select
@@ -664,7 +659,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                     {/* Date */}
                                     <div style={MS.fieldWrap}>
                                         <label style={MS.fieldLabel}>
-                                            {t('transactions.transaction_form_date_label') || 'Ngày'}
+                                            {t('Date')}
                                         </label>
                                         <input
                                             type="date"
@@ -680,7 +675,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                     {/* Notes */}
                                     <div style={MS.fieldWrap}>
                                         <label style={MS.fieldLabel}>
-                                            {t('transactions.transaction_form_notes_label') || 'Ghi chú'}
+                                            {t('Notes')}
                                         </label>
                                         <textarea
                                             value={formData.notes ?? ''}
@@ -688,7 +683,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                                 setFormData({ ...formData, notes: e.target.value })
                                             }
                                             rows={3}
-                                            placeholder={t('transactions.transaction_notes_placeholder') || 'Thêm ghi chú…'}
+                                            placeholder={t('Add a note…')}
                                             style={{ ...MS.inputBase, resize: 'none', lineHeight: '1.5' }}
                                         />
                                     </div>
@@ -708,7 +703,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                         marginBottom: '16px',
                                     }}>
                                         <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280' }}>
-                                            {t('transactions.photos.count_label') || 'Ảnh'}:{' '}
+                                            {t('Photos')}:{' '}
                                             <span style={{ color: photoCount >= MAX_PHOTOS ? '#ef4444' : '#7B51F1', fontWeight: 800 }}>
                                                 {photoCount}
                                             </span>
@@ -722,7 +717,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                             }}>
                                                 <AlertCircle style={{ width: '11px', height: '11px', color: '#ef4444' }} />
                                                 <span style={{ fontSize: '11px', color: '#ef4444', fontWeight: 600 }}>
-                                                    {t('transactions.photos.max_reached_badge') || 'Đã đạt giới hạn'}
+                                                    {t('Limit reached')}
                                                 </span>
                                             </div>
                                         )}
@@ -782,18 +777,18 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                                 <span style={{ fontSize: '13px', fontWeight: 600, color: uploadingPhoto ? '#7B51F1' : canUploadMore ? '#4b5563' : '#9ca3af' }}>
                                                     {uploadingPhoto
                                                         ? (uploadProgress.stage === 'compressing'
-                                                            ? (t('transactions.photos.compressing') || 'Đang nén…')
+                                                            ? t('Compressing…')
                                                             : uploadProgress.stage === 'uploading'
-                                                                ? (t('transactions.photos.uploading') || 'Đang tải lên…')
-                                                                : (t('transactions.transaction_uploading_state') || 'Đang xử lý…'))
+                                                                ? t('Uploading…')
+                                                                : t('Processing…'))
                                                         : canUploadMore
-                                                            ? (t('transactions.transaction_upload_photo_action') || 'Nhấn để tải ảnh lên')
-                                                            : (t('transactions.photos.max_photos_reached') || `Đã đạt tối đa ${MAX_PHOTOS} ảnh`)
+                                                            ? t('Tap to upload photos')
+                                                            : t('Maximum {{max}} photos reached', { max: MAX_PHOTOS })
                                                     }
                                                 </span>
                                                 {!uploadingPhoto && canUploadMore && (
                                                     <span style={{ fontSize: '11px', color: '#9ca3af' }}>
-                                                        JPEG, PNG, WebP · tối đa 10 MB · còn {MAX_PHOTOS - photoCount} ô
+                                                        {t('JPEG, PNG, WebP · max 10 MB · {{n}} slot(s) left', { n: MAX_PHOTOS - photoCount })}
                                                     </span>
                                                 )}
                                             </label>
@@ -845,7 +840,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                                                 padding: '4px', cursor: 'pointer',
                                                                 display: 'flex', alignItems: 'center',
                                                             }}
-                                                            title={t('transactions.photos.delete_photo') || 'Xóa ảnh'}
+                                                            title={t('Delete photo')}
                                                         >
                                                             <Trash2 style={{ width: '13px', height: '13px' }} />
                                                         </button>
@@ -865,7 +860,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 20px', color: '#9ca3af' }}>
                                             <ImageIcon style={{ width: '44px', height: '44px', opacity: 0.35, marginBottom: '10px' }} />
                                             <p style={{ fontSize: '13px' }}>
-                                                {t('transaction_detail_modal.no_photos_uploaded_yet') || 'Chưa có ảnh nào.'}
+                                                {t('No photos uploaded yet.')}
                                             </p>
                                         </div>
                                     )}
@@ -896,20 +891,20 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                                         <div style={{ flex: 1, minWidth: 0 }}>
                                                             <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '4px', marginBottom: '2px' }}>
                                                                 <span style={{ fontSize: '13px', fontWeight: 700, color: '#121212' }}>
-                                                                    {log.action === 'created' && (t('transactions.transaction_history_created') || 'Tạo mới')}
-                                                                    {log.action === 'updated' && (t('transactions.transaction_history_updated') || 'Cập nhật')}
-                                                                    {log.action === 'deleted' && (t('transactions.transaction_history_deleted') || 'Xóa')}
-                                                                    {log.action === 'photo_added' && (t('transactions.transaction_history_photo_added') || 'Thêm ảnh')}
-                                                                    {log.action === 'photo_removed' && (t('transactions.transaction_history_photo_removed') || 'Xóa ảnh')}
+                                                                    {log.action === 'created' && t('Created')}
+                                                                    {log.action === 'updated' && t('Updated')}
+                                                                    {log.action === 'deleted' && t('Deleted')}
+                                                                    {log.action === 'photo_added' && t('Photo added')}
+                                                                    {log.action === 'photo_removed' && t('Photo removed')}
                                                                 </span>
                                                                 <span style={{ fontSize: '11px', color: '#9ca3af' }}>
                                                                     {format(parseISO(log.created_at), 'MMM dd, yyyy h:mm a')}
                                                                 </span>
                                                             </div>
                                                             <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '6px' }}>
-                                                                {t('transactions.transaction_history_by') || 'Bởi'}{' '}
+                                                                {t('By')}{' '}
                                                                 <span style={{ fontWeight: 700, color: '#374151' }}>
-                                                                    {log.user?.name || (t('transactions.transaction_history_unknown_user') || 'Không rõ')}
+                                                                    {log.user?.name || t('Unknown')}
                                                                 </span>
                                                             </p>
 
@@ -948,7 +943,7 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 20px', color: '#9ca3af' }}>
                                             <History style={{ width: '44px', height: '44px', opacity: 0.35, marginBottom: '10px' }} />
                                             <p style={{ fontSize: '13px' }}>
-                                                {t('transaction_detail_modal.no_history_available') || 'Chưa có lịch sử.'}
+                                                {t('No history available.')}
                                             </p>
                                         </div>
                                     )}
