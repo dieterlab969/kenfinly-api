@@ -4090,12 +4090,12 @@ p.balance {
 }
 .gol3 {
     position: fixed;
-    bottom: 12px;
+    bottom: 26px;
     top: auto;
     left: 50%;
     transform: translateX(-50%);
-    width: 60px;
-    height: 60px;
+    width: 58px;
+    height: 58px;
     background-color: #000000;
     border-radius: 50%;
     z-index: 102;
@@ -4124,7 +4124,7 @@ p.balance {
     transform: translateX(-50%);
     width: calc(100% - 32px);
     max-width: 520px;
-    padding: 10px 20px;
+    padding: 16px 24px;
     background: #ffffff;
     border-radius: 999px;
     border: 1.5px solid #e5e7eb;
