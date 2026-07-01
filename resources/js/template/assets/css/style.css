@@ -4086,19 +4086,19 @@ p.balance {
     position: relative;
 }
 .bottom-menu-svg {
-    position: fixed;
-    bottom: -40px;
+    display: none;
 }
 .gol3 {
-    position: absolute;
+    position: fixed;
+    bottom: 50px;
+    top: auto;
     left: 50%;
-    top: -10%;
     transform: translateX(-50%);
-    width: 80px;
-    height: 80px;
+    width: 58px;
+    height: 58px;
     background-color: #000000;
     border-radius: 50%;
-    z-index: 99;
+    z-index: 102;
 }
 .add-to-cart-icon {
     position: absolute;
@@ -4115,18 +4115,21 @@ p.balance {
     transform: translate(-50%, -50%);
 }
 .bottom-menu-svg-design {
-    max-width: 600px;
-    height: 160px;
-    width: 100%;
-    backdrop-filter: blur(12px);
-    background: var(--primary-color);
+    display: none;
 }
 .navigation {
     position: fixed;
-    bottom: 25px;
-    width: 100%;
-    padding: 0 32px;
-    max-width: 600px;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 520px;
+    padding: 16px 24px;
+    background: #ffffff;
+    border-radius: 999px;
+    border: 1.5px solid #e5e7eb;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+    z-index: 100;
 }
 .navigation .listWrap {
     list-style: none;
@@ -4157,20 +4160,19 @@ p.balance {
 #paint0_linear_1_13394 {
     stop-color: #121212;
 }
+.navigation .listWrap li a .text {
+    display: block;
+    font-size: 10px;
+    font-weight: 500;
+    margin-top: 4px;
+    color: #9ca3af;
+    white-space: nowrap;
+    transition: color 0.2s;
+    text-align: center;
+}
 .navigation .listWrap li:active a .text,
 .navigation .listWrap li.active a .text {
-    opacity: 1;
-}
-.navigation .listWrap li a .text {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: #7B51F1;
-    transition: 0.5s;
-    transform: translateY(20px);
-    opacity: 0;
-    z-index: 1;
+    color: #7B51F1;
 }
 /************************ 51.Face recognition css ***************************/
 .concentric-circles {
