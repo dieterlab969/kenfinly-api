@@ -120,7 +120,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ fabOpen, onFabToggl
                                     flexDirection: 'column',
                                     alignItems: 'center',
                                     textDecoration: 'none',
-                                    color: isActive ? '#7B51F1' : '#5A5C5E',
+                                    color: isActive ? '#7B51F1' : '#9ca3af',
                                     transition: 'color 0.2s',
                                 }}
                             >
@@ -129,8 +129,6 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ fabOpen, onFabToggl
                                     style={{
                                         display: 'flex',
                                         justifyContent: 'center',
-                                        transform: isActive ? 'translateY(-10px)' : 'none',
-                                        transition: 'transform 0.3s ease',
                                     }}
                                 >
                                     <item.Icon
@@ -138,14 +136,7 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ fabOpen, onFabToggl
                                         strokeWidth={isActive ? 2.2 : 1.8}
                                     />
                                 </span>
-                                {/* Active dot indicator */}
-                                <span
-                                    className="text"
-                                    style={{
-                                        display: 'block',
-                                        opacity: isActive ? 1 : 0,
-                                    }}
-                                />
+                                <span className="text">{t(item.label)}</span>
                             </Link>
                         </li>
                     )
