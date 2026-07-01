@@ -4086,19 +4086,19 @@ p.balance {
     position: relative;
 }
 .bottom-menu-svg {
-    position: fixed;
-    bottom: -40px;
+    display: none;
 }
 .gol3 {
-    position: absolute;
+    position: fixed;
+    bottom: 12px;
+    top: auto;
     left: 50%;
-    top: -10%;
     transform: translateX(-50%);
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
     background-color: #000000;
     border-radius: 50%;
-    z-index: 99;
+    z-index: 102;
 }
 .add-to-cart-icon {
     position: absolute;
@@ -4115,18 +4115,21 @@ p.balance {
     transform: translate(-50%, -50%);
 }
 .bottom-menu-svg-design {
-    max-width: 600px;
-    height: 160px;
-    width: 100%;
-    backdrop-filter: blur(12px);
-    background: var(--primary-color);
+    display: none;
 }
 .navigation {
     position: fixed;
-    bottom: 25px;
-    width: 100%;
-    padding: 0 32px;
-    max-width: 600px;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 32px);
+    max-width: 520px;
+    padding: 10px 20px;
+    background: #ffffff;
+    border-radius: 999px;
+    border: 1.5px solid #e5e7eb;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+    z-index: 100;
 }
 .navigation .listWrap {
     list-style: none;
