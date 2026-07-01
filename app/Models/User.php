@@ -11,41 +11,11 @@ use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 /**
- * User model — the central entity of the Kenfinly application.
+ * User model representing an application user.
  *
- * Represents a registered user account with:
- *  - JWT-based API authentication (implements JWTSubject)
- *  - Role-Based Access Control via a many-to-many `roles` pivot
- *  - Subscription lifecycle management (trial → active → expired)
- *  - Relationships to accounts, transactions, Halo ledger, Pomodoro state,
- *    saving habits, licenses, payments, invitations, and email verifications
- *
- * Subscription status flow:
- *  trial → active (after successful PayOS payment)
- *        → expired (trial_ends_at or subscription_expires_at elapsed)
- *
- * @property int              $id
- * @property string           $name
- * @property string           $email
- * @property string           $password               Bcrypt-hashed
- * @property int|null         $language_id
- * @property string           $status                 "pending" | "active" | "suspended"
- * @property bool             $is_suspended
- * @property int              $halo_points_balance    Running total of Halo points
- * @property \Carbon\Carbon|null $email_verified_at
- * @property string|null      $timezone
- * @property int|null         $hourly_rate            VND per hour for Halo sessions
- * @property \Carbon\Carbon|null $rate_updated_at
- * @property \Carbon\Carbon|null $hourly_rate_locked_until
- * @property int              $current_streak         Consecutive Halo days
- * @property int              $longest_streak         All-time longest streak
- * @property \Carbon\Carbon|null $last_halo_date       Date of last completed Halo session
- * @property string           $subscription_status    "trial" | "active" | "expired"
- * @property string           $subscription_plan      "free" | "monthly" | "yearly"
- * @property \Carbon\Carbon|null $trial_ends_at
- * @property \Carbon\Carbon|null $subscription_expires_at
- * @property \Carbon\Carbon   $created_at
- * @property \Carbon\Carbon   $updated_at
+ * Represents a user account with authentication, authorization, and relationships
+ * to various application entities including accounts, subscriptions, payments, and more.
+ * Implements JWT authentication for API access.
  */
 class User extends Authenticatable implements JWTSubject
 {
@@ -61,36 +31,9 @@ class User extends Authenticatable implements JWTSubject
         'name',
         'email',
         'password',
-        'avatar',
-        'facebook_id',
         'language_id',
         'status',
-        'is_suspended',
-        'halo_points_balance',
         'email_verified_at',
-        'timezone',
-        'hourly_rate',
-        'rate_updated_at',
-        'hourly_rate_locked_until',
-        'current_streak',
-        'longest_streak',
-        'last_halo_date',
-        'subscription_status',
-        'subscription_plan',
-        'trial_ends_at',
-        'subscription_expires_at',
-        'country_code',
-        'currency',
-        'phone',
-        'date_of_birth',
-        'gender',
-        'address',
-        'is_2fa_enabled',
-        'is_biometric_enabled',
-        'login_notifications_enabled',
-        'security_alerts_enabled',
-        'pin_hash',
-        'deletion_scheduled_at',
     ];
 
     /**
@@ -104,43 +47,23 @@ class User extends Authenticatable implements JWTSubject
     ];
 
     /**
-     * Get the attributes that should be cast to native types.
+     * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
     protected function casts(): array
     {
         return [
-            'email_verified_at'        => 'datetime',
-            'password'                 => 'hashed',
-            'status'                   => 'string',
-            'is_suspended'             => 'boolean',
-            'halo_points_balance'      => 'integer',
-            'rate_updated_at'          => 'datetime',
-            'hourly_rate_locked_until' => 'datetime',
-            'last_halo_date'           => 'date',
-            'date_of_birth'            => 'date',
-            'hourly_rate'              => 'integer',
-            'current_streak'           => 'integer',
-            'longest_streak'           => 'integer',
-            'trial_ends_at'                  => 'datetime',
-            'subscription_expires_at'        => 'datetime',
-            'deletion_scheduled_at'          => 'datetime',
-            'is_2fa_enabled'                 => 'boolean',
-            'is_biometric_enabled'           => 'boolean',
-            'login_notifications_enabled'    => 'boolean',
-            'security_alerts_enabled'        => 'boolean',
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'status' => 'string',
         ];
     }
 
-    // ── JWT ───────────────────────────────────────────────────────────────
-
     /**
-     * Get the identifier stored in the subject claim of the JWT.
+     * Get the identifier that will be stored in the subject claim of the JWT.
      *
-     * Required by the JWTSubject contract. Returns the model's primary key.
-     *
-     * @return mixed  The user's primary key value.
+     * @return mixed
      */
     public function getJWTIdentifier()
     {
@@ -148,24 +71,17 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Return a key-value array of custom claims to add to the JWT payload.
+     * Return a key value array, containing any custom claims to be added to the JWT.
      *
-     * Currently no extra claims are added. Override to embed roles, plan,
-     * or other data that should travel with the token without a DB round-trip.
-     *
-     * @return array<string, mixed>
+     * @return array
      */
     public function getJWTCustomClaims()
     {
         return [];
     }
 
-    // ── Relationships ─────────────────────────────────────────────────────
-
     /**
-     * Get the financial accounts owned by this user.
-     *
-     * @return HasMany<Account>
+     * Get the user's accounts.
      */
     public function accounts(): HasMany
     {
@@ -173,87 +89,7 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Get the attendance records for this user.
-     *
-     * @return HasMany<Attendance>
-     */
-    public function attendances(): HasMany
-    {
-        return $this->hasMany(Attendance::class);
-    }
-
-    /**
-     * Get the append-only hourly rate governance log entries for this user.
-     *
-     * Each row records a rate change event; the current rate is the latest entry.
-     *
-     * @return HasMany<UserRateLog>
-     */
-    public function hourlyRateChanges(): HasMany
-    {
-        return $this->hasMany(UserRateLog::class);
-    }
-
-    /**
-     * Get the commitments associated with this user.
-     *
-     * @return HasMany<Commitment>
-     */
-    public function commitments(): HasMany
-    {
-        return $this->hasMany(Commitment::class);
-    }
-
-    /**
-     * Get the completed or interrupted Pomodoro sessions for this user.
-     *
-     * @return HasMany<PomodoroSession>
-     */
-    public function pomodoroSessions(): HasMany
-    {
-        return $this->hasMany(PomodoroSession::class);
-    }
-
-    /**
-     * Get the persisted active Pomodoro state rows for this user.
-     *
-     * In the current implementation a single row is maintained per user even
-     * though the relation type is has-many.
-     *
-     * @return HasMany<PomodoroActiveState>
-     */
-    public function pomodoroActiveState(): HasMany
-    {
-        return $this->hasMany(PomodoroActiveState::class);
-    }
-
-    /**
-     * Get the daily ledger summaries for this user's Halo dashboard.
-     *
-     * @return HasMany<LedgerDailySummary>
-     */
-    public function ledgerDailySummaries(): HasMany
-    {
-        return $this->hasMany(LedgerDailySummary::class);
-    }
-
-    /**
-     * Get the append-only Halo point ledger entries for this user.
-     *
-     * The ledger is an immutable audit chain; the running balance is stored
-     * denormalized on the user's `halo_points_balance` column.
-     *
-     * @return HasMany<HaloPointLedger>
-     */
-    public function haloPointLedgerEntries(): HasMany
-    {
-        return $this->hasMany(HaloPointLedger::class);
-    }
-
-    /**
-     * Get the roles assigned to this user via the `user_roles` pivot table.
-     *
-     * @return BelongsToMany<Role>
+     * Get the roles that belong to the user.
      */
     public function roles(): BelongsToMany
     {
@@ -261,9 +97,9 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Get the user's preferred UI language.
+     * Get the user's preferred language.
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo<Language, User>
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo Relationship to the Language model.
      */
     public function language()
     {
@@ -271,74 +107,10 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Get the licenses associated with this user.
+     * Check if the user has a specific role.
      *
-     * @return HasMany<License>
-     */
-    public function licenses(): HasMany
-    {
-        return $this->hasMany(License::class);
-    }
-
-    /**
-     * Get the subscriptions associated with this user.
-     *
-     * @return HasMany<Subscription>
-     */
-    public function subscriptions(): HasMany
-    {
-        return $this->hasMany(Subscription::class);
-    }
-
-    /**
-     * Get the payments made by this user.
-     *
-     * @return HasMany<Payment>
-     */
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class);
-    }
-
-    /**
-     * Get all workspace participations for this user.
-     *
-     * @return HasMany<AccountParticipant>
-     */
-    public function accountParticipations(): HasMany
-    {
-        return $this->hasMany(AccountParticipant::class);
-    }
-
-    /**
-     * Get all invitations sent by this user.
-     *
-     * Uses the non-default `invited_by` foreign key column.
-     *
-     * @return HasMany<Invitation>
-     */
-    public function invitations(): HasMany
-    {
-        return $this->hasMany(Invitation::class, 'invited_by');
-    }
-
-    /**
-     * Get the email verifications associated with this user.
-     *
-     * @return HasMany<EmailVerification>
-     */
-    public function emailVerifications(): HasMany
-    {
-        return $this->hasMany(EmailVerification::class);
-    }
-
-    // ── Role helpers ──────────────────────────────────────────────────────
-
-    /**
-     * Check whether the user holds a specific role.
-     *
-     * @param  string  $roleName  Role name to look up (e.g. "owner", "super_admin").
-     * @return bool               True when the role is assigned.
+     * @param string $roleName
+     * @return bool
      */
     public function hasRole(string $roleName): bool
     {
@@ -346,10 +118,10 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Check whether the user holds at least one of the given roles.
+     * Check if the user has any of the given roles.
      *
-     * @param  array<int, string>  $roles  Role names to match.
-     * @return bool                        True when any role matches.
+     * @param array $roles
+     * @return bool
      */
     public function hasAnyRole(array $roles): bool
     {
@@ -357,12 +129,9 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Assign a role to the user (idempotent — uses syncWithoutDetaching).
+     * Assign a role to the user.
      *
-     * Accepts either a Role model instance or a role name string. Throws a
-     * ModelNotFoundException when the role name does not exist.
-     *
-     * @param  string|Role  $role  Role instance or role name.
+     * @param string|Role $role
      * @return void
      */
     public function assignRole(string|Role $role): void
@@ -377,10 +146,7 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Remove a role from the user.
      *
-     * Silently does nothing when the role name does not exist, so callers
-     * can call this unconditionally without checking first.
-     *
-     * @param  string|Role  $role  Role instance or role name.
+     * @param string|Role $role
      * @return void
      */
     public function removeRole(string|Role $role): void
@@ -394,15 +160,62 @@ class User extends Authenticatable implements JWTSubject
         }
     }
 
-    // ── License helpers ───────────────────────────────────────────────────
+    /**
+     * Get all licenses associated with this user.
+     *
+     * @return HasMany Relationship to License models.
+     */
+    public function licenses(): HasMany
+    {
+        return $this->hasMany(License::class);
+    }
 
     /**
-     * Get the user's currently active license.
+     * Get all subscriptions associated with this user.
      *
-     * Returns the first active license whose `expires_at` is null (perpetual)
-     * or in the future. Returns null when no valid license exists.
+     * @return HasMany Relationship to Subscription models.
+     */
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Get all payments made by this user.
      *
-     * @return \App\Models\License|null
+     * @return HasMany Relationship to Payment models.
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * Get all account participations for this user.
+     *
+     * @return HasMany Relationship to AccountParticipant models.
+     */
+    public function accountParticipations(): HasMany
+    {
+        return $this->hasMany(AccountParticipant::class);
+    }
+
+    /**
+     * Get all invitations sent by this user.
+     *
+     * @return HasMany Relationship to Invitation models.
+     */
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(Invitation::class, 'invited_by');
+    }
+
+    /**
+     * Get the user's active license.
+     *
+     * Returns the first active license that is either non-expiring or not yet expired.
+     *
+     * @return \App\Models\License|null The active license or null if none exists.
      */
     public function activeLicense()
     {
@@ -416,21 +229,29 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Check whether the user holds an active license.
+     * Check if the user has an active license.
      *
-     * @return bool  True when activeLicense() returns a non-null value.
+     * @return bool True if the user has an active license, false otherwise.
      */
     public function hasActiveLicense(): bool
     {
         return $this->activeLicense() !== null;
     }
 
-    // ── Status / verification helpers ─────────────────────────────────────
+    /**
+     * Get all email verifications associated with this user.
+     *
+     * @return HasMany Relationship to EmailVerification models.
+     */
+    public function emailVerifications(): HasMany
+    {
+        return $this->hasMany(EmailVerification::class);
+    }
 
     /**
-     * Check whether the user's email address has been verified.
+     * Check if the user's email is verified.
      *
-     * @return bool  True when `email_verified_at` is not null.
+     * @return bool True if email is verified, false otherwise.
      */
     public function isEmailVerified(): bool
     {
@@ -438,11 +259,9 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Check whether the user account is in "pending" status.
+     * Check if the user has pending status.
      *
-     * New accounts are set to "pending" until their email is verified.
-     *
-     * @return bool  True when `status` is "pending".
+     * @return bool True if user status is 'pending', false otherwise.
      */
     public function isPending(): bool
     {
@@ -450,9 +269,9 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Check whether the user account is in "active" status.
+     * Check if the user has active status.
      *
-     * @return bool  True when `status` is "active".
+     * @return bool True if user status is 'active', false otherwise.
      */
     public function isActive(): bool
     {
@@ -460,23 +279,19 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Check whether the user is suspended by either status or explicit flag.
+     * Check if the user has suspended status.
      *
-     * Halo integrity enforcement sets both `status = "suspended"` and
-     * `is_suspended = true`. Either signal alone is treated as authoritative.
-     *
-     * @return bool  True when the user is suspended.
+     * @return bool True if user status is 'suspended', false otherwise.
      */
     public function isSuspended(): bool
     {
-        return $this->status === 'suspended' || (bool) $this->is_suspended;
+        return $this->status === 'suspended';
     }
 
     /**
-     * Mark the user's email as verified and activate the account.
+     * Mark the user's email as verified and set status to active.
      *
-     * Sets `email_verified_at` to the current timestamp and flips `status`
-     * to "active" in a single UPDATE.
+     * Updates the email_verified_at timestamp and sets user status to 'active'.
      *
      * @return void
      */
@@ -484,19 +299,17 @@ class User extends Authenticatable implements JWTSubject
     {
         $this->update([
             'email_verified_at' => now(),
-            'status'            => 'active',
+            'status' => 'active',
         ]);
     }
 
     /**
-     * Check whether the user has a verified email (Laravel MustVerifyEmail compat).
+     * Check if the user has a verified email.
      *
-     * Mirrors isEmailVerified() using the standard Laravel convention name.
-     *
-     * @return bool  True when `email_verified_at` is not null.
+     * @return bool True if email is verified, false otherwise.
      */
     public function hasVerifiedEmail(): bool
     {
-        return ! is_null($this->email_verified_at);
+        return !is_null($this->email_verified_at);
     }
 }

@@ -12,27 +12,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Register alias
         $middleware->alias([
             'role' => \App\Http\Middleware\EnsureUserHasRole::class,
-            'beta.access' => \App\Http\Middleware\CheckBetaAccess::class,
-            'halo.integrity' => \App\Http\Middleware\VerifyHaloPointLedgerIntegrity::class,
-            'pomodoro.acl' => \App\Http\Middleware\ResolvePomodoroAcl::class,
-            'check.subscription' => \App\Http\Middleware\CheckSubscription::class,
-            'wc.signature' => \App\Http\Middleware\VerifyWooCommerceSignature::class,
-        ]);
-        // Apply middleware to ALL web routes
-        $middleware->web(append: [
-            \App\Http\Middleware\CheckBetaAccess::class,
-            // Runs geo-detection ONCE per session, sets user_country/user_currency
-            // in the session, and attaches the JS-readable app_currency cookie.
-            \App\Http\Middleware\LocalizationMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, $request) {
-            if (!$request->expectsJson()) {
-                return redirect('/SignIn');
-            }
-        });
+        //
     })->create();

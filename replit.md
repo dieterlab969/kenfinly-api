@@ -169,9 +169,8 @@ php artisan serve --host=0.0.0.0 --port=5000 & npm run dev
 
 | Email | Password | Role |
 |-------|----------|------|
-| owner@example.com | password123 | Owner |
-| editor@example.com | password123 | Editor |
-| viewer@example.com | password123 | Viewer |
+| owner@example.com | password | Owner |
+| viewer@example.com | password | Viewer |
 | admin@kenfinly.com | Admin@123 | Super Admin |
 
 ## Database Seeders

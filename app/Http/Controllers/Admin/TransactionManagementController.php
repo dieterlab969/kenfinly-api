@@ -6,9 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 
-/**
- * @tags Admin — Transactions
- */
 class TransactionManagementController extends Controller
 {
     public function index(Request $request)

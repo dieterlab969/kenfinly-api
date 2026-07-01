@@ -216,12 +216,12 @@ function Footer({ showCopyright = true, showAnalytics = true }) {
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/SignIn" onClick={() => gtmTracking.trackFooterNavClick('sign_in')} className="text-gray-400 hover:text-white transition-colors flex items-center">
+                                <Link to="/login" onClick={() => gtmTracking.trackFooterNavClick('sign_in')} className="text-gray-400 hover:text-white transition-colors flex items-center">
                                     <span className="mr-2">›</span> {t('footer.navigation.sign_in')}
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/SignUp" onClick={() => gtmTracking.trackFooterNavClick('get_started')} className="text-gray-400 hover:text-white transition-colors flex items-center">
+                                <Link to="/register" onClick={() => gtmTracking.trackFooterNavClick('get_started')} className="text-gray-400 hover:text-white transition-colors flex items-center">
                                     <span className="mr-2">›</span> {t('footer.navigation.get_started')}
                                 </Link>
                             </li>

@@ -10,11 +10,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Exception;
 
-/**
- * Site logo management (authenticated upload, public retrieval).
- *
- * @tags Branding
- */
 class LogoController extends Controller
 {
     /**
@@ -26,9 +21,7 @@ class LogoController extends Controller
     {
         try {
             $logoPath = AppSetting::get('site_logo');
-            $logoUrl = ($logoPath && Storage::disk('public')->exists($logoPath))
-                ? Storage::url($logoPath)
-                : null;
+            $logoUrl = $logoPath ? Storage::url($logoPath) : null;
 
             return response()->json([
                 'success' => true,

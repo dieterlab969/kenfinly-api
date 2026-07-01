@@ -4,25 +4,6 @@
  * Configured for MySQL database and REST API
  */
 
-$kenfinly_env = __DIR__ . '/../../.env';
-if (is_readable($kenfinly_env)) {
-    foreach (file($kenfinly_env, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
-        $line = trim($line);
-        if ($line === '' || str_starts_with($line, '#') || ! str_contains($line, '=')) {
-            continue;
-        }
-
-        [$name, $value] = explode('=', $line, 2);
-        $name = trim($name);
-        $value = trim($value, " \t\n\r\0\x0B\"'");
-        if ($name !== '' && getenv($name) === false) {
-            putenv($name . '=' . $value);
-            $_ENV[$name] = $value;
-            $_SERVER[$name] = $value;
-        }
-    }
-}
-
 define( 'DB_NAME', getenv('WP_DB_NAME') ?: 'wordpress' );
 define( 'DB_USER', getenv('WP_DB_USER') ?: 'root' );
 define( 'DB_PASSWORD', getenv('WP_DB_PASSWORD') ?: '' );
@@ -46,12 +27,10 @@ define( 'WP_DEBUG_LOG', true );
 define( 'WP_DEBUG_DISPLAY', false );
 
 $client_url = getenv('APP_URL') ?: (getenv('REPL_SLUG') ? 'https://' . getenv('REPL_SLUG') . '.' . getenv('REPL_OWNER') . '.repl.co' : 'http://localhost:5000');
-$wordpress_home = getenv('WP_HOME_URL') ?: (getenv('WORDPRESS_API_URL') ?: $client_url . '/wordpress');
-$wordpress_siteurl = getenv('WP_SITEURL') ?: $wordpress_home;
 define( 'HEADLESS_MODE_CLIENT_URL', $client_url );
 
-define( 'WP_HOME', $wordpress_home );
-define( 'WP_SITEURL', $wordpress_siteurl );
+define( 'WP_HOME', HEADLESS_MODE_CLIENT_URL . '/wordpress' );
+define( 'WP_SITEURL', HEADLESS_MODE_CLIENT_URL . '/wordpress' );
 
 define( 'DISABLE_WP_CRON', true );
 

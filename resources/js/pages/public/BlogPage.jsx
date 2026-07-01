@@ -447,7 +447,7 @@ function BlogPage() {
                         {t('blogpage.cta.description')}
                     </p>
                     <Link
-                        to="/SignUp"
+                        to="/register"
                         className="inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
                     >
                         {t('blogpage.cta.button')}

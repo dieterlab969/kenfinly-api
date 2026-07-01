@@ -1,0 +1,137 @@
+Summary: Financial Data Import Requirements
+
+1. CSV Data Format
+
+
+
+
+
+The CSV file contains financial data for 24 months, from December 2023 to November 2025.
+
+
+
+Each record includes the following fields:
+
+
+
+
+
+month (format example: “2023-12” or “December 2023”)
+
+
+
+income (amount in Vietnamese Dong - VND)
+
+
+
+expenses (amount in Vietnamese Dong - VND)
+
+
+
+total amount which should equal income + expenses
+
+2. Currency Management System
+
+
+
+
+
+The existing application uses USD; the requirement is to add support for VND (Vietnamese Dong).
+
+
+
+The system should allow the user to select their preferred currency (USD or VND).
+
+
+
+Currency conversion functionality must be researched and implemented (e.g., convert VND amounts to USD based on exchange rates and vice versa).
+
+3. CSV Import Process
+
+
+
+
+
+Implement a one-time command-line tool to import the CSV file.
+
+
+
+The command-line interface should require two parameters:
+
+
+
+
+
+The path to the CSV file to import.
+
+
+
+The email address of the user account into which the data will be imported.
+
+
+
+When importing the file:
+
+
+
+
+
+Update the wallet balance of the specified user account with the imported data.
+
+
+
+Create transaction records for each month under the specified user account according to the data.
+
+4. Transaction Record Creation Rules
+
+
+
+
+
+For each month in the CSV:
+
+
+
+
+
+Create one income transaction on the 1st day of the month with the full income amount.
+
+
+
+Distribute the expenses equally on a daily basis across all days in the month, creating daily expense transactions.
+
+
+
+The sum of all daily expense transactions must exactly match the total monthly expense from the CSV.
+
+5. Implementation Notes
+
+
+
+
+
+The CSV only contains monthly aggregates without detailed daily transactions; the system must generate these daily transactions artificially using the above rules.
+
+
+
+All imported CSV amounts are in VND and must be handled correctly based on the selected currency.
+
+
+
+The command-line interface should support optional currency selection.
+
+6. Validation and Error Handling
+
+
+
+
+
+Validate that total amount in CSV equals income plus expenses for each record.
+
+
+
+Validate CSV data format and handle errors gracefully during import.
+
+
+
+Ensure transaction sums and wallet balances are accurate after import.

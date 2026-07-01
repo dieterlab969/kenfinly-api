@@ -14,7 +14,6 @@ use App\Models\Language;
  *
  * Provides statistical data and overview information for the admin interface,
  * including user counts, account statistics, and transaction metrics.
- * @tags Admin — Dashboard
  */
 class AdminDashboardController extends Controller
 {

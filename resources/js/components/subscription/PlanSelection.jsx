@@ -63,7 +63,7 @@ export default function PlanSelection({ onSelectPlan, subscriptionsEnabled = tru
                                 <button
                                     onClick={() => {
                                         if (plan.price == 0) {
-                                            window.location.href = '/SignUp';
+                                            window.location.href = '/register';
                                         } else {
                                             onSelectPlan(plan);
                                         }

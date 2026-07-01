@@ -11,23 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 
-/**
- * CSV import and export for financial transactions.
- *
- * @tags CSV Import / Export
- */
 class CsvController extends Controller
 {
-    /**
-     * Export transactions to CSV.
-     *
-     * Returns a downloadable CSV file containing transactions matching the given filters.
-     *
-     * @queryParam account_id int Filter by account ID. Example: 1
-     * @queryParam start_date date Start of date range (Y-m-d). Example: 2024-01-01
-     * @queryParam end_date date End of date range (Y-m-d). Example: 2024-12-31
-     * @queryParam type string Filter by type: income or expense. Example: expense
-     */
     public function export(Request $request)
     {
         $validator = Validator::make($request->all(), [

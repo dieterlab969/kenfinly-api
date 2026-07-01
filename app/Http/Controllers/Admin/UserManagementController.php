@@ -8,9 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
-/**
- * @tags Admin — Users
- */
 class UserManagementController extends Controller
 {
     public function index(Request $request)

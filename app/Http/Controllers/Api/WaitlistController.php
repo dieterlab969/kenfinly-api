@@ -8,9 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Early-access waitlist sign-ups.
+ * Controller to manage waitlist sign-ups.
  *
- * @tags Waitlist
+ * Handles storing new email entries with optional plan interest.
  */
 class WaitlistController extends Controller
 {

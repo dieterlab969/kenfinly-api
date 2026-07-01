@@ -10,7 +10,6 @@ use Illuminate\Http\Request;
  *
  * Provides CRUD operations for categories including listing, creating,
  * viewing, updating, and deleting categories. Supports pagination and search functionality.
- * @tags Admin — Categories
  */
 class CategoryManagementController extends Controller
 {

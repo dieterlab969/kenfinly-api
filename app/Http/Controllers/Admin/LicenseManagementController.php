@@ -5,9 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-/**
- * @tags Admin — Licenses
- */
 class LicenseManagementController extends Controller
 {
     public function index(Request $request)

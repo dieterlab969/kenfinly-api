@@ -6,9 +6,7 @@ use App\Models\AppSetting;
 use Illuminate\Http\JsonResponse;
 
 /**
- * Public company/branding settings (no authentication required).
- *
- * @tags Public Settings
+ * Controller to provide public company settings via API.
  */
 class PublicSettingsController
 {
