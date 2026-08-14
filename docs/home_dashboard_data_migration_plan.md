@@ -8,7 +8,7 @@ Replace the redesigned Home dashboard's static demo values with the legacy Dashb
 
 | Data source | Backend/API | Legacy consumer | New Home mapping |
 | --- | --- | --- | --- |
-| Authenticated user | `AuthContext` backed by `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/refresh` | Navbar greeting and account actions in `resources/js/pages/Dashboard.jsx` | Header greeting (`Chào {user.name}`) in `resources/js/template/pages/Home.tsx` |
+| Authenticated user | `AuthContext` backed by `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/refresh` | Navbar greeting and account actions in `resources/js/pages/Dashboard.jsx` | Header greeting (`Chào {user.name}`) in `resources/js/pages/Home.tsx` |
 | Dashboard aggregate payload | `api.get('/dashboard')` → `GET /api/dashboard` | `Dashboard.jsx` `fetchDashboardData()` | Single Home dashboard fetch using the same API client |
 | Monthly summary | `TransactionController::getDashboardData()` returns `monthly_summary.current` and `monthly_summary.previous` | `MonthlySummaryCard` | `Sơ lược` current/previous month half-donut columns |
 | Accounts / total balance | `TransactionController::getDashboardData()` returns `accounts` with balances | `Dashboard.jsx` computes `totalBalance` via account sum and passes it to `BalanceTrendChart` | Header “TỔNG SỐ TIỀN SỞ HỮU” |
@@ -55,7 +55,7 @@ Replace the redesigned Home dashboard's static demo values with the legacy Dashb
 
 ### Mock data removed
 
-- Removed `SPENDING_7DAYS`, `TRANSACTIONS`, and `EXPENSE_CATEGORIES` static arrays from `resources/js/template/pages/Home.tsx`.
+- Removed `SPENDING_7DAYS`, `TRANSACTIONS`, and `EXPENSE_CATEGORIES` static arrays from `resources/js/pages/Home.tsx`.
 - Replaced hardcoded greeting, total balance, monthly summary values, seven-day chart ticks/tooltips, historical balance labels, recent transaction rows, quick-add date, and quick-add summary values with API-derived values.
 - Removed the unused visual-only recurrence toggle because it was not connected to the existing transaction API contract.
 
@@ -69,4 +69,4 @@ Replace the redesigned Home dashboard's static demo values with the legacy Dashb
 
 - Verify Home with an authenticated user that has non-empty income/expense data, empty data, and negative/flat balance-history scenarios.
 - Verify quick-add income and expense creation against real accounts/categories, then confirm the Home cards and charts refresh without a full-page loading state.
-- Verify the existing full TypeScript errors outside Home (`resources/js/template/App.tsx` JSX namespace and `resources/js/template/components/BarChartComponent.tsx` legend position typing) separately if a clean project-wide `tsc --noEmit` gate is required.
+- Verify the existing full TypeScript errors outside Home (`resources/js/App.tsx` JSX namespace and `resources/js/components/BarChartComponent.tsx` legend position typing) separately if a clean project-wide `tsc --noEmit` gate is required.

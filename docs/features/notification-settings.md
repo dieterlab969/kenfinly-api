@@ -158,15 +158,15 @@ when called before any GET.
 | `app/Models/UserNotificationSetting.php` | Eloquent model with casts and helpers |
 | `app/Http/Controllers/Api/NotificationSettingController.php` | API controller |
 | `routes/api.php` | Route registration (GET + PUT) |
-| `resources/js/template/pages/NotificationSetting.tsx` | Frontend settings screen |
+| `resources/js/pages/NotificationSetting.tsx` | Frontend settings screen |
 | `tests/Feature/NotificationSettingTest.php` | Feature test suite |
 
 ---
 
 ## Frontend
 
-**Component:** `resources/js/template/pages/NotificationSetting.tsx`  
-**Route:** `/NotificationSetting` (already registered in `template/App.tsx`)
+**Component:** `resources/js/pages/NotificationSetting.tsx`
+**Route:** `/NotificationSetting` (already registered in `App.tsx`)
 
 ### Behaviour
 

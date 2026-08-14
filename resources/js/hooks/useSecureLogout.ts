@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../../utils/api'
+import api from '../utils/api'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

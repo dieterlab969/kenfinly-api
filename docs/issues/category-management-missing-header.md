@@ -54,7 +54,7 @@ Specifically:
 
 | File | Change |
 |---|---|
-| `resources/js/template/pages/CategoryManagement.tsx` | Full rendering rewrite — classes and layout structure corrected |
+| `resources/js/pages/CategoryManagement.tsx` | Full rendering rewrite — classes and layout structure corrected |
 | `docs/issues/category-management-missing-header.md` | This document (created) |
 
 **No other files are modified.** Backend, routes, policy, migration, tests, `App.tsx`, `Setting.tsx` are all untouched.

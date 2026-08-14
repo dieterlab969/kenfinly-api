@@ -9,7 +9,7 @@ import SearchIcon from '../assets/svg/search-icon.svg';
 import EditIcon from '../assets/svg/purple-edit-icon.svg';
 import ExpiredIcon from '../assets/svg/expired-icon.svg';
 import faqPlus from '../assets/svg/faq-plus.svg';
-import api from '../../utils/api';
+import api from '../utils/api';
 import { useTranslation } from 'react-i18next';
 
 // ─── Types ────────────────────────────────────────────────────────────────────

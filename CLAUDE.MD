@@ -12,7 +12,7 @@
 - **Strict Access Control (ALC):** Every data-modifying or data-viewing API must be protected by Laravel Sanctum. Implement Laravel Policies (`view`, `create`, `update`) for Attendances, Transactions, and Commitments to strictly enforce that a user can ONLY access or mutate their own data (`$user->id === $resource->user_id`). Block Admin-only routes using a custom Role middleware.
 
 ## ⚛️ FRONTEND MIGRATION STANDARDS
-- **TSX-First:** resources/js/app.tsx is the only active entry point. app.jsx is deprecated.
+- **TSX-First:** resources/js/main.tsx is the only active entry point. app.jsx is deprecated.
 - **No Legacy Development:** Do not add or modify features in the JSX flow.
 - **TypeScript Only:** All new code must use .ts / .tsx.
 - **Migrate Forward:** Prefer migrating touched JSX code to TypeScript rather than extending legacy implementations.

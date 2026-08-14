@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 import { RecaptchaConfigContext } from './components/App';
-import TemplateApp from './template/App';
+import TemplateApp from './App';
 import PWAInstallBanner from './components/PWAInstallBanner';
 
 interface AppConfig {

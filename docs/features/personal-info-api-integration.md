@@ -2,7 +2,7 @@
 
 ## Overview
 
-Refactored `resources/js/template/pages/PersonalInfo.tsx` from a fully static mockup into a live, API-backed profile management screen.
+Refactored `resources/js/pages/PersonalInfo.tsx` from a fully static mockup into a live, API-backed profile management screen.
 
 ---
 
@@ -46,7 +46,7 @@ Accepts and validates any subset of the four editable fields:
 
 ## Frontend Changes
 
-### `resources/js/template/pages/PersonalInfo.tsx` (full rewrite)
+### `resources/js/pages/PersonalInfo.tsx` (full rewrite)
 
 #### State Management
 

@@ -1,7 +1,7 @@
 # Issue: Recent Transactions Layout Imbalance
 
 **Date:** 2026-06-28
-**File:** `resources/js/template/pages/Home.tsx`
+**File:** `resources/js/pages/Home.tsx`
 **Section:** Recent Transactions card
 
 ---
@@ -56,7 +56,7 @@ Restructure each row into a true two-column layout where **both sides always hav
 
 ## Changes Made
 
-### `resources/js/template/pages/Home.tsx`
+### `resources/js/pages/Home.tsx`
 
 **Before** (lines ~1034–1050):
 ```tsx

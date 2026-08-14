@@ -9,12 +9,12 @@ Built a static Contact Us page for Kenfinly at `/ContactUs`, displaying the comp
 ## Deliverables
 
 ### 1. React Page
-**File:** `resources/js/template/pages/ContactUs.tsx`
+**File:** `resources/js/pages/ContactUs.tsx`
 
 Replaces the placeholder PayFast template content with Kenfinly-specific contact information.
 
 ### 2. Route Integration
-**File:** `resources/js/template/App.tsx` (pre-existing, no change needed)
+**File:** `resources/js/App.tsx` (pre-existing, no change needed)
 
 The route `/ContactUs` was already registered in the template router:
 ```tsx

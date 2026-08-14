@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
-import { useRecaptchaConfig } from '../../components/App';
+import { useRecaptchaConfig } from '../components/App';
 import BackBtn from '../components/BackBtn';
 import Logo from '../assets/images/let-you-screen/logo.svg';
 import { Link, useNavigate, useLocation } from 'react-router-dom';

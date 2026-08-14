@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import api from '../../utils/api'
+import api from '../utils/api'
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type RangeType = 'TODAY' | '7_DAYS' | 'THIS_MONTH' | 'LAST_MONTH' | 'THIS_YEAR' | 'CUSTOM'

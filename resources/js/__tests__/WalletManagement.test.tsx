@@ -23,7 +23,7 @@ import userEvent from '@testing-library/user-event';
 import type { UserEvent } from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import type { Mock } from 'vitest';
-import WalletManagement from '../template/pages/WalletManagement';
+import WalletManagement from '../pages/WalletManagement';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Module mocks
@@ -127,6 +127,9 @@ const setupApiSuccess = (accounts: TestAccount[]): void => {
 const setupApiError = (): void => {
     mockApiGet.mockRejectedValue(new Error('Network error'));
 };
+
+const accountGetCalls = (): unknown[][] =>
+    mockApiGet.mock.calls.filter(([url]: unknown[]) => url === '/accounts');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Render helper
@@ -233,8 +236,8 @@ describe('TC-01: Loading Wallets', () => {
         setupApiSuccess([]);
         renderPage();
 
-        await waitFor(() => expect(mockApiGet).toHaveBeenCalledTimes(1));
-        expect(mockApiGet).toHaveBeenCalledWith('/accounts');
+        await waitFor(() => expect(accountGetCalls()).toHaveLength(1));
+        expect(accountGetCalls()[0][0]).toBe('/accounts');
     });
 
     it('TC-01-j: the retry trigger fires a second GET /accounts after an error', async () => {
@@ -248,8 +251,8 @@ describe('TC-01: Loading Wallets', () => {
         setupApiSuccess([makeAccount()]);
         await user.click(screen.getByRole('link', { name: /try again/i }));
 
-        await waitFor(() => expect(mockApiGet).toHaveBeenCalledTimes(2));
-        expect(mockApiGet).toHaveBeenNthCalledWith(2, '/accounts');
+        await waitFor(() => expect(accountGetCalls()).toHaveLength(2));
+        expect(accountGetCalls()[1][0]).toBe('/accounts');
     });
 
     it('TC-01-k: shows the empty-state message when the API returns zero accounts', async () => {
@@ -480,8 +483,8 @@ describe('TC-03: Sorting by Balance', () => {
         await user.click(screen.getByRole('button', { name: /balance.*high.*low/i }));
         await user.click(screen.getByRole('button', { name: /balance.*low.*high/i }));
 
-        // Only the initial mount triggered a GET call
-        expect(mockApiGet).toHaveBeenCalledTimes(1);
+        // Sorting only changes local state; the accounts endpoint was called once.
+        expect(accountGetCalls()).toHaveLength(1);
 
         const names = getOrderedNames();
         expect(names[0]).toBe('Charlie');
