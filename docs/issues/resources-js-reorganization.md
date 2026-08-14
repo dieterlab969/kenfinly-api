@@ -96,9 +96,9 @@ resources/js/
 └── __tests__/              # Frontend tests
 ```
 
-The existing `app.js`, `app.jsx`, and related legacy entry files remain in place
-because this change is a path and ownership reorganization, not a separate
-legacy-entrypoint migration.
+The existing `legacy-app.js`, `app.jsx`, and related legacy entry files remain
+in place because this change is a path and ownership reorganization, not a
+separate legacy-entrypoint migration.
 
 ## Verification results
 
