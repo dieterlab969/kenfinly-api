@@ -32,10 +32,10 @@ When a user opens the Settings drawer from the Home screen and navigates into a 
 
 | Layer | File | Role |
 |---|---|---|
-| Router | `resources/js/template/App.tsx` | Flat `BrowserRouter` — all pages as top-level routes |
-| Home page | `resources/js/template/pages/Home.tsx` | Renders the Settings drawer (offcanvas) |
-| Settings panel | `resources/js/template/components/Setting.tsx` | Rendered inside offcanvas body; contains nav links |
-| Back button | `resources/js/template/components/BackBtn.tsx` | Calls `navigate(-1)` |
+| Router | `resources/js/App.tsx` | Flat `BrowserRouter` — all pages as top-level routes |
+| Home page | `resources/js/pages/Home.tsx` | Renders the Settings drawer (offcanvas) |
+| Settings panel | `resources/js/components/Setting.tsx` | Rendered inside offcanvas body; contains nav links |
+| Back button | `resources/js/components/BackBtn.tsx` | Calls `navigate(-1)` |
 
 ### Root cause: Two compounding issues
 
@@ -99,8 +99,8 @@ Store the "return-to-settings" intent in `sessionStorage` **immediately before**
 
 | File | Change type | Description |
 |---|---|---|
-| `resources/js/template/components/Setting.tsx` | Edit | Add `saveNavState()` + `onBeforeNavigate` prop wiring |
-| `resources/js/template/pages/Home.tsx` | Edit | Add mount-time sessionStorage check + offcanvas restore |
+| `resources/js/components/Setting.tsx` | Edit | Add `saveNavState()` + `onBeforeNavigate` prop wiring |
+| `resources/js/pages/Home.tsx` | Edit | Add mount-time sessionStorage check + offcanvas restore |
 
 No new files, no new dependencies, no router changes.
 
@@ -222,5 +222,5 @@ React Router v6's `navigate(-1)` responds to `window.history.back()`, which is e
 
 | File | Nature of change |
 |---|---|
-| `resources/js/template/components/Setting.tsx` | Added `onBeforeNavigate` prop, `saveNavState()`, and wired both to all nav links |
-| `resources/js/template/pages/Home.tsx` | Added mount-time `useEffect` to restore offcanvas from sessionStorage |
+| `resources/js/components/Setting.tsx` | Added `onBeforeNavigate` prop, `saveNavState()`, and wired both to all nav links |
+| `resources/js/pages/Home.tsx` | Added mount-time `useEffect` to restore offcanvas from sessionStorage |

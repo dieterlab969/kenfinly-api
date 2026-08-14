@@ -1,7 +1,7 @@
 # Change Plan: i18n POC — Setting.tsx (react-i18next)
 
 **Date:** 2026-06-26  
-**Scope:** `resources/js/template/components/Setting.tsx`  
+**Scope:** `resources/js/components/Setting.tsx`
 **Strategy:** Natural Language Keys (English text = translation key)
 
 ---
@@ -50,7 +50,7 @@ All 17 user-facing English strings found in `Setting.tsx`:
 | File | Purpose |
 |---|---|
 | `resources/js/locales/vi.json` | Vietnamese translation dictionary |
-| `resources/js/template/components/Setting.tsx` | Refactored component using `useTranslation` |
+| `resources/js/components/Setting.tsx` | Refactored component using `useTranslation` |
 
 ---
 

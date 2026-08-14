@@ -4,7 +4,7 @@ import BackBtn from '../components/BackBtn.tsx';
 import ProfileImg from '../assets/images/personal-info/profile-img.png';
 import CameraIconImg from '../assets/svg/camera-icon.svg';
 import EditIcon from '../assets/svg/edit-icon.svg';
-import api from '../../utils/api.js';
+import api from '../utils/api.js';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

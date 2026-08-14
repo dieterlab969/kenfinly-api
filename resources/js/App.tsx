@@ -4,15 +4,15 @@ import './assets/css/swap.css';
 import './assets/css/style.css';
 import './assets/css/media-query.css';
 // Bootstrap react-i18next — must be imported before any component that calls useTranslation()
-import '../i18n';
+import './i18n';
 import type { ReactElement } from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DarkModeProvider } from "./components/DarkModeContext";
 import { LanguageProvider } from "./components/LanguageContext";
 import { CurrencyProvider } from "./components/CurrencyContext";
-import { TranslationProvider } from '../contexts/TranslationContext';
-import { AuthProvider } from '../contexts/AuthContext';
-import { LogoProvider } from '../contexts/LogoContext';
+import { TranslationProvider } from './contexts/TranslationContext';
+import { AuthProvider } from './contexts/AuthContext';
+import { LogoProvider } from './contexts/LogoContext';
 import Loader from "./components/Loader";
 import Splashscreen from "./pages/Splashscreen";
 import LetYouScreen from "./pages/LetYouScreen";
@@ -139,7 +139,7 @@ import DeleteAccount from './pages/DeleteAccount';
 import DeleteDeactivateAccount from './pages/DeleteDeactivateAccount';
 import InviteFriend from './pages/InviteFriend';
 import PersonalInfo from './pages/PersonalInfo';
-import HaloDashboard from '../pages/halo/HaloDashboard';
+import HaloDashboard from './pages/halo/HaloDashboard';
 import AppLayout from './components/AppLayout'
 import { QuickAddProvider } from './context/QuickAddContext';
 

@@ -176,8 +176,8 @@ The column stores:
 | `app/Services/AvatarUploadService.php` | Created |
 | `app/Http/Controllers/Api/ProfileController.php` | `uploadAvatar` added; `resolveAvatarUrl` helper added; `AvatarUploadService` injected |
 | `routes/api.php` | `POST /api/profile/avatar` route added |
-| `resources/js/template/components/Setting.tsx` | Real user data (name, email, avatar) fetched from API on mount |
-| `resources/js/template/pages/PersonalInfo.tsx` | Avatar upload wired up (file input, FormData, optimistic preview, error states) |
+| `resources/js/components/Setting.tsx` | Real user data (name, email, avatar) fetched from API on mount |
+| `resources/js/pages/PersonalInfo.tsx` | Avatar upload wired up (file input, FormData, optimistic preview, error states) |
 | `tests/Feature/AvatarUploadTest.php` | Created — 16 test cases |
 | `docs/features/avatar-upload.md` | This document |
 

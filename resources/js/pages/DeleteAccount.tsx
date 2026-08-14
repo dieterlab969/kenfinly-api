@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import BackBtn from '../components/BackBtn.tsx'
 import { useSecureLogout } from '../hooks/useSecureLogout'
-import api from '../../utils/api'
+import api from '../utils/api'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 

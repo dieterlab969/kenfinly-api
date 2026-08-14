@@ -31,7 +31,7 @@ import setting21 from '../assets/images/setting/setting21.svg';
 import setting22 from '../assets/images/setting/setting22.svg';
 import settingWallet from '../assets/images/setting/setting-wallet.svg';
 import { useDarkMode } from './DarkModeContext.tsx';
-import api from '../../utils/api.js';
+import api from '../utils/api.js';
 
 // ─── Session-storage key ────────────────────────────────────────────────────
 // Home.tsx reads this on mount to decide whether to re-open the drawer.

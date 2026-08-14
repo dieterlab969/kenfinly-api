@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import api from '../../utils/api.js';
+import api from '../utils/api.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import BackBtn from '../components/BackBtn.tsx';
-import api from '../../utils/api';
+import api from '../utils/api';
 
 interface MarketingPrefs {
     email_news: boolean;

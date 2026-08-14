@@ -23,7 +23,7 @@ interface CurrencyContextType {
 
 // ─── Icon mapping ─────────────────────────────────────────────────────────────
 // Maps ISO currency codes to the SVG asset keys available in
-// resources/js/template/assets/images/currency/.
+// resources/js/assets/images/currency/.
 // Unmapped codes fall back to 'currency1' (generic flag icon).
 
 const CODE_TO_ICON: Record<string, string> = {

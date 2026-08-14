@@ -25,13 +25,13 @@ The project has **two separate React app entry points**, each with its own `<Bro
 | Entry point | File | Providers |
 |---|---|---|
 | Main app | `resources/js/app.jsx` → `components/App.jsx` | `RecaptchaConfigContext`, `TranslationProvider`, `LogoProvider`, **`AuthProvider`** |
-| Template prototype | `resources/js/template/App.tsx` | `TranslationProvider`, `DarkModeProvider` — **no `AuthProvider`** |
+| Template prototype | `resources/js/App.tsx` | `TranslationProvider`, `DarkModeProvider` — **no `AuthProvider`** |
 
-`template/App.tsx` mounts `template/pages/SignUp.tsx` at `/SignUp` (line 141).
+`App.tsx` mounts `pages/SignUp.tsx` at `/SignUp` (line 141).
 
-`template/pages/SignUp.tsx` was recently updated to include full registration logic from the legacy `Register.tsx`, which introduced three hooks that require missing providers:
+`pages/SignUp.tsx` was recently updated to include full registration logic from the legacy `Register.tsx`, which introduced three hooks that require missing providers:
 
-| Hook | Required provider | Present in `template/App.tsx`? |
+| Hook | Required provider | Present in `App.tsx`? |
 |---|---|---|
 | `useAuth()` | `<AuthProvider>` | ❌ |
 | `useRecaptchaConfig()` | `<RecaptchaConfigContext.Provider>` | ❌ |
@@ -43,15 +43,15 @@ Because none of these providers wrap the template router, all three hooks throw 
 
 ## Affected Files
 
-- `resources/js/template/App.tsx` — missing provider wrappers
-- `resources/js/template/pages/SignUp.tsx` — calls hooks without guaranteed provider ancestors
+- `resources/js/App.tsx` — missing provider wrappers
+- `resources/js/pages/SignUp.tsx` — calls hooks without guaranteed provider ancestors
 - `resources/js/app.jsx` — reference for how providers are correctly composed in the main entry
 
 ---
 
 ## Proposed Fix
 
-### Option A — Add providers to `template/App.tsx` ✅ Recommended
+### Option A — Add providers to `App.tsx` ✅ Recommended
 
 Wrap the template `<BrowserRouter>` with `AuthProvider`, `LogoProvider`, and `RecaptchaConfigContext.Provider` (same composition as the main app). Also wrap `/SignUp` in a `<GoogleReCaptchaProvider>` with the site key, or conditionally disable reCAPTCHA when the key is absent.
 
@@ -59,7 +59,7 @@ Wrap the template `<BrowserRouter>` with `AuthProvider`, `LogoProvider`, and `Re
 **Cons**: Pulls auth infrastructure into a file that was previously a lightweight prototype shell.
 
 ```tsx
-// template/App.tsx — proposed wrapper order
+// App.tsx — proposed wrapper order
 <RecaptchaConfigContext.Provider value={{ enabled: recaptchaEnabled }}>
   <TranslationProvider>
     <LogoProvider>
@@ -83,7 +83,7 @@ For `useGoogleReCaptcha`, wrap only the `/SignUp` route element with `<GoogleReC
 
 ### Option B — Unify on a single entry point
 
-Remove `template/App.tsx` as a standalone entry. Register template routes directly inside `components/App.jsx` under the existing provider tree. The template prototype becomes a route namespace (e.g. `/template/*`) rather than its own app.
+Remove `App.tsx` as a standalone entry. Register template routes directly inside `components/App.jsx` under the existing provider tree. The template prototype becomes a route namespace (e.g. `/template/*`) rather than its own app.
 
 **Pros**: Eliminates the dual-entry-point problem permanently.  
 **Cons**: Larger refactor; template prototype loses its standalone nature.
@@ -94,21 +94,21 @@ Remove `template/App.tsx` as a standalone entry. Register template routes direct
 
 Wrap each hook call in try/catch or add an optional context that returns no-ops when no provider is present.
 
-**Pros**: No changes to `template/App.tsx`.  
+**Pros**: No changes to `App.tsx`.
 **Cons**: Hides the misconfiguration instead of fixing it; auth logic would silently do nothing, making debugging harder.
 
 ---
 
 ## Recommended Implementation Steps (Option A)
 
-1. **`template/App.tsx`**
+1. **`App.tsx`**
    - Import `AuthProvider` from `'../contexts/AuthContext'`
    - Import `LogoProvider` from `'../contexts/LogoContext'`
    - Import `RecaptchaConfigContext` from `'../components/App'`
    - Read `recaptchaEnabled` from `import.meta.env.VITE_RECAPTCHA_ENABLED === 'true'`
    - Add the four providers as wrappers around `<DarkModeProvider>` (keep `DarkModeProvider` innermost since it is template-specific)
 
-2. **`template/pages/SignUp.tsx`** — no logic changes needed; the existing `if (!executeRecaptcha)` guard already handles the case where reCAPTCHA is not configured.
+2. **`pages/SignUp.tsx`** — no logic changes needed; the existing `if (!executeRecaptcha)` guard already handles the case where reCAPTCHA is not configured.
 
 3. **Verify** `npm run build` exits 0 and `/SignUp` renders without errors in both entry points.
 

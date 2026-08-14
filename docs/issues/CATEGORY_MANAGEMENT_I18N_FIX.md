@@ -143,9 +143,9 @@ t('category_mgmt.success.created').replace('{{name}}', form.name)
 
 1. **Re-seed translations DB** — run `php artisan db:seed --class=LanguageSeeder` on any environment where the database-backed translation API is used. The new `category_mgmt.*` keys must be present in the `language_translations` table for the API path to serve Vietnamese text.
 
-2. **Audit pattern** — the same bare-string-as-key anti-pattern may exist in other `resources/js/template/pages/` components (e.g. `WalletManagement.tsx`, `SavingHabitTracker.tsx`). A quick grep can surface them:
+2. **Audit pattern** — the same bare-string-as-key anti-pattern may exist in other `resources/js/pages/` components (e.g. `WalletManagement.tsx`, `SavingHabitTracker.tsx`). A quick grep can surface them:
    ```bash
-   grep -n "t('" resources/js/template/pages/*.tsx | grep -v "category_mgmt\|common\.\|account\.\|payment\.\|habit\.\|auth\.\|verification\."
+   grep -n "t('" resources/js/pages/*.tsx | grep -v "category_mgmt\|common\.\|account\.\|payment\.\|habit\.\|auth\.\|verification\."
    ```
 
 3. **Lint rule** — consider adding an ESLint custom rule (or a CI grep check) that warns when `t()` is called with a string that does not match the dot-notation key pattern `^[a-z][a-z0-9_]+(\.[a-z][a-z0-9_.]+)+$`.
@@ -157,4 +157,4 @@ t('category_mgmt.success.created').replace('{{name}}', form.name)
 | File | Change |
 |---|---|
 | `resources/lang/translations.json` | +52 `category_mgmt.*` key/value pairs (EN + VI) |
-| `resources/js/template/pages/CategoryManagement.tsx` | All `t()` calls converted to semantic keys; SORT_OPTIONS `label→labelKey`; hardcoded strings now use `t()` |
+| `resources/js/pages/CategoryManagement.tsx` | All `t()` calls converted to semantic keys; SORT_OPTIONS `label→labelKey`; hardcoded strings now use `t()` |

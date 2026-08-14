@@ -3,8 +3,8 @@
 **Date:** 2026-06-22  
 **Severity:** High — The Onboarding screen is the very first thing a new user sees. Missing navigation dots and a "Get Started" button visible on slide 1 break the intended UX gate and create a poor first impression.  
 **Status:** 🔴 Open / Planned  
-**Component:** `resources/js/template/pages/Splashscreen.tsx`  
-**Supporting CSS:** `resources/js/template/assets/css/style.css` (lines 340–433)  
+**Component:** `resources/js/pages/Splashscreen.tsx`
+**Supporting CSS:** `resources/js/assets/css/style.css` (lines 340–433)
 **Route:** `/` (root path in `App.tsx`)
 
 ---
@@ -38,7 +38,7 @@ Both bugs share the same root cause: **the React component relies on Bootstrap c
 ### 3.1 Component Location
 
 ```
-resources/js/template/pages/Splashscreen.tsx
+resources/js/pages/Splashscreen.tsx
 ```
 
 Registered at `App.tsx` line 148:
@@ -89,7 +89,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 ```
 
-Template custom CSS lives in `resources/js/template/assets/css/style.css`.
+Template custom CSS lives in `resources/js/assets/css/style.css`.
 
 ---
 
@@ -270,9 +270,9 @@ Current logic is already correct in the JSX — slide 3 shows "Get Started", oth
 
 | File | Change | Risk |
 |---|---|---|
-| `resources/js/template/pages/Splashscreen.tsx` | Replace `.carousel-item` class + active toggle with `style={{ display }}` | Low |
-| `resources/js/template/assets/css/style.css` | Fix `[data-bs-target]` selector → `button` (line 352) | Low |
-| `resources/js/template/assets/css/style.css` | Verify `--sub-text-color` / `--text-color` variables are in `:root` | Low |
+| `resources/js/pages/Splashscreen.tsx` | Replace `.carousel-item` class + active toggle with `style={{ display }}` | Low |
+| `resources/js/assets/css/style.css` | Fix `[data-bs-target]` selector → `button` (line 352) | Low |
+| `resources/js/assets/css/style.css` | Verify `--sub-text-color` / `--text-color` variables are in `:root` | Low |
 
 ---
 
@@ -306,7 +306,7 @@ After the fix is applied, verify the following:
 
 ## 10. References
 
-- `resources/js/template/pages/Splashscreen.tsx` — Full component source
-- `resources/js/template/assets/css/style.css` lines 340–433 — Onboarding CSS section
-- `resources/js/template/App.tsx` lines 1–2 — Bootstrap JS/CSS imports
+- `resources/js/pages/Splashscreen.tsx` — Full component source
+- `resources/js/assets/css/style.css` lines 340–433 — Onboarding CSS section
+- `resources/js/App.tsx` lines 1–2 — Bootstrap JS/CSS imports
 - Bootstrap 5 Carousel docs: https://getbootstrap.com/docs/5.3/components/carousel/
