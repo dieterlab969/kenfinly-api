@@ -3,10 +3,7 @@
 > A personal finance platform for tracking money, understanding spending, and
 > building better financial habits.
 
-Kenfinly is a Laravel-powered web application with a React single-page
-frontend. It brings together accounts, transactions, categories, budgets,
-financial insights, savings habits, subscriptions, and supporting content in
-one product.
+Kenfinly is a personal finance application designed to help individuals understand, track, and improve their financial health. Its core purpose is to turn financial data into clear, actionable information that helps people make better money decisions.
 
 **Project status:** MVP / active development. The codebase is functional but
 still evolving. Expect some areas to be refined as product requirements and
