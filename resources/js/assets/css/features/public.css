@@ -1,0 +1,449 @@
+/* Public onboarding and entry screens. Loaded by public routes only. */
+/* Generated from the audited legacy stylesheet by scripts/generate-phase3-css.mjs. */
+
+/************************ 2.Splash CSS ***************************/
+#splash-screen-page {
+    height: 100vh;
+    width: 100%;
+}
+.splash-screen-content,
+.profile-img-content {
+    text-align: center;
+}
+.payfast-txt {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 64px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 60px;
+}
+.payfast-txt span {
+    color: var(--2, #7B51F1);
+    font-weight: 700;
+    line-height: 60px;
+}
+.payfast-title {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+
+/************************ 3.Onboarding CSS ***************************/
+.custom-slider-btn {
+    position: relative !important;
+    z-index: 2;
+    padding: 0;
+    margin: 0 !important;
+    list-style: none;
+    height: fit-content;
+    width: fit-content;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    margin-top: 40px !important;
+}
+.onboarding-slider .carousel-indicators button {
+    margin-right: 8px;
+    margin-left: 0 !important;
+}
+.custom-slider-dots {
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 8px !important;
+    border: none !important;
+    background: var(--sub-text-color) !important;
+    margin-right: 8px;
+    opacity: 0.24;
+}
+.Onboarding-Screen-1 {
+    position: relative;
+    margin-top: 50px;
+}
+.Onboarding-Screen-1-full {
+    position: relative;
+    height: 100vh;
+}
+.slider-sec-btn {
+    position: fixed;
+    width: 100%;
+    left: 0;
+    bottom: 0;
+    background-color: var(--primary-color);
+    z-index: 5;
+    padding: 16px;
+}
+.onboarding-slider {
+    padding-bottom: 100px;
+}
+.slider-sec-btn a {
+    width: 100%;
+    border-radius: 12px;
+    background: var(--2, #7B51F1);
+    padding: 12px 0;
+    margin: auto;
+    max-width: 600px;
+    color: var(--1, #FFF);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.slider-txt h2 {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 30px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 40px;
+}
+.slider-txt p {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.slider-img,
+.verify-number-img,
+.otp-resend {
+    text-align: center;
+}
+.onboarding-slider .carousel-item {
+    transition: none !important;
+}
+.slider-txt {
+    margin-top: 70px;
+}
+.custom-slider-dots.active {
+    opacity: 1;
+    background: var(--text-color) !important;
+    width: 40px !important;
+}
+.loader-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--primary-color);
+    z-index: 99999;
+}
+
+/************************ 4.Let you screen CSS ***************************/
+.let-you-page-main {
+    height: 100vh;
+    background: var(--sub-bg-color);
+    position: relative;
+    overflow: auto;
+}
+#let-you-main {
+    padding-bottom: 100px;
+    margin-bottom: 180px;
+}
+#sign-up-main {
+    padding-bottom: 150px;
+    margin-bottom: 250px;
+}
+.let-you-top {
+    background-image: url(../images/let-you-screen/bg-img.png);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: 375px;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+}
+.payfast-img_main {
+    border-radius: 24px;
+    background: var(--1, #FFF);
+    width: 120px;
+    height: 120px;
+    padding: 16px 20px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+    text-align: center;
+}
+.back-btn {
+    border: 1px solid #ffffff;
+    height: 36px;
+    width: 36px;
+    border-radius: 8px;
+}
+.let-you-top-wrap {
+    padding-top: 30px;
+}
+.icons_main a {
+    border: 2px solid var(--sub-bg-color);
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.apple {
+    filter: var(--icon-filter);
+}
+.icons_main {
+    display: flex;
+    justify-content: center;
+    column-gap: 24px;
+}
+.lets_you_in_box {
+    border-radius: 24px;
+    background: var(--primary-color);
+    padding: 32px 16px;
+    margin: 0 16px;
+    position: absolute;
+    width: calc(100% - 30px);
+    left: 0;
+    right: 0;
+    top: -118px;
+}
+.lets_you_in_text {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 36px;
+}
+.or-section p {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    overflow: hidden;
+}
+.or-section p:before {
+    right: 8px;
+    margin-left: -50%;
+}
+.or-section p:before,
+.or-section p:after {
+    background: var(--sub-bg-color);
+    content: "";
+    display: inline-block;
+    height: 2px;
+    position: relative;
+    vertical-align: middle;
+    width: 50%;
+}
+.or-section p:after {
+    left: 8px;
+    margin-right: -50%;
+}
+.form-sign-in-password-btn a {
+    width: 100%;
+    border-radius: 12px;
+    background: var(--2, #7B51F1);
+    padding: 12px 0;
+    margin: auto;
+    max-width: 600px;
+    color: var(--1, #FFF);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.let-you-social-sec {
+    position: relative;
+    width: 100%;
+}
+#let-you-footer {
+    position: fixed;
+    width: 100%;
+    left: 0;
+    bottom: 0;
+    padding: 16px;
+    z-index: 99;
+    max-width: 600px;
+    margin: 0 auto;
+    right: 0;
+    background: var(--sub-bg-color);
+}
+.block-footer p {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.block-footer a {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+}
+
+/************************ 5.Sign In screen CSS ***************************/
+.iti__arrow:before {
+    content: url(../svg/up-icon.svg) !important;
+    position: absolute;
+    top: 0px;
+}
+#sign-in-main {
+    padding-bottom: 120px;
+    margin-bottom: 220px;
+}
+.iti__arrow {
+    border: 0 !important;
+    margin-left: 12px !important;
+}
+.iti__selected-dial-code {
+    display: none;
+}
+.iti--separate-dial-code .iti__selected-flag {
+    background-color: transparent !important;
+    padding: 0 !important;
+}
+.mobile-form {
+    border-radius: 8px;
+    background: var(--input-bg);
+    padding: 11px;
+    display: flex;
+    align-items: center;
+}
+.ReactFlagsSelect-module_selectBtn__19wW7 {
+    width: 70px !important;
+    padding: 0 !important;
+    border: none !important;
+    font-size: 20px !important;
+    justify-content: center !important;
+}
+.ReactFlagsSelect-module_flagsSelect__2pfa2 {
+    padding-bottom: 0 !important;
+}
+.ReactFlagsSelect-module_selectOptions__3LNBJ {
+    width: 320px;
+}
+.ReactFlagsSelect-module_selectValue__152eS .ReactFlagsSelect-module_label__27pw9 {
+    display: none;
+}
+.sign-in-custom-input {
+    border: none;
+    background: transparent;
+    width: 100%;
+    padding-left: 12px;
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.sign-in-custom-input::placeholder {
+    color: var(--5, #5A5C5E);
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+#mobile_code {
+    padding-right: 0;
+}
+.iti {
+    display: flex !important;
+}
+
+/************************ 6.Sign up screen CSS ***************************/
+.form-details-sign-in {
+    border-radius: 8px;
+    background: var(--input-bg);
+    padding: 11px;
+    display: flex;
+}
+.form-details-sign-in span img {
+    filter: var(--icon-filter);
+}
+/************************ Auth alert / feedback components ***************************/
+/* Info (cart-checkout context notice) */
+.auth-alert-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    color: #3730a3;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+.auth-alert-info-icon {
+    font-size: 16px;
+    line-height: 1;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+/* Success */
+.auth-alert-success {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #15803d;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+/* Danger (general server errors + SignIn inline error) */
+.auth-alert-danger {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    text-align: center;
+}
+/* Inline per-field validation message */
+.auth-field-error {
+    color: #ef4444;
+    font-size: 13px;
+    margin: 4px 0 8px;
+}
+/* Submit button — invisible click target; parent .form-sign-in-password-btn owns the visual */
+.auth-submit-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    width: 100%;
+    cursor: pointer;
+}
+.auth-submit-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+/* Column-direction modifier for .mobile-form (single-input rows) */
+.mobile-form-col {
+    flex-direction: column;
+    gap: 0;
+}
+/* Forgot-password anchor */
+.auth-forgot-link {
+    color: #7B51F1;
+    font-size: 14px;
+}

@@ -1,8 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import './assets/css/swap.css';
-import './assets/css/style.css';
-import './assets/css/media-query.css';
+import './assets/css/kenfinly-core.css';
 // Bootstrap react-i18next — must be imported before any component that calls useTranslation()
 import './i18n';
 import { Suspense, type ComponentType, type ReactElement } from 'react';

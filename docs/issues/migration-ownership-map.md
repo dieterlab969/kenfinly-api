@@ -1,6 +1,6 @@
 # Database Migration Ownership Map
 
-**Generated:** 2026-08-16T07:11:02.981Z
+**Generated:** 2026-08-16T08:27:30.629Z
 **Source:** `database/migrations` filenames and schema operations
 
 The current migration chain contains **73 migrations**.

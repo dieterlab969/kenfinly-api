@@ -10,3 +10,4 @@
 - [User Subscriptions vs Platform Subscriptions](user-vs-platform-subscriptions.md) — two separate subscription systems; `user_subscriptions` tracks personal services (Netflix etc.), `subscriptions` tracks Kenfinly plan billing
 - [JWT Secret must be set](jwt-secret-env.md) — JWT_SECRET in .env is empty by default on fresh environments; run `php artisan jwt:secret --force` before testing auth-protected routes
 - [App entry casing](app-entry-casing.md) — keep the Vite bootstrap distinct from root-level App.tsx; App.tsx + app.tsx fails TypeScript casing checks
+- [Phase 3 CSS ownership](phase3-css-ownership.md) — keep only shell CSS global; load route, widget, and Halo styles at their lazy feature boundary

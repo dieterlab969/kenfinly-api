@@ -1,0 +1,906 @@
+/* Authentication and identity-flow screens. Loaded by identity routes only. */
+/* Generated from the audited legacy stylesheet by scripts/generate-phase3-css.mjs. */
+
+/************************ 7.Verify phone number screen CSS ***************************/
+.verify-number-bottom {
+    border-radius: 24px 24px 0px 0px;
+    background: var(--primary-color);
+    margin-top: 20px;
+    padding: 16px 16px 0px 16px;
+    position: relative;
+}
+.verify-number-main {
+    background-image: url(../images/let-you-screen/bg-img.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+}
+div#upload-id-page {
+    height: 100vh;
+}
+.verify-number-top-content {
+    padding-top: 30px;
+    display: flex;
+    align-items: center;
+    column-gap: 12px;
+}
+.header-title p {
+    color: var(--1, #FFF);
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.verify-txt p {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.otp-section input {
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    padding: 10px;
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 32px;
+    border-radius: 30px;
+    background: var(--sub-bg-color);
+}
+.otp-section {
+    column-gap: 11px;
+}
+.otp-section input:focus {
+    border-radius: 30px;
+    border: 2px solid var(--2, #7B51F1);
+    background: var(--1, #FFF);
+    box-shadow: none !important;
+}
+.resend-txt1 {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.resend-txt2 {
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+    color: var(--text-color);
+}
+.verify-number-btn a {
+    width: 100%;
+    border-radius: 12px;
+    background: var(--2, #7B51F1);
+    padding: 12px 0;
+    margin: auto;
+    max-width: 600px;
+    color: var(--1, #FFF);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.verify-number-btn {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    left: 0;
+    right: 0;
+    padding: 0 16px;
+    padding-bottom: 20px;
+    background: var(--primary-color);
+    z-index: 2;
+}
+.resend-txt2 a {
+    color: var(--text-color);
+}
+.form-control:focus {
+    background: var(--sub-bg-color);
+    box-shadow: none;
+}
+
+/************************ 11.Send quick response2 CSS ***************************/
+.allow-btn a {
+    width: 100%;
+    border-radius: 12px;
+    background: var(--2, #7B51F1);
+    padding: 15px 0;
+    margin: auto;
+    max-width: 600px;
+    color: var(--1, #FFF);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.done-btn a {
+    width: 100%;
+    border-radius: 12px;
+    background: var(--2, #F2EEFE);
+    padding: 15px 0;
+    margin: auto;
+    max-width: 600px;
+    color: var(--1, #7B51F1);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.bottom-btn {
+    position: fixed;
+    width: 100%;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 16px 16px 16px;
+    background: white;
+}
+#send-response2 {
+    padding-bottom: 160px;
+}
+
+/************************ 15.Reason for using payfast CSS ***************************/
+.we-txt {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.border-top {
+    border-top: 2px solid var(--sub-bg-color) !important;
+}
+#reason-using-payfast-main .custom-lable {
+    color: var(--text-color);
+}
+#reason-using-payfast-main .change-lan-sec {
+    padding: 12px 0 !important;
+}
+#upload-id-main {
+    background-image: url(../images/upload-id/bg-img.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 100%;
+    height: calc(100vh - 66px);
+    position: relative;
+    border-radius: 24px 24px 0px 0px;
+    margin-top: 20px;
+}
+.frame {
+    max-width: 768px;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 34px 34px 0px 0px;
+}
+.frame img {
+    width: 100%;
+    height: 100%;
+}
+#upload-id-page .verify-number-top {
+    padding-bottom: 20px;
+}
+.overlay {
+    position: absolute;
+    background-image: url(../images/upload-id/overlay.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: 100%;
+    top: 0;
+    right: 0;
+    height: 100%;
+    border-radius: 24px 24px 0px 0px;
+}
+.overlay.selfie-overlay {
+    background-image: url(../images/upload-id/selfie-overlay.png);
+}
+.upload-top h1 {
+    color: var(--1, #FFF);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+}
+.upload-top p {
+    color: var(--1, #FFF);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.upload-id-content {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    padding: 16px 16px 0 16px;
+    bottom: 0;
+}
+.flash-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 24px;
+    background: white;
+}
+.upload-id-button-content {
+    column-gap: 30px;
+}
+.upload-id-bottom {
+    position: relative;
+    height: calc(100% - 86px);
+}
+.upload-id-button {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding-bottom: 30px;
+}
+.scanner-border {
+    margin-top: 64px;
+    text-align: center;
+}
+.verify-txt {
+    color: var(--1, #FFF);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+#loader {
+    color: var(--6, #FFAA01);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 36px;
+}
+.loader-content {
+    position: fixed;
+    width: 100%;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    padding-bottom: 30px;
+    bottom: 0;
+}
+.finger-content-sec h2 {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 36px;
+}
+.finger-content-sec p {
+    color: var(--5, #5A5C5E);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.face-main .offcanvas-body {
+    overflow-y: hidden;
+}
+.loader,
+.finger-img-sec {
+    text-align: center;
+}
+.sk-fading-circle {
+    width: 40px;
+    height: 40px;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+}
+.sk-fading-circle .sk-circle {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+.sk-fading-circle .sk-circle:before {
+    content: '';
+    display: block;
+    margin: 0 auto;
+    width: 15%;
+    height: 15%;
+    background-color: #7B51F1;
+    border-radius: 100%;
+    -webkit-animation: sk-circleFadeDelay 1.2s infinite ease-in-out both;
+    animation: sk-circleFadeDelay 1.2s infinite ease-in-out both;
+}
+.sk-fading-circle .sk-circle2 {
+    -webkit-transform: rotate(30deg);
+    -ms-transform: rotate(30deg);
+    transform: rotate(30deg);
+}
+.sk-fading-circle .sk-circle3 {
+    -webkit-transform: rotate(60deg);
+    -ms-transform: rotate(60deg);
+    transform: rotate(60deg);
+}
+.sk-fading-circle .sk-circle4 {
+    -webkit-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg);
+}
+.sk-fading-circle .sk-circle5 {
+    -webkit-transform: rotate(120deg);
+    -ms-transform: rotate(120deg);
+    transform: rotate(120deg);
+}
+.sk-fading-circle .sk-circle6 {
+    -webkit-transform: rotate(150deg);
+    -ms-transform: rotate(150deg);
+    transform: rotate(150deg);
+}
+.sk-fading-circle .sk-circle7 {
+    -webkit-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    transform: rotate(180deg);
+}
+.sk-fading-circle .sk-circle8 {
+    -webkit-transform: rotate(210deg);
+    -ms-transform: rotate(210deg);
+    transform: rotate(210deg);
+}
+.sk-fading-circle .sk-circle9 {
+    -webkit-transform: rotate(240deg);
+    -ms-transform: rotate(240deg);
+    transform: rotate(240deg);
+}
+.sk-fading-circle .sk-circle10 {
+    -webkit-transform: rotate(270deg);
+    -ms-transform: rotate(270deg);
+    transform: rotate(270deg);
+}
+.sk-fading-circle .sk-circle11 {
+    -webkit-transform: rotate(300deg);
+    -ms-transform: rotate(300deg);
+    transform: rotate(300deg);
+}
+.sk-fading-circle .sk-circle12 {
+    -webkit-transform: rotate(330deg);
+    -ms-transform: rotate(330deg);
+    transform: rotate(330deg);
+}
+.sk-fading-circle .sk-circle2:before {
+    -webkit-animation-delay: -1.1s;
+    animation-delay: -1.1s;
+}
+.sk-fading-circle .sk-circle3:before {
+    -webkit-animation-delay: -1s;
+    animation-delay: -1s;
+}
+.sk-fading-circle .sk-circle4:before {
+    -webkit-animation-delay: -0.9s;
+    animation-delay: -0.9s;
+}
+.sk-fading-circle .sk-circle5:before {
+    -webkit-animation-delay: -0.8s;
+    animation-delay: -0.8s;
+}
+.sk-fading-circle .sk-circle6:before {
+    -webkit-animation-delay: -0.7s;
+    animation-delay: -0.7s;
+}
+.sk-fading-circle .sk-circle7:before {
+    -webkit-animation-delay: -0.6s;
+    animation-delay: -0.6s;
+}
+.sk-fading-circle .sk-circle8:before {
+    -webkit-animation-delay: -0.5s;
+    animation-delay: -0.5s;
+}
+.sk-fading-circle .sk-circle9:before {
+    -webkit-animation-delay: -0.4s;
+    animation-delay: -0.4s;
+}
+.sk-fading-circle .sk-circle10:before {
+    -webkit-animation-delay: -0.3s;
+    animation-delay: -0.3s;
+}
+.sk-fading-circle .sk-circle11:before {
+    -webkit-animation-delay: -0.2s;
+    animation-delay: -0.2s;
+}
+.sk-fading-circle .sk-circle12:before {
+    -webkit-animation-delay: -0.1s;
+    animation-delay: -0.1s;
+}
+@keyframes sk-circleFadeDelay {
+    0%,
+    39%,
+    100% {
+        opacity: 0;
+    }
+    40% {
+        opacity: 1;
+    }
+}
+
+/************************ 16.Finger Print CSS ***************************/
+.scan {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: url(../images/finger-print/print-border.png);
+    width: 220px;
+    height: 220px;
+    background-size: 300px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    margin-left: auto;
+    margin-right: auto;
+}
+.scan .fingerprint {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    background: url(../images/finger-print/finger-print-img.png);
+    background-size: 300px;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.dark .scan .fingerprint {
+    background: url(../images/finger-print/finger-print-img-white.png);
+}
+.scan .fingerprint::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url(../images/finger-print/finger-print-img.png);
+    background-size: 300px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    animation: animate 4s ease-in-out infinite;
+    filter: brightness(0) saturate(100%) invert(30%) sepia(94%) saturate(1008%) hue-rotate(229deg) brightness(109%) contrast(91%);
+}
+.finger-print-main .modal-dialog {
+    margin: inherit !important;
+    margin-right: auto !important;
+    margin-left: auto !important;
+}
+.scan .fingerprint::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    border-radius: 8px;
+    animation: animate_line 4s ease-in-out infinite;
+}
+.sub-text {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.verify-number-btn.fingerprint-btn {
+    position: relative;
+    padding: 0;
+}
+.add-fingerprint p {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.scanner_main {
+    padding-top: 120px;
+    padding-bottom: 135px;
+}
+.circles,
+#homepage .home-activity {
+    padding-bottom: 135px;
+}
+.skip-txt a {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.skip-txt {
+    text-align: center;
+}
+.finger-print-bottom {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    padding: 16px 16px;
+    background: var(--primary-color);
+}
+
+/************************ 17.Forget password CSS ***************************/
+.form-item {
+    position: relative;
+    margin-bottom: 15px;
+}
+.form-item input {
+    display: block;
+    width: 100%;
+    height: 64px;
+    background: transparent;
+    border: solid 2px black;
+    transition: all .3s ease;
+    padding-left: 80px;
+    border-radius: 30px;
+    outline: none;
+    padding-top: 5px;
+    color: grey;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.form-item label {
+    position: absolute;
+    cursor: text;
+    z-index: 2;
+    top: 33%;
+    left: 70px;
+    padding: 0 10px;
+    color: green;
+    transition: all .3s ease;
+    font-family: Satoshi;
+    font-weight: 500;
+    line-height: 20px;
+    font-size: 16px;
+}
+.form-item input:focus {
+    border: 2px solid #00D061;
+}
+.mobile-message-main {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 48px;
+    height: 48px;
+    background-color: var(--sub-bg-color);
+    border-radius: 50%;
+}
+.form-item input:focus+label,
+.form-item input:valid+label {
+    font-size: 14px;
+    top: 3px;
+    color: #00D061 !important;
+}
+.forget-password-form .form-floating>label {
+    left: 70px;
+}
+.forget-password-form input {
+    padding-left: 80px !important;
+    background: transparent !important;
+    border-radius: 12px;
+    border: 2px solid var(--14, #F2EEFE);
+    background: var(--1, #FFF);
+    height: 64px !important;
+}
+.forget-password-form .form-control:focus {
+    box-shadow: none !important;
+    background: transparent !important;
+    border: 2px solid var(--14, #F2EEFE);
+}
+.forget-password-form .form-floating input:focus {
+    border: 2px solid var(--2, #7B51F1);
+}
+
+/************************ 18.Notification screen CSS ***************************/
+.notification-icon-img {
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
+}
+.icon1 {
+    background: #F2EEFE;
+}
+.icon2 {
+    background: rgb(255 170 1 / 12%);
+}
+.icon3 {
+    background: rgb(251 73 69 / 12%);
+}
+.icon4 {
+    background: rgb(0 162 102 / 12%);
+}
+.nofication-content {
+    display: flex;
+    column-gap: 16px;
+    align-items: center;
+}
+.notification-new {
+    margin-left: auto;
+}
+.new {
+    padding: 8px 12px;
+    border-radius: 4px;
+    background: var(--7, #00A266);
+}
+.new a {
+    color: var(--1, #FFF);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    display: block;
+}
+.notification-content h3 {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+}
+.notification-content p {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 18px;
+    padding-top: 4px;
+}
+.now-txt {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 18px;
+}
+.notification-details {
+    border-bottom: 2px solid var(--sub-bg-color);
+    padding-bottom: 12px;
+}
+.notification-details:last-child {
+    border-bottom: none;
+}
+#notification-main {
+    padding: 16px !important;
+}
+
+/************************ 51.Face recognition css ***************************/
+.concentric-circles {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin-top: 70px;
+    margin-left: auto;
+    margin-right: auto
+}
+.circle {
+    position: absolute;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+.outer {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(136, 84, 255, 0.1);
+    animation-delay: 0s;
+}
+.middle {
+    width: 220px;
+    height: 220px;
+    background-color: rgba(136, 84, 255, 0.2);
+    animation-delay: 0.5s;
+}
+.inner {
+    width: 120px;
+    height: 120px;
+    background-color: #8854FF;
+    animation-delay: 1s;
+}
+.inner img {
+    width: 50%;
+    height: 50%;
+}
+.chart-container {
+    width: 100%;
+    background: #FFF;
+    padding: 10px;
+}
+.bar-chart-container {
+    height: 300px;
+    margin: auto;
+}
+.request-content span:first-child {
+    color: var(--sub-text-color);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.request-content span:last-child {
+    color: var(--text-color);
+    text-align: right;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.request-txt {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    border-bottom: 2px solid var(--sub-bg-color);
+    padding-bottom: 16px;
+}
+.request-btn {
+    position: relative;
+    padding: 0;
+}
+.request-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.request-money-modal {
+    max-width: 600px;
+    margin: auto;
+}
+
+/************************ 53.Create new password CSS ***************************/
+#create-new-password-main .password-form input {
+    padding-right: 50px !important;
+}
+.password-form .form-floating>.form-control:focus~label {
+    color: var(--2, #7B51F1);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.password-form input {
+    color: var(--text-color) !important;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    border-radius: 12px;
+    background: var(--sub-bg-color);
+    border: 2px solid var(--sub-bg-color);
+    padding-right: 16px !important;
+}
+i#eye,
+i#eye1 {
+    font-size: 20px;
+    color: #5A5C5E;
+    position: absolute;
+    right: 16px;
+    top: 35%;
+    cursor: pointer;
+}
+.form-floating>.form-control:not(:placeholder-shown)~label {
+    color: #8854FF;
+}
+.password-form .form-floating>label {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.password-form .form-floating>.form-control:focus~label::after {
+    background: transparent;
+}
+.footer-checkbox-input+.footer-chec-txt:before {
+    content: "";
+    margin-right: 12px;
+    display: inline-block;
+    vertical-align: text-top;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--text-color);
+    border-radius: 8px;
+}
+.footer-checkbox-input {
+    position: absolute;
+    opacity: 0;
+    width: fit-content;
+}
+.footer-checkbox-input:checked+.footer-chec-txt:after {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 12px;
+    background: white;
+    width: 2px;
+    height: 2px;
+    box-shadow: 2px 0 0 white, 4px 0 0 white, 4px -2px 0 white, 4px -4px 0 white, 4px -6px 0 white, 4px -8px 0 white;
+    transform: rotate(45deg);
+}
+.footer-checkbox-input:checked+.footer-chec-txt:before {
+    background: black;
+    border: none;
+}
+.footer-checkbox-input+.footer-chec-txt {
+    position: relative;
+    cursor: pointer;
+    padding: 0;
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.verify-txt h1 {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 36px;
+}
+#empty-notification-main .verify-number-bottom {
+    padding-bottom: 30px;
+}

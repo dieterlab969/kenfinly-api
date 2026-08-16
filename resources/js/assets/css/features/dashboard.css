@@ -1,0 +1,317 @@
+/* Home, analytics, chart, navigation, and dashboard feature screens. */
+/* Generated from the audited legacy stylesheet by scripts/generate-phase3-css.mjs. */
+
+/************************ 48.Line chart css ***************************/
+.chat-income-sec {
+    display: flex;
+    column-gap: 16px;
+    width: 100%;
+}
+.chat-income,
+.chat-expense {
+    width: 50%;
+    display: flex;
+    padding: 7px 8px;
+    height: 56px;
+    align-items: center;
+    column-gap: 9px;
+    border: 2px solid var(--6, #FFAA01);
+    border-radius: 8px;
+    background: white;
+}
+.chat-content {
+    width: calc(100% - 30px);
+    position: absolute;
+    left: 0;
+    z-index: 99;
+    margin-top: 16px !important;
+    max-width: 100%;
+    margin: 0 auto;
+    right: 0;
+}
+.chat-txt1 {
+    color: var(--7, #00A266);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+.chat-txt2 {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 18px;
+}
+.week-txt {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px
+}
+.price-txt {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+    margin-top: 4px;
+}
+.date-txt {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 18px;
+    margin-top: 4px;
+}
+.line-chart-data {
+    display: flex;
+}
+.data-details {
+    width: 50%;
+}
+.statistic-first h2 {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+.statistic-first p {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    margin-top: 4px;
+}
+.statistic-overview-content {
+    display: flex;
+    column-gap: 16px;
+}
+.chat-bottom-space {
+    padding-bottom: 110px;
+}
+.statistic-first {
+    width: 60%;
+}
+.statistic-second {
+    width: 40%;
+}
+.area-chat .custom-select-internet select {
+    border-radius: 4px;
+    background-color: var(--2, #7B51F1);
+    color: var(--1, #FFF);
+    font-family: Satoshi;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 16px;
+    padding: 12px;
+}
+.area-chat .arrow-icon {
+    background-image: url(../svg/white-up-icon.svg) !important;
+}
+
+/************************ 49.Homescreen css ***************************/
+p.name {
+    color: var(--1, #FFF);
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 30px;
+}
+p.balance {
+    color: var(--1, #FFF);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.balance-data h1 {
+    color: var(--1, #FFF);
+    font-family: Poppins;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 36px;
+}
+.home-top-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 36px;
+}
+.homepage-first {
+    display: flex;
+    justify-content: space-around;
+    border-radius: 24px;
+    background: var(--6, #FFAA01);
+    padding: 16px 0;
+}
+.first-details p {
+    color: var(--1, #FFF);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    margin-top: 8px;
+}
+#homepage .send-money:last-child p,
+#homepage .send-money:first-child p {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 74px;
+    white-space: nowrap;
+    margin-left: auto;
+    margin-right: auto;
+}
+.home-activity-top span:first-child {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 30px;
+}
+.home-activity-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.home-activity-bottom-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.home-first h3 {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+}
+.home-first p {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    margin-top: 4px;
+}
+.home-second h4 {
+    color: var(--7, #00A266);
+    text-align: right;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+}
+
+/************************ 50.Bottom tabbar css ***************************/
+.bottom-menu-svg-main {
+    position: relative;
+}
+.bottom-menu-svg {
+    position: fixed;
+    bottom: -40px;
+}
+.gol3 {
+    position: absolute;
+    left: 50%;
+    top: -10%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 80px;
+    background-color: #000000;
+    border-radius: 50%;
+    z-index: 99;
+}
+.add-to-cart-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+}
+.home-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.bottom-menu-svg-design {
+    max-width: 600px;
+    height: 160px;
+    width: 100%;
+    backdrop-filter: blur(12px);
+    background: var(--primary-color);
+}
+.navigation {
+    position: fixed;
+    bottom: 25px;
+    width: 100%;
+    padding: 0 32px;
+    max-width: 600px;
+}
+.navigation .listWrap {
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+.navigation .listWrap li a {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+.navigation .listWrap li:active a .icon,
+.navigation .listWrap li.active a .icon {
+    filter: brightness(0) saturate(100%) invert(35%) sepia(56%) saturate(1672%) hue-rotate(232deg) brightness(95%) contrast(100%);
+    transform: translateY(-10px);
+}
+.navigation .listWrap li a .icon {
+    position: relative;
+    display: block;
+    text-align: center;
+    transition: 0.5s;
+    color: #FFF;
+}
+.icon img {
+    filter: var(--icon-filter);
+}
+#paint0_linear_1_13394 {
+    stop-color: #121212;
+}
+.navigation .listWrap li:active a .text,
+.navigation .listWrap li.active a .text {
+    opacity: 1;
+}
+.navigation .listWrap li a .text {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #7B51F1;
+    transition: 0.5s;
+    transform: translateY(20px);
+    opacity: 0;
+    z-index: 1;
+}

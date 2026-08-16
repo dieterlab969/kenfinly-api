@@ -1,6 +1,6 @@
 # Backend Controller Inventory
 
-**Generated:** 2026-08-16T07:11:02.963Z
+**Generated:** 2026-08-16T08:27:30.605Z
 **Source:** `app/Http/Controllers` plus route-file references
 
 The current backend contains **60 controllers**. The
