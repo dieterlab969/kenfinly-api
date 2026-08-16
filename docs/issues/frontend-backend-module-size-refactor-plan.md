@@ -334,6 +334,12 @@ Tasks:
 These are targets to validate after the baseline is measured; they should not
 be treated as arbitrary success claims before implementation:
 
+The executable baseline-aware implementation is documented in
+[Frontend and Backend Refactor Quality Gates](frontend-backend-quality-gates.md).
+Run `npm run quality:gates` during incremental work and
+`npm run quality:ci` in CI. Strict enforcement is available through
+`npm run quality:gates:strict` after the recorded baseline debt is addressed.
+
 - No new route-level page module exceeds **500 lines** without an approved
   exception.
 - No new controller mixes transport, persistence orchestration, file handling,

@@ -43,6 +43,18 @@ args = "php-lint"
 task = "workflow.run"
 args = "laravel-test"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "quality-gates"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "quality-ci"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "quality-migrations"
+
 [[workflows.workflow]]
 name = "dev-server"
 author = "agent"
@@ -120,6 +132,39 @@ args = "php artisan test --no-coverage"
 
 [workflows.workflow.metadata]
 isValidation = true
+
+[[workflows.workflow]]
+name = "quality-gates"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run quality:gates"
+
+[workflows.workflow.metadata]
+isValidation = true
+
+[[workflows.workflow]]
+name = "quality-ci"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run quality:ci"
+
+[workflows.workflow.metadata]
+isValidation = true
+
+[[workflows.workflow]]
+name = "quality-migrations"
+author = "agent"
+
+[workflows.workflow.metadata]
+isValidation = true
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "MIGRATION_UPGRADE_DATABASE_URL=\"${MIGRATION_UPGRADE_DATABASE_URL:?Set a disposable current-schema URL}\" npm run quality:migrations"
 
 [[ports]]
 localPort = 5000
