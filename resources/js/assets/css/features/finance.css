@@ -1,0 +1,1498 @@
+/* Payments, transfers, invoices, bills, charts, and finance feature screens. */
+/* Generated from the audited legacy stylesheet by scripts/generate-phase3-css.mjs. */
+
+/************************ 9.Send money to all screen CSS ***************************/
+.search-text {
+    background: transparent;
+    color: white !important;
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    border: 0 !important;
+    padding: 0;
+}
+.star-favourite a {
+    display: block;
+}
+.star-favourite span img,
+.upIconsSat,
+.star-favourite img {
+    filter: var(--icon-filter);
+}
+.search-text::placeholder {
+    color: rgb(255 255 255 / 64%) !important;
+}
+.search-icon {
+    background: transparent;
+    border: 0 !important;
+    padding: 0;
+}
+.contact-searchbar {
+    border: 1px solid #ffffff;
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    width: 100%;
+    padding: 15px !important;
+    justify-content: space-between;
+    border-radius: 16px;
+    background: linear-gradient(92deg, rgba(255, 255, 255, 0.40) 0%, rgba(255, 255, 255, 0.24) 100%);
+    backdrop-filter: blur(4px);
+}
+.seach-bar .form-control:focus {
+    background: transparent;
+}
+.contact-search {
+    margin-top: 20px;
+}
+.voice-icon {
+    text-align: center;
+}
+.seach-bar {
+    width: 80%;
+}
+.item-bookmark img {
+    filter: var(--icon-filter);
+}
+.item-bookmark.active {
+    content: url(../svg/fill-star.svg);
+}
+.send-money-contact-tab {
+    display: flex;
+    align-items: center;
+    column-gap: 16px;
+    padding: 8px 0;
+}
+.contact-star,
+#Qrcode-main .bank-active-sec {
+    margin-left: auto;
+}
+.contact-profile img {
+    border-radius: 50px;
+}
+.contact-details h3 {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+}
+.contact-details h4 {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 18px;
+    margin-top: 4px;
+}
+.custom-tab-contact {
+    width: 100%;
+    width: calc(100% - 30px);
+    border-radius: 8px;
+    border: 2px solid var(--6, #FFAA01);
+    background: var(--1, #FFF);
+    position: absolute;
+    left: 0;
+    z-index: 99;
+    margin-top: 25px !important;
+    margin: 0 auto;
+    right: 0;
+}
+.custom-tab-contact button {
+    width: 50%;
+    border: 0 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    color: var(--6, #FFAA01);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+    padding: 12px !important;
+}
+.custom-tab-contact .nav-link.active {
+    background: var(--6, #FFAA01);
+    margin-bottom: auto !important;
+    color: var(--1, #FFF);
+}
+.custom-tab-contact button:hover {
+    color: var(--6, #FFAA01);
+}
+#send-money-contact {
+    margin-top: 40px !important;
+    padding: 60px 16px 16px 16px !important;
+}
+#subscription-main .contact-searchbar {
+    justify-content: normal;
+    column-gap: 8px;
+}
+#subscription-main .seach-bar {
+    width: 100%;
+}
+.purple-edit-icon {
+    filter: brightness(0) saturate(100%) invert(29%) sepia(61%) saturate(1820%) hue-rotate(235deg) brightness(111%) contrast(91%);
+}
+
+/************************ 10.Pay Bill  CSS ***************************/
+.pay-bill-img {
+    width: 74px;
+    height: 74px;
+    border-radius: 37px;
+}
+.pay-bill-sec,
+.about-us-icon-wrapper {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+}
+.pay-bill-img.bg-1,
+.pay-bill-img.bg-9 {
+    background: rgb(255 170 1 / 12%);
+}
+.pay-bill-img.bg-2,
+.pay-bill-img.bg-12,
+.pay-bill-img.bg-15 {
+    background: rgb(251 73 69 / 12%);
+}
+.pay-bill-img.bg-3 {
+    background: rgb(34 211 238 / 12%);
+}
+.pay-bill-img.bg-4,
+.pay-bill-img.bg-10 {
+    background: rgb(0 162 102 / 12%);
+}
+.pay-bill-img.bg-5,
+.pay-bill-img.bg-13 {
+    background: rgb(123 81 241 / 12%);
+}
+.pay-bill-img.bg-6,
+.pay-bill-img.bg-11 {
+    background: rgb(249 115 22 / 12%);
+}
+.pay-bill-img.bg-7 {
+    background: rgb(0 162 102 / 12%);
+}
+.pay-bill-img.bg-8 {
+    background: rgb(132 204 22 / 12%);
+}
+.pay-bill-img.bg-14 {
+    background: rgb(6 182 212 / 12%);
+}
+.pay-bill-img.bg-16 {
+    background: rgb(18 18 18 / 12%);
+    filter: var(--icon-filter);
+}
+.pay-bill-name {
+    overflow: hidden;
+    color: var(--text-color);
+    text-align: center;
+    text-overflow: ellipsis;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    margin-top: 8px;
+}
+.pay-bill-sec a {
+    margin-right: auto;
+    margin-left: auto;
+}
+
+/************************ 20.Electricity bill 1 Screen ***************************/
+.electricity1-top {
+    border-bottom: 2px solid var(--sub-bg-color);
+}
+.pay-txt {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 36px;
+}
+#electricity1 .pay-bill-img {
+    margin-right: auto;
+    margin-left: auto;
+}
+#electricity1 .pay-bill-name {
+    padding-bottom: 24px;
+}
+.custom-input-id {
+    border: none;
+    background: aqua;
+    width: 100%;
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    border-radius: 12px;
+    background: var(--primary-color);
+    padding: 16px;
+    border: 2px solid var(--sub-bg-color);
+}
+.custom-lbl-electricity {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+.bill-amount-content span:first-child {
+    color: var(--sub-text-color);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.bill-amount-content span:last-child {
+    color: var(--text-color);
+    text-align: right;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+}
+.bill-amount-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.electricity1-bottom.mt-24 {
+    border-radius: 12px;
+    border: 2px solid var(--2, #7B51F1);
+    background: var(--primary-color);
+    padding: 16px;
+}
+.custom-select-internet select {
+    width: 100%;
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    padding: 16px;
+    border-radius: 12px;
+    background-color: var(--sub-bg-color);
+    border: 0;
+}
+.arrow-icon {
+    background: url(../svg/up-icon.svg) no-repeat;
+    background-position: 96% center;
+    font-size: 18px;
+    appearance: none;
+}
+select:focus-visible {
+    outline: 0;
+}
+
+/************************ 21.Paid screen css ***************************/
+.paid-button1 a {
+    width: 100%;
+    border-radius: 12px;
+    background: var(--2, #7B51F1);
+    padding: 12px 0;
+    margin: auto;
+    max-width: 600px;
+    color: var(--1, #FFF);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.paid-button2 a {
+    width: 100%;
+    border-radius: 12px;
+    background: var(--sub-bg-color);
+    padding: 12px 0;
+    margin: auto;
+    max-width: 600px;
+    color: var(--2, #7B51F1);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.bill-paid-btn {
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    background: var(--primary-color);
+    padding: 16px;
+    padding-bottom: 16px;
+    box-shadow: 0px -4px 4px 0px rgba(18, 18, 18, 0.04);
+}
+#bill-paid {
+    padding-bottom: 170px !important;
+}
+
+/************************ 27.Send money1 css ***************************/
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+.enter-amount label,
+.total-txt {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.available-txt {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.enter-amount input {
+    width: 100%;
+    padding: 22px 12px;
+    text-align: center;
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 36px;
+    border-radius: 12px;
+    border: 2px solid var(--8, #FB4945);
+    background: var(--primary-color);
+    border-style: solid;
+}
+.enter-amount input:focus,
+.enter-amount input.active {
+    border: 2px solid #00A266;
+}
+.fee-txt {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+
+/************************ 28.Send money4 css ***************************/
+.send-money4-top h1 {
+    color: var(--4, #121212);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 30px;
+}
+.send-money4-top p {
+    color: var(--5, #5A5C5E);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.custom-radio {
+    position: relative;
+    margin-bottom: 0;
+    border-radius: 12px;
+    border: 2px solid var(--sub-bg-color);
+    background: var(--primary-color);
+    padding: 16px !important;
+}
+#data-privacy .form-check-input:checked[type=radio],
+#delete-deactivate-main .form-check-input:checked[type=radio],
+#delete-account .form-check-input:checked[type=radio],
+#transfer-to-bank-main .form-check-input:checked[type=radio] {
+    outline: 2px solid #FB4945;
+    outline-offset: 4px;
+    background: #FB4945;
+    border: 0;
+    width: 11px;
+    height: 11px;
+    margin-right: 5px;
+}
+.custom-radio input {
+    right: 0;
+}
+.checkout-modal-lbl {
+    display: inline-grid !important;
+    padding: 16px 0;
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+.checkout-modal-lbl span {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    padding-right: 50px;
+}
+.custom-radio input {
+    position: absolute;
+    right: 25px;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--text-color);
+}
+.custom-radio.active {
+    border: 2px solid var(--8, #FB4945) !important;
+}
+
+/************************ 29.Send money css ***************************/
+.sendmoney-top h1 {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 36px;
+}
+.sendmoney-top p {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.sendmoney-top.send-money4-top {
+    padding-bottom: 16px;
+}
+.contact-icon {
+    background: var(--sub-bg-color);
+    padding: 13px;
+    width: 74px;
+    height: 74px;
+    border-radius: 37px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.send-money p {
+    color: var(--text-color);
+    text-align: center;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.sendmoney-bottom-wrap {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+.send-money {
+    width: 33.33%;
+}
+.sendmomey-details {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--sub-bg-color);
+    padding-bottom: 12px;
+}
+.sendmomey-details span:first-child {
+    color: var(--sub-text-color);
+    font-family: Poppins;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.sendmomey-details span:last-child {
+    color: var(--text-color);
+    text-align: right;
+    font-family: Poppins;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px;
+}
+img.copied-icon {
+    margin-left: 8px;
+}
+.sendmoney-content {
+    border-radius: 12px;
+    border: 2px solid var(--2, #7B51F1);
+    background: var(--primary-color);
+    padding: 16px;
+}
+.sendmomey-details:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+/************************ 30.Taxes css ***************************/
+.tax-plus-btn {
+    width: 56px;
+    height: 56px;
+    background: var(--2, #7B51F1);
+    border-radius: 26px;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-bottom: 50px;
+    margin-right: 16px;
+}
+#taxes-main .tax-plus-btn {
+    margin-bottom: 30px;
+}
+.tax-plus-btn img {
+    filter: brightness(0) saturate(100%) invert(100%) sepia(100%) saturate(0%) hue-rotate(299deg) brightness(106%) contrast(101%);
+}
+#taxes-main .sendmomey-details {
+    padding: 16px 0 !important;
+}
+#taxes-main .sendmomey-details:first-child {
+    padding-top: 0 !important;
+}
+#taxes-main .sendmomey-details span:first-child,
+#taxes-main .sendmomey-details span:last-child {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+
+/************************ 34.Send money review css ***************************/
+.purple-border {
+    border-bottom: 2px solid #7B51F1;
+}
+.review-note h2 {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+.review-note p {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+#send-money-review .sendmomey-details {
+    padding-bottom: 16px;
+}
+.money-review-txt {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+form {
+    margin-block-end: 0px;
+}
+
+/************************ 35.Transfer to bank css ***************************/
+.transfer-first {
+    display: flex;
+    align-items: center;
+    column-gap: 16px;
+    border-bottom: 2px solid var(--sub-bg-color);
+    padding-bottom: 24px;
+    padding-top: 24px;
+}
+.bank-img {
+    border: 1px solid var(--sub-bg-color);
+    width: 74px;
+    height: 48px;
+    border-radius: 8px;
+}
+.bank-details h2 {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+}
+.bank-card span:first-child {
+    color: var(--7, #00A266);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.bank-card span:last-child {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+#bank-and-card-main .bank-active-sec,
+#payment-main .bank-active-sec,
+#transfer-to-bank-main .bank-active-sec {
+    margin-left: auto;
+}
+.bank-active-sec img {
+    filter: var(--icon-filter);
+}
+.bank-card {
+    margin-top: 4px;
+}
+.paid-button2 span img {
+    filter: brightness(0) saturate(100%) invert(35%) sepia(96%) saturate(2682%) hue-rotate(239deg) brightness(95%) contrast(100%);
+    margin-right: 8px;
+}
+#bank-and-card-main .verify-number-btn span img {
+    filter: brightness(0) saturate(100%) invert(100%) sepia(13%) saturate(0%) hue-rotate(79deg) brightness(101%) contrast(101%);
+    margin-right: 8px;
+}
+.pay-txt1 {
+    color: var(--7, #00A266);
+    text-align: right;
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+}
+#payment-main .transfer-first {
+    padding-bottom: 16px;
+    padding-top: 16px;
+}
+.transfer-first:first-child {
+    padding-top: 0 !important;
+}
+#payment-main .bank-active-sec img {
+    filter: brightness(0) saturate(100%) invert(34%) sepia(31%) saturate(6894%) hue-rotate(144deg) brightness(102%) contrast(101%);
+}
+#payment-main .bank-details p {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    margin-top: 4px;
+}
+.ApplyPay {
+    filter: var(--icon-filter);
+}
+
+/************************ 41.Add new card css ***************************/
+.demo-visa {
+    background-image: url(../images/payment/visa-card.png);
+    background-position: center;
+    background-repeat: no-repeat;
+    max-height: 200px;
+    height: 100%;
+    max-width: 343px;
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 24px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+.card-hidden-number {
+    color: var(--1, #FFF);
+    font-family: Satoshi;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 36px;
+    letter-spacing: 1.2px;
+}
+.card-name-jessica {
+    color: var(--1, #FFF);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    width: 100%;
+    max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.card-date-cvv {
+    color: var(--1, #FFF);
+    text-align: right;
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+.new_password_input .form-item input {
+    border-radius: 8px;
+    background: #F0F0F0;
+    border: navajowhite;
+    padding: 12px 16px;
+    width: 100%;
+    color: #212B46;
+    font-family: "Space Grotesk", sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    margin-top: 8px;
+}
+.info-person {
+    color: var(--3, #67696B);
+    font-family: "League Spartan", sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    text-transform: uppercase;
+}
+.new_password_input .form-item input::placeholder {
+    color: #212B46;
+}
+.card-name-jessica-main {
+    display: flex;
+    justify-content: space-around;
+    column-gap: 25px;
+}
+.ui-datepicker-header a.ui-datepicker-next {
+    right: 0;
+    background: url(../images/payment/left-icon.png);
+    background-repeat: no-repeat;
+    background-size: 16px;
+    background-position: 50%;
+}
+.ui-datepicker-header a.ui-datepicker-prev {
+    left: 0;
+    background: url(../images/payment/left-icon.png);
+    background-repeat: no-repeat;
+    background-size: 16px;
+    background-position: 50%;
+    transform: rotate(180deg);
+}
+.ui-datepicker-header a>span {
+    display: none;
+}
+.card-name-jessica-main-sub {
+    display: flex;
+    justify-content: space-around;
+    column-gap: 25px;
+}
+#ui-datepicker-div {
+    display: none;
+    background-color: #fff;
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
+    margin-top: 0.25rem;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+.ui-datepicker-calendar thead th {
+    padding: 0.25rem 0;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #78909C;
+}
+.ui-datepicker-calendar tbody td {
+    width: 2.5rem;
+    text-align: center;
+    padding: 0;
+}
+div#ui-datepicker-div {
+    z-index: 500 !important;
+}
+.ui-datepicker-calendar tbody td a {
+    display: block;
+    border-radius: 0.25rem;
+    line-height: 2rem;
+    transition: 0.3s all;
+    color: #546E7A;
+    font-size: 0.875rem;
+    text-decoration: none;
+}
+.ui-datepicker-calendar tbody td a:hover {
+    background: rgb(159 130 240 / 20%);
+}
+.ui-datepicker-calendar tbody td a.ui-state-active {
+    background-color: #7B51F1;
+    color: white;
+}
+.ui-datepicker-header a.ui-corner-all {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    width: 2rem;
+    height: 2rem;
+    margin: 0.5rem;
+    border-radius: 0.25rem;
+    transition: 0.3s all;
+}
+.ui-datepicker-title {
+    text-align: center;
+    line-height: 32px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    font-weight: 500;
+}
+.expiry-date.mt-16 {
+    display: flex;
+    column-gap: 16px;
+}
+
+/************************ 42.Old invoice css ***************************/
+.old-invoice-edit {
+    margin-left: auto;
+}
+.old-invoice-edit img {
+    filter: brightness(0) saturate(100%) invert(100%) sepia(100%) saturate(0%) hue-rotate(201deg) brightness(105%) contrast(105%);
+}
+.old-invoice-icon {
+    margin-left: 8px;
+    width: 20px;
+    height: 20px;
+}
+#old-invoice .verify-number-btn {
+    background: var(--primary-color);
+    box-shadow: 0px -4px 4px 0px rgba(18, 18, 18, 0.04);
+    padding: 16px;
+}
+.old-invoice-add-content {
+    display: flex;
+    justify-content: space-between;
+}
+.old-invoice-add-content span {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+.add-item-btn a {
+    width: 100%;
+    border-radius: 12px;
+    border: 2px solid #7B51F1;
+    padding: 10px 0;
+    margin: auto;
+    max-width: 600px;
+    color: var(--2, #7B51F1);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.add-item-btn img {
+    padding-right: 8px;
+}
+.txt2 {
+    color: var(--sub-text-color);
+    font-family: Poppins;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    margin-top: 8px;
+}
+.continue-txt {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.new-invoice-modal-content {
+    display: flex;
+    column-gap: 12px;
+}
+.new-invoice-modal-content {
+    display: flex;
+    column-gap: 12px;
+    border-bottom: 2px solid var(--sub-bg-color);
+    padding: 16px 0;
+}
+.new-invoive-pre-bnt {
+    margin-left: auto;
+}
+.new-invoive-pre-bnt img {
+    filter: var(--icon-filter);
+}
+.new-invoice-title p {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.new-invoice-modal {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 600px;
+}
+
+/************************ 43.Invoice css ***************************/
+.custom-tab-invoice button {
+    width: 25%;
+}
+.text-reset-share{
+text-align: center;
+}
+.share-btn {
+    filter: var(--icon-filter) !important;
+    background: #000;
+}
+.all-details-name-invoice,
+.all-content-price-invoice {
+    display: flex;
+    justify-content: space-between;
+}
+.all-details-name-invoice span {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+}
+.all-content-price-invoice span {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    margin-top: 4px;
+}
+
+/************************ 44.Tracking css ***************************/
+.order-status-sec {
+    display: flex;
+    align-items: center;
+}
+.order-status-sec img {
+    filter: var(--icon-filter);
+}
+.order1 {
+    position: relative;
+}
+.order1::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    border-left: 2px dashed var(--text-color);
+    height: 40px;
+    margin-top: 14px;
+}
+.order2 {
+    margin-left: 12px;
+}
+.order-txt1 {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 18px;
+}
+.order-txt2 {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 14px;
+    margin-top: 4px;
+}
+.track-order-third-sec-full h3 {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+    padding-bottom: 18px;
+}
+
+/************************ 45.Preapproved-payment1 css ***************************/
+#preapproved-payment1 .send-money {
+    width: 25%;
+}
+#preapproved-payment1 .send-money:last-child p {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: 74px;
+    white-space: nowrap;
+    margin-left: auto;
+    margin-right: auto;
+}
+#preapproved-payment1 .sendmoney-bottom-wrap {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    column-gap: 16px;
+}
+.refund-txt {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 30px;
+}
+
+/************************ 46.Spilt css ***************************/
+.spilt8-img {
+    margin-top: 20px;
+}
+.spilt3-editIcon {
+    filter: var(--icon-filter);
+}
+.split7-screen-content-top,
+.spilt8-img {
+    text-align: center;
+}
+.spilt8-img p {
+    color: var(--1, #FFF);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 18px;
+}
+.spilt8-btn {
+    gap: 16px;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+.split3-btn {
+    background: var(--primary-color);
+    box-shadow: 0px -4px 4px 0px rgba(18, 18, 18, 0.04);
+    padding: 16px;
+}
+.social-media-content {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    max-width: 600px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.social-media-img {
+    text-align: center;
+}
+.social-media-img p {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    margin-top: 8px;
+}
+.split7-screen-content-top h1 {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 36px;
+}
+.split7-screen-content-top p {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+#spilt7-main .sendmomey-details,
+#spilt6-main .sendmomey-details {
+    padding: 12px 0;
+}
+.split6-screen-content-top h1 {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 36px;
+}
+.split6-screen-content-top p {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    margin-top: 12px;
+}
+.split3-screen-content {
+    display: flex;
+    align-items: center;
+    column-gap: 16px;
+}
+.split3-edit {
+    margin-left: auto;
+    display: flex;
+}
+.split3-edit span:first-child {
+    margin-right: 15px;
+}
+.split-bill2-top {
+    display: flex;
+    column-gap: 12px;
+    justify-content: space-between;
+    overflow-x: scroll;
+    margin-left: 16px;
+}
+.split-bill2-top-wrap {
+    position: relative;
+}
+.spilt-cancel-icon {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+}
+.spilt-img img {
+    border-radius: 50px;
+}
+::-webkit-scrollbar {
+    display: none;
+}
+.split2-main .split-bill2-content .send-money-contact-tab {
+    padding: 0 !important;
+}
+.doneIocn {
+    filter: none;
+}
+
+/************************ 47.Transfer-to-bank-success css ***************************/
+.transfer-txt h1 {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 36px;
+}
+.transfer-txt p {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.transfer-logo {
+    width: 74px;
+    height: 48px;
+    border: 1px solid #F2EEFE;
+    border-radius: 4px;
+}
+.first-content h2 {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+}
+.first-content p {
+    color: var(--sub-text-color);
+    font-family: Satoshi !important;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500 !important;
+    line-height: 20px;
+    margin-top: 4px;
+}
+.content-details {
+    display: flex;
+    column-gap: 16px;
+    border-bottom: 2px solid var(--sub-bg-color);
+    padding-bottom: 16px;
+}
+.transfer-content-details p {
+    color: var(--sub-text-color);
+    font-family: Poppins;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 20px;
+}
+#transfer-to-bank-review .sendmomey-details {
+    padding-top: 16px !important;
+    border-bottom: 2px solid #7B51F1;
+}
+#transfer-to-bank-review .sendmomey-details:last-child {
+    border-bottom: 0;
+}
+#transfer-to-bank-review .sendmomey-details:first-child {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+.estimated-time h2 {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+.estimated-time p {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.send-money4 h1 {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 30px;
+}
+
+/************************ 52.QR code payment css ***************************/
+.name-txt {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 30px;
+}
+.email-txt {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.qr-price {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 36px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 36px;
+}
+.qr-code-name input {
+    border-radius: 12px;
+    background: var(--sub-bg-color);
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    padding: 12px 24px;
+    border: 0;
+    width: 230px;
+    margin: auto;
+    display: flex;
+}
+.payment-method p {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.payment-method {
+    padding-top: 50px;
+}
+.payment-method P {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.profile-img-content img {
+    border-radius: 80px;
+}
+.line-scale>div {
+    background-color: #7B51F1;
+    width: 4px;
+    height: 35px;
+    border-radius: 2px;
+    margin: 2px;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    display: inline-block;
+}
+.line-scale>div:nth-child(1) {
+    -webkit-animation: line-scale 1s -0.4s infinite cubic-bezier(0.2, 0.68, 0.18, 1.08);
+    animation: line-scale 1s -0.4s infinite cubic-bezier(0.2, 0.68, 0.18, 1.08);
+}
+.line-scale>div:nth-child(2) {
+    -webkit-animation: line-scale 1s -0.3s infinite cubic-bezier(0.2, 0.68, 0.18, 1.08);
+    animation: line-scale 1s -0.3s infinite cubic-bezier(0.2, 0.68, 0.18, 1.08);
+}
+.line-scale>div:nth-child(3) {
+    -webkit-animation: line-scale 1s -0.2s infinite cubic-bezier(0.2, 0.68, 0.18, 1.08);
+    animation: line-scale 1s -0.2s infinite cubic-bezier(0.2, 0.68, 0.18, 1.08);
+}
+.line-scale>div:nth-child(4) {
+    -webkit-animation: line-scale 1s -0.1s infinite cubic-bezier(0.2, 0.68, 0.18, 1.08);
+    animation: line-scale 1s -0.1s infinite cubic-bezier(0.2, 0.68, 0.18, 1.08);
+}
+.line-scale>div:nth-child(5) {
+    -webkit-animation: line-scale 1s 0s infinite cubic-bezier(0.2, 0.68, 0.18, 1.08);
+    animation: line-scale 1s 0s infinite cubic-bezier(0.2, 0.68, 0.18, 1.08);
+}
+.loader {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+.overlay1 {
+    position: absolute;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    width: 100%;
+    top: 0;
+    right: 0;
+    height: 100%;
+    border-radius: 24px 24px 0px 0px;
+    background: rgb(18 18 18 / 80%);
+}
+.scan1 .fingerprint1 {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    background: url(../images/finger-print/scan-code1.png);
+    background-size: 300px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-color: white;
+}
+.scan1 {
+    position: relative;
+    background-image: url(../images/finger-print/print-border2.png);
+    width: 339px;
+    height: 339px;
+    background-size: 300px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-color: white;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 70px;
+    border-radius: 25px;
+}
+.scan1 .fingerprint1::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url(../images/finger-print/scan-code1.png);
+    background-size: 300px;
+    background-repeat: no-repeat;
+    background-size: cover;
+    animation: animate 4s ease-in-out infinite;
+    background: linear-gradient(180deg, rgba(251, 73, 69, 0.00) 0%, rgba(251, 73, 69, 0.60) 100%);
+}
+.scan1 .fingerprint1::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: #FB4945;
+    border-radius: 8px;
+    filter: drop-shadow(0 0 20px #00D061) drop-shadow(0 0 60px #00D061);
+    animation: animate_line 4s ease-in-out infinite;
+}

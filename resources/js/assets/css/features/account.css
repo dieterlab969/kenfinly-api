@@ -1,0 +1,1113 @@
+/* Account, settings, support, notification, and dashboard-adjacent feature screens. */
+/* Generated from the audited legacy stylesheet by scripts/generate-phase3-css.mjs. */
+
+/************************ 12.Language CSS ***************************/
+.change-lan-sec {
+    padding: 16px 0px !important;
+}
+#currency-page .form-check-input.custom-input:checked,
+#language-screen .form-check-input.custom-input:checked,
+#spilt8-main .form-check-input.custom-input:checked,
+#reason-using-payfast-main .form-check-input.custom-input:checked {
+    background: var(--primary-color);
+    background-image: url(../svg/purple-tick.svg);
+    background-size: cover;
+    width: 20px;
+    height: 20px;
+    border: none;
+}
+.form-check-input {
+    --bs-form-check-bg: transparent;
+}
+.form-check-label.custom-lable {
+    display: flex;
+    align-items: center;
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.custom-lable span {
+    padding-right: 8px;
+}
+#currency-page .form-check-input.custom-input,
+#language-screen .form-check-input.custom-input,
+#spilt8-main .form-check-input.custom-input,
+#reason-using-payfast-main .form-check-input.custom-input {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 2px solid #7B51F1;
+    float: right !important;
+}
+.language-sel .curr-icon {
+    filter: var(--icon-filter);
+}
+.change-lan-sec:last-child {
+    border: navajowhite;
+}
+.form-check-input:focus {
+    box-shadow: none !important;
+}
+.language-sel .form-check-label.custom-lable {
+    color: var(--text-color);
+}
+.form-check-input:active {
+    filter: none;
+}
+.first-pt-0 {
+    padding-top: 0 !important;
+}
+
+/************************ 13.About us CSS ***************************/
+.social-detail-about {
+    margin-left: auto;
+    margin-right: auto;
+}
+.shape {
+    width: 74px;
+    height: 74px;
+    border-radius: 37px;
+    cursor: pointer;
+}
+.facebook-bg {
+    background: rgb(59 89 153 / 8%);
+}
+.instragram-bg {
+    background: linear-gradient(225deg, rgb(110 62 255 / 7%) 0%, rgb(224 49 77 / 7%) 47.92%, rgb(254 215 84 / 7%) 100%);
+}
+.twitter-bg {
+    background: rgb(29 161 242 / 7%);
+}
+.youtube-bg {
+    background: rgb(255 0 0 / 7%);
+}
+.privacy-txt p {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.pt-10 {
+    padding-top: 10px;
+}
+p.about-social-txt {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 16px;
+    padding-top: 12px;
+}
+.social-txt {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+
+/************************ 14.Personal info slider CSS ***************************/
+.form-floating>.form-control:not(:placeholder-shown)~label::after {
+    background: transparent !important;
+}
+#msform .progress {
+    background: var(--sub-bg-color);
+    width: 140px;
+    height: 8px;
+    margin-left: auto;
+    margin-right: auto;
+}
+#msform .progress-bar {
+    background: #7B51F1;
+}
+#msform {
+    text-align: center;
+    position: relative;
+    margin-bottom: 0;
+}
+#msform fieldset:not(:first-of-type) {
+    display: none;
+}
+#msform .action-button {
+    width: 48px;
+    height: 48px;
+    background: var(--sub-bg-color);
+    border: 0 none;
+    border-radius: 12px;
+    cursor: pointer;
+    padding: 10px 5px;
+    float: right;
+    position: relative;
+    margin-top: 24px;
+}
+.input-icon-next {
+    background-image: url(../svg/next-icon.svg) !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+}
+.input-icon-previous {
+    background-image: url(../svg/previous-icon.svg) !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+}
+#msform .action-button-previous {
+    width: 48px;
+    height: 48px;
+    background: var(--sub-bg-color);
+    border: 0 none;
+    border-radius: 8px;
+    cursor: pointer;
+    padding: 10px 5px;
+    float: left;
+    position: relative;
+    margin-top: 24px;
+}
+.home-address-heading h2 {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 36px;
+}
+.home-address-heading p {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    margin-top: 12px;
+}
+#personal-info-slider {
+    padding: 16px !important;
+}
+#file-input {
+    display: none;
+}
+#files {
+    display: none;
+}
+.select-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--2, #7B51F1);
+}
+.select-sec {
+    column-gap: 12px;
+    margin-top: 24px;
+}
+.select-img img,
+.plus-id-btn img {
+    filter: brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7472%) hue-rotate(114deg) brightness(110%) contrast(98%);
+}
+.select-txt {
+    color: var(--2, #7B51F1);
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.goverment-id-sec {
+    border-radius: 12px;
+    background: var(--sub-bg-color);
+    padding: 24px 16px;
+}
+.goverment-id-sec h3 {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+    margin-bottom: 8px;
+}
+.goverment-id-sec p {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.plus-id-btn a {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--2, #7B51F1);
+    padding: 12px;
+}
+.plus-id-btn {
+    column-gap: 12px;
+}
+.verify-id-btn a {
+    width: 100%;
+    border-radius: 12px;
+    background: var(--sub-bg-color);
+    padding: 15px 0;
+    margin: auto;
+    max-width: 600px;
+    color: var(--2, #7B51F1);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.verify-id-btn {
+    pointer-events: none;
+    cursor: default;
+    position: absolute;
+    width: 100%;
+    bottom: -100px;
+    clear: both;
+    padding-bottom: 16px;
+}
+.verify-my-btn {
+    pointer-events: auto !important;
+}
+.finger-modal-content .modal-body {
+    padding: 12px 16px;
+    bottom: 0;
+    background: var(--primary-color);
+}
+.photo-custom-modal .modal-dialog {
+    position: fixed;
+    top: auto;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 0;
+}
+.photo-type p {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.photo-content-details a div:nth-child(1) {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.photo-content-details a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+}
+.photo-content-details img {
+    filter: var(--icon-filter);
+}
+.card-btn {
+    text-align: center;
+}
+.photo-content-details:last-child {
+    border-bottom: none;
+}
+#photo-id-modal {
+    background: linear-gradient(180deg, rgba(18, 18, 18, 0.56) 0%, rgba(18, 18, 18, 0.24) 100%);
+    backdrop-filter: blur(2px);
+}
+.finger-modal-content {
+    border: 0;
+}
+.photo-custom-modal .modal.fade .modal-dialog {
+    transition: transform .3s ease-out;
+    transform: translate(0, 0px);
+    margin: auto;
+}
+.card-btn button {
+    background: transparent;
+    border: navajowhite;
+    padding: 0;
+}
+.hidden-text-button {
+    color: transparent;
+    text-indent: -9999px;
+    background: #f0f0f0;
+    width: 100px;
+    height: 50px;
+    border-radius: 10px;
+    border: none;
+}
+
+/************************ 19.Deactive account CSS ***************************/
+.deactive-account-sec h1 {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+.deactivate-step p,
+.deactivate-step-list li {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.deactivate-step-list li {
+    padding-top: 8px;
+}
+.deactivate-step-list {
+    padding-left: 25px;
+}
+
+/************************ 22.Faq css ***************************/
+.nested-accordion {
+    cursor: pointer;
+    position: relative;
+}
+.review-time p {
+    color: var(--3, #666);
+    font-family: Lato;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+.nested-accordion h3 {
+    color: var(--4, #121212);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20px;
+}
+.nested-accordion .comment {
+    color: var(--5, #5A5C5E);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.nested-accordion h3:before {
+    content: url(../svg/faq-plus.svg);
+    position: absolute;
+    right: 0;
+    color: #FF4C3B;
+    font-family: Space Grotesk;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20px;
+}
+.nested-accordion h3.selected {
+    color: var(--2, #7B51F1);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 20px;
+}
+/* .faq-txt1:before {
+    content: url(../svg/up-arrow.svg) !important;
+} */
+.nested-accordion h3.selected:before {
+    content: url(../svg/faq-minus.svg);
+}
+.faq-txt1.selected:before {
+    content: url(../svg/faq-down.svg) !important;
+}
+.faq-txt1:before {
+    content: url(../svg/up-icon.svg) !important;
+}
+
+/************************ 23.Feedback css ***************************/
+label {
+    display: block;
+}
+.custom-textarea {
+    width: 100%;
+    padding: 16px;
+    color: var(--5, #5A5C5E);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    border-radius: 12px;
+    background: var(--9, #F5F5F5);
+    border: 0;
+}
+textarea {
+    resize: none;
+}
+
+/************************ 24.Contact us css ***************************/
+.contact-us-mobile-btn a {
+    border-radius: 8px;
+    background: rgb(123 81 241 / 8%);
+    padding: 12px;
+    width: 100%;
+    display: block;
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.contact-us-no {
+    padding-left: 12px;
+}
+
+/************************ 25.Notifiaction setting css ***************************/
+.notification-option-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+}
+.notification-option-name p {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.notification-option-switch .switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+}
+.notification-option-switch .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 4px;
+    right: 0;
+    bottom: 0;
+    border: 1px solid rgb(102 102 102 / 20%);
+    border-radius: 40px;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+}
+.notification-option-switch .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    background: #fff;
+    border-radius: 22px;
+    left: 0px;
+    bottom: 0px;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
+    border-radius: 22px;
+    border: 0.5px solid #F0F0F0;
+    box-shadow: 0px 3px 1px 0px rgba(0, 0, 0, 0.05), 0px 1px 1px 0px rgba(0, 0, 0, 0.08), 0px 3px 8px 0px rgba(0, 0, 0, 0.08);
+}
+.notification-option-switch input:checked+.slider {
+    background: #7B51F1;
+    border: 1px solid transparent;
+}
+.notification-option-switch input:checked+.slider:before {
+    transform: translateX(16px);
+}
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+p.notify-txt {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+
+/************************ 26.Setting screen css ***************************/
+.setting-header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+.setting-left {
+    width: 50%;
+    display: flex;
+    align-items: center;
+    column-gap: 12px;
+}
+.setting-right {
+    width: 50%;
+    justify-content: end;
+    display: flex;
+    align-items: center;
+    column-gap: 12px;
+}
+.setting-right span a {
+    display: flex;
+}
+.dots-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    border: 2px solid white;
+    border-radius: 8px;
+}
+.setting-txt {
+    color: var(--1, #FFF);
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.setting-top {
+    border-bottom: 2px solid var(--sub-bg-color);
+    padding-bottom: 16px;
+}
+.setting-title h3 {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.setting-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--sub-bg-color);
+    border-radius: 8px;
+}
+.setting-center-border {
+    height: 2px;
+    background: var(--sub-bg-color);
+    margin: 24px 0;
+}
+.border-none {
+    border-bottom: none !important;
+    padding-bottom: 0 !important;
+}
+.setting-lanuage {
+    color: var(--sub-text-color);
+    text-align: right;
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    display: inline-flex;
+    margin-right: 16px;
+}
+.send-money-contact-tab {
+    cursor: pointer;
+}
+.diffrent-chat-dropdown {
+    padding: 0;
+    margin: 0;
+    list-style-type: circle;
+    margin-left: 50px;
+    margin-right: 30px;
+}
+.diffrent-chat-dropdown li {
+    border-bottom: 2px solid var(--sub-bg-color);
+    padding: 8px;
+}
+.diffrent-chat-dropdown li a {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+
+/************************ 31.Marketing css ***************************/
+.marketing-content p {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.marketing-content h2 {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+.marketing-content .notification-option-wrapper {
+    padding: 0;
+}
+.marketing-content .notification-option-name p {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+
+/************************ 32.Data privacy css ***************************/
+.data-privacy-content h1 {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+.privacy-content h2 {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+.privacy-content p {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.privacy-content {
+    border-radius: 12px;
+    border: 2px solid var(--sub-bg-color);
+    background: var(--primary-color);
+    padding: 16px;
+}
+.manage-txt {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+.manage-data-sec {
+    border-radius: 12px;
+    border: 2px solid var(--sub-bg-color);
+    background: var(--primary-color);
+    padding: 16px;
+}
+.manage-data-title h3 {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+.manage-data-title p {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+
+/************************ 33.Delete deactivate css ***************************/
+.delete-content p {
+    color: var(--sub-text-color);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+
+/************************ 36.Invite friend css ***************************/
+.invite-friend-wrapper {
+    display: flex;
+    align-items: center;
+    column-gap: 16px;
+}
+.friend-invite {
+    margin-left: auto;
+}
+.friend-select input {
+    display: none;
+}
+.custom-radio-sel-friend {
+    width: 61px;
+    height: 34px;
+    border-radius: 4px;
+    border: 2px solid #7B51F1;
+    cursor: pointer;
+    color: var(--2, #7B51F1);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 16px;
+}
+.friend-select input[type="checkbox"]:checked+label {
+    border-radius: 4px;
+    border: 2px solid var(--2, #7B51F1);
+    background: var(--2, #7B51F1);
+    color: white;
+}
+.friend-name {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+}
+.friend-no a {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 18px;
+    margin-top: 4px;
+}
+.invite-img img {
+    border-radius: 50px;
+}
+.friend-no {
+    margin-top: 4px;
+}
+
+/************************ 37.Logout popup css ***************************/
+.offcanvas.offcanvas-bottom {
+    border-radius: 24px 24px 0 0;
+    padding: 12px 16px 30px 16px;
+    height: auto;
+}
+.offcanvas.offcanvas-bottom .offcanvas-header {
+    padding: 0;
+    cursor: pointer;
+}
+.offcanvas {
+    background: var(--primary-color);
+}
+.logout-main .offcanvas-body {
+    padding: 0 !important;
+}
+.logout-text-pop {
+    color: var(--text-color);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 30px;
+}
+.sm-txt {
+    color: var(--5, #5A5C5E);
+    text-align: center;
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.logout-button-main {
+    gap: 16px;
+}
+.logout-cancel {
+    color: var(--2, #7B51F1);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    width: 164px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--14, #F2EEFE);
+    border: none !important;
+}
+.yes-logot {
+    border-radius: 12px;
+    background: var(--2, #7B51F1);
+    color: var(--1, #FFF);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.offcanvas-backdrop.show {
+    opacity: 1 !important;
+}
+.offcanvas-backdrop {
+    background: linear-gradient(180deg, rgba(33, 43, 70, 0.56) 0%, rgba(33, 43, 70, 0.24) 100%) !important;
+    backdrop-filter: blur(2px) !important;
+}
+.not-connect {
+    color: var(--4, #FF484D);
+}
+button.text-reset {
+    background: transparent;
+    color: var(--text-color) !important;
+    padding: 0;
+    border: 0;
+}
+
+/************************ 38.Personal info css ***************************/
+.profile-edit-img {
+    text-align: center;
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: auto;
+}
+.profile-edit-img img {
+    border-radius: 60px;
+    max-width: 200px;
+    max-height: 200px;
+    width: 100%;
+    height: auto;
+}
+.image-input {
+    position: absolute;
+    bottom: 6px;
+    right: 0px;
+}
+.image-input input {
+    display: none;
+}
+.image-button {
+    background: black;
+    padding: 8px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+.custom-icon-edit {
+    position: absolute;
+    right: 16px;
+    top: 35%;
+    cursor: pointer;
+    filter: var(--icon-filter);
+}
+.personal-name {
+    border-radius: 12px;
+    background: var(--sub-bg-color);
+    padding: 8px 16px;
+    position: relative;
+}
+.personal-name label {
+    color: var(--2, #7B51F1);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.personal-name input {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+    border: 0;
+    width: 100%;
+    background: transparent;
+    padding-right: 35px;
+}
+
+/************************ 39.Activity css ***************************/
+.custom-tab-activity {
+    width: 100%;
+    width: calc(100% - 30px);
+    border-radius: 8px;
+    border: 2px solid var(--6, #FFAA01);
+    background: var(--1, #FFF);
+    position: absolute;
+    left: 0;
+    z-index: 99;
+    margin-top: 25px !important;
+    margin: 0 auto;
+    right: 0;
+}
+.custom-tab-activity button {
+    width: 33.33%;
+    border: 0 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    color: var(--6, #FFAA01);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+    padding: 12px !important;
+    border-right: 1px solid #ffaa01 !important;
+}
+.custom-tab-activity .nav-link.active {
+    background: var(--6, #FFAA01);
+    margin-bottom: auto !important;
+    color: var(--1, #FFF);
+}
+.custom-tab-activity button:hover {
+    color: var(--6, #FFAA01);
+}
+.custom-tab-activity button:last-child {
+    border-right: 0 !important;
+}
+.activity-date {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+.all-details-name h3 {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+}
+.all-details-name p {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+    margin-top: 4px;
+}
+.all-content-price p {
+    color: var(--7, #00A266);
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px;
+}
+.all-details-wrap {
+    display: flex;
+    justify-content: space-between;
+}
+
+/************************ 40.Delete account css ***************************/
+.delete-account-top h1 {
+    color: var(--text-color);
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 24px;
+}
+.delete-account-top p {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.delete-account-bottom {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 0;
+}
+.delete-account-bottom input,
+.bank-active-sec input {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--text-color);
+    outline: 0;
+    margin: 0;
+}
+.delete-select {
+    display: flex;
+    align-items: center;
+}
+.delete-account-trapping p {
+    color: var(--sub-text-color);
+    font-family: Satoshi;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 20px;
+}
+.delete-account-trapping span {
+    color: var(--text-color);
+}
+.delete-account-trapping {
+    margin-top: 40px;
+}
+.delete-txt {
+    color: var(--text-color);
+    font-family: Satoshi;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 24px;
+}
+
+/* Idetify Bottom Modal  */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    z-index: 1000;
+}
+.photo-modal {
+    background: #fff;
+    border-radius: 16px 16px 0 0;
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
+    animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}

@@ -1,0 +1,355 @@
+/* Kenfinly shell tokens, typography, base layout, shared utilities, and animations. */
+/* Generated from the audited legacy stylesheet by scripts/generate-phase3-css.mjs. */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+    --font-ui: 'Satoshi', sans-serif;
+    --font-display: 'Poppins', sans-serif;
+}
+
+/************************ 0.Theme Variables (Light / Dark) ********/
+:root {
+    --primary-color:   #ffffff;
+    --text-color:      #121212;
+    --sub-text-color:  #5A5C5E;
+    --border-color:    #E8E8E8;
+    --card-color:      #F5F5F5;
+    /* Extended tokens — used throughout the stylesheet but previously undefined */
+    --sub-bg-color:    #F5F5F5;
+    --input-bg:        #F5F5F5;
+    --icon-filter:     none;
+}
+html.dark {
+    --primary-color:   #121212;
+    --text-color:      #ffffff;
+    --sub-text-color:  #9E9E9E;
+    --border-color:    #2C2C2C;
+    --card-color:      #1E1E1E;
+    /* Extended tokens for dark mode */
+    --sub-bg-color:    #1E1E1E;
+    --input-bg:        #1E1E1E;
+    --icon-filter:     brightness(0) invert(1);
+}
+
+/************************ 1.Default CSS ***************************/
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    width: 100%;
+    height: 100%;
+}
+*,
+::after,
+::before {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+a:focus,
+a {
+    outline: none;
+    text-decoration: none;
+    cursor: pointer;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    margin: 0;
+    padding: 0;
+}
+body {
+    max-width: 600px;
+    margin: 0 auto;
+    height: 100%;
+    background-color: var(--primary-color);
+}
+ul {
+    padding: 0;
+    margin: 0;
+}
+.container {
+    padding: 0 16px !important;
+}
+svg {
+    vertical-align: middle;
+}
+input {
+    outline-width: 0;
+    outline-offset: 0;
+    outline: 0;
+}
+textarea {
+    outline-width: 0;
+    outline-offset: 0;
+    outline: 0;
+}
+.nav-link:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+.form-control:focus {
+    box-shadow: none !important;
+    background: var(--9, #F5F5F5);
+    border: none;
+}
+.site-content {
+    width: 100%;
+    height: 100%;
+}
+.mt-16 {
+    margin-top: 16px !important;
+}
+.mt-32 {
+    margin-top: 32px !important;
+}
+.mt-24 {
+    margin-top: 24px !important;
+}
+.mt-12 {
+    margin-top: 12px !important;
+}
+.mt-8 {
+    margin-top: 8px !important;
+}
+.color-purple {
+    color: #7B51F1 !important;
+}
+.color-green {
+    color: #00A266 !important;
+}
+.color-black {
+    color: var(--text-color) !important;
+}
+.color-red,
+.red-color {
+    color: var(--8, #FB4945) !important;
+}
+#verify-no-main,
+#notification-allow-main,
+#reason-using-payfast-main,
+#create-new-pin-main,
+#forget-password-main,
+#confirm-otp-main,
+#create-new-password-main,
+#send-money1,
+#delete-deactivate-main,
+#feedback-main,
+#personal-info,
+#add-new-card,
+#bank-and-card-main,
+#old-invoice,
+#add-new-item,
+#tracking-main,
+#preapproved-refund,
+#spilt8-main,
+#spilt7-main,
+#spilt6-main,
+#spilt5-main,
+#spilt4-main,
+#spilt3-main,
+#electricity1,
+#internet1,
+#transfer-to-bank-success,
+#transfer-to-bank-review,
+#send-money-successfull,
+#send-money-review,
+#Qrcode-main,
+#transfer-to-bank-main {
+    padding-bottom: 100px !important;
+}
+#deactive-main,
+#payment-main,
+#add-tax-main,
+#delete-account,
+#activity-main .favourite-list {
+    padding-bottom: 80px;
+}
+#invite-friend-main,
+#contact-us-main,
+#about-us,
+#data-privacy,
+#faq-main,
+#notification-setting,
+#language-screen,
+#currency-page,
+#security-main,
+#automatic-payment,
+#customer-main,
+#setting-main,
+#taxes-main,
+#request-payment,
+#send-money-main,
+#preapproved-payment1,
+.split2-main,
+#pay-bill {
+    padding-bottom: 20px;
+}
+@font-face {
+    font-family: "Satoshi";
+    src: url('../fonts/Satoshi-Medium.ttf');
+    font-weight: 500;
+    font-display: swap;
+    font-style: normal;
+}
+.split6-screen-content-top,
+#old-invoice .feedback-form,
+.send-money4-top,
+.boder-bottom-activity,
+.chart-border,
+.border-main {
+    border-bottom: 2px solid var(--sub-bg-color);
+    padding-bottom: 24px;
+}
+.delete-content,
+.marketing-content,
+.about-us-screen-full,
+.boder-top {
+    border-bottom: 1px solid var(--sub-bg-color);
+    padding-bottom: 24px;
+}
+.change-lan-sec,
+.delete-account-bottom,
+.setting-center-border,
+.send-money-contact-tab.setting-border,
+.notification-option-wrap,
+#reason-using-payfast-main .change-lan-sec:last-child,
+.photo-content-details a,
+.Char-content {
+    border-bottom: 1px solid var(--sub-bg-color);
+}
+.loader-mask-splash {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--primary-color);
+    z-index: 99999;
+}
+.flash-btn,
+.upload-id-button-content,
+#loader,
+.mobile-message-main,
+.notification-icon-img,
+.paid-button1 a,
+.paid-button2 a,
+.contact-us-mobile-btn,
+.notification-option-switch,
+.setting-icon,
+.contact-icon,
+.tax-plus-btn,
+.bank-img,
+.custom-radio-sel-friend,
+.logout-button-main,
+.add-item-btn a,
+.spilt8-btn,
+.transfer-logo,
+.pie-chart .chart-container,
+.concentric-circles,
+.circle,
+.scan1,
+#splash-screen-page,
+.slider-sec-btn a,
+.back-btn,
+.form-sign-in-password-btn a,
+.otp-section,
+.verify-number-btn a,
+.pay-bill-img,
+.allow-btn a,
+.done-btn a,
+.shape,
+.select-img,
+.select-sec,
+.plus-id-btn a,
+.plus-id-btn,
+.verify-id-btn a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.bg-green {
+    background: #00A266 !important;
+}
+
+/************************ 54.Keyframe Animation ***************************/
+@keyframes line-scale {
+    0% {
+        -webkit-transform: scaley(1);
+        transform: scaley(1);
+    }
+    50% {
+        -webkit-transform: scaley(0.4);
+        transform: scaley(0.4);
+    }
+    100% {
+        -webkit-transform: scaley(1);
+        transform: scaley(1);
+    }
+}
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+@keyframes animate {
+    0%,
+    100% {
+        height: 0%;
+    }
+    50% {
+        height: 100%;
+    }
+}
+@keyframes animate_line {
+    0%,
+    100% {
+        top: 0%;
+    }
+    50% {
+        top: 100%;
+    }
+}
+@keyframes pulse {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+.offcanvas-title {
+    color: var(--text-color);
+}
+.btn-close {
+    filter: var(--icon-filter);
+}
+.diffrent-chat-dropdown {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, opacity 0.4s ease;
+    opacity: 0;
+}
+.diffrent-chat-dropdown.open {
+    max-height: 500px;
+    opacity: 1;
+}
+.pay-bill-img {
+    background: #00D061;
+}
+.upIconsSat {
+    transition: transform 0.3s ease;
+}
+.rotated {
+    transform: rotate(180deg);
+}
+.menu-canvas {
+    background: var(--primary-color);
+}

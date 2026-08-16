@@ -6,6 +6,8 @@
         "build": "vite build",
         "baseline:bundle": "npm run build && node scripts/report-frontend-baseline.mjs --output docs/issues/frontend-bundle-baseline.md",
         "baseline:inventory": "node scripts/generate-phase0-inventory.mjs",
+        "phase3:css": "node scripts/generate-phase3-css.mjs",
+        "phase3:css:report": "node scripts/report-css-usage.mjs --output docs/issues/phase3-css-usage-before.md",
         "dev": "vite",
         "php:dev": "php -S 0.0.0.0:5000 server.php",
         "test": "vitest run",
@@ -35,7 +37,7 @@
         "chart.js": "^4.5.0",
         "date-fns": "^4.1.0",
         "dompurify": "^3.3.1",
-        "i18next": "^26.3.2",
+        "i18next": "^26.3.6",
         "lucide-react": "^0.552.0",
         "react": "^19.2.0",
         "react-bootstrap": "^2.10.10",
@@ -44,7 +46,7 @@
         "react-dom": "^19.2.0",
         "react-flags-select": "^2.5.0",
         "react-google-recaptcha-v3": "^1.11.0",
-        "react-i18next": "^17.0.8",
+        "react-i18next": "^17.0.11",
         "react-router-dom": "^7.9.5",
         "recharts": "^3.3.0"
     }
