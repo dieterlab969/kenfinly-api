@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import Logo from '../assets/images/setting/logo.png'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
+import NotificationIcon from '../assets/svg/notification-icon.svg'
+import dotsIcon from '../assets/svg/dots-icon.svg'
 import Setting from '../components/Setting.tsx'
 import api from '../utils/api'
 import { formatCurrency, getCategoryIcon } from '../constants/categories'
@@ -11,7 +14,6 @@ import Offcanvas from 'react-bootstrap/Offcanvas'
 import { useSecureLogout } from '../hooks/useSecureLogout'
 import { useQuickAdd } from '../context/QuickAddContext'
 import { useHomeDashboard } from '../hooks/useHomeDashboard'
-import { Bell, CalendarDays, ChevronRight, MoreHorizontal, MoreVertical } from 'lucide-react'
 
 type ApiAmount = string | number | null | undefined
 type TransactionType = 'income' | 'expense'
@@ -219,96 +221,158 @@ function getTransactionSignedAmount(transaction: DashboardTransaction): number {
 interface HalfDonutProps { expensePct: number; incomePct: number; isEmpty?: boolean; size?: number }
 
 const HalfDonut: React.FC<HalfDonutProps> = ({ expensePct, incomePct, isEmpty, size = 110 }) => {
-  const radius = 38
-  const circumference = 2 * Math.PI * radius
-  const expenseLength = (Math.min(expensePct, 100) / 100) * circumference
-  const incomeLength = (Math.min(incomePct, 100) / 100) * circumference
-  const remainderLength = Math.max(circumference - expenseLength - incomeLength, 0)
+  const r = 36, cx = 50, cy = 50
+  const expAngleRad = (expensePct / 100) * Math.PI
+  const boundAngle = Math.PI - expAngleRad
+  const bx = cx + r * Math.cos(boundAngle)
+  const by = cy - r * Math.sin(boundAngle)
+  const expLargeArc = expensePct > 100 ? 1 : 0
+
+  if (isEmpty) {
+    return (
+      <svg width={size} height={Math.round(size * 0.56)} viewBox="0 0 100 56" aria-hidden>
+        <path d="M 14 50 A 36 36 0 0 1 86 50" fill="none" stroke="#374151" strokeWidth="11" strokeLinecap="butt" />
+        <text x="50" y="38" fontSize="7" textAnchor="middle" fill="#6b7280" fontWeight="600">KHÔNG CÓ</text>
+        <text x="50" y="47" fontSize="7" textAnchor="middle" fill="#6b7280">DỮ LIỆU</text>
+      </svg>
+    )
+  }
 
   return (
-    <div className={`home-donut${isEmpty ? ' is-empty' : ''}`} style={{ width: size, height: size }} aria-hidden>
-      <svg viewBox="0 0 100 100" width={size} height={size}>
-        <circle cx="50" cy="50" r={radius} fill="none" stroke="#eeeaff" strokeWidth="11" />
-        {!isEmpty && expenseLength > 0 && (
-          <circle
-            cx="50" cy="50" r={radius} fill="none" stroke="#ef596b" strokeWidth="11"
-            strokeDasharray={`${expenseLength} ${circumference - expenseLength}`}
-            strokeDashoffset="0"
-          />
-        )}
-        {!isEmpty && incomeLength > 0 && (
-          <circle
-            cx="50" cy="50" r={radius} fill="none" stroke="#51c89a" strokeWidth="11"
-            strokeDasharray={`${incomeLength} ${circumference - incomeLength}`}
-            strokeDashoffset={-expenseLength}
-          />
-        )}
-        <circle
-          cx="50" cy="50" r={radius} fill="none" stroke={isEmpty ? '#7157df' : '#d1c7ff'} strokeWidth="11"
-          strokeDasharray={`${isEmpty ? circumference * 0.72 : remainderLength} ${circumference}`}
-          strokeDashoffset={isEmpty ? 0 : -(expenseLength + incomeLength)}
+    <svg width={size} height={Math.round(size * 0.56)} viewBox="0 0 100 56" aria-hidden>
+      <path d="M 14 50 A 36 36 0 0 1 86 50" fill="none" stroke="#1e1b4b" strokeWidth="11" strokeLinecap="butt" />
+      <path
+        d={`M 14 50 A 36 36 0 ${expLargeArc} 1 ${bx.toFixed(2)} ${by.toFixed(2)}`}
+        fill="none" stroke="#ef4444" strokeWidth="11" strokeLinecap="butt"
+      />
+      {incomePct > 0 && (
+        <path
+          d={`M ${bx.toFixed(2)} ${by.toFixed(2)} A 36 36 0 0 1 86 50`}
+          fill="none" stroke="#22c55e" strokeWidth="11" strokeLinecap="butt"
         />
-      </svg>
-      <span className="home-donut-label">{isEmpty ? '0%' : `${Math.round(expensePct)}%`}<small>of limit</small></span>
-    </div>
+      )}
+    </svg>
   )
 }
 
 const SpendingChart: React.FC<{ data: SpendingDay[] }> = ({ data }) => {
   const { t } = useTranslation()
-  const [hoveredPoint, setHoveredPoint] = useState<number | null>(null)
+  const [hoveredBar, setHoveredBar] = useState<number | null>(null)
   const maxAmount = Math.max(...data.map(day => day.amount), 0)
   const maxVal = maxAmount > 0 ? Math.ceil(maxAmount / 1_000_000) * 1_000_000 : 1_000_000
-  const chartTop = 16, chartBottom = 124, chartLeft = 44, chartRight = 304
-  const chartHeight = chartBottom - chartTop
-  const colW = (chartRight - chartLeft) / Math.max(data.length - 1, 1)
+  const chartH = 88, chartB = 108, chartL = 30, barW = 18, colW = 240 / 7
   const tickValues = Array.from({ length: 5 }, (_, index) => (maxVal / 4) * index)
-  const points = data.map((day, index) => ({
-    ...day,
-    x: chartLeft + index * colW,
-    y: chartBottom - (day.amount / maxVal) * chartHeight,
-  }))
-  const polyline = points.map(point => `${point.x},${point.y}`).join(' ')
 
   return (
     <svg
-      viewBox="0 0 340 160"
-      className="home-spending-chart"
+      viewBox="0 0 278 130"
+      style={{ width: '100%', overflow: 'visible' }}
       role="img"
       aria-label={t('Spending — Last 7 Days')}
-      onMouseLeave={() => setHoveredPoint(null)}
+      onMouseLeave={() => setHoveredBar(null)}
     >
+      <defs>
+        <style>{`
+          @keyframes scTtFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+          .sc-tooltip { animation: scTtFade 0.18s ease forwards; }
+          .sc-crosshair { animation: scTtFade 0.12s ease forwards; }
+        `}</style>
+      </defs>
+
+      {/* Grid lines */}
       {tickValues.map((value, i) => {
-        const y = chartBottom - (value / maxVal) * chartHeight
+        const y = chartB - (value / maxVal) * chartH
         return (
           <g key={i}>
-            <line x1={chartLeft} y1={y} x2={chartRight} y2={y} className="home-chart-grid" />
-            <text x={chartLeft - 10} y={y + 3} className="home-chart-axis-label">{fmtCompactVND(value)}</text>
+            <line x1={chartL - 4} y1={y} x2={272} y2={y} stroke="#e5e7eb" strokeWidth="0.5" />
+            <text x={chartL - 6} y={y + 3} fontSize="7.5" textAnchor="end" fill="#9ca3af">{fmtCompactVND(value)}</text>
           </g>
         )
       })}
 
-      {hoveredPoint !== null && (
+      {/* Vertical crosshair */}
+      {hoveredBar !== null && (
         <line
-          x1={points[hoveredPoint].x} y1={chartTop} x2={points[hoveredPoint].x} y2={chartBottom}
-          className="home-chart-crosshair"
+          className="sc-crosshair"
+          x1={chartL + hoveredBar * colW + colW / 2}
+          y1={18}
+          x2={chartL + hoveredBar * colW + colW / 2}
+          y2={chartB}
+          stroke="#7B51F1"
+          strokeWidth="1"
+          strokeDasharray="4 3"
+          opacity="0.45"
         />
       )}
 
-      <polyline points={polyline} className="home-spending-line" />
-      {points.map((point, index) => (
-        <g key={point.date} onMouseEnter={() => setHoveredPoint(index)} onClick={() => setHoveredPoint(index)} style={{ cursor: 'pointer' }}>
-          <circle cx={point.x} cy={point.y} r="9" fill="transparent" />
-          <circle cx={point.x} cy={point.y} r={point.isSpike ? 5 : 3.5} className={`home-spending-point${point.isSpike ? ' is-spike' : ''}`} />
-          <text x={point.x} y={chartBottom + 19} className={hoveredPoint === index ? 'home-chart-day is-active' : 'home-chart-day'}>{point.label}</text>
-          {hoveredPoint === index && point.amount > 0 && (
-            <g className="home-chart-tooltip">
-              <rect x={Math.max(chartLeft, Math.min(point.x - 38, chartRight - 76))} y={Math.max(0, point.y - 42)} width="76" height="28" rx="8" />
-              <text x={Math.max(chartLeft + 38, Math.min(point.x, chartRight - 38))} y={Math.max(16, point.y - 24)}>{fmtVND(point.amount)}</text>
-            </g>
-          )}
-        </g>
-      ))}
+      {/* Bars + hit areas */}
+      {data.map((d, i) => {
+        const barH = d.amount > 0 ? Math.max((d.amount / maxVal) * chartH, 3) : 0
+        const cx = chartL + i * colW + colW / 2
+        const barX = cx - barW / 2
+        const barY = chartB - barH
+        const isHot = hoveredBar === i
+        const tipW = 68
+        const tipX = Math.max(chartL + tipW / 2, Math.min(cx, 272 - tipW / 2))
+
+        return (
+          <g
+            key={i}
+            onMouseEnter={() => setHoveredBar(i)}
+            onClick={() => setHoveredBar(isHot ? null : i)}
+            style={{ cursor: 'pointer' }}
+          >
+            {/* Invisible wider hit zone */}
+            <rect x={barX - 8} y={18} width={barW + 16} height={chartB - 18} fill="transparent" />
+
+            {/* Bar */}
+            <rect
+              x={barX} y={barY} width={barW} height={Math.max(barH, 0.5)} rx="4" ry="4"
+              fill={d.isSpike ? '#ef4444' : '#7B51F1'}
+              fillOpacity={isHot ? 1 : (d.isSpike ? 0.85 : 0.6)}
+              style={{ transition: 'fill-opacity 0.15s ease' }}
+            />
+
+            {/* Dot on top of bar */}
+            {barH > 3 && (
+              <circle
+                cx={cx} cy={barY} r="2.5"
+                fill={isHot ? '#fff' : 'transparent'}
+                stroke={d.isSpike ? '#ef4444' : '#7B51F1'}
+                strokeWidth="1.5"
+                style={{ transition: 'fill 0.15s ease' }}
+              />
+            )}
+
+            {/* X-axis label */}
+            <text
+              x={cx} y={chartB + 13} fontSize="7.5" textAnchor="middle"
+              fill={isHot ? '#7B51F1' : '#6b7280'}
+              fontWeight={isHot ? 'bold' : 'normal'}
+              style={{ transition: 'fill 0.15s ease' }}
+            >
+              {d.label}
+            </text>
+
+            {/* Tooltip — hover only */}
+            {isHot && d.amount > 0 && (
+              <g className="sc-tooltip">
+                <rect x={tipX - tipW / 2} y={barY - 42} width={tipW} height={32} rx="6" fill="#1f2937" />
+                <text x={tipX} y={barY - 28} fontSize="7" textAnchor="middle" fill="#d1d5db">
+                  {formatShortDate(d.date)}
+                </text>
+                <text x={tipX} y={barY - 15} fontSize="7.5" textAnchor="middle" fill="#fbbf24" fontWeight="bold">
+                  {fmtVND(d.amount)}
+                </text>
+                <polygon
+                  points={`${cx - 4},${barY - 10} ${cx + 4},${barY - 10} ${cx},${barY - 4}`}
+                  fill="#1f2937"
+                />
+              </g>
+            )}
+          </g>
+        )
+      })}
     </svg>
   )
 }
@@ -523,17 +587,22 @@ const MonthCol: React.FC<{
   income: string; expense: string; total: string; incomeColor: string; expenseColor: string; totalColor: string;
 }> = ({ title, expensePct, incomePct, isEmpty, income, expense, total, incomeColor, expenseColor, totalColor }) => {
   const { t } = useTranslation()
+  console.log('Income label:', t('income'));
+  console.log('Expense label:', t('expense'));
+  console.log('Total label:', t('total'));
   return (
-    <div className="home-month-col" style={{ flex: 1, minWidth: 0 }}>
+    <div style={{ flex: 1, minWidth: 0 }}>
       {/* Column header — only the period label ("This Month"), no date sub-text */}
-      <p className="home-month-title" style={{ fontSize: '11px', fontWeight: 700, color: '#121212', marginBottom: '8px', fontFamily: 'Satoshi, sans-serif' }}>{title}</p>
+      <p style={{ fontSize: '11px', fontWeight: 700, color: '#121212', marginBottom: '8px', fontFamily: 'Satoshi, sans-serif' }}>{title}</p>
 
       {/* Horizontal layout: rotated chart on the left, metrics on the right */}
-      <div className="home-month-content" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
 
         {/* Chart container — keeps a stable bounding box after 90° rotation */}
-        <div className="home-month-donut">
-          <HalfDonut expensePct={expensePct} incomePct={incomePct} isEmpty={isEmpty} size={90} />
+        <div style={{ width: 56, height: 100, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ transform: 'rotate(90deg)', transformOrigin: 'center' }}>
+            <HalfDonut expensePct={expensePct} incomePct={incomePct} isEmpty={isEmpty} size={100} />
+          </div>
         </div>
 
         {/* Metrics — "Label: Value" plain text rows, no dot icons */}
@@ -662,65 +731,72 @@ const Home: React.FC = () => {
   }
 
   return (
-    <div className="home-page">
+    <div>
       <div className="site-content">
         <div className="verify-number-main">
 
-          <div className="verify-number-top home-hero">
+          <div className="verify-number-top">
             <div className="container">
-              <div className="verify-number-top-content home-hero-header">
-                <div className="setting-header home-header">
-                  <div className="setting-left home-header-title">
-                    <span className="home-brand-mark" aria-hidden>k</span>
+              <div className="verify-number-top-content">
+                <div className="setting-header">
+                  <div className="setting-left">
+                    <span></span>
                     <span className="setting-txt">{t('Dashboard')}</span>
                   </div>
                   <div className="setting-right">
-                    <span className="home-header-action">
-                      <Link to="/Notification" aria-label="Open notifications">
-                        <Bell size={19} strokeWidth={2} />
+                    <span>
+                      <Link to="/Notification">
+                        <img src={NotificationIcon} alt="notifications" />
                       </Link>
                     </span>
-                    <span className="home-header-action">
+                    <span className="dots-icon">
                       <button
                         type="button"
                         onClick={() => setIsDrawerOpen(true)}
-                        className="home-icon-button"
+                        style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', lineHeight: 0 }}
                         aria-label="Open settings"
                       >
-                        <MoreVertical size={19} strokeWidth={2} />
+                        <img src={dotsIcon} alt="menu" />
                       </button>
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="home-hero-balance">
-                <p className="home-greeting">
+              <div style={{ paddingBottom: '24px', paddingTop: '4px' }}>
+                <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '14px', fontWeight: 500, fontFamily: 'Satoshi, sans-serif' }}>
                   {user?.name ? t('Hello {{name}},', { name: user.name }) : t('Hello,')}
                 </p>
-                <h1 className="home-balance">
+                <h1 style={{
+                  color: '#fff', fontSize: '28px', fontWeight: 800,
+                  marginTop: '4px', letterSpacing: '-0.5px', fontFamily: 'Poppins, sans-serif',
+                }}>
                   {fmtVND(totalBalance)}
                 </h1>
-                <p className="home-balance-label">
+                <p style={{
+                  color: 'rgba(255,255,255,0.55)', fontSize: '10px', fontWeight: 700,
+                  letterSpacing: '2.5px', marginTop: '4px', textTransform: 'uppercase',
+                  fontFamily: 'Satoshi, sans-serif',
+                }}>
                   {t('TOTAL BALANCE')}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="verify-number-bottom home-content" id="homepage">
-            <div className="verify-number-bottom-wrap home-content-inner">
+          <div className="verify-number-bottom" id="homepage">
+            <div className="verify-number-bottom-wrap">
 
               {error && (
-                <div className="home-card home-error" style={{ ...S.card, color: '#b91c1c', background: '#fef2f2', fontSize: '13px', fontWeight: 600 }}>
+                <div style={{ ...S.card, color: '#b91c1c', background: '#fef2f2', fontSize: '13px', fontWeight: 600 }}>
                   {error}
                 </div>
               )}
 
-              <div className="home-card home-overview-card" style={S.card}>
+              <div style={S.card}>
                 <div style={S.cardHeader}>
                   <span style={S.cardTitle}>{t('Overview')}</span>
-                  <button type="button" className="home-card-menu" aria-label="Overview options"><MoreHorizontal size={19} /></button>
+                  <span style={{ color: '#9ca3af', fontSize: '18px', cursor: 'pointer', letterSpacing: '2px' }}>···</span>
                 </div>
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <MonthCol
@@ -741,10 +817,10 @@ const Home: React.FC = () => {
                 </div>
               </div>
 
-              <div className="home-card home-chart-card" style={S.card}>
+              <div style={S.card}>
                 <div style={S.cardHeader}>
                   <span style={S.cardTitle}>{t('Spending — Last 7 Days')}</span>
-                  <CalendarDays size={18} className="home-card-icon" aria-hidden />
+                  <span style={{ fontSize: '18px', cursor: 'pointer' }}>📅</span>
                 </div>
                 <SpendingChart data={spendingData} />
                 <p style={{ textAlign: 'center', fontSize: '11px', color: '#9ca3af', marginTop: '4px' }}>
@@ -752,22 +828,26 @@ const Home: React.FC = () => {
                 </p>
               </div>
 
-              <div className="home-card home-history-card" style={S.card}>
+              <div style={S.card}>
                 <div style={S.cardHeader}>
                   <span style={S.cardTitle}>{t('Balance History')}</span>
-                  <span className="home-card-select">
-                    {balanceDelta === null ? t('No data yet') : `${fmtCompactVND(balanceDelta)} ▾`}
-                  </span>
+                  <span style={{
+                    fontSize: '11px', color: '#7B51F1',
+                    background: 'rgba(123,81,241,0.1)', padding: '3px 10px',
+                    borderRadius: '20px', fontWeight: 700,
+                  }}>{balanceDelta === null ? t('No data yet') : `${fmtCompactVND(balanceDelta)} ▾`}</span>
                 </div>
                 <HistoricalChart data={balanceHistory} />
               </div>
 
-              <div className="home-card home-transactions-card" style={S.card}>
+              <div style={S.card}>
                 <div style={S.cardHeader}>
                   <span style={S.cardTitle}>{t('Recent Transactions')}</span>
-                  <button type="button" className="home-view-all" onClick={() => navigate('/analytics')}>
-                    View all <ChevronRight size={15} />
-                  </button>
+                  <span style={{
+                    width: '30px', height: '30px', borderRadius: '50%',
+                    background: 'rgba(123,81,241,0.1)', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '14px',
+                  }}>⊜</span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                   {recentTransactions.length === 0 ? (
@@ -778,7 +858,7 @@ const Home: React.FC = () => {
                     const signedAmount = getTransactionSignedAmount(tx)
                     return (
                     <div key={tx.id} onClick={() => { setSelectedTransactionId(tx.id); setShowEditModal(true) }} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-                        <div className="home-transaction-icon" style={{
+                      <div style={{
                         width: '44px', height: '44px', borderRadius: '14px', flexShrink: 0,
                         background: signedAmount >= 0 ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.10)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px',
@@ -787,7 +867,7 @@ const Home: React.FC = () => {
                       </div>
                       {/* Left column — category name (bold) + wallet name (gray) */}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                          <p className="home-transaction-name" style={{
+                        <p style={{
                           fontSize: '14px', fontWeight: 600, color: '#121212',
                           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                           fontFamily: 'Satoshi, sans-serif',
@@ -798,7 +878,7 @@ const Home: React.FC = () => {
                       </div>
                       {/* Right column — amount (bold, color-coded) + date (gray), mirrors left height */}
                       <div style={{ flexShrink: 0, textAlign: 'right' }}>
-                          <p className="home-transaction-amount" style={{
+                        <p style={{
                           fontSize: '14px', fontWeight: 700,
                           color: signedAmount >= 0 ? '#28a745' : '#dc3545',
                           fontFamily: 'Satoshi, sans-serif',
@@ -815,7 +895,7 @@ const Home: React.FC = () => {
                 </div>
               </div>
 
-               <div style={{ height: '110px' }} />
+              <div style={{ height: '110px' }} />
             </div>
           </div>
         </div>
