@@ -9,6 +9,7 @@ import { getCategoryIcon, formatCurrency } from '../constants/categories';
 import { format, parseISO } from 'date-fns';
 import { useTranslation } from 'react-i18next';
 import { processImageForUpload, validateImageFile, formatFileSize } from '../utils/imageCompression';
+import { useEditTransactionModal } from '../hooks/useEditTransactionModal';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Domain types
@@ -189,91 +190,12 @@ const EditTransactionModal: React.FC<EditTransactionModalProps> = ({
     transactionId,
     onUpdate,
 }) => {
-    const { t } = useTranslation();
-
-    const [transaction, setTransaction] = useState<Transaction | null>(null);
-    const [permissions, setPermissions] = useState<Permissions>({ can_edit: false, can_manage_photos: false });
-    const [loading, setLoading] = useState<boolean>(false);
-    const [saving, setSaving] = useState<boolean>(false);
-    const [error, setError] = useState<string>('');
-    const [successMsg, setSuccessMsg] = useState<string>('');
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [accounts, setAccounts] = useState<Account[]>([]);
-    const [formData, setFormData] = useState<TransactionFormData>({});
-    const [activeTab, setActiveTab] = useState<TabId>('details');
-    const [amountLocked, setAmountLocked] = useState<boolean>(true);
-
-    const [uploadingPhoto, setUploadingPhoto] = useState<boolean>(false);
-    const [uploadProgress, setUploadProgress] = useState<UploadProgress>({ stage: '', progress: 0 });
-    const [photoError, setPhotoError] = useState<string>('');
-
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const formRef = useRef<HTMLFormElement>(null);
-
-    useEffect(() => {
-        if (isOpen && transactionId) {
-            setActiveTab('details');
-            setError('');
-            setSuccessMsg('');
-            setPhotoError('');
-            fetchAll();
-        }
-        if (!isOpen) {
-            setTransaction(null);
-            setFormData({});
-        }
-    }, [isOpen, transactionId]);
-
-    const fetchAll = async (): Promise<void> => {
-        setLoading(true);
-        try {
-            await Promise.all([
-                fetchTransactionDetails(),
-                fetchCategories(),
-                fetchAccounts(),
-            ]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchTransactionDetails = async (): Promise<void> => {
-        try {
-            const response = await api.get(`/transactions/${transactionId}`);
-            const tx: Transaction = response.data.transaction;
-            setTransaction(tx);
-            setPermissions(response.data.permissions || { can_edit: true, can_manage_photos: true });
-            setAmountLocked(!isAmountEditable(tx.created_at));
-            setFormData({
-                amount: tx.amount,
-                category_id: tx.category_id,
-                account_id: tx.account_id,
-                notes: tx.notes || '',
-                transaction_date: tx.transaction_date,
-            });
-        } catch (err) {
-            setError(t('Failed to load transaction details.'));
-            console.error(err);
-        }
-    };
-
-    const fetchCategories = async (): Promise<void> => {
-        try {
-            const response = await api.get('/categories');
-            setCategories(response.data.categories || []);
-        } catch (err) {
-            console.error('Failed to fetch categories', err);
-        }
-    };
-
-    const fetchAccounts = async (): Promise<void> => {
-        try {
-            const response = await api.get('/accounts');
-            setAccounts(response.data.accounts || []);
-        } catch (err) {
-            console.error('Failed to fetch accounts', err);
-        }
-    };
+    const {
+        t, transaction, permissions, loading, saving, error, successMsg, categories, accounts,
+        formData, setFormData, activeTab, setActiveTab, amountLocked, uploadingPhoto,
+        uploadProgress, photoError, fileInputRef, formRef, handleSave, handlePhotoUpload,
+        handleDeletePhoto, handleClose, maxPhotos,
+    } = useEditTransactionModal({ isOpen, onClose, transactionId, onUpdate });
 
     const handleSave = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
         e.preventDefault();

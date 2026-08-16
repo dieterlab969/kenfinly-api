@@ -11,6 +11,7 @@ import ExpiredIcon from '../assets/svg/expired-icon.svg';
 import faqPlus from '../assets/svg/faq-plus.svg';
 import api from '../utils/api';
 import { useTranslation } from 'react-i18next';
+import { useSubscriptionManagement } from '../hooks/useSubscriptionManagement';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -143,221 +144,17 @@ const FieldError: React.FC<FieldErrorProps> = ({ errors, field }) => {
 
 const SubscriptionManagement: React.FC = () => {
   const { t } = useTranslation();
+  const {
+    subscriptions, loading, errorMsg, activeTab, setActiveTab, search, setSearch,
+    sortKey, setSortKey, showSort, setShowSort, view, pageMsg, form, editingId,
+    historyId, fieldErrors, formGenError, saving, confirmDelete, setConfirmDelete,
+    deleting, history, historySubscription, historyLoading, filtered,
+    fetchSubscriptions, updateForm, goToList, openAdd, openEdit, openHistory,
+    handleCreate, handleUpdate, handleDelete,
+  } = useSubscriptionManagement();
 
-  // ── Data ──────────────────────────────────────────────────────────────────
-  const [subscriptions, setSubscriptions] = useState<UserSubscription[]>([]);
-  const [loading, setLoading]             = useState<boolean>(true);
-  const [errorMsg, setErrorMsg]           = useState<string>('');
-
-  // ── List UI ───────────────────────────────────────────────────────────────
-  const [activeTab, setActiveTab]   = useState<ActiveTab>('active');
-  const [search, setSearch]         = useState<string>('');
-  const [sortKey, setSortKey]       = useState<SortKey>('next_billing_date_asc');
-  const [showSort, setShowSort]     = useState<boolean>(false);
-
-  // ── View / forms ──────────────────────────────────────────────────────────
-  const [view, setView]             = useState<PageView>('list');
-  const [pageMsg, setPageMsg]       = useState<PageMessage | null>(null);
-  const [form, setForm]             = useState<SubscriptionForm>(EMPTY_FORM);
-  const [editingId, setEditingId]   = useState<number | null>(null);
-  const [historyId, setHistoryId]   = useState<number | null>(null);
-
-  // ── Form feedback ─────────────────────────────────────────────────────────
-  const [fieldErrors, setFieldErrors]   = useState<ValidationErrors>({});
-  const [formGenError, setFormGenError] = useState<string>('');
-  const [saving, setSaving]             = useState<boolean>(false);
-
-  // ── Delete ────────────────────────────────────────────────────────────────
-  const [confirmDelete, setConfirmDelete]   = useState<boolean>(false);
-  const [deleting, setDeleting]             = useState<boolean>(false);
-
-  // ── Payment history ───────────────────────────────────────────────────────
-  const [history, setHistory]               = useState<PaymentHistoryItem[]>([]);
-  const [historySubscription, setHistorySub] = useState<UserSubscription | null>(null);
-  const [historyLoading, setHistoryLoading] = useState<boolean>(false);
-
-  // ─── Fetch ───────────────────────────────────────────────────────────────
-
-  const fetchSubscriptions = useCallback(async (): Promise<void> => {
-    setLoading(true);
-    setErrorMsg('');
-    try {
-      const res = await api.get('/user-subscriptions');
-      setSubscriptions(res.data.subscriptions ?? []);
-    } catch {
-      setErrorMsg(t('Unable to load subscriptions. Please try again.'));
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
-
-  useEffect(() => { void fetchSubscriptions(); }, [fetchSubscriptions]);
-
-  // ─── Derived data ─────────────────────────────────────────────────────────
-
-  const filtered = useMemo<UserSubscription[]>(() => {
-    const q = search.trim().toLowerCase();
-    let list = subscriptions.filter(s =>
-      activeTab === 'active' ? s.status === 'ACTIVE' : s.status === 'EXPIRED'
-    );
-    if (q) list = list.filter(s => s.service_name.toLowerCase().includes(q));
-
-    return [...list].sort((a, b) => {
-      switch (sortKey) {
-        case 'next_billing_date_asc':  return a.next_billing_date.localeCompare(b.next_billing_date);
-        case 'next_billing_date_desc': return b.next_billing_date.localeCompare(a.next_billing_date);
-        case 'amount_high':            return parseFloat(b.amount) - parseFloat(a.amount);
-        case 'amount_low':             return parseFloat(a.amount) - parseFloat(b.amount);
-        case 'name_asc':               return a.service_name.localeCompare(b.service_name);
-        default:                       return 0;
-      }
-    });
-  }, [subscriptions, activeTab, search, sortKey]);
-
-  // ─── Helpers ──────────────────────────────────────────────────────────────
-
-  const showPageMsg = (type: PageMessage['type'], text: string): void => {
-    setPageMsg({ type, text });
-    setTimeout(() => setPageMsg(null), 4000);
-  };
-
-  const updateForm = (patch: Partial<SubscriptionForm>): void =>
-    setForm(prev => ({ ...prev, ...patch }));
-
-  const goToList = (): void => {
-    setView('list');
-    setEditingId(null);
-    setForm(EMPTY_FORM);
-    setFieldErrors({});
-    setFormGenError('');
-    setConfirmDelete(false);
-  };
-
-  const openAdd = (): void => {
-    setForm(EMPTY_FORM);
-    setFieldErrors({});
-    setFormGenError('');
-    setEditingId(null);
-    setView('add');
-  };
-
-  const openEdit = async (sub: UserSubscription): Promise<void> => {
-    setFieldErrors({});
-    setFormGenError('');
-    setConfirmDelete(false);
-    setEditingId(sub.id);
-    const r = sub.reminder;
-    setForm({
-      service_name:       sub.service_name,
-      amount:             sub.amount,
-      currency:           sub.currency as 'VND' | 'USD',
-      billing_cycle:      sub.billing_cycle,
-      next_billing_date:  sub.next_billing_date,
-      is_trial:           sub.is_trial,
-      reminder_enabled:   r?.is_enabled ?? false,
-      remind_before_days: r?.remind_before_days ?? 3,
-      channels_email:     r?.channels?.includes('email') ?? true,
-      channels_push:      r?.channels?.includes('push') ?? false,
-    });
-    setView('edit');
-  };
-
-  const openHistory = async (sub: UserSubscription): Promise<void> => {
-    setHistoryId(sub.id);
-    setHistorySub(sub);
-    setHistoryLoading(true);
-    setView('history');
-    try {
-      const res = await api.get(`/user-subscriptions/${sub.id}/payment-history`);
-      setHistory(res.data.history ?? []);
-    } catch {
-      setHistory([]);
-    } finally {
-      setHistoryLoading(false);
-    }
-  };
-
-  // ─── CRUD ─────────────────────────────────────────────────────────────────
-
-  const buildPayload = (f: SubscriptionForm) => ({
-    service_name:       f.service_name,
-    amount:             parseFloat(f.amount),
-    currency:           f.currency,
-    billing_cycle:      f.billing_cycle,
-    next_billing_date:  f.next_billing_date,
-    is_trial:           f.is_trial,
-    reminder: f.reminder_enabled ? {
-      is_enabled:         true,
-      remind_before_days: f.remind_before_days,
-      channels: [
-        ...(f.channels_email ? ['email'] : []),
-        ...(f.channels_push  ? ['push']  : []),
-      ],
-    } : { is_enabled: false, remind_before_days: f.remind_before_days, channels: [] },
-  });
-
-  const handleCreate = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault();
-    setSaving(true);
-    setFieldErrors({});
-    setFormGenError('');
-    try {
-      await api.post('/user-subscriptions', buildPayload(form));
-      showPageMsg('success', t('Subscription created successfully.'));
-      goToList();
-      await fetchSubscriptions();
-    } catch (err: unknown) {
-      const ax = err as { response?: { data?: { errors?: ValidationErrors; message?: string } } };
-      const errs = ax.response?.data?.errors ?? {};
-      if (Object.keys(errs).length > 0) {
-        setFieldErrors(errs);
-      } else {
-        setFormGenError(ax.response?.data?.message ?? t('Something went wrong. Please try again.'));
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleUpdate = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault();
-    if (!editingId) return;
-    setSaving(true);
-    setFieldErrors({});
-    setFormGenError('');
-    try {
-      await api.put(`/user-subscriptions/${editingId}`, buildPayload(form));
-      showPageMsg('success', t('Subscription updated successfully.'));
-      goToList();
-      await fetchSubscriptions();
-    } catch (err: unknown) {
-      const ax = err as { response?: { data?: { errors?: ValidationErrors; message?: string } } };
-      const errs = ax.response?.data?.errors ?? {};
-      if (Object.keys(errs).length > 0) {
-        setFieldErrors(errs);
-      } else {
-        setFormGenError(ax.response?.data?.message ?? t('Something went wrong. Please try again.'));
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDelete = async (): Promise<void> => {
-    if (!editingId) return;
-    setDeleting(true);
-    try {
-      await api.delete(`/user-subscriptions/${editingId}`);
-      showPageMsg('success', t('Subscription deleted successfully.'));
-      goToList();
-      await fetchSubscriptions();
-    } catch {
-      setFormGenError(t('Could not delete subscription. Please try again.'));
-    } finally {
-      setDeleting(false);
-      setConfirmDelete(false);
-    }
-  };
+  // Query, form payload construction, payment-history loading, and mutations
+  // are centralized in useSubscriptionManagement.
 
   // ─── Shared form UI ───────────────────────────────────────────────────────
 
