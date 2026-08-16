@@ -3,15 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\AppSetting;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Models\User;
-use App\Rules\Recaptcha;
 use App\Services\EmailVerificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 use App\Models\SubscriptionPlan;
@@ -52,39 +50,9 @@ class AuthController extends Controller
      * @param \Illuminate\Http\Request $request Incoming registration request
      * @return \Illuminate\Http\JsonResponse JSON response with registration result and verification info
      */
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $rules = [
-            'name' => 'required|string|max:100',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ];
-
-        $messages = [
-            'name.required' => 'Please enter your name',
-            'name.max' => 'Name must not exceed 100 characters',
-            'email.required' => 'Please enter your email address',
-            'email.email' => 'Please enter a valid email address',
-            'email.unique' => 'This email is already registered. Please login or use a different email.',
-            'password.required' => 'Please enter a password',
-            'password.min' => 'Password must be at least 8 characters long',
-            'password.confirmed' => 'Password confirmation does not match. Please make sure both passwords are the same.',
-        ];
-
-        if (AppSetting::isRecaptchaEnabled()) {
-            $rules['g-recaptcha-response'] = ['required', 'string', new Recaptcha];
-            $messages['g-recaptcha-response.required'] = 'Security verification is required.';
-        }
-
-        $validator = Validator::make($request->all(), $rules, $messages);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Registration failed. Please check the errors below.',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        $validated = $request->validated();
 
         // Read geo-locale values sent by the React frontend (from app_currency cookie)
         $regCurrency = strtoupper((string) $request->input('app_currency', ''));
@@ -93,9 +61,9 @@ class AuthController extends Controller
         if (strlen($regCountry) !== 2)                       { $regCountry  = null; }
 
         $user = User::create([
-            'name'         => $request->name,
-            'email'        => $request->email,
-            'password'     => Hash::make($request->password),
+            'name'         => $validated['name'],
+            'email'        => $validated['email'],
+            'password'     => Hash::make($validated['password']),
             'status'       => 'pending',
             'currency'     => $regCurrency ?: 'VND',
             'country_code' => $regCountry,
@@ -156,35 +124,14 @@ class AuthController extends Controller
      * @param \Illuminate\Http\Request $request Incoming login request
      * @return \Illuminate\Http\JsonResponse JSON response with authentication result or verification prompt
      */
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $rules = [
-            'email' => 'required|email',
-            'password' => 'required|string',
+        $validated = $request->validated();
+
+        $credentials = [
+            'email' => $validated['email'],
+            'password' => $validated['password'],
         ];
-
-        $messages = [
-            'email.required' => 'Please enter your email address',
-            'email.email' => 'Please enter a valid email address',
-            'password.required' => 'Please enter your password',
-        ];
-
-        if (AppSetting::isRecaptchaEnabled()) {
-            $rules['g-recaptcha-response'] = ['required', 'string', new Recaptcha];
-            $messages['g-recaptcha-response.required'] = 'Security verification is required.';
-        }
-
-        $validator = Validator::make($request->all(), $rules, $messages);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Login failed. Please check the errors below.',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $credentials = $request->only('email', 'password');
 
         if (!$token = auth('api')->attempt($credentials)) {
             return response()->json([

@@ -3,13 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\PaymentProcessRequest;
+use App\Http\Requests\RetryPaymentRequest;
 use App\Models\Payment;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\PaymentGateway;
 use App\Services\PaymentProcessingService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /**
  * Payment processing, history, and payment method management.
@@ -46,23 +48,15 @@ class PaymentController extends Controller
      * @param Request $request Incoming HTTP request containing payment data.
      * @return JsonResponse JSON response with payment status and details or error message.
      */
-    public function processPayment(Request $request): JsonResponse
+    public function processPayment(PaymentProcessRequest $request): JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'subscription_id' => 'required|exists:subscriptions,id',
-                'payment_gateway_id' => 'required|exists:payment_gateways,id',
-                'amount' => 'required|numeric|min:0.01',
-                'payment_method' => 'nullable|string',
-            ]);
+            $validated = $request->validated();
 
             $subscription = Subscription::findOrFail($validated['subscription_id']);
             $gateway = PaymentGateway::findOrFail($validated['payment_gateway_id']);
 
-            // Verify user owns subscription or has super admin role
-            if ($subscription->user_id !== auth()->id() && !auth()->user()->hasRole('super_admin')) {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
+            $this->authorize('view', $subscription);
 
             $payment = $this->paymentService->processPayment(
                 $subscription,
@@ -111,11 +105,14 @@ class PaymentController extends Controller
      */
     public function show(Payment $payment): JsonResponse
     {
-        if ($payment->user_id !== auth()->id() && !auth()->user()->hasRole('super_admin')) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('view', $payment);
 
-        return response()->json($payment->load('subscription.plan', 'gateway', 'user'));
+        $payment = $payment->load('subscription.plan', 'gateway', 'user');
+        return response()->json([
+            'success' => true,
+            'data' => $payment,
+            'payment' => $payment,
+        ]);
     }
 
     /**
@@ -128,21 +125,17 @@ class PaymentController extends Controller
      * @param Request $request Incoming HTTP request with optional payment method.
      * @return JsonResponse JSON response with updated payment status or error message.
      */
-    public function retry(Payment $payment, Request $request): JsonResponse
+    public function retry(Payment $payment, RetryPaymentRequest $request): JsonResponse
     {
         try {
-            if ($payment->user_id !== auth()->id()) {
-                return response()->json(['message' => 'Unauthorized'], 403);
-            }
+            $this->authorize('retry', $payment);
 
             // Only allow retry if payment status is 'failed'
             if ($payment->status !== 'failed') {
                 return response()->json(['message' => 'Only failed payments can be retried'], 400);
             }
 
-            $validated = $request->validate([
-                'payment_method' => 'nullable|string',
-            ]);
+            $validated = $request->validated();
 
             $payment = $this->paymentService->retryPayment($payment, [
                 'amount' => $payment->amount,

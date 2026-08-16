@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\KillCommitmentRequest;
 use App\Http\Requests\StoreCommitmentRequest;
 use App\Http\Resources\CommitmentResource;
 use App\Models\Commitment;
@@ -54,7 +55,7 @@ class CommitmentController extends Controller
 
     public function show(Commitment $commitment): JsonResponse
     {
-        $this->authorizeOwner($commitment);
+        $this->authorize('view', $commitment);
 
         return response()->json([
             'success' => true,
@@ -67,7 +68,7 @@ class CommitmentController extends Controller
         $user = auth('api')->user();
         $commitment = $this->service->create(
             $user,
-            $request->only(['title', 'goal_amount', 'deadline']),
+            $request->validated(),
             $request->file('image')
         );
 
@@ -79,7 +80,7 @@ class CommitmentController extends Controller
 
     public function complete(Commitment $commitment): JsonResponse
     {
-        $this->authorizeOwner($commitment);
+        $this->authorize('complete', $commitment);
         $user = auth('api')->user();
 
         $commitment = $this->service->complete($user, $commitment);
@@ -90,15 +91,12 @@ class CommitmentController extends Controller
         ]);
     }
 
-    public function kill(Request $request, Commitment $commitment): JsonResponse
+    public function kill(KillCommitmentRequest $request, Commitment $commitment): JsonResponse
     {
-        $this->authorizeOwner($commitment);
-        $validated = $request->validate([
-            'kill_reason' => 'nullable|string|max:255',
-        ]);
+        $this->authorize('kill', $commitment);
 
         $user = auth('api')->user();
-        $commitment = $this->service->kill($user, $commitment, $validated['kill_reason'] ?? null);
+        $commitment = $this->service->kill($user, $commitment, $request->validated('kill_reason'));
 
         return response()->json([
             'success' => true,
@@ -106,9 +104,4 @@ class CommitmentController extends Controller
         ]);
     }
 
-    private function authorizeOwner(Commitment $commitment): void
-    {
-        $userId = (int) auth('api')->id();
-        abort_if((int) $commitment->user_id !== $userId, 403, 'Forbidden');
-    }
 }
