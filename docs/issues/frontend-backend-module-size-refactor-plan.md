@@ -111,10 +111,12 @@ and rollback strategy.
 
 ## 4. Phased implementation plan
 
-### Phase 0 — Baseline and guardrails
+### Phase 0 — Baseline and guardrails (Completed)
 
 **Goal:** Capture the current behavior and prevent the refactor from becoming
 an unmeasured rewrite.
+
+**Completion report:** [Phase 0 baseline report](frontend-backend-module-size-refactor-baseline.md)
 
 Tasks:
 
