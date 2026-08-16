@@ -1,19 +1,17 @@
 import React, { useState, useCallback } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { TrendingUp, TrendingDown, ArrowLeftRight } from 'lucide-react'
 import BottomNavigation from './BottomNavigation'
 import { useQuickAdd } from '../context/QuickAddContext'
-import incomeIcon from '../assets/icons/quick-add-plus.png'
-import spendingIcon from '../assets/icons/quick-add-minus.png'
-import transferIcon from '../assets/icons/quick-add-transfer.png'
 
 // ─── FAB speed-dial menu ──────────────────────────────────────────────────────
 
 interface FabOption {
     label: string
-    icon: string
-    tone: 'income' | 'spending' | 'transfer'
+    Icon: React.FC<{ size?: number; strokeWidth?: number; color?: string }>
     bg: string
+    shadow: string
     action: () => void
 }
 
@@ -30,23 +28,23 @@ const AppLayout: React.FC = () => {
     const FAB_OPTIONS: FabOption[] = [
         {
             label: t('Income'),
-            icon: incomeIcon,
-            tone: 'income',
-            bg: 'linear-gradient(145deg, #6f54ed, #4c31cc)',
+            Icon: TrendingUp,
+            bg: 'linear-gradient(145deg, #22c55e, #16a34a)',
+            shadow: '0 8px 28px rgba(34,197,94,0.50)',
             action: () => { closeFab(); triggerQuickAdd('income') },
         },
         {
-            label: t('Spending'),
-            icon: spendingIcon,
-            tone: 'spending',
-            bg: 'linear-gradient(145deg, #f45b6a, #dc354d)',
+            label: t('Expense'),
+            Icon: TrendingDown,
+            bg: 'linear-gradient(145deg, #ef4444, #dc2626)',
+            shadow: '0 8px 28px rgba(239,68,68,0.50)',
             action: () => { closeFab(); triggerQuickAdd('expense') },
         },
         {
             label: t('Transfer'),
-            icon: transferIcon,
-            tone: 'transfer',
-            bg: 'linear-gradient(145deg, #4d9bf5, #2871d8)',
+            Icon: ArrowLeftRight,
+            bg: 'linear-gradient(145deg, #3b82f6, #1d4ed8)',
+            shadow: '0 8px 28px rgba(59,130,246,0.50)',
             action: () => { closeFab(); triggerQuickAdd('transfer') },
         },
     ]
@@ -60,47 +58,70 @@ const AppLayout: React.FC = () => {
             {fabOpen && (
                 <div
                     onClick={closeFab}
-                    className="quick-add-backdrop"
-                    aria-hidden="true"
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 80,
+                        background: 'rgba(0,0,0,0.38)',
+                        backdropFilter: 'blur(2px)',
+                        WebkitBackdropFilter: 'blur(2px)',
+                    }}
                 />
             )}
 
-            {/* ── Focused quick-add action tray ── */}
+            {/* ── FAB speed-dial options ── */}
             {fabOpen && (
                 <div
-                    className="quick-add-tray"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label={t('Quick add')}
+                    style={{
+                        position: 'fixed',
+                        bottom: '112px',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        display: 'flex',
+                        gap: '20px',
+                        zIndex: 90,
+                        alignItems: 'flex-end',
+                        animation: 'bnav_fadeUp 0.2s ease',
+                    }}
                 >
-                    <div className="quick-add-tray-header">
-                        <div>
-                            <span className="quick-add-eyebrow">{t('QUICK ACTION')}</span>
-                            <h2>{t('What would you like to add?')}</h2>
-                        </div>
-                        <button type="button" className="quick-add-close" onClick={closeFab} aria-label={t('Close')}>
-                            <span aria-hidden="true">×</span>
-                        </button>
-                    </div>
-                    <div className="quick-add-options">
-                    {FAB_OPTIONS.map(({ label, icon, tone, bg, action }) => (
+                    {FAB_OPTIONS.map(({ label, Icon, bg, shadow, action }) => (
                         <div
                             key={label}
-                            className={`quick-add-option quick-add-option--${tone}`}
+                            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}
                         >
                             <button
                                 onClick={action}
-                                className="quick-add-option-button"
+                                style={{
+                                    width: '58px',
+                                    height: '58px',
+                                    borderRadius: '50%',
+                                    background: bg,
+                                    border: 'none',
+                                    color: '#fff',
+                                    cursor: 'pointer',
+                                    boxShadow: shadow,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
                                 aria-label={label}
-                                style={{ background: bg }}
                             >
-                                <img src={icon} alt="" aria-hidden="true" />
+                                <Icon size={22} strokeWidth={2} />
                             </button>
-                            <span className="quick-add-option-label">{label}</span>
+                            <span
+                                style={{
+                                    fontSize: '10px',
+                                    color: '#fff',
+                                    fontWeight: 600,
+                                    textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                                    whiteSpace: 'nowrap',
+                                    fontFamily: 'Satoshi, Inter, sans-serif',
+                                }}
+                            >
+                                {label}
+                            </span>
                         </div>
                     ))}
-                    </div>
-                    <p className="quick-add-hint">{t('Choose an action to continue')}</p>
                 </div>
             )}
 
