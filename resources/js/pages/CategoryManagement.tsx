@@ -11,6 +11,7 @@ import faqPlus from '../assets/svg/faq-plus.svg';
 import purpleEditIcon from '../assets/svg/purple-edit-icon.svg';
 import api from '../utils/api';
 import { useTranslation } from 'react-i18next';
+import { useCategoryManagement } from '../hooks/useCategoryManagement';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Domain types
@@ -118,215 +119,17 @@ function isValidHex(hex: string): boolean {
 
 const CategoryManagement: React.FC = () => {
   const { t } = useTranslation();
-  // ── Data ────────────────────────────────────────────────────────────────────
-  const [tree,     setTree]    = useState<Category[]>([]);
-  const [loading,  setLoading] = useState<boolean>(true);
-  const [errorMsg, setErrorMsg] = useState<string>('');
+  const {
+    tree, loading, errorMsg, search, setSearch, sortKey, setSortKey, typeFilter,
+    setTypeFilter, collapsed, view, pageMsg, form, editingId, formErrors, formGenError,
+    saving, confirmDeleteId, setConfirmDeleteId, deleting, deleteError, flat,
+    topLevelOptions, displayedTree, effectiveColor, fetchCategories, updateForm,
+    goToList, openAdd, openEdit, toggleCollapse, handleCreate, handleUpdate, handleDelete,
+  } = useCategoryManagement();
 
-  // ── List UI ─────────────────────────────────────────────────────────────────
-  const [search,     setSearch]     = useState<string>('');
-  const [sortKey,    setSortKey]    = useState<string>('system_first');
-  const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
-  const [collapsed,  setCollapsed]  = useState<Set<number>>(new Set());
-
-  // ── View / forms ────────────────────────────────────────────────────────────
-  const [view,      setView]      = useState<PageView>('list');
-  const [pageMsg,   setPageMsg]   = useState<PageMessage | null>(null);
-  const [form,      setForm]      = useState<CategoryForm>(EMPTY_FORM);
-  const [editingId, setEditingId] = useState<number | null>(null);
-
-  // ── Form feedback ───────────────────────────────────────────────────────────
-  const [formErrors,   setFormErrors]   = useState<ApiValidationErrors>({});
-  const [formGenError, setFormGenError] = useState<string>('');
-  const [saving,       setSaving]       = useState<boolean>(false);
-
-  // ── Delete ──────────────────────────────────────────────────────────────────
-  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
-  const [deleting,        setDeleting]        = useState<boolean>(false);
-  const [deleteError,     setDeleteError]     = useState<string>('');
-
-  // ─── Fetch ───────────────────────────────────────────────────────────────────
-
-  const fetchCategories = useCallback(async (): Promise<void> => {
-    setLoading(true);
-    setErrorMsg('');
-    try {
-      const res = await api.get('/categories');
-      setTree(res.data.categories ?? []);
-    } catch {
-      setErrorMsg(t('Unable to load categories. Please try again.'));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { void fetchCategories(); }, [fetchCategories]);
-
-  // ─── Derived data ─────────────────────────────────────────────────────────────
-
-  const flat = useMemo<Category[]>(() => flattenTree(tree), [tree]);
-
-  const topLevelOptions = useMemo<Category[]>(
-    () => flat.filter((c) => c.parent_id === null),
-    [flat],
-  );
-
-  const displayedTree = useMemo<Category[]>(() => {
-    const q = search.trim().toLowerCase();
-    let filtered = tree;
-    if (typeFilter !== 'all') {
-      filtered = filtered.filter((c) => c.type === typeFilter);
-    }
-    if (q) {
-      filtered = filtered.filter(
-        (c) =>
-          c.name.toLowerCase().includes(q) ||
-          c.children?.some((ch) => ch.name.toLowerCase().includes(q)),
-      );
-    }
-    return sortTree(filtered, sortKey);
-  }, [tree, search, typeFilter, sortKey]);
-
-  // ─── Navigation helpers ──────────────────────────────────────────────────────
-
-  const showPageMsg = (type: PageMessage['type'], text: string): void => {
-    setPageMsg({ type, text });
-    setTimeout(() => setPageMsg(null), 4000);
-  };
-
-  const goToList = (): void => {
-    setView('list');
-    setEditingId(null);
-    setForm(EMPTY_FORM);
-    setFormErrors({});
-    setFormGenError('');
-    setConfirmDeleteId(null);
-    setDeleteError('');
-  };
-
-  const openAdd = (): void => {
-    setForm(EMPTY_FORM);
-    setFormErrors({});
-    setFormGenError('');
-    setEditingId(null);
-    setView('add');
-  };
-
-  const openEdit = (cat: Category): void => {
-    setForm({
-      name:        cat.name,
-      type:        cat.type,
-      icon:        cat.icon  ?? '📁',
-      color:       cat.color ?? '#6B7280',
-      customColor: '',
-      parent_id:   cat.parent_id ? String(cat.parent_id) : '',
-    });
-    setFormErrors({});
-    setFormGenError('');
-    setEditingId(cat.id);
-    setView('edit');
-  };
-
-  const toggleCollapse = (id: number): void =>
-    setCollapsed((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-
-  // ─── CRUD handlers ────────────────────────────────────────────────────────────
-
-  const handleCreate = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault();
-    setSaving(true);
-    setFormErrors({});
-    setFormGenError('');
-    const resolvedColor = form.customColor && isValidHex(form.customColor)
-      ? form.customColor : form.color;
-    try {
-      await api.post('/categories', {
-        name:      form.name,
-        type:      form.type,
-        icon:      form.icon,
-        color:     resolvedColor,
-        parent_id: form.parent_id ? parseInt(form.parent_id, 10) : null,
-      });
-      showPageMsg('success', t('"{{name}}" created successfully.', { name: form.name }));
-      goToList();
-      await fetchCategories();
-    } catch (err: unknown) {
-      const ax = err as { response?: { data?: { errors?: ApiValidationErrors; message?: string } } };
-      const errs = ax.response?.data?.errors ?? {};
-      if (Object.keys(errs).length > 0) {
-        setFormErrors(errs);
-      } else {
-        setFormGenError(ax.response?.data?.message ?? t('Something went wrong. Please try again.'));
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleUpdate = async (e: React.FormEvent): Promise<void> => {
-    e.preventDefault();
-    if (!editingId) return;
-    setSaving(true);
-    setFormErrors({});
-    setFormGenError('');
-    const resolvedColor = form.customColor && isValidHex(form.customColor)
-      ? form.customColor : form.color;
-    try {
-      await api.put(`/categories/${editingId}`, {
-        name:      form.name,
-        type:      form.type,
-        icon:      form.icon,
-        color:     resolvedColor,
-        parent_id: form.parent_id ? parseInt(form.parent_id, 10) : null,
-      });
-      showPageMsg('success', t('"{{name}}" updated successfully.', { name: form.name }));
-      goToList();
-      await fetchCategories();
-    } catch (err: unknown) {
-      const ax = err as { response?: { status?: number; data?: { errors?: ApiValidationErrors; message?: string } } };
-      if (ax.response?.status === 403) {
-        setFormGenError(t('You cannot edit a system category.'));
-      } else {
-        const errs = ax.response?.data?.errors ?? {};
-        if (Object.keys(errs).length > 0) {
-          setFormErrors(errs);
-        } else {
-          setFormGenError(ax.response?.data?.message ?? t('Something went wrong. Please try again.'));
-        }
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleDelete = async (id: number): Promise<void> => {
-    setDeleting(true);
-    setDeleteError('');
-    try {
-      await api.delete(`/categories/${id}`);
-      setConfirmDeleteId(null);
-      await fetchCategories();
-      showPageMsg('success', t('Category deleted successfully.'));
-    } catch (err: unknown) {
-      const ax = err as { response?: { data?: { message?: string } } };
-      setDeleteError(ax.response?.data?.message ?? t('Could not delete this category.'));
-    } finally {
-      setDeleting(false);
-    }
-  };
+  // Querying, filtering, navigation, and CRUD live in the feature hook.
 
   // ─── Shared form atoms ────────────────────────────────────────────────────────
-
-  const updateForm = (patch: Partial<CategoryForm>): void =>
-    setForm((prev) => ({ ...prev, ...patch }));
-
-  const effectiveColor = form.customColor && isValidHex(form.customColor)
-    ? form.customColor
-    : form.color;
 
   const iconPickerRow = (): React.ReactNode => (
     <div className="personal-name mb-3">

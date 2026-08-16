@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import Offcanvas from 'react-bootstrap/Offcanvas'
 import { useSecureLogout } from '../hooks/useSecureLogout'
 import { useQuickAdd } from '../context/QuickAddContext'
+import { useHomeDashboard } from '../hooks/useHomeDashboard'
 
 type ApiAmount = string | number | null | undefined
 type TransactionType = 'income' | 'expense'
@@ -630,91 +631,20 @@ const Home: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { logout } = useSecureLogout()
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [user, setUser] = useState<UserProfile | null>(() => getStoredUser())
+  const {
+    dashboardData, loading, error, user, showModal, setShowModal, transactionType,
+    setTransactionType, amount, setAmount, category, setCategory, accountId, setAccountId,
+    transactionDate, setTransactionDate, note, setNote, categories, accounts, formLoading,
+    saving, formError, receipt, setReceipt, receiptPreview, setReceiptPreview,
+    compressionStatus, setCompressionStatus, fetchDashboardData, openQuickAdd,
+    handleFileChange, handleSaveQuickAdd,
+  } = useHomeDashboard()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isLogoutOpen, setIsLogoutOpen] = useState(false)
   const [logoutLoading, setLogoutLoading] = useState(false)
-  const [showModal, setShowModal] = useState(false)
-  const [transactionType, setTransactionType] = useState<TransactionType>('expense')
-  const [amount, setAmount] = useState('')
-  const [category, setCategory] = useState('')
-  const [accountId, setAccountId] = useState('')
-  const [transactionDate, setTransactionDate] = useState(todayDateKey())
-  const [note, setNote] = useState('')
-  const [categories, setCategories] = useState<CategoryOption[]>([])
-  const [accounts, setAccounts] = useState<DashboardAccount[]>([])
-  const [formLoading, setFormLoading] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [formError, setFormError] = useState('')
   const [selectedTransactionId, setSelectedTransactionId] = useState<number | null>(null)
   const [showEditModal, setShowEditModal] = useState<boolean>(false)
   const [showTransferModal, setShowTransferModal] = useState(false)
-  const [receipt, setReceipt] = useState<File | null>(null)
-  const [receiptPreview, setReceiptPreview] = useState<string | null>(null)
-  const [compressionStatus, setCompressionStatus] = useState<string>('')
-
-  const fetchDashboardData = useCallback(async (showLoading = true) => {
-    try {
-      if (showLoading) setLoading(true)
-      setError('')
-      const response = await api.get('/dashboard')
-      setDashboardData(response.data.data ?? null)
-    } catch (err) {
-      console.error('Failed to fetch dashboard data:', err)
-      setError(getApiErrorMessage(err, t('Could not load dashboard data.')))
-    } finally {
-      if (showLoading) setLoading(false)
-    }
-  }, [t])
-
-  const fetchUser = useCallback(async () => {
-    try {
-      const response = await api.get('/auth/me')
-      const nextUser = response.data.user as UserProfile | undefined
-      if (nextUser) {
-        setUser(nextUser)
-        localStorage.setItem('user', JSON.stringify(nextUser))
-      }
-    } catch (err) {
-      console.error('Failed to fetch user:', err)
-    }
-  }, [])
-
-  const loadQuickAddOptions = useCallback(async (type: TransactionType) => {
-    try {
-      setFormLoading(true)
-      setFormError('')
-      const [categoriesResponse, accountsResponse] = await Promise.all([
-        api.get(`/categories?type=${type}`),
-        api.get('/accounts'),
-      ])
-      const nextCategories = categoriesResponse.data.categories ?? []
-      const nextAccounts = accountsResponse.data.accounts ?? []
-      setCategories(nextCategories)
-      setAccounts(nextAccounts)
-      setAccountId(current => current || String(nextAccounts[0]?.id ?? ''))
-    } catch (err) {
-      console.error('Failed to fetch quick add options:', err)
-      setFormError(getApiErrorMessage(err, t('Could not load categories or accounts.')))
-    } finally {
-      setFormLoading(false)
-    }
-  }, [t])
-
-  useEffect(() => {
-    fetchDashboardData()
-    fetchUser()
-  }, [fetchDashboardData, fetchUser])
-
-  useEffect(() => {
-    if (showModal) {
-      setCategory('')
-      loadQuickAddOptions(transactionType)
-    }
-  }, [loadQuickAddOptions, showModal, transactionType])
 
   // ── Restore Settings drawer after back-navigation ─────────────────────────
   // Setting.tsx writes 'kenfinly_settings_return' to sessionStorage before
@@ -787,102 +717,6 @@ const Home: React.FC = () => {
   const quickAddSummary = currentMonthSummary
   const transactionLabel = transactionType === 'income' ? t('INCOME') : t('EXPENSE')
   const transactionAccent = transactionType === 'income' ? '#22c55e' : '#ef4444'
-
-  const openQuickAdd = (type: TransactionType) => {
-    setTransactionType(type)
-    setShowModal(true)
-    setAmount('')
-    setCategory('')
-    setNote('')
-    setTransactionDate(todayDateKey())
-    setFormError('')
-    setReceipt(null)
-    setReceiptPreview(null)
-    setCompressionStatus('')
-  }
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    const validation = validateImageFile(file)
-    if (!validation.valid) {
-      setFormError(validation.error ?? t('Invalid file.'))
-      e.target.value = ''
-      return
-    }
-
-    try {
-      setCompressionStatus(t('Compressing image...'))
-      setFormError('')
-
-      const result = await processImageForUpload(file, (progress: { stage: string }) => {
-        if (progress.stage === 'compressing') {
-          setCompressionStatus(t('Compressing image...'))
-        }
-      })
-
-      if (result.wasCompressed) {
-        console.log(`Ảnh đã nén: ${formatFileSize(result.originalSize)} → ${formatFileSize(result.compressedSize)} (giảm ${result.compressionRatio}%)`)
-      }
-
-      setReceipt(result.file)
-      const reader = new FileReader()
-      reader.onloadend = () => { setReceiptPreview(reader.result as string) }
-      reader.readAsDataURL(result.file)
-    } catch (err) {
-      const message = err instanceof Error ? err.message : t('Could not process image.')
-      setFormError(message)
-      e.target.value = ''
-    } finally {
-      setCompressionStatus('')
-    }
-  }
-
-  const handleSaveQuickAdd = async () => {
-    const amountValue = Number(amount)
-    if (!Number.isFinite(amountValue) || amountValue <= 0) {
-      setFormError(t('Please enter a valid amount.'))
-      return
-    }
-    if (!category) {
-      setFormError(t('Please select a category.'))
-      return
-    }
-    if (!accountId) {
-      setFormError(t('Please select an account.'))
-      return
-    }
-
-    try {
-      setSaving(true)
-      setFormError('')
-
-      const submitData = new FormData()
-      submitData.append('type', transactionType)
-      submitData.append('amount', String(amountValue))
-      submitData.append('category_id', String(Number(category)))
-      submitData.append('account_id', String(Number(accountId)))
-      submitData.append('transaction_date', transactionDate)
-      if (note) submitData.append('notes', note)
-      if (receipt) submitData.append('receipt', receipt)
-
-      await api.post('/transactions', submitData)
-
-      setShowModal(false)
-      setAmount('')
-      setCategory('')
-      setNote('')
-      setReceipt(null)
-      setReceiptPreview(null)
-      await fetchDashboardData(false)
-    } catch (err) {
-      console.error('Failed to save quick add transaction:', err)
-      setFormError(getApiErrorMessage(err, t('Could not save transaction.')))
-    } finally {
-      setSaving(false)
-    }
-  }
 
   if (loading) {
     return (
