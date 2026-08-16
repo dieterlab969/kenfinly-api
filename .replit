@@ -19,6 +19,30 @@ author = "agent"
 task = "workflow.run"
 args = "dev-server"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "baseline-bundle"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "baseline-inventory"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "frontend-test"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "frontend-typecheck"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "php-lint"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "laravel-test"
+
 [[workflows.workflow]]
 name = "dev-server"
 author = "agent"
@@ -30,6 +54,72 @@ outputType = "webview"
 task = "shell.exec"
 args = "php -S 0.0.0.0:5000 server.php"
 waitForPort = 5000
+
+[[workflows.workflow]]
+name = "baseline-bundle"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run baseline:bundle"
+
+[workflows.workflow.metadata]
+isValidation = true
+
+[[workflows.workflow]]
+name = "baseline-inventory"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run baseline:inventory"
+
+[workflows.workflow.metadata]
+isValidation = true
+
+[[workflows.workflow]]
+name = "frontend-test"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run test"
+
+[workflows.workflow.metadata]
+isValidation = true
+
+[[workflows.workflow]]
+name = "frontend-typecheck"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npx tsc --noEmit"
+
+[workflows.workflow.metadata]
+isValidation = true
+
+[[workflows.workflow]]
+name = "php-lint"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "find app routes database -type f -name '*.php' -print0 | xargs -0 -n1 php -l"
+
+[workflows.workflow.metadata]
+isValidation = true
+
+[[workflows.workflow]]
+name = "laravel-test"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "php artisan test --no-coverage"
+
+[workflows.workflow.metadata]
+isValidation = true
 
 [[ports]]
 localPort = 5000
