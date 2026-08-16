@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "initialJavaScriptGzipBytes": 173579,
+  "entryCssBytes": 235747,
+  "notes": "Generated from the current lazy-route build. Update intentionally after reviewing a new baseline report.",
+  "tolerance": 0.05
+}

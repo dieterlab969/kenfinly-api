@@ -11,3 +11,4 @@
 - [JWT Secret must be set](jwt-secret-env.md) — JWT_SECRET in .env is empty by default on fresh environments; run `php artisan jwt:secret --force` before testing auth-protected routes
 - [App entry casing](app-entry-casing.md) — keep the Vite bootstrap distinct from root-level App.tsx; App.tsx + app.tsx fails TypeScript casing checks
 - [Phase 3 CSS ownership](phase3-css-ownership.md) — keep only shell CSS global; load route, widget, and Halo styles at their lazy feature boundary
+- [Frontend dependency drift](frontend-dependency-drift.md) — verify installed modules against package.json before diagnosing a Vite resolution failure

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Models\AppSetting;
 use App\Models\User;
 use App\Services\EmailVerificationService;
 use Illuminate\Http\Request;
