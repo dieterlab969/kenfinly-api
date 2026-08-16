@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
 use App\Models\Language;
 use App\Models\Translation;
@@ -77,15 +79,9 @@ class CategoryController extends Controller
      *  - color: optional hex colour (#RGB, #RRGGBB, #RRGGBBAA)
      *  - parent_id: optional, must reference an existing category
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreCategoryRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'name'      => 'required|string|max:255',
-            'type'      => 'required|in:expense,income',
-            'icon'      => 'nullable|string|max:50',
-            'color'     => ['nullable', 'string', 'max:20', 'regex:/^#[0-9A-Fa-f]{3,8}$/'],
-            'parent_id' => 'nullable|integer|exists:categories,id',
-        ]);
+        $validated = $request->validated();
 
         $userId = auth()->id();
 
@@ -116,19 +112,11 @@ class CategoryController extends Controller
      *  - The category is a system category (is_system = true)
      *  - The authenticated user does not own the category
      */
-    public function update(Request $request, Category $category): JsonResponse
+    public function update(UpdateCategoryRequest $request, Category $category): JsonResponse
     {
         $this->authorize('update', $category);
 
-        $validated = $request->validate([
-            'name'      => 'sometimes|required|string|max:255',
-            'type'      => 'sometimes|required|in:expense,income',
-            'icon'      => 'nullable|string|max:50',
-            'color'     => ['nullable', 'string', 'max:20', 'regex:/^#[0-9A-Fa-f]{3,8}$/'],
-            'parent_id' => 'nullable|integer|exists:categories,id',
-        ]);
-
-        $category->update($validated);
+        $category->update($request->validated());
 
         return response()->json([
             'success'  => true,

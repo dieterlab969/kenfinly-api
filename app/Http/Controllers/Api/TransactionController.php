@@ -3,662 +3,209 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreTransactionRequest;
+use App\Http\Requests\TransactionIndexRequest;
+use App\Http\Requests\TransactionPhotoRequest;
+use App\Http\Requests\UpdateTransactionRequest;
+use App\Http\Resources\TransactionResource;
 use App\Models\Transaction;
-use App\Models\Account;
-use App\Services\LedgerSummaryService;
-use App\Services\TransactionPhotoService;
+use App\Models\TransactionPhoto;
+use App\Services\TransactionAnalyticsService;
 use App\Services\TransactionChangeLogService;
+use App\Services\TransactionPhotoService;
+use App\Services\TransactionQuery;
+use App\Services\TransactionService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Financial transactions — CRUD, photo attachments, and dashboard data.
+ * HTTP adapter for transaction use cases.
  *
- * All write operations update the account balance and ledger summaries
- * atomically. Halo-sourced transactions are immutable (Standard 5).
- *
- * @tags Transactions
+ * Validation, authorization, persistence, balance/ledger synchronization,
+ * photo management, and analytics are intentionally kept outside this class.
  */
 class TransactionController extends Controller
 {
-    /**
-     * Transaction photo service instance.
-     *
-     * @var TransactionPhotoService
-     */
-    protected $photoService;
-
-    /**
-     * Transaction change log service instance.
-     *
-     * @var TransactionChangeLogService
-     */
-    protected $changeLogService;
-
-    /**
-     * Ledger daily summary service (Standard 4 — write-time rollup).
-     *
-     * @var LedgerSummaryService
-     */
-    protected $ledgerSummary;
-
-    /**
-     * TransactionController constructor.
-     *
-     * Initializes services and sets up authorization policies for transaction resources.
-     *
-     * @param TransactionPhotoService $photoService Service for handling transaction photos.
-     * @param TransactionChangeLogService $changeLogService Service for logging transaction changes.
-     * @param LedgerSummaryService $ledgerSummary Service that updates ledger_daily_summaries at write time.
-     */
     public function __construct(
-        TransactionPhotoService $photoService,
-        TransactionChangeLogService $changeLogService,
-        LedgerSummaryService $ledgerSummary
+        private readonly TransactionService $transactionService,
+        private readonly TransactionQuery $transactionQuery,
+        private readonly TransactionAnalyticsService $analytics,
+        private readonly TransactionPhotoService $photoService,
+        private readonly TransactionChangeLogService $changeLogService,
     ) {
-        $this->photoService = $photoService;
-        $this->changeLogService = $changeLogService;
-        $this->ledgerSummary = $ledgerSummary;
         $this->authorizeResource(Transaction::class, 'transaction');
     }
-    /**
-     * Get a paginated list of transactions for the authenticated user.
-     *
-     * Retrieves transactions with optional filtering by account, type, and date range.
-     * Supports pagination and includes related category and account data.
-     *
-     * @param Request $request HTTP request containing optional filter parameters:
-     *                         - account_id: Filter by specific account
-     *                         - type: Filter by transaction type (income/expense)
-     *                         - start_date: Start date for date range filter
-     *                         - end_date: End date for date range filter
-     *                         - per_page: Number of items per page
-     * @return \Illuminate\Http\JsonResponse JSON response with success status and paginated transaction data.
-     */
-    public function index(Request $request)
+
+    public function index(TransactionIndexRequest $request): JsonResponse
     {
-        $user = auth('api')->user();
+        $transactions = $this->transactionQuery->paginateForUser(
+            (int) auth('api')->id(),
+            $request->validated()
+        );
 
-        $query = Transaction::where('user_id', $user->id)
-            ->with(['category', 'account']);
-
-        if ($request->has('account_id')) {
-            $query->where('account_id', $request->account_id);
-        }
-
-        if ($request->has('type')) {
-            $query->where('type', $request->type);
-        }
-
-        if ($request->has('start_date') && $request->has('end_date')) {
-            $query->whereBetween('transaction_date', [
-                $request->start_date,
-                $request->end_date
-            ]);
-        }
-
-        $transactions = $query->orderBy('transaction_date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->paginate($request->get('per_page', 15));
-
+        // `transactions` is retained for existing consumers. `data` is the
+        // canonical field used by newly migrated clients.
         return response()->json([
             'success' => true,
-            'transactions' => $transactions
+            'data' => $transactions,
+            'transactions' => $transactions,
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreTransactionRequest $request): JsonResponse
     {
         $user = auth('api')->user();
-
         if ($user->accounts()->count() === 0) {
             return response()->json([
                 'success' => false,
-                'message' => 'You must have at least one account to create transactions. Please create an account first.'
+                'message' => 'You must have at least one account to create transactions. Please create an account first.',
+                'errors' => [],
             ], 400);
         }
 
-        $validator = Validator::make($request->all(), [
-            'account_id' => 'required|exists:accounts,id',
-            'category_id' => 'required|exists:categories,id',
-            'type' => 'required|in:income,expense',
-            'amount' => 'required|numeric|min:0.01',
-            'notes' => 'nullable|string|max:1000',
-            'transaction_date' => 'required|date',
-            'receipt' => 'nullable|image|max:20480',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $account = Account::where('id', $request->account_id)
-            ->where('user_id', $user->id)
-            ->firstOrFail();
-
-        $uploadedPhotoPath = null;
-
-        DB::beginTransaction();
         try {
-            $amountMinor = (int) round(((float) $request->amount) * 100);
-
-            $transaction = Transaction::create([
-                'user_id' => $user->id,
-                'account_id' => $request->account_id,
-                'category_id' => $request->category_id,
-                'type' => $request->type,
-                'ledger_type' => 'real',
-                'amount' => $request->amount,
-                'amount_minor' => $amountMinor,
-                'notes' => $request->notes,
-                'transaction_date' => $request->transaction_date,
-                'currency' => $account->currency ?? 'VND',
-                'source_type' => 'manual',
-            ]);
-
-            // Standard 4 — write-time rollup into ledger_daily_summaries.
-            $this->ledgerSummary->applyTransaction($transaction);
-
-            if ($request->hasFile('receipt')) {
-                $file = $request->file('receipt');
-
-                Log::info('Receipt upload during transaction creation', [
-                    'transaction_id' => $transaction->id,
-                    'user_id' => $user->id,
-                    'original_filename' => $file->getClientOriginalName(),
-                    'mime_type' => $file->getMimeType(),
-                    'size_kb' => round($file->getSize() / 1024, 2),
-                ]);
-
-                $photo = $this->photoService->uploadPhoto($transaction, $file, $user);
-                $uploadedPhotoPath = $photo->file_path;
-
-                $this->changeLogService->logPhotoAdded(
-                    $transaction,
-                    $user,
-                    $photo->original_filename
-                );
-
-                Log::info('Receipt saved successfully', [
-                    'transaction_id' => $transaction->id,
-                    'photo_id' => $photo->id,
-                ]);
-            }
-
-            $balanceChange = $request->type === 'income'
-                ? $request->amount
-                : -$request->amount;
-
-            $account->increment('balance', $balanceChange);
-
-            $this->changeLogService->logCreate($transaction, $user);
-
-            DB::commit();
-
-            $transaction->load(['category', 'account', 'photos']);
+            $transaction = $this->transactionService->create(
+                $user,
+                $request->validated(),
+                $request->file('receipt')
+            );
 
             return response()->json([
                 'success' => true,
                 'message' => 'Transaction created successfully',
-                'transaction' => $transaction
+                'data' => new TransactionResource($transaction),
+                'transaction' => $transaction,
             ], 201);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            if ($uploadedPhotoPath) {
-                Storage::disk('public')->delete($uploadedPhotoPath);
-                Log::info('Cleaned up orphaned photo after transaction creation failure', [
-                    'file_path' => $uploadedPhotoPath,
-                ]);
-            }
-
-            Log::error('Failed to create transaction', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
+        } catch (\Throwable $e) {
+            Log::error('Transaction creation failed', ['user_id' => $user->id, 'error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to create transaction: ' . $e->getMessage()
+                'message' => 'Failed to create transaction',
+                'errors' => [],
             ], 500);
         }
     }
 
-    /**
-     * Get details of a specific transaction.
-     *
-     * Retrieves a transaction with all related data including category, account,
-     * photos with uploader info, and change logs. Also determines user permissions
-     * for editing and photo management.
-     *
-     * @param Transaction $transaction The transaction model instance to show.
-     * @return \Illuminate\Http\JsonResponse JSON response with success status, transaction data, and permissions.
-     */
-    public function show(Transaction $transaction)
+    public function show(Transaction $transaction): JsonResponse
     {
         $transaction->load([
             'category',
             'account',
             'photos.uploader:id,name,email',
-            'changeLogs.user:id,name,email'
+            'changeLogs.user:id,name,email',
         ]);
-
-        $user = auth('api')->user();
-        $canEdit = $user->hasAnyRole(['owner', 'editor']);
+        $canEdit = auth('api')->user()->hasAnyRole(['owner', 'editor']);
 
         return response()->json([
             'success' => true,
+            'data' => new TransactionResource($transaction),
             'transaction' => $transaction,
             'permissions' => [
                 'can_edit' => $canEdit,
                 'can_manage_photos' => $canEdit,
-            ]
+            ],
         ]);
     }
 
-    public function update(Request $request, Transaction $transaction)
+    public function update(UpdateTransactionRequest $request, Transaction $transaction): JsonResponse
     {
-        // Standard 5 — Financial Ledger Immutability.
-        // Halo rewards and non-manual sources are append-only.
-        if ($transaction->isImmutable()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ledger transactions sourced from Halo or system flows are immutable. Use a reversing entry instead.',
-            ], 405);
-        }
-
-        $validator = Validator::make($request->all(), [
-            'account_id' => 'sometimes|required|exists:accounts,id',
-            'category_id' => 'sometimes|required|exists:categories,id',
-            'type' => 'sometimes|required|in:income,expense',
-            'amount' => 'sometimes|required|numeric|min:0.01',
-            'notes' => 'nullable|string|max:1000',
-            'transaction_date' => 'sometimes|required|date',
-            'receipt' => 'nullable|image|max:20480',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $user = auth('api')->user();
-
-        if ($request->has('account_id')) {
-            $newAccount = Account::where('id', $request->account_id)
-                ->where('user_id', $user->id)
-                ->firstOrFail();
-        }
-
-        $oldData = [
-            'type' => $transaction->type,
-            'amount' => (string)$transaction->amount,
-            'category_id' => $transaction->category_id,
-            'account_id' => $transaction->account_id,
-            'notes' => $transaction->notes,
-            'transaction_date' => $transaction->transaction_date->format('Y-m-d'),
-        ];
-
-        DB::beginTransaction();
         try {
-            $oldAmount = $transaction->amount;
-            $oldType = $transaction->type;
-            $oldAccountId = $transaction->account_id;
-
-            $oldAccount = Account::where('id', $oldAccountId)
-                ->where('user_id', $user->id)
-                ->firstOrFail();
-            $oldBalanceChange = $oldType === 'income' ? -$oldAmount : $oldAmount;
-            $oldAccount->increment('balance', $oldBalanceChange);
-
-            if ($request->hasFile('receipt')) {
-                if ($transaction->receipt_path) {
-                    Storage::disk('public')->delete($transaction->receipt_path);
-                }
-                $transaction->receipt_path = $request->file('receipt')->store('receipts', 'public');
-            }
-
-            $transaction->fill($request->except('receipt'));
-            $transaction->save();
-
-            $newAccount = Account::where('id', $transaction->account_id)
-                ->where('user_id', $user->id)
-                ->firstOrFail();
-            $newBalanceChange = $transaction->type === 'income'
-                ? $transaction->amount
-                : -$transaction->amount;
-            $newAccount->increment('balance', $newBalanceChange);
-
-            $this->changeLogService->logUpdate($transaction, $user, $oldData);
-
-            DB::commit();
-
-            $transaction->load(['category', 'account', 'photos', 'changeLogs']);
+            $updated = $this->transactionService->update(
+                auth('api')->user(),
+                $transaction,
+                $request->validated(),
+                $request->file('receipt')
+            );
 
             return response()->json([
                 'success' => true,
                 'message' => 'Transaction updated successfully',
-                'transaction' => $transaction
+                'data' => new TransactionResource($updated),
+                'transaction' => $updated,
             ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to update transaction'
-            ], 500);
+        } catch (\DomainException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage(), 'errors' => []], 405);
+        } catch (\Throwable $e) {
+            Log::error('Transaction update failed', ['transaction_id' => $transaction->id, 'error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Failed to update transaction', 'errors' => []], 500);
         }
     }
 
-    public function destroy(Transaction $transaction)
+    public function destroy(Transaction $transaction): JsonResponse
     {
-        // Standard 5 — Financial Ledger Immutability.
-        if ($transaction->isImmutable()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ledger transactions sourced from Halo or system flows cannot be deleted. Use a reversing entry instead.',
-            ], 405);
-        }
-
-        $user = auth('api')->user();
-
-        DB::beginTransaction();
         try {
-            $account = Account::findOrFail($transaction->account_id);
-            $balanceChange = $transaction->type === 'income'
-                ? -$transaction->amount
-                : $transaction->amount;
-            $account->increment('balance', $balanceChange);
-
-            $this->changeLogService->logDelete($transaction, $user);
-
-            if ($transaction->receipt_path) {
-                Storage::disk('public')->delete($transaction->receipt_path);
-            }
-
-            foreach ($transaction->photos as $photo) {
-                $this->photoService->deletePhoto($photo);
-            }
-
-            $transaction->delete();
-
-            DB::commit();
-
+            $this->transactionService->delete(auth('api')->user(), $transaction);
             return response()->json([
                 'success' => true,
-                'message' => 'Transaction deleted successfully'
+                'message' => 'Transaction deleted successfully',
+                'data' => [],
             ]);
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to delete transaction'
-            ], 500);
+        } catch (\DomainException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage(), 'errors' => []], 405);
+        } catch (\Throwable $e) {
+            Log::error('Transaction deletion failed', ['transaction_id' => $transaction->id, 'error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Failed to delete transaction', 'errors' => []], 500);
         }
     }
 
-    public function addPhoto(Request $request, Transaction $transaction)
+    public function addPhoto(TransactionPhotoRequest $request, Transaction $transaction): JsonResponse
     {
         $this->authorize('managePhotos', $transaction);
 
-        $validator = Validator::make($request->all(), [
-            'photo' => 'required|image|max:20480',
-        ]);
-
-        if ($validator->fails()) {
-            Log::warning('Photo upload validation failed', [
-                'transaction_id' => $transaction->id,
-                'errors' => $validator->errors()->toArray(),
-                'content_type' => $request->header('Content-Type'),
-                'has_file' => $request->hasFile('photo'),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
         try {
-            $user = auth('api')->user();
-            $file = $request->file('photo');
-
-            Log::info('Photo upload started', [
-                'transaction_id' => $transaction->id,
-                'user_id' => $user->id,
-                'original_filename' => $file->getClientOriginalName(),
-                'mime_type' => $file->getMimeType(),
-                'size_kb' => round($file->getSize() / 1024, 2),
-            ]);
-
             $photo = $this->photoService->uploadPhoto(
                 $transaction,
-                $file,
-                $user
+                $request->file('photo'),
+                auth('api')->user()
             );
-
             $this->changeLogService->logPhotoAdded(
                 $transaction,
-                $user,
+                auth('api')->user(),
                 $photo->original_filename
             );
-
-            $photo->load('uploader:id,name,email');
-
-            Log::info('Photo upload successful', [
-                'transaction_id' => $transaction->id,
-                'photo_id' => $photo->id,
-                'stored_size_kb' => round($photo->file_size / 1024, 2),
-            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Photo uploaded successfully',
-                'photo' => $photo
+                'data' => $photo->load('uploader:id,name,email'),
+                'photo' => $photo,
             ], 201);
-        } catch (\Exception $e) {
-            Log::error('Photo upload failed', [
-                'transaction_id' => $transaction->id,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 400);
+        } catch (\Throwable $e) {
+            Log::error('Photo upload failed', ['transaction_id' => $transaction->id, 'error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => $e->getMessage(), 'errors' => []], 400);
         }
     }
 
-    public function deletePhoto(Request $request, $photoId)
+    public function deletePhoto(Request $request, int $photoId): JsonResponse
     {
-        $user = auth('api')->user();
-
-        $photo = \App\Models\TransactionPhoto::findOrFail($photoId);
+        $photo = TransactionPhoto::findOrFail($photoId);
         $transaction = $photo->transaction;
-
         $this->authorize('managePhotos', $transaction);
 
         try {
             $filename = $photo->original_filename;
             $this->photoService->deletePhoto($photo);
-
-            $this->changeLogService->logPhotoRemoved(
-                $transaction,
-                $user,
-                $filename
-            );
+            $this->changeLogService->logPhotoRemoved($transaction, auth('api')->user(), $filename);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Photo deleted successfully'
+                'message' => 'Photo deleted successfully',
+                'data' => [],
             ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to delete photo'
-            ], 500);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete photo', 'errors' => []], 500);
         }
     }
 
-    public function getDashboardData(Request $request)
+    public function getDashboardData(Request $request): JsonResponse
     {
-        $user = auth('api')->user();
+        $data = $this->analytics->dashboard(auth('api')->user());
 
-        $now = now();
-        $startOfMonth = $now->copy()->startOfMonth();
-        $endOfMonth = $now->copy()->endOfMonth();
-        $sevenDaysAgo = $now->copy()->subDays(6);
-
-        $startOfPreviousMonth = $now->copy()->subMonth()->startOfMonth();
-        $endOfPreviousMonth = $now->copy()->subMonth()->endOfMonth();
-
-        $currentIncome = Transaction::where('user_id', $user->id)
-            ->where('type', 'income')
-            ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
-            ->sum('amount');
-
-        $currentExpense = Transaction::where('user_id', $user->id)
-            ->where('type', 'expense')
-            ->whereBetween('transaction_date', [$startOfMonth, $endOfMonth])
-            ->sum('amount');
-
-        $previousIncome = Transaction::where('user_id', $user->id)
-            ->where('type', 'income')
-            ->whereBetween('transaction_date', [$startOfPreviousMonth, $endOfPreviousMonth])
-            ->sum('amount');
-
-        $previousExpense = Transaction::where('user_id', $user->id)
-            ->where('type', 'expense')
-            ->whereBetween('transaction_date', [$startOfPreviousMonth, $endOfPreviousMonth])
-            ->sum('amount');
-
-        $monthlySummary = [
-            'current' => [
-                'month' => $now->format('F Y'),
-                'income' => $currentIncome,
-                'expense' => $currentExpense,
-                'net' => $currentIncome - $currentExpense,
-            ],
-            'previous' => [
-                'month' => $now->copy()->subMonth()->format('F Y'),
-                'income' => $previousIncome,
-                'expense' => $previousExpense,
-                'net' => $previousIncome - $previousExpense,
-            ],
-        ];
-
-        $sevenDayExpenses = Transaction::where('user_id', $user->id)
-            ->where('type', 'expense')
-            ->whereBetween('transaction_date', [$sevenDaysAgo, $now])
-            ->select(
-                DB::raw('DATE(transaction_date) as date'),
-                DB::raw('SUM(amount) as total')
-            )
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
-
-        // Monthly balance history for balance trend chart (last 7 months)
-        $balanceHistory = [];
-        $accounts = Account::where('user_id', $user->id)->get();
-        $totalBalance = $accounts->sum('balance');
-
-        for ($i = 6; $i >= 0; $i--) {
-            $monthDate = $now->copy()->subMonths($i)->endOfMonth();
-            $dateStr = $monthDate->format('Y-m-d');
-
-            // Calculate balance at end of this month by subtracting all transactions after this date
-            $futureTransactions = Transaction::where('user_id', $user->id)
-                ->whereDate('transaction_date', '>', $dateStr)
-                ->select(
-                    DB::raw('SUM(CASE WHEN type = "income" THEN amount ELSE -amount END) as net_change')
-                )
-                ->first();
-
-            $monthBalance = $totalBalance - ($futureTransactions->net_change ?? 0);
-
-            $balanceHistory[] = [
-                'date' => $dateStr,
-                'balance' => $monthBalance,
-            ];
-        }
-
-        // Keep dashboard serialization cast-safe. The dashboard does not render
-        // transaction notes, and some historical rows may contain plaintext or
-        // otherwise non-Laravel-encrypted `notes` values. Selecting/mapping only
-        // the fields required by the dashboard prevents Eloquent from attempting
-        // to decrypt `notes` while JSON-encoding the response.
-        $recentTransactions = Transaction::where('user_id', $user->id)
-            ->select([
-                'id',
-                'account_id',
-                'category_id',
-                'type',
-                'ledger_type',
-                'amount',
-                'amount_minor',
-                'currency',
-                'transaction_date',
-                'created_at',
-            ])
-            ->with([
-                'category:id,name,slug,icon,color,type',
-                'account:id,name,currency,icon,color',
-            ])
-            ->orderBy('transaction_date', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->limit(6)
-            ->get()
-            ->map(function (Transaction $transaction) {
-                return [
-                    'id' => $transaction->id,
-                    'account_id' => $transaction->account_id,
-                    'category_id' => $transaction->category_id,
-                    'type' => $transaction->type,
-                    'ledger_type' => $transaction->ledger_type,
-                    'amount' => $transaction->amount,
-                    'amount_minor' => $transaction->amount_minor,
-                    'currency' => $transaction->currency,
-                    'transaction_date' => optional($transaction->transaction_date)->toDateString(),
-                    'created_at' => optional($transaction->created_at)->toIso8601String(),
-                    'category' => $transaction->category ? [
-                        'id' => $transaction->category->id,
-                        'name' => $transaction->category->name,
-                        'slug' => $transaction->category->slug,
-                        'icon' => $transaction->category->icon,
-                        'color' => $transaction->category->color,
-                        'type' => $transaction->category->type,
-                    ] : null,
-                    'account' => $transaction->account ? [
-                        'id' => $transaction->account->id,
-                        'name' => $transaction->account->name,
-                        'currency' => $transaction->account->currency,
-                        'icon' => $transaction->account->icon,
-                        'color' => $transaction->account->color,
-                    ] : null,
-                ];
-            })
-            ->values();
-
+        // Dashboard already exposed `data`; keep that exact shape.
         return response()->json([
             'success' => true,
-            'data' => [
-                'monthly_summary' => $monthlySummary,
-                'seven_day_expenses' => $sevenDayExpenses,
-                'balance_history' => $balanceHistory,
-                'recent_transactions' => $recentTransactions,
-                'accounts' => $accounts,
-            ]
+            'data' => $data,
         ]);
     }
 }

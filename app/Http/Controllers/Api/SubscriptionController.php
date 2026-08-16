@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreSubscriptionRequest;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
@@ -33,11 +33,9 @@ class SubscriptionController extends Controller
      * @param Request $request Incoming HTTP request containing 'plan_id'.
      * @return JsonResponse JSON response with the subscription data and HTTP 201 status.
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreSubscriptionRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'plan_id' => 'required|exists:subscription_plans,id',
-        ]);
+        $validated = $request->validated();
 
         $plan = SubscriptionPlan::findOrFail($validated['plan_id']);
 

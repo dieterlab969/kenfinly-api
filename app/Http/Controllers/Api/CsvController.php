@@ -6,9 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\Transaction;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\CsvExportRequest;
+use App\Http\Requests\CsvImportRequest;
+use App\Services\TransactionService;
 use Carbon\Carbon;
 
 /**
@@ -18,6 +18,10 @@ use Carbon\Carbon;
  */
 class CsvController extends Controller
 {
+    public function __construct(private readonly TransactionService $transactionService)
+    {
+    }
+
     /**
      * Export transactions to CSV.
      *
@@ -28,23 +32,14 @@ class CsvController extends Controller
      * @queryParam end_date date End of date range (Y-m-d). Example: 2024-12-31
      * @queryParam type string Filter by type: income or expense. Example: expense
      */
-    public function export(Request $request)
+    public function export(CsvExportRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'account_id' => 'nullable|exists:accounts,id',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date|after_or_equal:start_date',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
         $userId = auth()->id();
+        $filters = $request->validated();
         $query = Transaction::query();
 
-        if ($request->account_id) {
-            $account = Account::findOrFail($request->account_id);
+        if (!empty($filters['account_id'])) {
+            $account = Account::findOrFail($filters['account_id']);
             
             $isOwner = $account->user_id === $userId;
             $participantRole = $account->getParticipantRole($userId);
@@ -54,7 +49,7 @@ class CsvController extends Controller
                 return response()->json(['error' => 'Unauthorized. You do not have access to this account.'], 403);
             }
 
-            $query->where('account_id', $request->account_id);
+            $query->where('account_id', $filters['account_id']);
         } else {
             $accountIds = Account::where('user_id', $userId)
                 ->orWhereHas('participants', function ($q) use ($userId) {
@@ -65,12 +60,16 @@ class CsvController extends Controller
             $query->whereIn('account_id', $accountIds);
         }
 
-        if ($request->start_date) {
-            $query->where('transaction_date', '>=', $request->start_date);
+        if (!empty($filters['start_date'])) {
+            $query->where('transaction_date', '>=', $filters['start_date']);
         }
 
-        if ($request->end_date) {
-            $query->where('transaction_date', '<=', $request->end_date);
+        if (!empty($filters['end_date'])) {
+            $query->where('transaction_date', '<=', $filters['end_date']);
+        }
+
+        if (!empty($filters['type'])) {
+            $query->where('type', $filters['type']);
         }
 
         $transactions = $query->with(['account', 'category'])->orderBy('transaction_date', 'desc')->get();
@@ -119,18 +118,9 @@ class CsvController extends Controller
         return $field;
     }
 
-    public function import(Request $request)
+    public function import(CsvImportRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'file' => 'required|file|mimes:csv,txt|max:10240',
-            'account_id' => 'required|exists:accounts,id',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
-        }
-
-        $account = Account::findOrFail($request->account_id);
+        $account = Account::findOrFail($request->validated('account_id'));
 
         $isOwner = $account->user_id === auth()->id();
         $participantRole = $account->getParticipantRole(auth()->id());
@@ -171,8 +161,6 @@ class CsvController extends Controller
             'errors' => []
         ];
 
-        DB::beginTransaction();
-
         try {
             foreach ($csvData as $index => $row) {
                 $rowNumber = $index + 2;
@@ -209,16 +197,19 @@ class CsvController extends Controller
                         ['type' => $type]
                     );
 
-                    Transaction::create([
-                        'account_id' => $account->id,
-                        'category_id' => $category->id,
-                        'type' => $type,
-                        'amount' => $amount,
-                        'currency' => $currency,
-                        'transaction_date' => $transactionDate,
-                        'description' => $description,
-                        'notes' => $notes,
-                    ]);
+                    $this->transactionService->create(
+                        auth('api')->user(),
+                        [
+                            'account_id' => $account->id,
+                            'category_id' => $category->id,
+                            'type' => $type,
+                            'amount' => $amount,
+                            'transaction_date' => $transactionDate,
+                            'notes' => $notes ?: null,
+                        ],
+                        null,
+                        $account
+                    );
 
                     $results['success']++;
 
@@ -228,16 +219,19 @@ class CsvController extends Controller
                 }
             }
 
-            DB::commit();
-
             return response()->json([
+                'success' => true,
+                'data' => $results,
                 'message' => 'CSV import completed',
                 'summary' => $results
             ], 200);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['error' => 'Import failed: ' . $e->getMessage()], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Import failed: ' . $e->getMessage(),
+                'error' => 'Import failed: ' . $e->getMessage(),
+            ], 500);
         }
     }
 

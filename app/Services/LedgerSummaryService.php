@@ -17,6 +17,52 @@ use Illuminate\Support\Facades\DB;
  */
 class LedgerSummaryService
 {
+    /**
+     * Remove a transaction's contribution from the daily rollup.
+     *
+     * This is used by update/delete use cases inside their outer database
+     * transaction so the raw ledger and its summary cannot drift apart.
+     */
+    public function reverseTransaction(Transaction $transaction): void
+    {
+        $userId = (int) $transaction->user_id;
+        $ledgerType = $transaction->ledger_type ?: 'real';
+        $summaryDate = $transaction->transaction_date instanceof Carbon
+            ? $transaction->transaction_date->toDateString()
+            : (string) $transaction->transaction_date;
+        $amountMinor = $this->resolveAmountMinor($transaction);
+        // API transactions store amount as an absolute value; the type is the
+        // source of truth for real-ledger income versus expense. Halo/system
+        // rows without a type may still use the sign of amount_minor.
+        $isIncome = $transaction->type === 'income'
+            || ($transaction->type !== 'expense' && $amountMinor > 0);
+        $absolute = abs($amountMinor);
+
+        DB::transaction(function () use (
+            $userId,
+            $ledgerType,
+            $summaryDate,
+            $isIncome,
+            $absolute
+        ): void {
+            $summary = LedgerDailySummary::where([
+                'user_id' => $userId,
+                'ledger_type' => $ledgerType,
+                'summary_date' => $summaryDate,
+            ])->lockForUpdate()->first();
+
+            if (!$summary) {
+                return;
+            }
+
+            $summary->income_minor = max(0, (int) $summary->income_minor - ($isIncome ? $absolute : 0));
+            $summary->expense_minor = max(0, (int) $summary->expense_minor - ($isIncome ? 0 : $absolute));
+            $summary->net_minor = (int) $summary->income_minor - (int) $summary->expense_minor;
+            $summary->transaction_count = max(0, (int) $summary->transaction_count - 1);
+            $summary->save();
+        });
+    }
+
     public function applyTransaction(Transaction $transaction): LedgerDailySummary
     {
         $userId = (int) $transaction->user_id;
