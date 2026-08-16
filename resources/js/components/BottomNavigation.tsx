@@ -1,7 +1,8 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Home, TrendingUp, Plus, BarChart2, FileText } from 'lucide-react'
+import { Home, TrendingUp, BarChart2, FileText } from 'lucide-react'
+import quickAddPlusIcon from '../assets/icons/quick-add-plus.png'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -36,34 +37,22 @@ const BottomNavigation: React.FC<BottomNavigationProps> = ({ fabOpen, onFabToggl
             <div className="bottom-menu-svg-main">
                 <div className="bottom-menu-svg">
                     {/* FAB circle */}
-                    <div
+                    <button
+                        type="button"
                         className="gol3"
                         onClick={onFabToggle}
-                        role="button"
                         aria-label={t('Quick add')}
                         aria-expanded={fabOpen}
-                        style={{
-                            cursor: 'pointer',
-                            background: 'linear-gradient(145deg, #8B6CF7, #7B51F1)',
-                            boxShadow: fabOpen
-                                ? '0 0 0 6px rgba(123,81,241,0.18), 0 8px 32px rgba(123,81,241,0.45)'
-                                : '0 6px 24px rgba(123,81,241,0.38)',
-                            transition: 'box-shadow 0.25s ease',
-                        }}
                     >
                         <div className="add-to-cart-icon">
-                            <Plus
-                                size={28}
-                                strokeWidth={2.5}
-                                color="#fff"
-                                style={{
-                                    display: 'block',
-                                    transform: fabOpen ? 'rotate(45deg)' : 'none',
-                                    transition: 'transform 0.22s ease',
-                                }}
+                            <img
+                                src={quickAddPlusIcon}
+                                alt=""
+                                aria-hidden="true"
+                                className={fabOpen ? 'is-open' : ''}
                             />
                         </div>
-                    </div>
+                    </button>
 
                     {/* Curved notch SVG */}
                     <svg
